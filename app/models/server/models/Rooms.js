@@ -91,6 +91,14 @@ export class Rooms extends Base {
 		return this.update({ _id: roomId }, { $unset: { lastMessage: { reactions: 1 } } });
 	}
 
+	setTagsInLastMessage(roomId, lastMessage) {
+		return this.update({ _id: roomId }, { $set: { 'lastMessage.tags': lastMessage.tags } });
+	}
+
+	unsetTagsInLastMessage(roomId) {
+		return this.update({ _id: roomId }, { $unset: { lastMessage: { tags: 1 } } });
+	}
+
 	updateLastMessageStar(roomId, userId, starred) {
 		let update;
 		const query = { _id: roomId };
