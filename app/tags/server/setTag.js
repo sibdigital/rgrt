@@ -17,8 +17,6 @@ const removeUserTag = (message, tag, username) => {
 };
 
 export function setTag(room, user, message, tag, shouldReact) {
-	tag = `:${ tag.replace(/:/g, '') }:`;
-
 	if (room.ro && !room.reactWhenReadOnly) {
 		if (!Array.isArray(room.unmuted) || room.unmuted.indexOf(user.username) === -1) {
 			return false;
