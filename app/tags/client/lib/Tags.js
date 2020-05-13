@@ -31,6 +31,11 @@ class TagsClass {
 			this.add(tag);
 		}
 	}
+
+	get(_id) {
+		const list = this.list.get();
+		return list[_id];
+	}
 }
 
 export const Tags = new TagsClass();

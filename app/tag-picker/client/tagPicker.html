@@ -1,0 +1,29 @@
+<template name="tagPicker">
+	<div class="tag-picker rc-popover__content">
+		<div class="tag-top">
+			<div class="rc-input">
+				<label class="rc-input__label">
+					<div class="rc-input__wrapper">
+						<div class="rc-input__icon">
+							{{> icon block="rc-input__icon-svg" icon="magnifier" }}
+						</div>
+						<input name="name" type="text" class="rc-input__element js-tagpicker-search" placeholder="{{_ "Search"}}" autofocus autocomplete="off">
+					</div>
+				</label>
+			</div>
+		</div>
+		<div class="tags">
+			<ul class="tag-list">
+				{{#each tags}}
+					<li class="tag-{{_id}} tag-picker-item" data-tag="{{_id}}" title="{{name}}">
+						<span>{{name}}</span>
+					</li>
+				{{else}}
+					<li class="tag-new tag-picker-item" data-tag="new">
+						<span>{{_ "Tag_Add"}} {{filter}}</span>
+					</li>
+				{{/each}}
+			</ul>
+		</div>
+	</div>
+</template>

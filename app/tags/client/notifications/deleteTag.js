@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 
 import { Notifications } from '../../../notifications';
 import { CachedCollectionManager } from "/app/ui-cached-collection";
-import { Tags } from "/app/tags/client";
+import { Tags } from '../lib/Tags';
 
 Meteor.startup(() =>
 	CachedCollectionManager.onLogin(() =>

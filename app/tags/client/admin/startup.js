@@ -4,7 +4,7 @@ import { hasAtLeastOnePermission } from '../../../authorization';
 AdminBox.addOption({
 	href: 'tags',
 	i18nLabel: 'Tags',
-	icon: 'hashtag',
+	icon: 'tags',
 	permissionGranted() {
 		return hasAtLeastOnePermission('manage-tags');
 	},

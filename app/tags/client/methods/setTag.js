@@ -14,7 +14,6 @@ Meteor.methods({
 
 		const message = Messages.findOne({ _id: messageId });
 		const room = Rooms.findOne({ _id: message.rid });
-		console.log(message);
 
 		if (room.ro && !room.reactWhenReadOnly) {
 			if (!Array.isArray(room.unmuted) || room.unmuted.indexOf(user.username) === -1) {
@@ -61,7 +60,6 @@ Meteor.methods({
 			message.tags[tag].usernames.push(user.username);
 
 			Messages.setTags(messageId, message.tags);
-			console.log(message);
 			callbacks.run('setTag', messageId, tag);
 		}
 	},

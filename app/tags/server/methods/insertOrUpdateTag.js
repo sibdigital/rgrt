@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import _ from 'underscore';
 import s from 'underscore.string';
-import limax from 'limax';
 
 import { hasPermission } from '../../../authorization';
 import { Notifications } from '../../../notifications';
@@ -9,15 +8,13 @@ import { Tags } from '../../../models';
 
 Meteor.methods({
 	insertOrUpdateTag(tagData) {
-		if (!hasPermission(this.userId, 'manage-tags')) {
-			throw new Meteor.Error('not_authorized');
-		}
+		// if (!hasPermission(this.userId, 'manage-tags')) {
+		// 	throw new Meteor.Error('not_authorized');
+		// }
 
 		if (!s.trim(tagData.name)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field Name is required', { method: 'insertOrUpdateTag', field: 'Name' });
 		}
-
-		tagData.name = limax(tagData.name, { replacement: '_' });
 
 		// allow all characters except colon, whitespace, comma, >, <, &, ", ', /, \, (, )
 		// more practical than allowing specific sets of characters; also allows foreign languages
