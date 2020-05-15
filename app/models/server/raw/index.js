@@ -46,6 +46,8 @@ import LivechatAgentActivityModel from '../models/LivechatAgentActivity';
 import { LivechatAgentActivityRaw } from './LivechatAgentActivity';
 import StatisticsModel from '../models/Statistics';
 import { StatisticsRaw } from './Statistics';
+import { ErrandsRaw } from './ErrandsRaw';
+import Errands from '../models/Errands';
 
 export const Permissions = new PermissionsRaw(PermissionsModel.model.rawCollection());
 export const Roles = new RolesRaw(RolesModel.model.rawCollection());
@@ -68,6 +70,7 @@ export const EmojiCustom = new EmojiCustomRaw(EmojiCustomModel.model.rawCollecti
 export const WebdavAccounts = new WebdavAccountsRaw(WebdavAccountsModel.model.rawCollection());
 export const OAuthApps = new OAuthAppsRaw(OAuthAppsModel.model.rawCollection());
 export const CustomSounds = new CustomSoundsRaw(CustomSoundsModel.model.rawCollection());
+export const CustomErrand = new ErrandsRaw(Errands.model.rawCollection());
 export const CustomUserStatus = new CustomUserStatusRaw(CustomUserStatusModel.model.rawCollection());
 export const LivechatAgentActivity = new LivechatAgentActivityRaw(LivechatAgentActivityModel.model.rawCollection());
 export const Statistics = new StatisticsRaw(StatisticsModel.model.rawCollection());
