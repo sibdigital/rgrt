@@ -45,6 +45,7 @@ import './views/app/videoCall/videoButtons';
 import './views/app/videoCall/videoCall';
 import './views/app/photoswipe';
 import './views/app/RoomForeword';
+import '../../errand/client/views/errandOnMessageDialog/ErrandOnMessageDialog';
 import './components/icon';
 import './components/status';
 import './components/table.html';
@@ -59,6 +60,7 @@ import './components/header/headerRoom';
 import './components/contextualBar.html';
 import './components/contextualBar';
 import './components/tooltip';
+
 
 export { ChatMessages } from './lib/chatMessages';
 export { fileUpload } from './lib/fileUpload';
