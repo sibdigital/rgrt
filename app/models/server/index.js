@@ -3,6 +3,7 @@ import { BaseDb } from './models/_BaseDb';
 import Avatars from './models/Avatars';
 import ExportOperations from './models/ExportOperations';
 import Messages from './models/Messages';
+import Errands from './models/Errands';
 import Reports from './models/Reports';
 import Rooms from './models/Rooms';
 import Settings from './models/Settings';
@@ -53,6 +54,7 @@ export {
 	Avatars,
 	ExportOperations,
 	Messages,
+	Errands,
 	Reports,
 	Rooms,
 	Settings,

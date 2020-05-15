@@ -117,6 +117,10 @@ Template.message.helpers({
 		const { msg } = this;
 		return `<span class='reply-counter'>${ msg.dcount }</span>`;
 	},
+	i18nErrandsCounter() {
+		const { msg } = this;
+		return `<span class='reply-counter'>${ msg.errand ? msg.errand.length : 0 }</span>`;
+	},
 	formatDateAndTime,
 	encodeURI(text) {
 		return encodeURI(text);
@@ -142,6 +146,14 @@ Template.message.helpers({
 	isBot() {
 		const { msg } = this;
 		return msg.bot && 'bot';
+	},
+	errands() {
+		const { msg } = this;
+		return msg.errand;
+	},
+	errandsSize() {
+		const { msg } = this;
+		return msg.errand ? msg.errand.length : 0;
 	},
 	roleTags() {
 		const { msg, hideRoles, settings } = this;

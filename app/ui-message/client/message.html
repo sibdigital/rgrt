@@ -41,6 +41,11 @@
 						<span class="is-bot color-secondary-color border-component-color">{{_ "Bot"}}</span>
 					{{/if}}
 					<time class="time" title='{{date}} {{time}}' datetime='{{date}} {{time}}'>{{time}}</time>
+					{{#if errands}}
+						<button class="js-open-window-errand rc-button rc-button--secondary rc-button--small" data-mid={{messageId}}>
+							<span>{{{_ 'errand_counter' counter=i18nErrandsCounter count=errandsSize }}}</span>
+						</button>
+					{{/if}}
 					{{#if showTranslated}}
 						<span class="translated">
 							<i class="icon-language {{#if msg.autoTranslateFetching}}loading{{/if}}" aria-label="{{_ "Translated"}}"></i>

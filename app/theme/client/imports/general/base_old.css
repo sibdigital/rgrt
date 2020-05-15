@@ -2782,6 +2782,18 @@ rc-old select,
 
 			line-height: initial;
 		}
+
+		& .errand {
+			  margin: 0 3px;
+			  padding: 1px 4px;
+
+			  border-width: 1px;
+
+			  border-radius: var(--border-radius);
+			  background: orangered;
+
+			  line-height: initial;
+		  }
 	}
 
 	& .private {

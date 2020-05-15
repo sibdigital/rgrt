@@ -1,0 +1,86 @@
+<template name="ErrandsPage">
+<section class="preferences-page preferences-page--new page-container page-home page-static page-settings">
+<div class="content">
+{{#table}}
+		<thead>
+		<tr>
+
+
+			{{#if $eq errandType "initiated_by_me"}}
+				<th width="10%">
+					<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
+				</th>
+
+			{{else if $eq errandType "charged_to_me"}}
+				<th width="10%">
+					<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
+				</th>
+			{{else}}
+				<th width="10%">
+					<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
+				</th>
+				<th width="10%">
+					<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
+				</th>
+			{{/if}}
+			<th>
+				<div class="table-fake-th">{{_ "Description"}}</div>
+			</th>
+			<th width="10%">
+				<div class="table-fake-th">{{_ "Started_At"}}</div>
+			</th>
+			<th width="10%">
+				<div class="table-fake-th">{{_ "Errand_Expired_date"}}</div>
+			</th>
+			<th width="10%">
+				<div class="table-fake-th">{{_ "Status"}}</div>
+			</th>
+			<th></th>
+		</tr>
+		</thead>
+	<tbody>
+
+	{{#if $and isLoading errandsAreEmpty}}
+		<tr>
+			<td colspan="4">{{_ "Loading..."}}</td>
+		</tr>
+	{{else}}
+		{{#each errands}}
+			<tr class="table-row" id="{{_id}}" data-id="{{_id}}">
+				{{#if $eq errandType "initiated_by_me"}}
+					<td>{{chargedToUser.username}}</td>
+
+				{{else if $eq errandType "charged_to_me"}}
+					<td>
+						{{initiatedBy.username}}
+					</td>
+				{{else}}
+					<td>
+						{{initiatedBy.username}}
+					</td>
+					<td>{{chargedToUser.username}}</td>
+				{{/if}}
+
+				<td>{{ shortDescription desc}}</td>
+				<td>{{ formatDate ts }}</td>
+				<td>{{ formatDate expiredDate }}</td>
+				<td>
+					{{_ t}}
+				</td>
+			</tr>
+		{{else}}
+			<tr>
+				<td colspan="4">{{_ "Errands_empty"}}</td>
+			</tr>
+		{{/each}}
+	{{/if}}
+
+
+		</tbody>
+		{{/table}}
+
+		</div>
+		</section>
+		</template>
+
+
