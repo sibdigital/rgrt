@@ -42,6 +42,10 @@ export class Messages extends Base {
 		return this.update({ _id: messageId }, { $set: { errand } });
 	}
 
+	getErrand(messageId) {
+		return this.findOne({ _id: messageId }).errand;
+	}
+
 	keepHistoryForToken(token) {
 		return this.update({
 			'navigation.token': token,

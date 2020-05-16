@@ -49,35 +49,25 @@ Template.ErrandDetails.helpers({
 
 		let dataIsTheSame = true;
 		const chargedUsers = Template.instance().chargedUsers.get();
-		console.log('createIsDisabled Template.instance().expiredDate.get()', Template.instance().expiredDate.get());
-		const expired_at = new Date(Template.instance().expiredDate.get());
-		console.log('createIsDisabled expired_at', expired_at);
+		const expired_at = moment(Template.instance().expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
+
 		const description = Template.instance().errandDescription.get();
 		try {
 			if (chargedUsers && chargedUsers[0] && expired_at && description && description.trim()) {
 				dataIsTheSame = dataIsTheSame && chargedUsers[0]._id === errand.chargedToUser._id;
-				console.log('chargedUsers & chargedUsers[0] & chargedUsers[0]._id === errand.chargedToUser._id', chargedUsers[0]._id === errand.chargedToUser._id);
 
 				dataIsTheSame = dataIsTheSame && description === errand.desc;
-				console.log('chargedUsers & chargedUsers[0] & chargedUsers[0]._id === errand.chargedToUser._id', description.trim() === errand.desc);
 
 				dataIsTheSame = dataIsTheSame && (errand.initiatedBy._id === Meteor.userId() || errand.chargedToUser._id === Meteor.userId());
-				console.log('errand.initiatedBy._id === Meteor.userId() || errand.chargedToUser._id === Meteor.userId()', errand.initiatedBy._id === Meteor.userId() || errand.chargedToUser._id === Meteor.userId());
-
 
 				const status = Template.instance().status.get();
 				dataIsTheSame = dataIsTheSame && status && status === errand.t;
-				console.log('status && status === errand.t', status && status === errand.t);
 
-				dataIsTheSame = dataIsTheSame && expired_at.getMilliseconds() === new Date(errand.expireAt).getMilliseconds();
-				console.log('expired_at && expired_at.getMilliseconds() === new Date(errand.expireAt).getMilliseconds()', expired_at && expired_at.getMilliseconds() === new Date(errand.expireAt).getMilliseconds());
-
-
-				console.log('');
-				console.log('');
+				dataIsTheSame = dataIsTheSame && expired_at.valueOf() === errand.expireAt.getTime();
 			}
-		} catch (e) {}
-
+		} catch (e) {
+			console.log(e);
+		}
 		return dataIsTheSame ? 'disabled' : '';
 	},
 
@@ -209,7 +199,7 @@ Template.ErrandDetails.events({
 		}
 		const chargedUsers = instance.chargedUsers.get().map(({ _id, username }) => ({ _id, username }))[0];
 		const status = instance.status.get();
-		const expired_at = new Date(instance.expiredDate.get());
+		const expired_at = moment(instance.expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
 
 
 		const { rid } = instance.errand;
@@ -293,9 +283,10 @@ Template.ErrandDetails.onCreated(function() {
 
 
 	this.errandDescription = new ReactiveVar(this.errand.desc);
-	console.log('onCreated this.errand.expireAt)', this.errand.expireAt);
-	this.expiredDate = new ReactiveVar(new Date(this.errand.expireAt));
-	console.log('onCreated expiredDate', this.expiredDate.get());
+
+	this.errand.expireAt = new Date(this.errand.expireAt);
+	console.log('onCreated this.errand.expireAt', this.errand.expireAt);
+	this.expiredDate = new ReactiveVar(this.errand.expireAt);
 	this.createdDate = new ReactiveVar(new Date(this.errand.ts));
 	this.status = new ReactiveVar(this.errand.t);
 

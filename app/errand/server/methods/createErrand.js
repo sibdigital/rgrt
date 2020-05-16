@@ -13,14 +13,10 @@ const getRoom = (rid) => {
 };
 
 const mentionMessage = (mid, errand_id) => {
-	const message = Messages.findById(mid);
-	let errands = message.errand;
-	if (errands) {
-		console.log(typeof errands);
-		if (typeof errands !== 'Array') {
-			errands = [errands];
-		}
-	} else {
+
+	let errands = Messages.getErrand(mid);
+	console.log('methods.createErrand.mentionMessage ', typeof errands);
+	if (!errands) {
 		errands = [];
 	}
 

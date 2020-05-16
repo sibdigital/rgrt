@@ -145,7 +145,7 @@ Template.CreateErrand.events({
 		const { rid, _id: mid } = message;
 		const initiated_by = initiatedUsers[0];
 		const charged_to = chargedUsers[0];
-		const expired_at = new Date(instance.expiredDate.get());
+		const expired_at = moment(instance.expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
 
 
 		if (!rid) {
@@ -154,6 +154,7 @@ Template.CreateErrand.events({
 		}
 		console.log('initiated_by', initiated_by);
 		console.log('charged_to', charged_to);
+		console.log('expired_at', expired_at);
 		const result = await call('createErrand', { rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply });
 		// callback to enable tracking
 		callbacks.run('afterErrand', Meteor.user(), result);
