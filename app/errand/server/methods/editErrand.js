@@ -7,11 +7,6 @@ import { settings } from '../../../settings/server';
 
 const editErrand = (_id, newData) => Errands.updateErrand(_id, newData);
 
-const getRoom = (rid) => {
-	const room = Rooms.findOne(rid);
-	return room && (room.prid ? Rooms.findOne(room.prid, { fields: { _id: 1 } }) : room);
-};
-
 const edit = ({ _id, chargedToUser, desc, expireAt, t }) => {
 	/*
 	const uid = Meteor.userId();

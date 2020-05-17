@@ -179,44 +179,11 @@ Template.CreateErrand.onRendered(function() {
 
 
 	this.$('#expired_date').datepicker('setDate', Template.instance().expiredDate.get());
-
-	Tracker.autorun(() => {
-		const metaToDate = this.expiredDate.get();
-
-		let toDate = new Date('9999-12-31T23:59:59Z');
-
-		if (metaToDate) {
-			toDate = new Date(`${ metaToDate }T00:00:00${ getTimeZoneOffset() }`);
-		}
-
-
-		if (toDate > new Date()) {
-			return this.validate.set(t('Newer_than_may_not_exceed_Older_than', {
-				postProcess: 'sprintf',
-				sprintf: [],
-			}));
-		}
-		// this.validate.set('');
-	});
 });
 
 const suggestName = (msg = '') => msg.substr(0, 140);
 
 Template.CreateErrand.onCreated(function() {
-	// const { rid, message: msg } = this.data;
-
-	// const parentRoom = rid && ChatSubscription.findOne({ rid });
-
-	// if creating a errand from inside a errand, uses the same channel as parent channel
-	/*	const room = parentRoom && parentRoom.prid ? ChatSubscription.findOne({ rid: parentRoom.prid }) : parentRoom;
-
-	if (room) {
-		room.text = room.name;
-	}
-
-	const roomName = room && roomTypes.getRoomName(room.t, room);*/
-
-
 	const { message: msg } = this.data;
 	this.message = msg;
 
@@ -225,37 +192,7 @@ Template.CreateErrand.onCreated(function() {
 
 	this.pmid = msg && msg._id;
 
-	/*	this.parentChannel = new ReactiveVar(roomName);
-	this.parentChannelId = new ReactiveVar(room && room.rid);
-
-	this.selectParent = new ReactiveVar(room && room.rid);*/
-
 	this.reply = new ReactiveVar('');
-
-
-	// this.selectedRoom = new ReactiveVar(room ? [room] : []);
-
-
-	// this.expiredDate = new ReactiveVar('');
-	//
-	// this.onClickTagRoom = () => {
-	// 	this.selectedRoom.set([]);
-	// };
-	// this.deleteLastItemRoom = () => {
-	// 	this.selectedRoom.set([]);
-	// };
-	//
-	// this.onSelectRoom = ({ item: room }) => {
-	// 	room.text = room.name;
-	// 	this.selectedRoom.set([room]);
-	// };
-
-	// this.autorun(() => {
-	// 	const [room = {}] = this.selectedRoom.get();
-	// 	this.parentChannel.set(roomTypes.getRoomName(room.t, room)); // determine parent Channel from setting and allow to overwrite
-	// 	this.parentChannelId.set(room && (room.rid || room._id));
-	// });
-
 
 	this.selectedUsers = new ReactiveVar([]);
 
@@ -284,17 +221,6 @@ Template.CreateErrand.onCreated(function() {
 	this.deleteLastInitiatedItemUser = () => {
 		this.initiatedByUsers.set([]);
 	};
-
-
-	// callback to allow setting a parent Channel or e. g. tracking the event using Piwik or GA
-	const { parentChannel, reply } = callbacks.run('openErrandCreationScreen') || {};
-
-	if (parentChannel) {
-		this.parentChannel.set(parentChannel);
-	}
-	if (reply) {
-		this.reply.set(reply);
-	}
 });
 
 Template.SearchCreateErrand.helpers({

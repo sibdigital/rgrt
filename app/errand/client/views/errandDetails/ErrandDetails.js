@@ -226,9 +226,13 @@ Template.ErrandDetails.events({
 		const result = await call('editErrand', { _id: instance.errand._id, chargedUsers, errandDescription, expired_at, status });
 		// callback to enable tracking
 		// callbacks.run('afterErrand', Meteor.user(), result);
+		console.log('result', result);
+		if (instance.data.updateRecord) {
+			instance.data.updateRecord(result);
+		}
 
 		if (instance.data.onCreate) {
-			instance.data.onCreated(result);
+			instance.data.onCreate();
 		}
 		// roomTypes.openRouteLink(result.t, result);
 	},

@@ -46,7 +46,7 @@
 		</tr>
 	{{else}}
 		{{#each errands}}
-			<tr class="table-row" id="{{_id}}" data-id="{{_id}}">
+			<tr class="table-row" id="{{_id}}" data-id="{{_id}}" data-index="{{@index}}">
 				{{#if $eq errandType "initiated_by_me"}}
 					<td>{{chargedToUser.username}}</td>
 

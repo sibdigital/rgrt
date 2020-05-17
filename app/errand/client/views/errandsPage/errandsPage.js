@@ -54,10 +54,11 @@ Template.ErrandsPage.events({
 	},
 
 	'click .table-row'(e, target) {
-		const errandId = e.currentTarget.id;
+		console.log(e.currentTarget.dataset);
+		const { id, index } = e.currentTarget.dataset;
 		let errand = target.errands.get();
 		errand = _.findWhere(errand, {
-			_id: errandId,
+			_id: id,
 		});
 		modal.open({
 			title: t('Errand_details'),
@@ -65,6 +66,7 @@ Template.ErrandsPage.events({
 			content: 'ErrandDetails',
 			data: {
 				errand,
+				updateRecord: target.updateRecord(Number(index)),
 				onCreate() {
 					modal.close();
 				},
@@ -82,47 +84,6 @@ Template.ErrandsPage.events({
 
 	'change [name=to__date]'(e, instance) {
 		instance.expiredDate.set(e.target.value);
-	},
-
-	async 'submit #create-errand, click .js-save-errand'(event, instance) {
-		event.preventDefault();
-
-
-		// const parentChannel = instance.parentChannel.get();
-		// const { pmid } = instance;
-		const errandDescription = instance.errandDescription.get();
-
-		const chargedUsers = instance.selectedUsers.get().map(({ username }) => username);
-		const initiatedUsers = instance.initiatedByUsers.get().map(({ username }) => username);
-		const { message } = instance;
-		// const prid = instance.parentChannelId.get();
-		const reply = instance.reply.get();
-
-
-		// const result = await call('createErrand', { prid, pmid, t_name, reply, users });
-		// // callback to enable tracking
-		// callbacks.run('afterErrand', Meteor.user(), result);
-
-
-		const { rid, _id: mid } = message;
-		const initiated_by = initiatedUsers[0];
-		const charged_to = chargedUsers[0];
-		const expired_at = new Date(instance.expiredDate.get());
-
-
-		if (!rid) {
-			const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
-			return toastr.error(errorText);
-		}
-		console.log('try to create errand');
-		const result = await call('createErrand', { rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply });
-		// callback to enable tracking
-		callbacks.run('afterErrand', Meteor.user(), result);
-
-		if (instance.data.onCreate) {
-			instance.data.onCreate(result);
-		}
-		// roomTypes.openRouteLink(result.t, result);
 	},
 });
 
@@ -169,8 +130,18 @@ Template.ErrandsPage.onCreated(function() {
 	this.isLoading = new ReactiveVar(false);
 	this.filter = new ReactiveVar('');
 
-	this.type = new ReactiveVar(this.data.type());
+	this.type = new ReactiveVar(this.data.type && this.data.type() ? this.data.type() : 'all');
 
+	this.updateRecord = (index) => (newRecord) => {
+		const errands = this.errands.get();
+
+		if (newRecord._id !== errands[index]._id) {
+			console.log('Изменяется не тот объект!', 'Новый', newRecord._id, 'старый:', errands[index]._id);
+		} else {
+			errands[index] = newRecord;
+			this.errands.set(errands);
+		}
+	};
 
 	const userId = Meteor.userId();
 	let errandQuerry = {};
@@ -206,15 +177,14 @@ Template.ErrandsPage.onCreated(function() {
 	}, DEBOUNCE_TIME_TO_SEARCH_IN_MS);
 
 	this.autorun(() => {
-		if (this.type.get() !== this.data.type()) {
+		const newDataType = this.data.type && this.data.type() ? this.data.type() : 'all';
+		if (this.type.get() !== newDataType) {
+			let errandQuerry = {};
 			this.isLoading.set(true);
 			this.errands.set([]);
 			const userId = Meteor.userId();
 			this.type.set(this.data.type());
-
-			let errandQuerry = {};
-
-			switch (this.type.get()) {
+			switch (newDataType) {
 				case 'initiated_by_me':
 					errandQuerry = { 'initiatedBy._id': `${ userId }` };
 					break;
@@ -224,7 +194,6 @@ Template.ErrandsPage.onCreated(function() {
 			}
 			this.query.set(errandQuerry);
 		}
-
 
 		const filter = this.filter.get() && this.filter.get().trim();
 		const offset = this.offset.get();

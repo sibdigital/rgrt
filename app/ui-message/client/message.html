@@ -42,7 +42,7 @@
 					{{/if}}
 					<time class="time" title='{{date}} {{time}}' datetime='{{date}} {{time}}'>{{time}}</time>
 					{{#if errands}}
-						<button class="js-open-window-errand rc-button rc-button--secondary rc-button--small" data-mid={{messageId}}>
+						<button class="js-open-window-errand errand-tag border-component-color" data-mid={{messageId}}>
 							<span>{{{_ 'errand_counter' counter=i18nErrandsCounter count=errandsSize }}}</span>
 						</button>
 					{{/if}}

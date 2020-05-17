@@ -52,7 +52,8 @@ export class Errands extends Base {
 	// UPDATE
 	updateErrand(_id, newData) {
 		newData._updatedAt = new Date();
-		const update = this.update({ _id }, { $set: { ...newData } });
+		this.update({ _id }, { $set: { ...newData } });
+		const update = this.findOne({ _id });
 		return update;
 	}
 
