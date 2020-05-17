@@ -1,10 +1,10 @@
 <template name="ErrandOnMessageDialog">
-	<section class="preferences-page preferences-page--new page-container page-home page-static page-settings">
-		<div class="content">
-		{{#table}}
+	<section>
+		<div style="height: 300px;">
+		{{#table fixed='true'}}
 			<thead>
 			<tr>
-				<th >
+				<th>
 					<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
 				</th>
 				<th>
@@ -19,12 +19,11 @@
 				<th>
 					<div class="table-fake-th">{{_ "Status"}}</div>
 				</th>
-				<th></th>
 			</tr>
 			</thead>
 			<tbody>
 			{{#each errands}}
-				<tr data-id="{{_id}}">
+				<tr class="table-row" data-id="{{_id}}">
 					<td>
 						{{initiatedBy.username}}
 					</td>
@@ -35,12 +34,11 @@
 				</tr>
 			{{else}}
 				<tr>
-					<td colspan="4">{{_ "There_are_no_personal_access_tokens_created_yet"}}</td>
+					<td colspan="5">{{_ "Errands_empty"}}</td>
 				</tr>
 			{{/each}}
 			</tbody>
 		{{/table}}
-
 		</div>
 	</section>
 </template>

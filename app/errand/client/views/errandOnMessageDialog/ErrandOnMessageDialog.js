@@ -93,7 +93,7 @@ Template.ErrandOnMessageDialog.events({
 });
 
 Template.ErrandOnMessageDialog.onRendered(function() {
-	Tracker.autorun(() => {
+	/*Tracker.autorun(() => {
 		const metaToDate = this.expiredDate.get();
 
 		let toDate = new Date('9999-12-31T23:59:59Z');
@@ -110,7 +110,7 @@ Template.ErrandOnMessageDialog.onRendered(function() {
 			}));
 		}
 		this.validate.set('');
-	});
+	});*/
 });
 
 
