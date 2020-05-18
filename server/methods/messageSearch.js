@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Match, check } from 'meteor/check';
 import s from 'underscore.string';
 
-import { Subscriptions, Messages } from '../../app/models';
+import { Subscriptions, Messages, Tags } from '../../app/models';
 import { settings } from '../../app/settings';
 
 Meteor.methods({
@@ -38,7 +38,7 @@ Meteor.methods({
 		const currentUserName = user.username;
 		const currentUserTimezoneOffset = user.utcOffset;
 
-		const query = {};
+		let query = {};
 		const options = {
 			sort: {
 				ts: -1,
@@ -198,14 +198,23 @@ Meteor.methods({
 		// Query in message text
 		text = text.trim().replace(/\s\s/g, ' ');
 		if (text !== '') {
+			const queryTags = {};
 			if (/^\/.+\/[imxs]*$/.test(text)) {
 				const r = text.split('/');
 				query.msg = {
 					$regex: r[1],
 					$options: r[2],
 				};
+				queryTags.name = {
+					$regex: r[1],
+					$options: r[2],
+				};
 			} else if (settings.get('Message_AlwaysSearchRegExp')) {
 				query.msg = {
+					$regex: text,
+					$options: 'i',
+				};
+				queryTags.name = {
 					$regex: text,
 					$options: 'i',
 				};
@@ -218,6 +227,24 @@ Meteor.methods({
 						$meta: 'textScore',
 					},
 				};
+			}
+
+			if (Object.keys(queryTags).length > 0) {
+				const tags = Tags.find(queryTags).fetch();
+				if (tags.length > 0) {
+					const expressions = [];
+					expressions.push(query);
+
+					tags.forEach(tag => {
+						const exp = {};
+						exp['tags.' + tag._id] = {$exists: true};
+						expressions.push(exp);
+					});
+
+					query = {
+						$or: expressions,
+					};
+				}
 			}
 		}
 
