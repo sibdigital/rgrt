@@ -36,10 +36,12 @@ export class Errands extends Base {
 			initiatedBy: {
 				_id: initiatedByUser._id,
 				username: initiatedByUser.username,
+				name: initiatedByUser.name,
 			},
 			chargedToUser: {
 				_id: chargedToUser._id,
 				username: chargedToUser.username,
+				name: chargedToUser.name,
 			},
 			expireAt: endDate,
 			groupable: false,

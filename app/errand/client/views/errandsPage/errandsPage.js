@@ -1,49 +1,41 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
-import { Blaze } from 'meteor/blaze';
-import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
-import toastr from 'toastr';
-// import moment from 'moment';
-import { Tracker } from 'meteor/tracker';
-
-// eslint-disable-next-line import/order
 import _ from 'underscore';
 import moment from 'moment';
 
 import { APIClient, t } from '../../../../utils/client';
-import { call, modal } from '../../../../ui-utils/client';
+import { modal } from '../../../../ui-utils/client';
+import { settings } from '../../../../settings';
 import './errandsPage.html';
 
 const DEBOUNCE_TIME_TO_SEARCH_IN_MS = 500;
-
-
-const getTimeZoneOffset = function() {
-	const offset = new Date().getTimezoneOffset();
-	const absOffset = Math.abs(offset);
-	return `${ offset < 0 ? '+' : '-' }${ `00${ Math.floor(absOffset / 60) }`.slice(-2) }:${ `00${ absOffset % 60 }`.slice(-2) }`;
-};
-
-const descriptionMaxLength = 120;
 
 Template.ErrandsPage.helpers({
 	errands() {
 		return Template.instance().errands.get();
 	},
 	formatDate(date) {
-		return moment(date).format('DD-MM-YYYY');
+		return moment(date).format(moment.localeData().longDateFormat('L'));
 	},
 	errandType() {
 		return Template.instance().type.get();
-	},
-	shortDescription(desc) {
-		return desc.length > descriptionMaxLength ? `${ desc.substr(0, descriptionMaxLength) } ...` : desc;
 	},
 	isLoading() {
 		return Template.instance().isLoading.get();
 	},
 	errandsAreEmpty() {
 		return Template.instance().errands.get().length === 0;
+	},
+	showRealNames() {
+		return settings.get('UI_Use_Real_Name');
+	},
+	currentPage() {
+		return Template.instance().offset;
+	},
+	totalPages() {
+		console.log('totalRecords', Template.instance().total.get(), 'recordsPerPage', Template.instance().recordsPerPage.get(), Template.instance().total.get() / Template.instance().recordsPerPage.get(), Math.ceil(Template.instance().total.get() / Template.instance().recordsPerPage.get()));
+		return Math.ceil(Template.instance().total.get() / Template.instance().recordsPerPage.get());
 	},
 });
 
@@ -53,20 +45,21 @@ Template.ErrandsPage.events({
 		t.errandDescription.set(e.target.value);
 	},
 
-	'click .table-row'(e, target) {
+	'click .table-row'(e, instance) {
 		console.log(e.currentTarget.dataset);
 		const { id, index } = e.currentTarget.dataset;
-		let errand = target.errands.get();
+		let errand = instance.errands.get();
 		errand = _.findWhere(errand, {
 			_id: id,
 		});
+		console.log('click .table-row', errand);
 		modal.open({
 			title: t('Errand_details'),
 			modifier: 'modal',
 			content: 'ErrandDetails',
 			data: {
 				errand,
-				updateRecord: target.updateRecord(Number(index)),
+				updateRecord: instance.updateRecord(Number(index)),
 				onCreate() {
 					modal.close();
 				},
@@ -88,53 +81,22 @@ Template.ErrandsPage.events({
 });
 
 Template.ErrandsPage.onRendered(function() {
-	/* Tracker.autorun(() => {
-		const metaToDate = this.expiredDate.get();
 
-		let toDate = new Date('9999-12-31T23:59:59Z');
-
-		if (metaToDate) {
-			toDate = new Date(`${ metaToDate }T00:00:00${ getTimeZoneOffset() }`);
-		}
-
-
-		if (toDate > new Date()) {
-			return this.validate.set(t('Newer_than_may_not_exceed_Older_than', {
-				postProcess: 'sprintf',
-				sprintf: [],
-			}));
-		}
-		this.validate.set('');
-	});*/
 });
 
 
 Template.ErrandsPage.onCreated(function() {
-	// const { rid, message: msg } = this.data;
-
-	// const parentRoom = rid && ChatSubscription.findOne({ rid });
-
-	// if creating a errand from inside a errand, uses the same channel as parent channel
-	/*	const room = parentRoom && parentRoom.prid ? ChatSubscription.findOne({ rid: parentRoom.prid }) : parentRoom;
-
-	if (room) {
-		room.text = room.name;
-	}
-
-	const roomName = room && roomTypes.getRoomName(room.t, room);*/
-
-
 	this.errands = new ReactiveVar([]);
 	this.offset = new ReactiveVar(0);
 	this.total = new ReactiveVar(0);
 	this.isLoading = new ReactiveVar(false);
 	this.filter = new ReactiveVar('');
-
+	this.recordsPerPage = new ReactiveVar(120);
 	this.type = new ReactiveVar(this.data.type && this.data.type() ? this.data.type() : 'all');
 
 	this.updateRecord = (index) => (newRecord) => {
 		const errands = this.errands.get();
-
+		console.log(newRecord);
 		if (newRecord._id !== errands[index]._id) {
 			console.log('Изменяется не тот объект!', 'Новый', newRecord._id, 'старый:', errands[index]._id);
 		} else {
@@ -165,14 +127,10 @@ Template.ErrandsPage.onCreated(function() {
 	this.loadErrands = _.debounce(async (query, offset) => {
 		this.isLoading.set(true);
 
-		const { errands, total } = await APIClient.v1.get(`errands-on-message.list?count=${ 10 }&offset=${ offset }&query=${ JSON.stringify(query) }`);
+		const { errands, total } = await APIClient.v1.get(`errands-on-message.list?count=${ this.recordsPerPage.get() }&offset=${ offset }&query=${ JSON.stringify(query) }`);
 		console.log('errands from server', errands);
 		this.total.set(total);
-		if (offset === 0) {
-			this.errands.set(errands);
-		} else {
-			this.errands.set(this.errands.get().concat(errands));
-		}
+		this.errands.set(errands);
 		this.isLoading.set(false);
 	}, DEBOUNCE_TIME_TO_SEARCH_IN_MS);
 
@@ -202,5 +160,129 @@ Template.ErrandsPage.onCreated(function() {
 			return this.loadErrands({ name: regex }, offset);
 		}
 		return this.loadErrands(this.query.get(), offset);
+	});
+});
+
+const pagesOffset = 2;
+Template.Paginator.helpers({
+
+	pages() {
+		const totalPages = Template.instance().totalPages.get();
+		const currentPage = Template.instance().currentPage.get() + 1;
+		const pages = [];
+		if (currentPage !== 1) {
+			pages.push({
+				number: '«',
+				classes: 'js-previous-page-button',
+				disabled: '',
+			});
+		}
+
+
+		let startPage = currentPage - pagesOffset;
+		if (startPage <= 0) {
+			startPage = 1;
+		} else {
+			pages.push({
+				number: '...',
+				classes: '',
+				disabled: 'disabled',
+			});
+		}
+
+		for (let i = startPage; i < currentPage; i++) {
+			pages.push({
+				number: i,
+				classes: 'js-clickable-page-button',
+				disabled: '',
+			});
+		}
+
+		pages.push({
+			number: currentPage,
+			classes: 'active',
+			disabled: '',
+		});
+
+		let endPage = currentPage + pagesOffset;
+		if (endPage >= totalPages) {
+			endPage = totalPages;
+		} else {
+			pages.push({
+				number: '...',
+				classes: '',
+				disabled: 'disabled',
+			});
+		}
+
+		for (let i = currentPage + 1; i <= endPage; i++) {
+			pages.push({
+				number: i,
+				classes: 'js-clickable-page-button',
+				disabled: '',
+			});
+		}
+		console.log('currentPage', currentPage, 'totalPages', totalPages);
+		if (currentPage !== totalPages) {
+			pages.push({
+				number: '»',
+				classes: 'js-next-page-button',
+				disabled: '',
+			});
+		}
+
+		return pages;
+	},
+
+
+});
+
+
+Template.Paginator.events({
+
+	'click .js-next-page-button'(e, instance) {
+		console.log(e.currentTarget.dataset);
+		// const { number } = e.currentTarget.dataset;
+		const newPage = instance.currentPage.get() + 1;
+		instance.currentPage.set(newPage);
+	},
+
+	'click .table-row'(e, instance) {
+		console.log(e.currentTarget.dataset);
+		const { id, index } = e.currentTarget.dataset;
+		let errand = instance.errands.get();
+		errand = _.findWhere(errand, {
+			_id: id,
+		});
+		modal.open({
+			title: t('Errand_details'),
+			modifier: 'modal',
+			content: 'ErrandDetails',
+			data: {
+				errand,
+				updateRecord: instance.updateRecord(Number(index)),
+				onCreate() {
+					modal.close();
+				},
+			},
+			showConfirmButton: false,
+			showCancelButton: false,
+			confirmOnEnter: false,
+		});
+	},
+
+});
+
+Template.Paginator.onRendered(function() {
+
+});
+
+
+Template.Paginator.onCreated(function() {
+	this.totalPages = new ReactiveVar(this.data.totalPages);
+	this.currentPage = this.data.currentPage;
+	this.autorun(() => {
+		this.totalPages.set(this.data.totalPages);
+		this.currentPage = this.data.currentPage;
 	});
 });

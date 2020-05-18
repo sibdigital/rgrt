@@ -16,22 +16,8 @@
 					<div class="rc-header__name">{{roomName}} <div class="rc-header__username">@{{secondaryName}}</div></div>
 					{{/unless}}
 
-					{{#if hasPresence}}
-					{{# userPresence uid=uid}}<span class="rc-header__status">
-						<div class="rc-header__status-bullet rc-header__status-bullet--{{userStatus}}" title="{{_ userStatus}}"></div>
-						<div class="rc-header__visual-status">{{userStatusText}}</div>
-					</span>{{/userPresence}}
-					{{else}}
-					{{#if roomTopic}}<span class="rc-header__topic">{{{roomTopic}}}</span>{{/if}}
-					{{/if}}
+					<span class="rc-header__topic">{{{roomTopic}}}</span>
 				</div>
-
-				{{#if sentimentSmile}}
-				<span class="sentiment">{{sentimentSmile}}</span>
-				{{/if}}
-				{{#if isTranslated}}
-				<i class="icon-language" aria-label="{{_ "Translated"}}"></i>
-				{{/if}}
 			</div>
 
 		</div>

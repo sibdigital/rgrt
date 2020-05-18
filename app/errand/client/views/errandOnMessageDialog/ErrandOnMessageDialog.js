@@ -1,38 +1,21 @@
-import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
-import { Blaze } from 'meteor/blaze';
-import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
-import toastr from 'toastr';
-// import moment from 'moment';
-import { Tracker } from 'meteor/tracker';
-
-// eslint-disable-next-line import/order
 import _ from 'underscore';
 import moment from 'moment';
 
 import { APIClient, t } from '../../../../utils/client';
-import { call } from '../../../../ui-utils/client';
+import { modal } from '../../../../ui-utils/client';
+
 import './ErrandOnMessageDialog.html';
 
 const DEBOUNCE_TIME_TO_SEARCH_IN_MS = 500;
 
-
-const getTimeZoneOffset = function() {
-	const offset = new Date().getTimezoneOffset();
-	const absOffset = Math.abs(offset);
-	return `${ offset < 0 ? '+' : '-' }${ `00${ Math.floor(absOffset / 60) }`.slice(-2) }:${ `00${ absOffset % 60 }`.slice(-2) }`;
-};
-
 Template.ErrandOnMessageDialog.helpers({
-	translateStatus(status) {
-		return Template.instance().status_set[status];
-	},
 	errands() {
 		return Template.instance().errands.get();
 	},
 	formatDate(date) {
-		return moment(date).format('DD-MM-YYYY');
+		return moment(date).format(moment.localeData().longDateFormat('L'));
 	},
 });
 
@@ -50,84 +33,37 @@ Template.ErrandOnMessageDialog.events({
 		instance.expiredDate.set(e.target.value);
 	},
 
-	async 'submit #create-errand, click .js-save-errand'(event, instance) {
-		event.preventDefault();
-
-
-		// const parentChannel = instance.parentChannel.get();
-		// const { pmid } = instance;
-		const errandDescription = instance.errandDescription.get();
-
-		const chargedUsers = instance.selectedUsers.get().map(({ username }) => username);
-		const initiatedUsers = instance.initiatedByUsers.get().map(({ username }) => username);
-		const { message } = instance;
-		// const prid = instance.parentChannelId.get();
-		const reply = instance.reply.get();
-
-
-		// const result = await call('createErrand', { prid, pmid, t_name, reply, users });
-		// // callback to enable tracking
-		// callbacks.run('afterErrand', Meteor.user(), result);
-
-
-		const { rid, _id: mid } = message;
-		const initiated_by = initiatedUsers[0];
-		const charged_to = chargedUsers[0];
-		const expired_at = new Date(instance.expiredDate.get());
-
-
-		if (!rid) {
-			const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
-			return toastr.error(errorText);
-		}
-		console.log('try to create errand');
-		const result = await call('createErrand', { rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply });
-		// callback to enable tracking
-		callbacks.run('afterErrand', Meteor.user(), result);
-
-		if (instance.data.onCreate) {
-			instance.data.onCreate(result);
-		}
-		// roomTypes.openRouteLink(result.t, result);
+	'click .table-row'(e, target) {
+		console.log(e.currentTarget.dataset);
+		const { id, index } = e.currentTarget.dataset;
+		let errand = target.errands.get();
+		errand = _.findWhere(errand, {
+			_id: id,
+		});
+		modal.open({
+			title: t('Errand_details'),
+			modifier: 'modal',
+			content: 'ErrandDetails',
+			data: {
+				errand,
+				updateRecord: target.updateRecord(Number(index)),
+				onCreate() {
+					modal.close();
+				},
+			},
+			showConfirmButton: false,
+			showCancelButton: false,
+			confirmOnEnter: false,
+		});
 	},
 });
 
 Template.ErrandOnMessageDialog.onRendered(function() {
-	/*Tracker.autorun(() => {
-		const metaToDate = this.expiredDate.get();
 
-		let toDate = new Date('9999-12-31T23:59:59Z');
-
-		if (metaToDate) {
-			toDate = new Date(`${ metaToDate }T00:00:00${ getTimeZoneOffset() }`);
-		}
-
-
-		if (toDate > new Date()) {
-			return this.validate.set(t('Newer_than_may_not_exceed_Older_than', {
-				postProcess: 'sprintf',
-				sprintf: [],
-			}));
-		}
-		this.validate.set('');
-	});*/
 });
 
 
 Template.ErrandOnMessageDialog.onCreated(function() {
-	// const { rid, message: msg } = this.data;
-
-	// const parentRoom = rid && ChatSubscription.findOne({ rid });
-
-	// if creating a errand from inside a errand, uses the same channel as parent channel
-	/*	const room = parentRoom && parentRoom.prid ? ChatSubscription.findOne({ rid: parentRoom.prid }) : parentRoom;
-
-	if (room) {
-		room.text = room.name;
-	}
-
-	const roomName = room && roomTypes.getRoomName(room.t, room);*/
-
 	this.errands = new ReactiveVar([]);
 	this.offset = new ReactiveVar(0);
 	this.total = new ReactiveVar(0);
@@ -135,12 +71,15 @@ Template.ErrandOnMessageDialog.onCreated(function() {
 	this.isLoading = new ReactiveVar(false);
 	this.filter = new ReactiveVar('');
 
-	this.status_set = {
-		opened: TAPi18n.__('Status_Errand_Opened'),
-		in_progress: TAPi18n.__('Status_Errand_In_Progress'),
-		solved: TAPi18n.__('Status_Errand_Solved'),
-		canceled: TAPi18n.__('Status_Errand_Canceled'),
-		closed: TAPi18n.__('Status_Errand_Closed'),
+	this.updateRecord = (index) => (newRecord) => {
+		const errands = this.errands.get();
+
+		if (newRecord._id !== errands[index]._id) {
+			console.log('Изменяется не тот объект!', 'Новый', newRecord._id, 'старый:', errands[index]._id);
+		} else {
+			errands[index] = newRecord;
+			this.errands.set(errands);
+		}
 	};
 
 	const { errand } = this.data;

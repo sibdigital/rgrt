@@ -23,14 +23,16 @@
 			</thead>
 			<tbody>
 			{{#each errands}}
-				<tr class="table-row" data-id="{{_id}}">
+				<tr class="table-row" data-id="{{_id}}" data-index="{{@index}}">
 					<td>
-						{{initiatedBy.username}}
+						{{>avatar username=initiatedBy.username}}
 					</td>
-					<td>{{chargedToUser.username}}</td>
-					<td><button>...</button></td>
+					<td>
+						{{>avatar username=chargedToUser.username}}
+					</td>
+					<td>{{ desc }}</td>
 					<td>{{ formatDate expiredDate }}</td>
-					<td>{{translateStatus t}}</td>
+					<td>{{_ t}}</td>
 				</tr>
 			{{else}}
 				<tr>

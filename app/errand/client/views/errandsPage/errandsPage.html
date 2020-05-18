@@ -1,86 +1,141 @@
 <template name="ErrandsPage">
-<section class="preferences-page preferences-page--new page-container page-home page-static page-settings">
-<div class="content">
-{{#table}}
-		<thead>
-		<tr>
+	<section class="preferences-page preferences-page--new page-container page-home page-static page-settings">
+	<!--	{{# if showTopNavbar}}-->
+			<!--		{{# headerRoom}}-->
+				<!--			{{#with flexData}}-->
+				<!--				<div class="rc-header__block rc-header__block-action">-->
+				<!--					{{> RoomsActionTab}}-->
+				<!--				</div>-->
+					<!--			{{/with}}-->
+				<!--		{{/headerRoom}}-->
+			<!--	{{/if}}-->
+		<div class="content">
+			{{#table}}
+				<thead>
+				<tr>
 
 
-			{{#if $eq errandType "initiated_by_me"}}
-				<th width="10%">
-					<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
-				</th>
+					{{#if $eq errandType "initiated_by_me"}}
+						<th width="10%">
+							<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
+						</th>
 
-			{{else if $eq errandType "charged_to_me"}}
-				<th width="10%">
-					<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
-				</th>
-			{{else}}
-				<th width="10%">
-					<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
-				</th>
-				<th width="10%">
-					<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
-				</th>
-			{{/if}}
-			<th>
-				<div class="table-fake-th">{{_ "Description"}}</div>
-			</th>
-			<th width="10%">
-				<div class="table-fake-th">{{_ "Started_At"}}</div>
-			</th>
-			<th width="10%">
-				<div class="table-fake-th">{{_ "Errand_Expired_date"}}</div>
-			</th>
-			<th width="10%">
-				<div class="table-fake-th">{{_ "Status"}}</div>
-			</th>
-			<th></th>
-		</tr>
-		</thead>
-	<tbody>
+					{{else if $eq errandType "charged_to_me"}}
+						<th width="10%">
+							<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
+						</th>
+					{{else}}
+						<th width="10%">
+							<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
+						</th>
+						<th width="10%">
+							<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
+						</th>
+					{{/if}}
+					<th>
+						<div class="table-fake-th">{{_ "Description"}}</div>
+					</th>
+					<th width="10%">
+						<div class="table-fake-th">{{_ "Started_At"}}</div>
+					</th>
+					<th width="10%">
+						<div class="table-fake-th">{{_ "Errand_Expired_date"}}</div>
+					</th>
+					<th width="10%">
+						<div class="table-fake-th">{{_ "Status"}}</div>
+					</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
 
-	{{#if $and isLoading errandsAreEmpty}}
-		<tr>
-			<td colspan="4">{{_ "Loading..."}}</td>
-		</tr>
-	{{else}}
-		{{#each errands}}
-			<tr class="table-row" id="{{_id}}" data-id="{{_id}}" data-index="{{@index}}">
-				{{#if $eq errandType "initiated_by_me"}}
-					<td>{{chargedToUser.username}}</td>
-
-				{{else if $eq errandType "charged_to_me"}}
-					<td>
-						{{initiatedBy.username}}
-					</td>
+				{{#if $and isLoading errandsAreEmpty}}
+					<tr>
+						<td colspan="4">{{_ "Loading..."}}</td>
+					</tr>
 				{{else}}
-					<td>
-						{{initiatedBy.username}}
-					</td>
-					<td>{{chargedToUser.username}}</td>
+					{{#each errands}}
+						<tr class="table-row" id="{{_id}}" data-id="{{_id}}" data-index="{{@index}}">
+							{{#if $eq errandType "initiated_by_me"}}
+								<td>
+									{{#if showRealNames}}
+										{{chargedToUser.name}}
+									{{else}}
+										{{chargedToUser.username}}
+									{{/if}}
+								</td>
+							{{else if $eq errandType "charged_to_me"}}
+								<td>
+									{{#if showRealNames}}
+										{{initiatedBy.name}}
+									{{else}}
+										{{initiatedBy.username}}
+									{{/if}}
+								</td>
+							{{else}}
+								<td>
+									{{#if showRealNames}}
+										{{initiatedBy.name}}
+									{{else}}
+										{{userModifier initiatedBy.username}}
+									{{/if}}
+								</td>
+								<td>
+									{{#if showRealNames}}
+										{{chargedToUser.name}}
+									{{else}}
+										{{chargedToUser.username}}
+									{{/if}}
+								</td>
+							{{/if}}
+
+							<td>{{ desc }}</td>
+							<td>{{ formatDate ts }}</td>
+							<td>{{ formatDate expireAt }}</td>
+							<td>
+								{{_ t}}
+							</td>
+						</tr>
+					{{else}}
+						<tr>
+							<td colspan="4">{{_ "Errands_empty"}}</td>
+						</tr>
+					{{/each}}
 				{{/if}}
 
-				<td>{{ shortDescription desc}}</td>
-				<td>{{ formatDate ts }}</td>
-				<td>{{ formatDate expireAt }}</td>
-				<td>
-					{{_ t}}
-				</td>
-			</tr>
-		{{else}}
-			<tr>
-				<td colspan="4">{{_ "Errands_empty"}}</td>
-			</tr>
-		{{/each}}
-	{{/if}}
 
-
-		</tbody>
-		{{/table}}
+				</tbody>
+			{{/table}}
+			<!--{{> Paginator
+					currentPage=currentPage
+					totalPages=totalPages
+			}}-->
 
 		</div>
-		</section>
-		</template>
+	</section>
+</template>
+
+<template name="Paginator">
+	<div class="center">
+		<ul class="pagination">
+			{{#if hasPrevoiusPages}}
+				<li><button class="js-previous-page">«</button></li>
+			{{/if}}
+			{{#if isPreviousPageOffsetLimited}}
+				<li><button disabled>...</button></li>
+			{{/if}}
+			{{#each pages}}
+				<li><button class="{{classes}}" {{disabled}} data-page="{{number}}">{{number}}</button></li>
+			{{/each}}
+			{{#if isNextPageOffsetLimited}}
+				<li><button disabled>...</button></li>
+			{{/if}}
+			{{#if hasNextPages}}
+				<li><button class="js-next-page">»</button></li>
+			{{/if}}
+
+		</ul>
+	</div>
+</template>
 
 

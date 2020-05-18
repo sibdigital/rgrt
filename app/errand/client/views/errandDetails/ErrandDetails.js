@@ -1,36 +1,22 @@
+import toastr from 'toastr';
+import moment from 'moment';
+import _ from 'underscore';
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Blaze } from 'meteor/blaze';
 import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
-import toastr from 'toastr';
-import moment from 'moment';
-import { Tracker } from 'meteor/tracker';
-import _ from 'underscore';
 
-// eslint-disable-next-line import/order
-import { APIClient, getUserPreference, t } from '../../../../utils/client';
-
-// import { roomTypes, t } from '../../../../utils/client';
+import { APIClient, t } from '../../../../utils/client';
 import { callbacks } from '../../../../callbacks/client';
-import { ChatRoom, Users } from '../../../../models/client';
+import { ChatRoom } from '../../../../models/client';
 import { call } from '../../../../ui-utils/client';
 import { AutoComplete } from '../../../../meteor-autocomplete/client';
-
 import './ErrandDetails.html';
-
 import { errandStatuses } from '../../../utils/statuses';
 
-import { settings } from '/app/settings';
 
 const DEBOUNCE_TIME_TO_SEARCH_IN_MS = 500;
-
-const getTimeZoneOffset = function() {
-	const offset = new Date().getTimezoneOffset();
-	const absOffset = Math.abs(offset);
-	return `${ offset < 0 ? '+' : '-' }${ `00${ Math.floor(absOffset / 60) }`.slice(-2) }:${ `00${ absOffset % 60 }`.slice(-2) }`;
-};
-
 
 Template.ErrandDetails.helpers({
 
@@ -182,9 +168,7 @@ Template.ErrandDetails.events({
 	},
 
 	'change [name=expired__date]'(e, instance) {
-		console.log('change Template.instance().expiredDate.get()', Template.instance().expiredDate.get());
 		instance.expiredDate.set(e.target.value);
-		console.log('change Template.instance().expiredDate.get()', Template.instance().expiredDate.get());
 	},
 
 	async 'submit #create-errand, click .js-save-errand'(event, instance) {
@@ -197,7 +181,7 @@ Template.ErrandDetails.events({
 			const errorText = TAPi18n.__('Errand_Charged_to_cant_be_empty');
 			return toastr.error(errorText);
 		}
-		const chargedUsers = instance.chargedUsers.get().map(({ _id, username }) => ({ _id, username }))[0];
+		const chargedUsers = instance.chargedUsers.get().map(({ _id, username, name }) => ({ _id, username, name }))[0];
 		const status = instance.status.get();
 		const expired_at = moment(instance.expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
 
@@ -222,7 +206,7 @@ Template.ErrandDetails.events({
 		newErrand.expireAt = expired_at;
 		newErrand.desc = errandDescription;
 		newErrand.t = status;*/
-
+		console.log('submit', instance.errand)
 		const result = await call('editErrand', { _id: instance.errand._id, chargedUsers, errandDescription, expired_at, status });
 		// callback to enable tracking
 		// callbacks.run('afterErrand', Meteor.user(), result);
@@ -260,36 +244,16 @@ Template.ErrandDetails.onRendered(function() {
 
 
 	this.$('#started_date').datepicker('setDate', Template.instance().createdDate.get());
-
-	Tracker.autorun(() => {
-		const metaToDate = this.expiredDate.get();
-
-		let toDate = new Date('9999-12-31T23:59:59Z');
-
-		if (metaToDate) {
-			toDate = new Date(`${ metaToDate }T00:00:00${ getTimeZoneOffset() }`);
-		}
-
-
-		if (toDate > new Date()) {
-			return this.validate.set(t('Newer_than_may_not_exceed_Older_than', {
-				postProcess: 'sprintf',
-				sprintf: [],
-			}));
-		}
-		// this.validate.set('');
-	});
 });
 
 
 Template.ErrandDetails.onCreated(function() {
 	this.errand = this.data.errand;
-
+	console.log('onCreated', this.errand);
 
 	this.errandDescription = new ReactiveVar(this.errand.desc);
 
 	this.errand.expireAt = new Date(this.errand.expireAt);
-	console.log('onCreated this.errand.expireAt', this.errand.expireAt);
 	this.expiredDate = new ReactiveVar(this.errand.expireAt);
 	this.createdDate = new ReactiveVar(new Date(this.errand.ts));
 	this.status = new ReactiveVar(this.errand.t);
@@ -308,9 +272,7 @@ Template.ErrandDetails.onCreated(function() {
 
 
 	this.onSelectUser = ({ item: user }) => {
-		console.log('onSelectUser', user);
 		this.chargedUsers.set([user]);
-		console.log('onSelectUser', this.chargedUsers.get());
 	};
 	this.onClickTagUser = ({ username }) => {
 		this.chargedUsers.set(this.chargedUsers.get().filter((user) => user.username !== username));
