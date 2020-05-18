@@ -57,6 +57,7 @@ Meteor.startup(function() {
 		{ _id: 'manage-own-incoming-integrations',   roles: ['admin'] },
 		{ _id: 'manage-oauth-apps',                  roles: ['admin'] },
 		{ _id: 'manage-selected-settings', 	         roles: ['admin'] },
+		{ _id: 'manage-tags',			 			 roles: ['admin'] },
 		{ _id: 'mention-all',                        roles: ['admin', 'owner', 'moderator', 'user'] },
 		{ _id: 'mention-here',                       roles: ['admin', 'owner', 'moderator', 'user'] },
 		{ _id: 'mute-user',                          roles: ['admin', 'owner', 'moderator'] },

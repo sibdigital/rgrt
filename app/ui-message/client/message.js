@@ -13,6 +13,7 @@ import { RoomRoles, UserRoles, Roles, Messages } from '../../models/client';
 import { callbacks } from '../../callbacks/client';
 import { Markdown } from '../../markdown/client';
 import { t, roomTypes } from '../../utils';
+import { Tags } from '../../tags/client'
 import { upsertMessage } from '../../ui-utils/client/lib/RoomHistoryManager';
 import './message.html';
 import './messageThread.html';
@@ -300,6 +301,42 @@ Template.message.helpers({
 	hideReactions() {
 		const { msg } = this;
 		if (_.isEmpty(msg.reactions)) {
+			return 'hidden';
+		}
+	},
+	tags() {
+		const { msg: { tags = {} }, u: { username: myUsername, name: myName } } = this;
+
+		return Object.entries(tags)
+			.filter(([id, tag]) => Tags.get(id)) // TODO наверное лучше добавить статус к тегам и фильтровать по нему
+			.map(([id, tag]) => {
+				const name = Tags.get(id).name;
+
+				const myDisplayName = tag.names ? myName : `@${ myUsername }`;
+				const displayNames = tag.names || tag.usernames.map((username) => `@${ username }`);
+				const selectedDisplayNames = displayNames.slice(0, 15).filter((displayName) => displayName !== myDisplayName);
+
+				if (displayNames.some((displayName) => displayName === myDisplayName)) {
+					selectedDisplayNames.unshift(t('You'));
+				}
+
+				return {
+					id,
+					name,
+					userTagged: displayNames.indexOf(myDisplayName) > -1,
+				};
+			});
+	},
+	markUserTag(tag) {
+		if (tag.userTagged) {
+			return {
+				class: 'selected',
+			};
+		}
+	},
+	hideTags() {
+		const { msg } = this;
+		if (_.isEmpty(msg.tags)) {
 			return 'hidden';
 		}
 	},

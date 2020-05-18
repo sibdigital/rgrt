@@ -38,6 +38,10 @@ export class Messages extends Base {
 		return this.update({ _id: messageId }, { $set: { reactions } });
 	}
 
+	setTags(messageId, tags) {
+		return this.update({ _id: messageId }, { $set: { tags } });
+	}
+
 	setErrand(messageId, errand) {
 		return this.update({ _id: messageId }, { $set: { errand } });
 	}
@@ -84,6 +88,10 @@ export class Messages extends Base {
 
 	unsetReactions(messageId) {
 		return this.update({ _id: messageId }, { $unset: { reactions: 1 } });
+	}
+
+	unsetTags(messageId) {
+		return this.update({ _id: messageId }, { $unset: { tags: 1 } });
 	}
 
 	deleteOldOTRMessages(roomId, ts) {
@@ -563,6 +571,7 @@ export class Messages extends Base {
 				mentions: [],
 				attachments: [],
 				reactions: [],
+				tags: [],
 				editedAt: new Date(),
 				editedBy: {
 					_id: user._id,

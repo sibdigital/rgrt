@@ -117,6 +117,11 @@ registerAdminRoute('/view-logs', {
 	lazyRouteComponent: () => import('./viewLogs/ViewLogsRoute'),
 });
 
+registerAdminRoute('/tags/:context?/:id?', {
+	name: 'tags',
+	lazyRouteComponent: () => import('./tags/AdminTagsRoute'),
+});
+
 Meteor.startup(() => {
 	registerAdminRoute('/:group+', {
 		name: 'admin',

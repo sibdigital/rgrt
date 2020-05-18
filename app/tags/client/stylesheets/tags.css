@@ -1,8 +1,8 @@
 .message {
-	& .reactions {
+	& .tags {
 		margin-top: 4px;
 		padding: 0;
-	    display: inline-block;
+		display: inline-block;
 
 		& > li {
 			position: relative;
@@ -21,33 +21,10 @@
 
 			line-height: 20px;
 
-			& .reaction-emoji {
-				& .emoji,
-				& .emojione {
-					width: 16px;
-					min-width: 16px;
-					height: 16px;
-					min-height: 16px;
-					margin: -0.2ex 0.15em 0.2ex;
-
-					pointer-events: none; /* to avoid title attribute to trigger a tooltip */
-				}
+			& .tag-name {
 			}
 
-			& .people {
-				display: none;
-			}
-
-			& .reaction-count {
-				position: relative;
-				top: -1px;
-
-				margin-left: -3px;
-
-				font-size: 0.65rem;
-			}
-
-			&.add-reaction {
+			&.add-tag {
 				visibility: hidden;
 
 				padding: 0 2px;
@@ -70,7 +47,7 @@
 		}
 
 		&:hover {
-			& > li.add-reaction {
+			& > li.add-tag {
 				visibility: visible;
 
 				opacity: 1;
@@ -79,12 +56,7 @@
 	}
 }
 
-html.rtl .message .reactions > li .reaction-count {
-	margin-right: -3px;
-	margin-left: auto;
-}
-
-html.rtl .message .reactions > li .add-reaction {
+html.rtl .message .tags > li .add-tag {
 	margin-right: 10px;
 	margin-left: 0;
 }

@@ -111,5 +111,6 @@ import '../app/promises/server';
 import '../app/ui-utils';
 import '../app/action-links';
 import '../app/reactions/server';
+import '../app/tags/server';
 import '../app/errand/server';
 import '../app/livechat/server';

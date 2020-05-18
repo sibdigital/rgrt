@@ -105,6 +105,8 @@ import '../app/ui-cached-collection';
 import '../app/action-links';
 import '../app/reactions/client';
 import '../app/livechat/client';
+import '../app/tags/client';
+import '../app/tag-picker';
 import '../app/errand/client';
 import '../app/meteor-autocomplete/client';
 import '../app/theme/client';
