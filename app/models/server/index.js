@@ -38,6 +38,7 @@ import LivechatAgentActivity from './models/LivechatAgentActivity';
 import LivechatInquiry from './models/LivechatInquiry';
 import ReadReceipts from './models/ReadReceipts';
 import LivechatExternalMessage from './models/LivechatExternalMessages';
+import Analytics from './models/Analytics';
 import Tags from './models/Tags';
 
 export { AppsLogsModel } from './models/apps-logs-model';
@@ -89,5 +90,6 @@ export {
 	ReadReceipts,
 	LivechatExternalMessage,
 	LivechatInquiry,
+	Analytics,
 	Tags,
 };
