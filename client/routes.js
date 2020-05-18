@@ -103,10 +103,10 @@ FlowRouter.route('/errands/:type?', {
 });
 
 FlowRouter.route('/directory', {
-FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
-	action: () => {
-		renderRouteComponent(() => import('../app/ui/client/views/app/components/Directory'), { template: 'main', region: 'center' });
+
+	action() {
+		BlazeLayout.render('main', { center: 'directory' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
