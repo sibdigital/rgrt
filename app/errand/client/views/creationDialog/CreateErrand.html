@@ -1,0 +1,124 @@
+<template name="CreateErrand">
+
+	<section class="create-channel">
+		<div class="create-channel__wrapper">
+			<p class="create-channel__description">{{_ "Errand_description"}}</p>
+			<form id="create-errand" class="create-channel__content">
+				<!--{{#unless disabled}}
+				{{> SearchCreateErrand
+					onClickTag=onClickTagRoom
+					deleteLastItem=deleteLastItemRoom
+					list=selectedRoom
+					onSelect=onSelectRoom
+					collection=roomCollection
+					field='name'
+					sort='name'
+					label="Errand_target_channel"
+					placeholder="Errand_target_channel_description"
+					name="parentChannel"
+					disabled=disabled
+					selector=roomSelector
+					description=targetChannelText
+					noMatchTemplate="roomSearchEmpty"
+					templateItem="popupList_item_channel"
+					modifier=roomModifier
+				}} {{else}}
+					<div class="rc-input" disabled>
+						<label class="rc-input__label">
+							<div class="rc-input__title">{{_ "Errand_target_channel"}}</div>
+							<div class="rc-input__wrapper">
+								<input disabled name="parentChannel" id="parentChannel" value={{parentChannel}} class="rc-input__element" />
+							</div>
+						</label>
+					</div>
+				{{/unless}}-->
+
+				<div class="create-channel__inputs">
+					{{> SearchCreateErrand
+							onClickTag=onClickInitiatedTagUser
+							deleteLastItem=deleteLastInitiatedItemUser
+							list=initiatedByUsers
+							onSelect=onSelectInitiatedUser
+							collection='UserAndRoom'
+							endpoint='users.autocomplete'
+							field='username'
+							sort='username'
+							label="Errand_Initiated_by"
+							placeholder="Username_Placeholder"
+							name="usersInitiated"
+							icon="at"
+							noMatchTemplate="userSearchEmpty"
+							templateItem="popupList_item_default"
+							modifier=userModifier
+					}}
+					{{> SearchCreateErrand
+							onClickTag=onClickTagUser
+							deleteLastItem=deleteLastItemUser
+							list=selectedUsers
+							onSelect=onSelectUser
+							collection='UserAndRoom'
+							endpoint='users.autocomplete'
+							field='username'
+							sort='username'
+							label="Errand_Charged_to"
+							placeholder="Username_Placeholder"
+							name="usersCharged"
+							icon="at"
+							noMatchTemplate="userSearchEmpty"
+							templateItem="popupList_item_default"
+							modifier=userModifier
+					}}
+					<div class="rc-input">
+						<label class="rc-input__label">
+							<div class="rc-input__title">{{_ "Description"}}</div>
+							<div class="rc-input__wrapper">
+								<textarea rows="5" name="errand_description" id="errand_description" class="rc-input__element" placeholder="{{_ 'Errand_description_placeholder'}}"
+										  maxlength="{{maxDescriptionLength}}" value="{{errandDescription}}"></textarea>
+							</div>
+						</label>
+					</div>
+					<div class="rc-input">
+						<label class="rc-input__label">
+							<div class="rc-input__title">{{_ "Errand_Expired_date"}}</div>
+							<div class="rc-input__wrapper">
+								<div class="rc-input__icon">
+									{{> icon block="rc-input__icon-svg" icon="calendar"}}
+								</div>
+								<input type="text" placeholder="{{_ "Errand_Expired_date" }}" autocomplete="off" id="expired_date" name="expired__date" class="rc-input__element" value="{{expiredDate}}">
+							</div>
+
+						</label>
+					</div>
+			</div>
+			</form>
+			<div class="rc-input">
+				<button form="create-errand" class="rc-button rc-button--primary js-save-errand {{createIsDisabled}}" {{createIsDisabled}}>{{_ "Create"}}</button>
+			</div>
+		</div>
+	</section>
+</template>
+
+<template name="SearchCreateErrand">
+	<div class="rc-input" id='search-{{name}}' {{disabled}}>
+		<label class="rc-input__label">
+			<div class="rc-input__title">{{_ label}}</div>
+			<div class="rc-input__wrapper">
+				{{# if icon}}
+				<div class="rc-input__icon">
+					{{> icon block="rc-input__icon-svg" icon=icon}}
+				</div>
+				{{/if}}
+				<div class="rc-tags{{# unless icon}} rc-tags--no-icon{{/unless}}">
+					{{#each item in list}} {{> tag item}} {{/each}}
+					<input type="text" id="{{name}}" class="rc-tags__input" placeholder="{{_ placeholder}}" name="{{name}}" autocomplete="off" {{disabled}} />
+				</div>
+			</div>
+			{{#with config}}
+				{{#if autocomplete 'isShowing'}}
+					{{> popupList data=config items=items ready=(autocomplete 'isLoaded')}}
+				{{/if}}
+			{{/with}}
+		</label>
+		<div class="rc-input__description">{{ description }}</div>
+	</div>
+</template>

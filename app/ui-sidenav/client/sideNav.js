@@ -46,6 +46,9 @@ Template.sideNav.helpers({
 	sidebarHideAvatar() {
 		return getUserPreference(Meteor.userId(), 'sidebarHideAvatar');
 	},
+
+
+
 });
 
 Template.sideNav.events({
@@ -55,6 +58,11 @@ Template.sideNav.events({
 
 	'click .arrow'() {
 		return SideNav.toggleCurrent();
+	},
+
+
+	'click .js-open-errands'() {
+		FlowRouter.go(`/errands`);
 	},
 
 	'scroll .rooms-list'() {
@@ -104,6 +112,7 @@ const redirectToDefaultChannelIfNeeded = () => {
 	});
 };
 
+
 Template.sideNav.onRendered(function() {
 	SideNav.init();
 	menu.init();
@@ -125,3 +134,20 @@ Template.sideNav.onCreated(function() {
 		this.groupedByType.set(userPref || settings.get('UI_Group_Channels_By_Type'));
 	});
 });
+
+Template.errandsNav.helpers({
+
+});
+
+Template.errandsNav.events({
+
+});
+
+Template.errandsNav.onRendered(function() {
+
+});
+
+Template.errandsNav.onCreated(function() {
+
+});
+

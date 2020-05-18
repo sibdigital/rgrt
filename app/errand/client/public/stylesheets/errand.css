@@ -1,0 +1,79 @@
+.message-discussion {
+  display: flex;
+  padding: 0.5rem 0;
+  align-items: center;
+}
+
+.discussion-reply-lm {
+  padding: 4px 8px;
+  color: var(--color-gray);
+  font-size: 12px;
+}
+
+.discussions-list .load-more {
+  text-align: center;
+  text-transform: lowercase;
+  font-style: italic;
+  line-height: 40px;
+}
+
+ul.pagination {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+ul.pagination li {
+  display: inline;
+}
+
+ul.pagination li button {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  border: 1px solid #ddd;
+  /* Gray */
+}
+
+ul.pagination li button.active {
+  background-color: #1d74f5;
+  color: white;
+  border-radius: 5px;
+}
+
+ul.pagination li button:disabled {
+  border: none;
+}
+
+ul.pagination li:first-child button {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+ul.pagination li:last-child button {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+ul.pagination li button:hover:not(.active):not(:disabled) {
+  background-color: #ddd;
+}
+
+div.center {
+  text-align: center;
+}
+
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+/*# sourceMappingURL=errand.css.map */
+
+/*# sourceMappingURL=errand.css.map */

@@ -1,0 +1,48 @@
+<template name="ErrandOnMessageDialog">
+	<section>
+		<div style="height: 300px;">
+		{{#table fixed='true'}}
+			<thead>
+			<tr>
+				<th>
+					<div class="table-fake-th">{{_ "Errand_Initiated_by"}}</div>
+				</th>
+				<th>
+					<div class="table-fake-th">{{_ "Errand_Charged_to"}}</div>
+				</th>
+				<th>
+					<div class="table-fake-th">{{_ "Description"}}</div>
+				</th>
+				<th>
+					<div class="table-fake-th">{{_ "Errand_Expired_date"}}</div>
+				</th>
+				<th>
+					<div class="table-fake-th">{{_ "Status"}}</div>
+				</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{#each errands}}
+				<tr class="table-row" data-id="{{_id}}" data-index="{{@index}}">
+					<td>
+						{{>avatar username=initiatedBy.username}}
+					</td>
+					<td>
+						{{>avatar username=chargedToUser.username}}
+					</td>
+					<td>{{ desc }}</td>
+					<td>{{ formatDate expiredDate }}</td>
+					<td>{{_ t}}</td>
+				</tr>
+			{{else}}
+				<tr>
+					<td colspan="5">{{_ "Errands_empty"}}</td>
+				</tr>
+			{{/each}}
+			</tbody>
+		{{/table}}
+		</div>
+	</section>
+</template>
+
+

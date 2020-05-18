@@ -38,6 +38,7 @@ import { ChatMessages } from '../../lib/chatMessages';
 import { fileUpload } from '../../lib/fileUpload';
 import { isURL } from '../../../../utils/lib/isURL';
 import { mime } from '../../../../utils/lib/mimeTypes';
+import {messageBox} from "/app/ui-utils/client/lib/messageBox";
 
 export const chatMessages = {};
 
@@ -1003,6 +1004,48 @@ Template.room.events({
 		const { msg: { drid } } = messageArgs(this);
 		FlowRouter.goToRoomById(drid);
 	},
+	'click .js-open-window-errand'(event) {
+		event.preventDefault();
+
+
+		const { msg: { errand } } = messageArgs(this);
+		console.log( messageArgs(errand))
+
+		modal.open({
+			title: t('Errands'),
+			modifier: 'modal',
+			content: 'ErrandOnMessageDialog',
+			data: {
+				errand,
+				onCreate() {
+					modal.close();
+				},
+			},
+			showConfirmButton: false,
+			showCancelButton: false,
+			confirmOnEnter: false,
+		});
+
+		/*modal.open({
+			title: t('Errands'),
+			modifier: 'modal',
+			content: 'ErrandOnMessageDialog',
+			data: {
+				errand,
+				onCreate() {
+					modal.close();
+				}
+				},
+			confirmOnEnter: false,
+			showConfirmButton: false,
+			showCancelButton: false,
+
+		});*/
+		/*
+		FlowRouter.goToRoomById(drid);*/
+	},
+
+
 });
 
 

@@ -27,6 +27,14 @@ export class Rooms extends Base {
 		this.tryEnsureIndex({ uids: 1 }, { sparse: true });
 	}
 
+	seErrandsInLastMessage(roomId, lastMessage) {
+		return this.update({ _id: roomId }, { $set: { 'lastMessage.errands': lastMessage.errands } });
+	}
+
+	unsetErrandsInLastMessage(roomId) {
+		return this.update({ _id: roomId }, { $unset: { lastMessage: { errands: 1 } } });
+	}
+
 	findOneByIdOrName(_idOrName, options) {
 		const query = {
 			$or: [{
@@ -1136,6 +1144,18 @@ export class Rooms extends Base {
 
 	countDiscussions() {
 		return this.find({ prid: { $exists: true } }).count();
+	}
+
+	incErrandCountById(_id, inc) {
+		const query = { _id };
+
+		const update = {
+			$inc: {
+				errands: inc,
+			},
+		};
+
+		return this.update(query, update);
 	}
 }
 

@@ -16,13 +16,22 @@
 	}
 
 	& .avatar-image {
-		width: 100%;
+		width: 50%;
 		height: 100%;
 
 		background-repeat: no-repeat;
 		background-position: center;
 		background-size: cover;
 	}
+
+	& table.avatar-image {
+	  width: 50%;
+	  height: 50%;
+
+	  background-repeat: no-repeat;
+	  background-position: center;
+	  background-size: cover;
+  	}
 
 	&[initials]::before {
 		position: absolute;
@@ -42,3 +51,4 @@
 		justify-content: center;
 	}
 }
+

@@ -2,9 +2,16 @@
 	<aside class="sidebar sidebar--{{sidebarViewMode}} {{#if sidebarHideAvatar}}sidebar--hide-avatar{{/if}}" role="navigation">
 		{{> sidebarHeader }}
 		{{#if loggedInUser}}
+
 			<div class="unread-rooms background-primary-action-color color-primary-action-contrast top-unread-rooms hidden">
 				{{_ "More_unreads"}} <i class="icon-up-big"></i>
 			</div>
+
+			{{> errandsNav}}
+
+
+
+
 			<div class="rooms-list" aria-label="{{_ "Channels"}}" role="region">
 				{{#each roomType}}
 					{{> Template.dynamic template=template data=data }}
@@ -27,4 +34,100 @@
 		<footer class="sidebar__footer">{{{footer}}}</footer>
 	</aside>
 	<div class="sidebar-wrap"></div>
+</template>
+
+<template name="errandsNav">
+	<h3 class="rooms-list__type">
+		{{_ "Errands"}}
+	</h3>
+
+	<ul class="rooms-list__list">
+		<li class="sidebar-item js-sidebar-type-p">
+			<a class="sidebar-item__link" href="/errands/initiated_by_me" aria-label="{{_ "From_me"}}">
+
+
+				<div class="sidebar-item__picture">
+
+					<div class="sidebar-item__user-thumb">
+						<div class="avatar">
+							<img src="/avatar/%40general" class="avatar-image ">
+						</div>
+					</div>
+
+				</div>
+
+				<div class="sidebar-item__body">
+
+					<div class="sidebar-item__message">
+						<div class="sidebar-item__message-top">
+							<div class="sidebar-item__name">
+
+
+								<div class="sidebar-item__room-type">
+									<svg class="rc-icon rc-icon--default-size sidebar-item__icon sidebar-item__icon--discussion" aria-hidden="true">
+										<use xlink:href="#icon-discussion"></use>
+									</svg>
+								</div>
+
+
+
+								<div class="sidebar-item__ellipsis">
+									{{_ "From_me"}}
+								</div>
+
+							</div>
+
+						</div>
+						<div class="sidebar-item__message-bottom">
+						</div>
+					</div>
+
+
+
+				</div>
+			</a>
+		</li>
+		<li class="sidebar-item js-sidebar-type-p">
+			<a class="sidebar-item__link" href="/errands/charged_to_me" aria-label={{_ "For_me"}}>
+
+
+				<div class="sidebar-item__picture">
+
+					<div class="sidebar-item__user-thumb">
+						<div class="avatar">
+							<img src="/avatar/%40general" class="avatar-image ">
+						</div>
+					</div>
+
+				</div>
+
+				<div class="sidebar-item__body">
+
+					<div class="sidebar-item__message">
+						<div class="sidebar-item__message-top">
+							<div class="sidebar-item__name">
+
+
+								<div class="sidebar-item__room-type">
+									<svg class="rc-icon rc-icon--default-size sidebar-item__icon sidebar-item__icon--discussion" aria-hidden="true">
+										<use xlink:href="#icon-discussion"></use>
+									</svg>
+								</div>
+
+
+
+								<div class="sidebar-item__ellipsis">
+									{{_ "For_me"}}
+								</div>
+
+							</div>
+
+						</div>
+						<div class="sidebar-item__message-bottom">
+						</div>
+					</div>
+				</div>
+			</a>
+		</li>
+	</ul>
 </template>
