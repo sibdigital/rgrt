@@ -1,9 +1,0 @@
-import './adminTagEdit.html';
-import './adminTagInfo.html';
-import './adminTags.html';
-import './adminTags';
-import './tagEdit.html';
-import './tagEdit';
-import './tagInfo.html';
-import './tagInfo';
-import './tagPreview.html';

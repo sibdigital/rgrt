@@ -64,3 +64,12 @@ registerAdminSidebarItem({
 		return hasPermission(['manage-sounds']);
 	},
 });
+
+registerAdminSidebarItem({
+	href: 'tags',
+	i18nLabel: 'Tags',
+	icon: 'tags',
+	permissionGranted() {
+		return hasPermission('manage-tags');
+	},
+});

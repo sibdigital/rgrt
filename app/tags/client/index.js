@@ -1,6 +1,3 @@
-import './admin/route';
-import './admin/startup';
-
 import './notifications/deleteTag';
 import './notifications/updateTag';
 
