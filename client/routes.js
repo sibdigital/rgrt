@@ -96,11 +96,21 @@ FlowRouter.route('/home', {
 
 FlowRouter.route('/errands/:type?', {
 	name: 'errands',
+	action: () => {
+		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+/*FlowRouter.route('/errands/:type?', {
+	name: 'errands',
 
 	action(params) {
 		BlazeLayout.render('main', { center: 'ErrandsPage', type: params.type });
 	},
-});
+});*/
 
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',

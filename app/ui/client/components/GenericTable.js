@@ -81,7 +81,7 @@ export const GenericTable = forwardRef(function GenericTable({
 							</Table.Head> }
 							<Table.Body>
 								{results
-									? results.map((props, index) => <RenderRow key={props._id || index} { ...props }/>)
+									? results.map((props, index) => <RenderRow key={props._id || index} index={index} { ...props }/>)
 									:	<Loading/>}
 							</Table.Body>
 						</Table>

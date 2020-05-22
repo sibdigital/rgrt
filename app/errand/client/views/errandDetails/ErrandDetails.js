@@ -32,7 +32,6 @@ Template.ErrandDetails.helpers({
 	},*/
 	createIsDisabled() {
 		const { errand } = Template.instance();
-
 		let dataIsTheSame = true;
 		const chargedUsers = Template.instance().chargedUsers.get();
 		const expired_at = moment(Template.instance().expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
@@ -49,7 +48,7 @@ Template.ErrandDetails.helpers({
 				const status = Template.instance().status.get();
 				dataIsTheSame = dataIsTheSame && status && status === errand.t;
 
-				dataIsTheSame = dataIsTheSame && expired_at.valueOf() === errand.expireAt.getTime();
+				dataIsTheSame = dataIsTheSame && expired_at.valueOf() === new Date(errand.expireAt).getTime();
 			}
 		} catch (e) {
 			console.log(e);
@@ -76,7 +75,6 @@ Template.ErrandDetails.helpers({
 		return instance.parentChannel.get();
 	},*/
 	chargedUsers() {
-		console.log('chargedUsers', Template.instance().chargedUsers.get());
 		return Template.instance().chargedUsers.get().map((e) => e);
 	},
 	onSelectUser() {
@@ -193,24 +191,7 @@ Template.ErrandDetails.events({
 			return toastr.error(errorText);
 		}
 
-		/* newErrand.initiatedBy = {
-			_id: initiatedUsers._id,
-			username: initiatedUsers.username,
-		};
-
-		newErrand.chargedToUser = {
-			_id: chargedUsers._id,
-			username: chargedUsers.username,
-		};
-
-		newErrand.expireAt = expired_at;
-		newErrand.desc = errandDescription;
-		newErrand.t = status;*/
-		console.log('submit', instance.errand)
 		const result = await call('editErrand', { _id: instance.errand._id, chargedUsers, errandDescription, expired_at, status });
-		// callback to enable tracking
-		// callbacks.run('afterErrand', Meteor.user(), result);
-		console.log('result', result);
 		if (instance.data.updateRecord) {
 			instance.data.updateRecord(result);
 		}
@@ -231,8 +212,7 @@ Template.ErrandDetails.onRendered(function() {
 		changeYear: true,
 	});
 
-
-	this.$('#expired_date').datepicker('setDate', Template.instance().expiredDate.get());
+	this.$('#expired_date').datepicker('setDate', new Date(Template.instance().expiredDate.get()));
 
 	this.$('#started_date').datepicker({
 		autoclose: true,
@@ -249,7 +229,6 @@ Template.ErrandDetails.onRendered(function() {
 
 Template.ErrandDetails.onCreated(function() {
 	this.errand = this.data.errand;
-	console.log('onCreated', this.errand);
 
 	this.errandDescription = new ReactiveVar(this.errand.desc);
 
