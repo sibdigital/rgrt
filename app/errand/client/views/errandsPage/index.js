@@ -1,6 +1,18 @@
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
-import {Avatar, Box, Button, ButtonGroup, Icon, Table, TextInput} from '@rocket.chat/fuselage';
-import {useMediaQuery, useSafely} from '@rocket.chat/fuselage-hooks';
+import {
+	Avatar,
+	Box,
+	Button,
+	ButtonGroup,
+	CheckBox,
+	Field,
+	Grid,
+	Icon,
+	Margins,
+	Table,
+	TextInput,
+} from '@rocket.chat/fuselage';
+import { useMediaQuery, useSafely } from '@rocket.chat/fuselage-hooks';
 import _ from 'underscore';
 
 import Page from '../../../../../client/components/basic/Page';
@@ -17,8 +29,12 @@ import MarkdownText from '../../../../../client/components/basic/MarkdownText';
 import { modal } from '/app/ui-utils';
 import { t } from '/app/utils';
 import { useEndpoint } from '/client/contexts/ServerContext';
-import { useToastMessageDispatch } from "/client/contexts/ToastMessagesContext";
-import {Modal} from "/client/components/basic/Modal";
+import { useToastMessageDispatch } from '/client/contexts/ToastMessagesContext';
+import { Modal } from '/client/components/basic/Modal';
+import { Counter } from '/ee/app/engagement-dashboard/client/components/data/Counter';
+import UserAvatar from '/client/components/basic/avatar/UserAvatar';
+import VerticalBar from '/client/components/basic/VerticalBar';
+import { EditRoomContextBar } from '/client/admin/rooms/EditRoom';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -40,8 +56,35 @@ const FilterByText = ({ setFilter, ...props }) => {
 	</Box>;
 };
 
+const ErrandsModal = ({ onDelete, onCancel, errand, ...props }) => {
+	const _t = useTranslation();
+	const newErrand = { ...errand, ts: new Date() };
+	const [text, setText] = useState('');
+	const handleChange = useCallback((event) => setText(event.currentTarget.value), []);
+	return <Modal {...props}>
+		<Modal.Header>
+			<Modal.Title>{_t('Errand_details')}</Modal.Title>
+			<Modal.Close onClick={onCancel(newErrand)}/>
+		</Modal.Header>
+		<Modal.Content fontScale='p1'>
+			<Box mb='x16' is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} display='flex' flexDirection='column'>
+				<TextInput flexShrink={0} placeholder={t('Search_Rooms')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
+				<TextInput flexShrink={0} placeholder={t('Search_Rooms')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
+				<TextInput flexShrink={0} placeholder={t('Search_Rooms')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
+				<TextInput flexShrink={0} placeholder={t('Search_Rooms')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
 
-function renderErrandTable(type) {
+			</Box>
+		</Modal.Content>
+		<Modal.Footer>
+			<ButtonGroup align='end'>
+				<Button ghost onClick={onCancel(newErrand)}>{_t('Cancel')}</Button>
+				<Button primary danger onClick={onDelete}>{_t('Delete')}</Button>
+			</ButtonGroup>
+		</Modal.Footer>
+	</Modal>;
+};
+
+function renderErrandTable(type, changeContext) {
 	const _t = useTranslation();
 	const [sort, setSort] = useState(['ts', 'asc']);
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 100 });
@@ -81,35 +124,35 @@ function renderErrandTable(type) {
 	const canViewPublicRooms = usePermission('view-c-room');
 
 	const [isLoading, setLoading] = useSafely(useState(true));
+	const [modal, setModal] = useSafely(useState(false));
+	const [selectedErrand, setSelectedErrand] = useSafely(useState(null));
 	const errands = (canViewPublicRooms && useEndpointData('errands', query)) || { result: [], total: 0 };
 	const [updater, setUpdater] = useSafely(useState({ result: [], total: 0 }));
 	const dispatchToastMessage = useToastMessageDispatch();
 
 
-
-	const updateRecord = useCallback((oldErrand, data) => (newRecord) => {
+	/* const updateRecord = useCallback((oldErrand) => (newRecord) => {
 		console.log('updateRecord errands', errands);
-		console.log('updateRecord data', data);
+
 		console.log(oldErrand);
 		if (oldErrand._id !== newRecord._id) {
 			console.log('Изменяется не тот объект!', 'Новый', newRecord._id, 'старый:', oldErrand._id);
 		} else {
 			oldErrand.t = newRecord.t;
 
-			//this.errands.set(errands);
+			// this.errands.set(errands);
 		}
 	}, [errands, errands.result, errands.total]);
 
-	const onClick = useCallback((errand, data) => (e) => {
+	const onClick = useCallback((errand) => (e) => {
 		console.log('onClick errands', errands);
-		console.log('onClick data', data);
 		modal.open({
 			title: t('Errand_details'),
 			modifier: 'modal',
 			content: 'ErrandDetails',
 			data: {
 				errand,
-				updateRecord: updateRecord(errand,data),
+				updateRecord: updateRecord(errand),
 				onCreate() {
 					modal.close();
 				},
@@ -118,11 +161,22 @@ function renderErrandTable(type) {
 			showCancelButton: false,
 			confirmOnEnter: false,
 		});
-	}, [errands, updateRecord, errands.result, errands.total]);
+	}, [errands, errands.result, errands.total]);*/
+
+
+	const onClick = useCallback((errand) => (e) => {
+		changeContext(errand);
+	}, []);
+
+	const onCancel = useCallback((newErrand) => (e) => {
+		console.log('onCancel errands', errands);
+		console.log('onCancel newErrand', newErrand);
+		setModal(false);
+	}, [errands]);
 
 
 	const formatDate = useFormatDate();
-	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item, errands)} role='link' action>
+	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
 		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' color='hint' style={style}>
 			{item.initiatedBy.username}
 		</Table.Cell> }
@@ -144,7 +198,7 @@ function renderErrandTable(type) {
 	</Table.Row>
 	, [mediaQuery]);
 
-	return <GenericTable header={header} renderRow={renderRow} results={errands.result} total={errands.total} setParams={setParams} />;
+	return <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={errands.result} total={errands.total} setParams={setParams} />;
 }
 
 
@@ -163,11 +217,27 @@ export function ErrandPage() {
 			break;
 	}
 
-	return <Page>
-		<Page.Header title={t(title)} />
-		<Page.Content>
-			{renderErrandTable(type)}
-		</Page.Content>
+	const [context, setContext] = useSafely(useState(null));
+	const handleVerticalBarCloseButtonClick = useCallback(() => { setContext(null); }, [context]);
+	const changeContext = useCallback((errand) => { setContext(errand); }, []);
+
+	return <Page flexDirection='row'>
+
+		<Page>
+			<Page.Header title={t(title)} />
+			<Page.Content>
+				{renderErrandTable(type, changeContext)}
+			</Page.Content>
+		</Page>
+		{context && <VerticalBar>
+			<VerticalBar.Header>
+				{t('Errand_details')}
+				<VerticalBar.Close onClick={handleVerticalBarCloseButtonClick} />
+			</VerticalBar.Header>
+			<VerticalBar.Content>
+
+			</VerticalBar.Content>
+		</VerticalBar>}
 	</Page>;
 }
 
