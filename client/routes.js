@@ -104,13 +104,6 @@ FlowRouter.route('/errands/:type?', {
 	}],
 });
 
-/*FlowRouter.route('/errands/:type?', {
-	name: 'errands',
-
-	action(params) {
-		BlazeLayout.render('main', { center: 'ErrandsPage', type: params.type });
-	},
-});*/
 
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',

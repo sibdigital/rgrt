@@ -770,6 +770,30 @@ API.v1.addRoute('users.autocomplete', { authRequired: true }, {
 	},
 });
 
+API.v1.addRoute('users.autocomplete.by_room', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+
+		const userId = Meteor.userId();
+
+		const formedQuery = {};
+
+		if (query.rid) {
+			formedQuery.rid = `${ query.rid }`;
+		} else {
+			return API.v1.failure('Room id param is required');
+		}
+
+		const result = Meteor.runAsUser(this.userId, () => Meteor.call('getUsersOfRoom', query.rid, true, {}, ''));
+		if (!result) {
+			return API.v1.failure('Please verify the parameters');
+		}
+		return API.v1.success({
+			items: result.records,
+		});
+	},
+});
+
 API.v1.addRoute('users.removeOtherTokens', { authRequired: true }, {
 	post() {
 		API.v1.success(Meteor.call('removeOtherTokens'));
