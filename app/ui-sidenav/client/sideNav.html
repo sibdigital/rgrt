@@ -8,12 +8,15 @@
 				</div>
 			</div>
 
-			{{> errandsNav}}
+
 
 
 
 
 			<div class="rooms-list" aria-label="{{_ "Channels"}}" role="region">
+
+				{{> errandsNav}}
+
 				{{#each roomType}}
 					{{> Template.dynamic template=template data=data }}
 				{{/each}}
@@ -45,15 +48,14 @@
 	</h3>
 
 	<ul class="rooms-list__list">
-		<li class="sidebar-item js-sidebar-type-p">
-			<a class="sidebar-item__link" href="/errands/initiated_by_me" aria-label="{{_ "From_me"}}">
-
+		<li class="sidebar-item js-sidebar-type-p {{#if active}} sidebar-item--active{{/if}}">
+		<a class="sidebar-item__link" href="/errands/initiated_by_me" aria-label="{{_ "From_me"}}">
 
 				<div class="sidebar-item__picture">
 
 					<div class="sidebar-item__user-thumb">
 						<div class="avatar">
-							<img src="/avatar/%40general" class="avatar-image ">
+							<img src="/avatar/%40My" class="avatar-image ">
 						</div>
 					</div>
 
@@ -68,7 +70,7 @@
 
 								<div class="sidebar-item__room-type">
 									<svg class="rc-icon rc-icon--default-size sidebar-item__icon sidebar-item__icon--discussion" aria-hidden="true">
-										<use xlink:href="#icon-discussion"></use>
+										<use xlink:href="#icon-errand"></use>
 									</svg>
 								</div>
 
@@ -90,7 +92,7 @@
 				</div>
 			</a>
 		</li>
-		<li class="sidebar-item js-sidebar-type-p">
+		<li class="sidebar-item js-sidebar-type-p {{#if active}} sidebar-item--active{{/if}}">
 			<a class="sidebar-item__link" href="/errands/charged_to_me" aria-label={{_ "For_me"}}>
 
 
@@ -98,7 +100,7 @@
 
 					<div class="sidebar-item__user-thumb">
 						<div class="avatar">
-							<img src="/avatar/%40general" class="avatar-image ">
+							<img src="/avatar/%40Fr" class="avatar-image ">
 						</div>
 					</div>
 
@@ -113,7 +115,7 @@
 
 								<div class="sidebar-item__room-type">
 									<svg class="rc-icon rc-icon--default-size sidebar-item__icon sidebar-item__icon--discussion" aria-hidden="true">
-										<use xlink:href="#icon-discussion"></use>
+										<use xlink:href="#icon-errand"></use>
 									</svg>
 								</div>
 

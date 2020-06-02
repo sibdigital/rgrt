@@ -1,11 +1,23 @@
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
-import {Avatar, Box, Button, ButtonGroup, Icon, Table, TextInput} from '@rocket.chat/fuselage';
-import {useMediaQuery, useSafely} from '@rocket.chat/fuselage-hooks';
+import {
+	Avatar,
+	Box,
+	Button,
+	ButtonGroup,
+	CheckBox,
+	Field,
+	Grid,
+	Icon,
+	Margins, Skeleton,
+	Table,
+	TextInput,
+} from '@rocket.chat/fuselage';
+import { useDebouncedValue, useMediaQuery, useSafely } from '@rocket.chat/fuselage-hooks';
 import _ from 'underscore';
 
 import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useRoute, useRouteParameter } from '../../../../../client/contexts/RouterContext';
+import { useRoute, useRouteParameter, useQueryStringParameter } from '../../../../../client/contexts/RouterContext';
 import { useSetting } from '../../../../../client/contexts/SettingsContext';
 import { useQuery } from '../../../../ui/client/views/app/components/hooks';
 import { GenericTable, Th } from '../../../../ui/client/components/GenericTable';
@@ -17,8 +29,14 @@ import MarkdownText from '../../../../../client/components/basic/MarkdownText';
 import { modal } from '/app/ui-utils';
 import { t } from '/app/utils';
 import { useEndpoint } from '/client/contexts/ServerContext';
-import { useToastMessageDispatch } from "/client/contexts/ToastMessagesContext";
-import {Modal} from "/client/components/basic/Modal";
+import { useToastMessageDispatch } from '/client/contexts/ToastMessagesContext';
+import { Modal } from '/client/components/basic/Modal';
+import { Counter } from '/ee/app/engagement-dashboard/client/components/data/Counter';
+import UserAvatar from '/client/components/basic/avatar/UserAvatar';
+import VerticalBar from '/client/components/basic/VerticalBar';
+import { EditRoomContextBar } from '/client/admin/rooms/EditRoom';
+import { EditErrandContextBar } from '/app/errand/client/views/errandsPage/EditErrand';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '/client/hooks/useEndpointDataExperimental';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -40,10 +58,23 @@ const FilterByText = ({ setFilter, ...props }) => {
 	</Box>;
 };
 
+function renderEditModal({ onCancel, erid, onChange, ...props }) {
+	const t = useTranslation();
+	return <Modal {...props}>
+		<Modal.Header>
+			<Modal.Title>{t('Errand_details')}</Modal.Title>
+			<Modal.Close onClick={onCancel}/>
+		</Modal.Header>
+		<Modal.Content fontScale='p1'>
+			<EditErrandContextBar erid={erid} onChange={onChange}/>
+		</Modal.Content>
+	</Modal>;
+}
 
 function renderErrandTable(type) {
 	const _t = useTranslation();
 	const [sort, setSort] = useState(['ts', 'asc']);
+	const [modalData, setModalData] = useState(null);
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 100 });
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
@@ -76,53 +107,34 @@ function renderErrandTable(type) {
 		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t'>{_t('Status')}</Th>,
 	].filter(Boolean), [sort, mediaQuery]);
 
-	const errandRoute = useRoute('errand');
+	/* const routeName = 'errands';
+	const router = useRoute(routeName);
+	const onClick = useCallback((errand) => () => router.push({
+		type: 'charged_to_me',
+		props: {
+			id: errand._id,
+		},
+	}), []);*/
 
 	const canViewPublicRooms = usePermission('view-c-room');
 
-	const [isLoading, setLoading] = useSafely(useState(true));
-	const errands = (canViewPublicRooms && useEndpointData('errands', query)) || { result: [], total: 0 };
-	const [updater, setUpdater] = useSafely(useState({ result: [], total: 0 }));
-	const dispatchToastMessage = useToastMessageDispatch();
+	const data = (canViewPublicRooms && useEndpointData('errands', query)) || { result: [], total: 0 };
+	const [errands, setErrands] = useSafely(useState(data));
+	useEffect(() => {
+		setErrands(data);
+	}, [data]);
 
-
-
-	const updateRecord = useCallback((oldErrand, data) => (newRecord) => {
-		console.log('updateRecord errands', errands);
-		console.log('updateRecord data', data);
-		console.log(oldErrand);
-		if (oldErrand._id !== newRecord._id) {
-			console.log('Изменяется не тот объект!', 'Новый', newRecord._id, 'старый:', oldErrand._id);
-		} else {
-			oldErrand.t = newRecord.t;
-
-			//this.errands.set(errands);
-		}
-	}, [errands, errands.result, errands.total]);
-
-	const onClick = useCallback((errand, data) => (e) => {
-		console.log('onClick errands', errands);
-		console.log('onClick data', data);
-		modal.open({
-			title: t('Errand_details'),
-			modifier: 'modal',
-			content: 'ErrandDetails',
-			data: {
-				errand,
-				updateRecord: updateRecord(errand,data),
-				onCreate() {
-					modal.close();
-				},
-			},
-			showConfirmButton: false,
-			showCancelButton: false,
-			confirmOnEnter: false,
-		});
-	}, [errands, updateRecord, errands.result, errands.total]);
-
+	// const onClick = useCallback((errand) => () => changeContext(errand), [changeContext]);
+	const onClick = useCallback((errand) => () => setModalData(errand), []);
+	const cancelModal = useCallback(() => setModalData(null), []);
+	const updateErrandsData = useCallback((oldErrand) => (newErrand) => {
+		errands.result[oldErrand.index] = { ...oldErrand, ...newErrand };
+		setErrands(errands);
+		setModalData(null);
+	}, [errands]);
 
 	const formatDate = useFormatDate();
-	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item, errands)} role='link' action>
+	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
 		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' color='hint' style={style}>
 			{item.initiatedBy.username}
 		</Table.Cell> }
@@ -144,7 +156,8 @@ function renderErrandTable(type) {
 	</Table.Row>
 	, [mediaQuery]);
 
-	return <GenericTable header={header} renderRow={renderRow} results={errands.result} total={errands.total} setParams={setParams} />;
+
+	return [modalData && renderEditModal({ onCancel: cancelModal, erid: modalData._id, onChange: updateErrandsData(modalData), key: 'modal-errand' }), <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={errands.result} total={errands.total} setParams={setParams} />];
 }
 
 
@@ -163,11 +176,37 @@ export function ErrandPage() {
 			break;
 	}
 
-	return <Page>
-		<Page.Header title={t(title)} />
-		<Page.Content>
-			{renderErrandTable(type)}
-		</Page.Content>
+	/* const [context, setContext] = useState(null);
+*/
+	/* const context = useRouteParameter('context');
+	const id = useRouteParameter('id');
+	const errandsRoute = useRoute('errands');
+
+	const handleVerticalBarCloseButtonClick = () => {
+		errandsRoute.push({ type });
+	};*/
+
+	/* const handleVerticalBarCloseButtonClick = () => {
+		setContext(null);
+	};*/
+
+	return <Page flexDirection='row'>
+
+		<Page>
+			<Page.Header title={t(title)} />
+			<Page.Content>
+				{renderErrandTable(type)}
+			</Page.Content>
+		</Page>
+		{/* {context && <VerticalBar>
+			<VerticalBar.Header>
+				{t('Errand_details')}
+				<VerticalBar.Close onClick={handleVerticalBarCloseButtonClick} />
+			</VerticalBar.Header>
+			<VerticalBar.Content>
+				<EditErrandContextBar erid={context._id}/>
+			</VerticalBar.Content>
+		</VerticalBar>}*/}
 	</Page>;
 }
 

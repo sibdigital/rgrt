@@ -42,24 +42,6 @@ const sortUsers = function(field, direction) {
 
 Meteor.methods({
 	browseErrands({ query, sortBy = 'ts', sortDirection = 'asc', page, offset, limit = 10 }) {
-		/* const regex = new RegExp(s.trim(s.escapeRegExp(text)), 'i');
-
-		if (!['channels', 'users'].includes(type)) {
-			return;
-		}
-
-		if (!['asc', 'desc'].includes(sortDirection)) {
-			return;
-		}
-
-		if ((!page && page !== 0) && (!offset && offset !== 0)) {
-			return;
-		}
-
-		if (!['name', 'createdAt', 'usersCount', ...type === 'channels' ? ['usernames', 'lastMessage'] : [], ...type === 'users' ? ['username', 'email', 'bio'] : []].includes(sortBy)) {
-			return;
-		}*/
-
 		const skip = Math.max(0, offset || (page > -1 ? limit * page : 0));
 
 		limit = limit > 0 ? limit : 10;
@@ -73,31 +55,6 @@ Meteor.methods({
 
 		const user = Meteor.user();
 
-		/*	if (type === 'channels') {
-			const sort = sortChannels(sortBy, sortDirection);
-			if ((!user && !canViewAnonymous) || (user && !hasPermission(user._id, 'view-c-room'))) {
-				return;
-			}
-
-			const result = Rooms.findByNameOrFNameAndType(regex, 'c', {
-				...pagination,
-				sort: {
-					featured: -1,
-					...sort,
-				},
-			});
-
-			return {
-				total: result.count(), // count ignores the `skip` and `limit` options
-				results: result.fetch(),
-			};
-		}
-
-		// non-logged id user
-		if (!user) {
-			return;
-		}*/
-
 		// type === users
 		if (!hasPermission(user._id, 'view-outside-room') || !hasPermission(user._id, 'view-d-room')) {
 			return;
@@ -107,6 +64,7 @@ Meteor.methods({
 			...pagination,
 			sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
 		};
+
 
 		const result = Errands.find(query, options);
 
