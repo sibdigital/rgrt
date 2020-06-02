@@ -2,9 +2,10 @@
 	<aside class="sidebar sidebar--{{sidebarViewMode}} {{#if sidebarHideAvatar}}sidebar--hide-avatar{{/if}}" role="navigation">
 		{{> sidebarHeader }}
 		{{#if loggedInUser}}
-
-			<div class="unread-rooms background-primary-action-color color-primary-action-contrast top-unread-rooms hidden">
-				{{_ "More_unreads"}} <i class="icon-up-big"></i>
+			<div class="wrapper-unread">
+				<div class="unread-rooms background-primary-action-color color-primary-action-contrast top-unread-rooms hidden">
+					<i class="icon-up-big"></i> {{_ "More_unreads"}}
+				</div>
 			</div>
 
 			{{> errandsNav}}
@@ -17,8 +18,10 @@
 					{{> Template.dynamic template=template data=data }}
 				{{/each}}
 			</div>
-			<div class="unread-rooms background-primary-action-color color-primary-action-contrast bottom-unread-rooms hidden">
-				{{_ "More_unreads"}} <i class="icon-down-big"></i>
+			<div class="wrapper-unread">
+				<div class="unread-rooms background-primary-action-color color-primary-action-contrast bottom-unread-rooms hidden">
+					<i class="icon-down-big"></i> {{_ "More_unreads"}}
+				</div>
 			</div>
 			<div class="flex-nav animated-hidden">
 				{{> Template.dynamic template=flexTemplate data=flexData }}
