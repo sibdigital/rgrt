@@ -48,7 +48,6 @@ Template.sideNav.helpers({
 	},
 
 
-
 });
 
 Template.sideNav.events({
@@ -62,7 +61,7 @@ Template.sideNav.events({
 
 
 	'click .js-open-errands'() {
-		FlowRouter.go(`/errands`);
+		FlowRouter.go('/errands');
 	},
 
 	'scroll .rooms-list'() {
@@ -136,11 +135,16 @@ Template.sideNav.onCreated(function() {
 });
 
 Template.errandsNav.helpers({
-
+	active() {
+		return Template.instance().active.get();
+	},
 });
 
 Template.errandsNav.events({
-
+	'click [data-id], click .sidebar-item__link'() {
+		Template.instance().active.set(true);
+		return menu.close();
+	},
 });
 
 Template.errandsNav.onRendered(function() {
@@ -148,6 +152,5 @@ Template.errandsNav.onRendered(function() {
 });
 
 Template.errandsNav.onCreated(function() {
-
+	this.active = new ReactiveVar(false);
 });
-
