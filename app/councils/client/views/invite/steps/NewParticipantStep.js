@@ -17,70 +17,9 @@ import { Pager } from '../Pager';
 import { useSetupWizardContext } from '../SetupWizardState';
 import { Step } from '../Step';
 import { StepHeader } from '../StepHeader';
+import {Item, Items, Option} from "/client/components/setupWizard/steps/RegisterServerStep";
 
-export const Option = React.forwardRef(({ children, label, selected, disabled, ...props }, ref) => {
-	const innerRef = useRef();
-	const mergedRef = useMergedRefs(ref, innerRef);
-	const id = useUniqueId();
-
-	return <Box
-		className={[
-			'SetupWizard__RegisterServerStep-option',
-			selected && 'SetupWizard__RegisterServerStep-option--selected',
-		].filter(Boolean).join(' ')}
-		display='block'
-		marginBlock='x8'
-		padding='x24'
-		color={selected ? 'primary' : 'disabled'}
-		style={{
-			borderColor: 'currentColor',
-			borderRadius: 2,
-			borderWidth: 2,
-			cursor: 'pointer',
-			...disabled && { opacity: 0.25 },
-		}}
-		onClick={() => {
-			innerRef.current.click();
-		}}
-	>
-		<Field>
-			<Field.Row>
-				<RadioButton ref={mergedRef} id={id} checked={selected} disabled={disabled} {...props} />
-				<Field.Label htmlFor={id}>{label}</Field.Label>
-			</Field.Row>
-		</Field>
-		{children}
-	</Box>;
-});
-
-export const Items = (props) => <Box is='ul' marginBlock='x16' {...props} />;
-
-export const Item = ({ children, icon, ...props }) =>
-	<Box
-		is='li'
-		marginBlockEnd='x8'
-		display='flex'
-		alignItems='center'
-		color='default'
-		{...props}
-	>
-		{icon === 'check' && <Icon
-			name='check'
-			size='x20'
-			marginInlineEnd='x8'
-			color='primary'
-		/>}
-		{icon === 'circle' && <Icon
-			name='circle'
-			size='x8'
-			marginInlineStart='x8'
-			marginInlineEnd='x12'
-			color='default'
-		/>}
-		{children}
-	</Box>;
-
-function RegisterServerStep({ step, title, active }) {
+function NewParticipantStep({ step, title, active }) {
 	const { canDeclineServerRegistration, goToPreviousStep, goToFinalStep } = useSetupWizardContext();
 
 	const [registerServer, setRegisterServer] = useState(true);
@@ -240,4 +179,4 @@ function RegisterServerStep({ step, title, active }) {
 	</Step>;
 }
 
-export default RegisterServerStep;
+export default NewParticipantStep;

@@ -1,29 +1,18 @@
-import React, { useCallback, useState, useMemo } from 'react';
-import {
-	Box,
-	Button,
-	TextInput,
-	TextAreaInput,
-	Skeleton,
-	Field,
-	SelectFiltered,
-} from '@rocket.chat/fuselage';
+import React, {useCallback, useMemo, useState} from 'react';
+import {Box, Button, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput,} from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import _ from 'underscore';
-import { Meteor } from 'meteor/meteor';
 
-import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
-import { useMethod } from '../../../../../client/contexts/ServerContext';
-import { usePermission } from '../../../../../client/contexts/AuthorizationContext';
-import NotAuthorizedPage from '../../../../../client/admin/NotAuthorizedPage';
-import { useEndpointAction } from '../../../../../client/hooks/useEndpointAction';
+import {useTranslation} from '../../../../../client/contexts/TranslationContext';
+import {ENDPOINT_STATES, useEndpointDataExperimental} from '../../../../../client/hooks/useEndpointDataExperimental';
+import {useEndpointAction} from '../../../../../client/hooks/useEndpointAction';
 import VerticalBar from '../../../../../client/components/basic/VerticalBar';
-import { errandStatuses } from '../../../utils/statuses';
+import {errandStatuses} from '../../../utils/statuses';
 
 
-import { useEndpointData } from '/client/hooks/useEndpointData';
+import {useEndpointData} from '../../../../../client/hooks/useEndpointData';
+import { useUserId } from '../../../../../client/contexts/UserContext';
 
 
 require('react-datepicker/dist/react-datepicker.css');
@@ -128,10 +117,10 @@ function EditErrand({ errand, onChange }) {
 
 	const errandStatus = newData.t ?? errand.t;
 	const availableStatuses = errandStatuses.map((value) => [value, _t(value)]);
+	const userId = useUserId();
+	const isCurrentUsesInitiator = () => errand.initiatedBy._id === userId;
 
-	const isCurrentUsesInitiator = () => errand.initiatedBy._id === Meteor.userId();
-
-	const isCurrentUsesResponsible = () => errand.chargedToUser._id === Meteor.userId();
+	const isCurrentUsesResponsible = () => errand.chargedToUser._id === userId;
 
 	return <VerticalBar.ScrollableContent is='form' onSubmit={useCallback((e) => e.preventDefault(), [])}>
 		<Field>

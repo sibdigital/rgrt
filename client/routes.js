@@ -104,10 +104,10 @@ FlowRouter.route('/errands/:type?', {
 	}],
 });
 
-FlowRouter.route('/invite/council/:id', {
+FlowRouter.route('/invite/council/:id/:step?', {
 	name: 'council-invite',
 	action: () => {
-		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/index'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/councils/client/views/invite/InvitePageState'));
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
@@ -127,7 +127,7 @@ FlowRouter.route('/councils', {
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
 	action: () => {
-		renderRouteComponent(() => import('../app/ui/client/views/app/components/Directory'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/ui/client/views/app/components/Directory'));
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
