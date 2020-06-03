@@ -104,6 +104,16 @@ FlowRouter.route('/errands/:type?', {
 	}],
 });
 
+FlowRouter.route('/invite/council/:id', {
+	name: 'council-invite',
+	action: () => {
+		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
