@@ -114,6 +114,15 @@ FlowRouter.route('/invite/council/:id', {
 	}],
 });
 
+FlowRouter.route('/councils', {
+	name: 'councils',
+	action: () => {
+		renderRouteComponent(() => import('../app/councils/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
 
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
