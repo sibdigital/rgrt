@@ -60,6 +60,15 @@ const toolbarButtons = (/* user */) => [{
 	},
 },
 {
+	name: t('Councils'),
+	icon: 'team',
+	condition: () => hasPermission('manage-councils'),
+	action: () => {
+		menu.close();
+		FlowRouter.go('councils');
+	},
+},
+{
 	name: t('Sort'),
 	icon: 'sort',
 	hasPopup: true,

@@ -2,7 +2,7 @@ import { Base } from './_Base';
 
 class Councils extends Base {
 	constructor() {
-		super('meetings');
+		super('councils');
 	}
 
 	// INSERT
@@ -13,6 +13,12 @@ class Councils extends Base {
 	// REMOVE
 	removeById(_id) {
 		return this.remove({ _id });
+	}
+
+	// UPDATE
+	updateCouncil(_id, data) {
+		data._updatedAt = new Date();
+		return this.update( { _id },{ $set: { ...data } });
 	}
 }
 

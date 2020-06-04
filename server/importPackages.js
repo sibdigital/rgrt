@@ -115,3 +115,4 @@ import '../app/tags/server';
 import '../app/errand/server';
 import '../app/livechat/server';
 import '../app/custom/server';
+import '../app/councils/server';

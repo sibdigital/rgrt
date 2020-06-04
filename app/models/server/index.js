@@ -41,7 +41,7 @@ import ReadReceipts from './models/ReadReceipts';
 import LivechatExternalMessage from './models/LivechatExternalMessages';
 import Analytics from './models/Analytics';
 import Tags from './models/Tags';
-import Councils from '/app/models/server/models/Councils';
+import Councils from './models/Councils';
 
 export { AppsLogsModel } from './models/apps-logs-model';
 export { AppsPersistenceModel } from './models/apps-persistence-model';

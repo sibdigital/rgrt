@@ -111,7 +111,7 @@ FlowRouter.route('/invite/council/:id/:step?', {
 	},
 });
 
-FlowRouter.route('/councils', {
+FlowRouter.route('/councils/:context?/:id?', {
 	name: 'councils',
 	action: () => {
 		renderRouteComponent(() => import('../app/councils/client/views/index'), { template: 'main', region: 'center' });

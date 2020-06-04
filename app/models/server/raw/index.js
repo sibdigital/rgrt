@@ -52,6 +52,8 @@ import TagsModel from '../models/Tags';
 import { TagsRaw } from './Tags';
 import { ErrandsRaw } from './ErrandsRaw';
 import Errands from '../models/Errands';
+import CouncilsModel from '../models/Councils';
+import { CouncilsRaw } from './Councils';
 
 export const Permissions = new PermissionsRaw(PermissionsModel.model.rawCollection());
 export const Roles = new RolesRaw(RolesModel.model.rawCollection());
@@ -80,3 +82,4 @@ export const LivechatAgentActivity = new LivechatAgentActivityRaw(LivechatAgentA
 export const Statistics = new StatisticsRaw(StatisticsModel.model.rawCollection());
 export const NotificationQueue = new NotificationQueueRaw(NotificationQueueModel.model.rawCollection());
 export const Tags = new TagsRaw(TagsModel.model.rawCollection());
+export const Councils = new CouncilsRaw(CouncilsModel.model.rawCollection());
