@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 
 import { useRouteParameter, useRoute } from '../../../../../client/contexts/RouterContext';
 import InviteStepperPage from './InviteStepperPage';
+import { useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
 
 export const finalStep = 'final';
 
@@ -39,23 +40,32 @@ const InvitePageContext = createContext({
 function InvitePageState() {
 	const [currentStep, setCurrentStep, councilId] = useStepRouting();
 
+	const query = useMemo(() => ({
+		query: JSON.stringify({ _id: councilId }),
+	}), [councilId]);
+
+	const { data, state, error } = useEndpointDataExperimental('councils.list', query);
 
 	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => (currentStep !== 1 ? currentStep - 1 : currentStep)), []);
 	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
 	const goToFinalStep = useCallback(() => setCurrentStep(finalStep), []);
-	const councilInfo = { name: 'hello' };
+
 
 	const value = useMemo(() => ({
 		currentStep,
 		goToPreviousStep,
 		goToNextStep,
 		goToFinalStep,
+		councilState: { data, state, error },
 	}), [
 		currentStep,
+		data,
+		state,
+		error,
 	]);
 
 	return <InvitePageContext.Provider value={value}>
-		<InviteStepperPage currentStep={currentStep} councilInfo={councilInfo}/>
+		<InviteStepperPage currentStep={currentStep}/>
 	</InvitePageContext.Provider>;
 }
 

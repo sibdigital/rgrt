@@ -21,8 +21,8 @@ import { StepHeader } from '../../../../../../client/components/setupWizard/Step
 import { useEndpointAction } from '/client/hooks/useEndpointAction';
 
 function NewParticipantStep({ step, title, active }) {
-	 const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
-
+	 const { goToPreviousStep, goToFinalStep, councilState } = useInvitePageContext();
+	console.log('[NewParticipantStep]', councilState.data);
 	const [newData, setNewData] = useState({
 		firstName: { value: '', required: true },
 		lastName: { value: '', required: true },
@@ -47,17 +47,17 @@ function NewParticipantStep({ step, title, active }) {
 	};
 
 	const packNewData = () => {
-		let dataToSend = {};
-		Object.keys(newData).forEach(key => {
-			dataToSend[key] = newData[key].value
-		})
-		if(!isContactPerson){
+		const dataToSend = {};
+		Object.keys(newData).forEach((key) => {
+			dataToSend[key] = newData[key].value;
+		});
+		if (!isContactPerson) {
 			delete dataToSend.contactPersonFirstName;
 			delete dataToSend.contactPersonLastName;
 			delete dataToSend.contactPersonPatronymicName;
 		}
 		return dataToSend;
-	}
+	};
 
 
 	const handleIAmContactPerson = () => {
@@ -127,10 +127,10 @@ function NewParticipantStep({ step, title, active }) {
 			}*/
 
 			setComitting(false);
-			const data = packNewData(newData)
-			console.log(data)
+			const data = packNewData(newData);
+			console.log(data);
 
-			//goToFinalStep();
+			// goToFinalStep();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 			setComitting(false);

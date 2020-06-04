@@ -11,7 +11,7 @@ import SideBar from './SideBar';
 import NewParticipantStep from './steps/NewParticipantStep';
 
 
-function InviteStepperPage({ currentStep = 1, councilInfo}) {
+function InviteStepperPage({ currentStep = 1 }) {
 	useWipeInitialPageLoading();
 
 	const t = useTranslation();
@@ -37,7 +37,6 @@ function InviteStepperPage({ currentStep = 1, councilInfo}) {
 						},
 					]}
 					currentStep={currentStep}
-					councilInfo={councilInfo}
 				/>
 				<Box
 					flexGrow={1}

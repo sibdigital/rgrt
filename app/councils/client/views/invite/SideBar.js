@@ -10,7 +10,7 @@ function SideBar({
 	logoSrc = 'images/logo/herb.png',
 	currentStep = 1,
 	steps = [],
-	councilInfo,
+	councilInfo = { name: 'unknown' },
 }) {
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
