@@ -107,11 +107,8 @@ FlowRouter.route('/errands/:type?', {
 FlowRouter.route('/invite/council/:id/:step?', {
 	name: 'council-invite',
 	action: () => {
-		renderRouteComponent(() => import('../app/councils/client/views/invite/InvitePageState'));
+		renderRouteComponent(() => import('../app/councils/client/views/invite/InviteStepperRoute'));
 	},
-	triggersExit: [function() {
-		$('.main-content').addClass('rc-old');
-	}],
 });
 
 FlowRouter.route('/councils', {

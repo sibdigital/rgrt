@@ -1,17 +1,15 @@
-import React, {useCallback, useMemo, useState} from 'react';
-import {Box, Button, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput,} from '@rocket.chat/fuselage';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Button, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import _ from 'underscore';
 
-import {useTranslation} from '../../../../../client/contexts/TranslationContext';
-import {ENDPOINT_STATES, useEndpointDataExperimental} from '../../../../../client/hooks/useEndpointDataExperimental';
-import {useEndpointAction} from '../../../../../client/hooks/useEndpointAction';
+import { useTranslation } from '../../../../../client/contexts/TranslationContext';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointAction } from '../../../../../client/hooks/useEndpointAction';
 import VerticalBar from '../../../../../client/components/basic/VerticalBar';
-import {errandStatuses} from '../../../utils/statuses';
-
-
-import {useEndpointData} from '../../../../../client/hooks/useEndpointData';
+import { errandStatuses } from '../../../utils/statuses';
+import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useUserId } from '../../../../../client/contexts/UserContext';
 
 
@@ -65,7 +63,6 @@ function EditErrand({ errand, onChange }) {
 	const areEqual = (a, b) => a === b || !(a || b);
 
 	const handleChange = (field, currentValue, getValue = (e) => e.currentTarget.value) => (e) => {
-		console.log(getValue(e));
 		setNewData({ ...newData, [field]: areEqual(getValue(e), currentValue) ? null : getValue(e) });
 	};
 
@@ -151,13 +148,13 @@ function EditErrand({ errand, onChange }) {
 			<Field.Label>{_t('Errand_Expired_date')}</Field.Label>
 			<Field.Row>
 
-					<DatePicker
-						disabled={!isCurrentUsesInitiator()}
-						dateFormat={'dd.MM.yyyy'}
-						selected={expireAt}
-						onChange={handleChangeDate}
-						customInput={<TextInput />}
-					/>
+				<DatePicker
+					disabled={!isCurrentUsesInitiator()}
+					dateFormat={'dd.MM.yyyy'}
+					selected={expireAt}
+					onChange={handleChangeDate}
+					customInput={<TextInput />}
+				/>
 
 			</Field.Row>
 		</Field>
