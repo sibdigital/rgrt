@@ -1,11 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import { Field, TextAreaInput, Button, InputBox, ButtonGroup } from '@rocket.chat/fuselage';
+import { Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
+import DatePicker from 'react-datepicker';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validate, createCouncilData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import moment from "moment";
+
+require('react-datepicker/dist/react-datepicker.css');
 
 export function AddCouncil({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -20,10 +24,10 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 		const councilData = createCouncilData(date, description);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
-			let _id = await insertOrUpdateCouncil(councilData);
+			const _id = await insertOrUpdateCouncil(councilData);
 			return _id;
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); })
+		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	};
 
 	const handleSave = useCallback(async () => {
@@ -44,7 +48,20 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Date')}</Field.Label>
 			<Field.Row>
-				<InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />
+				<DatePicker
+					dateFormat='dd.MM.yyyy HH:mm'
+					selected={date}
+					onChange={(newDate) => {
+						console.log(newDate)
+						return setDate(newDate);
+					}}
+					showTimeSelect
+					timeFormat='HH:mm'
+					timeIntervals={5}
+					timeCaption='time'
+					customInput={<TextInput />}
+				/>
+				{/* <InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />*/}
 			</Field.Row>
 		</Field>
 		<Field>

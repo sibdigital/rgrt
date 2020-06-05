@@ -19,9 +19,10 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/components/setupWizard/StepHeader';
 
 import { useEndpointAction } from '/client/hooks/useEndpointAction';
+import { useRouteParameter } from '/client/contexts/RouterContext';
 
 function NewParticipantStep({ step, title, active }) {
-	 const { goToPreviousStep, goToFinalStep, councilState } = useInvitePageContext();
+	const { goToPreviousStep, goToFinalStep, councilState } = useInvitePageContext();
 	console.log('[NewParticipantStep]', councilState.data);
 	const [newData, setNewData] = useState({
 		firstName: { value: '', required: true },
@@ -49,13 +50,14 @@ function NewParticipantStep({ step, title, active }) {
 	const packNewData = () => {
 		const dataToSend = {};
 		Object.keys(newData).forEach((key) => {
-			dataToSend[key] = newData[key].value;
+			dataToSend[key] = newData[key].value.trim();
 		});
 		if (!isContactPerson) {
 			delete dataToSend.contactPersonFirstName;
 			delete dataToSend.contactPersonLastName;
 			delete dataToSend.contactPersonPatronymicName;
 		}
+		dataToSend.ts = new Date();
 		return dataToSend;
 	};
 
@@ -87,55 +89,27 @@ function NewParticipantStep({ step, title, active }) {
 	const handleBackClick = () => {
 		goToPreviousStep();
 	};
-
-
+	const addPersonToCouncil = useMethod('addPersonToCouncil');
+	const councilId = useRouteParameter('id');
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 
 		setComitting(true);
 
 		try {
-			/* if (registerServer && !agreeTermsAndPrivacy) {
-				throw new Object({ error: 'Register_Server_Terms_Alert' });
-			}*/
-
-			/* await batchSetSettings([
-				{
-					_id: 'Statistics_reporting',
-					value: registerServer,
-				},
-				{
-					_id: 'Apps_Framework_enabled',
-					value: registerServer,
-				},
-				{
-					_id: 'Register_Server',
-					value: registerServer,
-				},
-				{
-					_id: 'Allow_Marketing_Emails',
-					value: optInMarketingEmails,
-				},
-				{
-					_id: 'Cloud_Service_Agree_PrivacyTerms',
-					value: agreeTermsAndPrivacy,
-				},
-			]);
-
-			if (registerServer) {
-				await registerCloudWorkspace();
-			}*/
-
 			setComitting(false);
-			const data = packNewData(newData);
-			console.log(data);
+			const person = packNewData(newData);
+			await addPersonToCouncil(councilId, person);
 
-			// goToFinalStep();
+			goToFinalStep();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 			setComitting(false);
 		}
 	};
+
+	!councilState.data && !councilState.data.desc && goToErrorStep();
+	!councilState.data && !councilState.data.d && goToErrorStep();
 
 
 	return <Step active={active} working={commiting} onSubmit={handleSubmit}>

@@ -1,5 +1,18 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { Box, Button, ButtonGroup, Field, Icon, Skeleton, Throbber, InputBox, TextAreaInput } from '@rocket.chat/fuselage';
+import {
+	Box,
+	Button,
+	ButtonGroup,
+	Field,
+	Icon,
+	Skeleton,
+	Throbber,
+	InputBox,
+	TextAreaInput,
+	TextInput,
+} from '@rocket.chat/fuselage';
+import moment from 'moment';
+import DatePicker from 'react-datepicker';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
@@ -8,7 +21,8 @@ import { Modal } from '../../../../client/components/basic/Modal';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validate, createCouncilData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import moment from 'moment';
+
+require('react-datepicker/dist/react-datepicker.css');
 
 const DeleteWarningModal = ({ onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -86,12 +100,12 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 	const { _id, d: previousDate, desc: previousDescription } = council || {};
 	const previousCouncil = council || {};
 
-	const [date, setDate] = useState(previousDate);
+	const [date, setDate] = useState(new Date(previousDate));
 	const [description, setDescription] = useState(previousDescription);
 	const [modal, setModal] = useState();
 
 	useEffect(() => {
-		setDate(moment(previousDate).format('YYYY-MM-DD') || '');
+		setDate(new Date(previousDate) || '');
 		setDescription(previousDescription || '');
 	}, [previousDate, previousDescription, previousCouncil, _id]);
 
@@ -102,12 +116,12 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 		[date, description]);
 
 	const saveAction = async (date, description) => {
-		const councilData = createCouncilData(date, description, { previousDate: previousDate, previousDescription, _id });
+		const councilData = createCouncilData(date, description, { previousDate, previousDescription, _id });
 		const validation = validate(councilData);
 		if (validation.length === 0) {
-			let _id = await insertOrUpdateCouncil(councilData);
+			const _id = await insertOrUpdateCouncil(councilData);
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); })
+		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	};
 
 	const handleSave = useCallback(async () => {
@@ -132,7 +146,20 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 			<Field>
 				<Field.Label>{t('Date')}</Field.Label>
 				<Field.Row>
-					<InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />
+					<DatePicker
+						dateFormat='dd.MM.yyyy HH:mm'
+						selected={date}
+						onChange={(newDate) => {
+							console.log(newDate)
+							return setDate(newDate);
+						}}
+						showTimeSelect
+						timeFormat='HH:mm'
+						timeIntervals={5}
+						timeCaption='time'
+						customInput={<TextInput />}
+					/>
+					{/* <InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />*/}
 				</Field.Row>
 			</Field>
 			<Field>

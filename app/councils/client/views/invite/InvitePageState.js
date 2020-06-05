@@ -1,10 +1,16 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import {Box, Skeleton, Scrollable, Margins, InputBox} from '@rocket.chat/fuselage';
 
 import { useRouteParameter, useRoute } from '../../../../../client/contexts/RouterContext';
 import InviteStepperPage from './InviteStepperPage';
-import { useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
+import {Step} from "/client/components/setupWizard/Step";
+import {StepHeader} from "/client/components/setupWizard/StepHeader";
+import {Pager} from "/client/components/setupWizard/Pager";
+
 
 export const finalStep = 'final';
+export const errorStep = 'error';
 
 const useStepRouting = () => {
 	const param = useRouteParameter('step');
@@ -25,7 +31,7 @@ const useStepRouting = () => {
 	});
 
 	useEffect(() => {
-		invitePageRoute.replace({ step: String(currentStep) });
+		invitePageRoute.replace({ step: String(currentStep), id: councilId });
 	}, [invitePageRoute, councilId, currentStep]);
 
 	return [currentStep, setCurrentStep, councilId];
@@ -35,6 +41,7 @@ const InvitePageContext = createContext({
 	goToPreviousStep: () => {},
 	goToNextStep: () => {},
 	goToFinalStep: () => {},
+	goToErrorStep: () => {},
 });
 
 function InvitePageState() {
@@ -44,25 +51,44 @@ function InvitePageState() {
 		query: JSON.stringify({ _id: councilId }),
 	}), [councilId]);
 
-	const { data, state, error } = useEndpointDataExperimental('councils.list', query);
+	const { data, state, error } = useEndpointDataExperimental('councils.getOne', query);
 
 	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => (currentStep !== 1 ? currentStep - 1 : currentStep)), []);
 	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
 	const goToFinalStep = useCallback(() => setCurrentStep(finalStep), []);
-
+	const goToErrorStep = useCallback(() => setCurrentStep(errorStep), []);
 
 	const value = useMemo(() => ({
 		currentStep,
 		goToPreviousStep,
 		goToNextStep,
 		goToFinalStep,
-		councilState: { data, state, error },
+		goToErrorStep,
+		councilState: { data, state },
 	}), [
 		currentStep,
 		data,
 		state,
 		error,
 	]);
+
+	if (ENDPOINT_STATES.LOADING === state) {
+		return <Box/>;
+	}
+
+	if (currentStep !== errorStep) {
+		try {
+			!data && !data.desc;
+			!data && !data.d;
+		} catch (e) {
+			goToErrorStep();
+		}
+	}
+
+	if (ENDPOINT_STATES.LOADING === state) {
+		return <Box/>;
+	}
+
 
 	return <InvitePageContext.Provider value={value}>
 		<InviteStepperPage currentStep={currentStep}/>
