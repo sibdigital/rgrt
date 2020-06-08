@@ -124,7 +124,7 @@ FlowRouter.route('/councils/:context?/:id?', {
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
 	action: () => {
-		renderRouteComponent(() => import('../app/ui/client/views/app/components/Directory'));
+		renderRouteComponent(() => import('../app/ui/client/views/app/components/Directory'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
