@@ -4,9 +4,6 @@ import {Box, Skeleton, Scrollable, Margins, InputBox} from '@rocket.chat/fuselag
 import { useRouteParameter, useRoute } from '../../../../../client/contexts/RouterContext';
 import InviteStepperPage from './InviteStepperPage';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
-import {Step} from "/client/components/setupWizard/Step";
-import {StepHeader} from "/client/components/setupWizard/StepHeader";
-import {Pager} from "/client/components/setupWizard/Pager";
 
 
 export const finalStep = 'final';

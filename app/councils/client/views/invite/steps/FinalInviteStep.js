@@ -1,11 +1,9 @@
-import { Box, Button, Tile } from '@rocket.chat/fuselage';
+import { Box, Tile } from '@rocket.chat/fuselage';
 import React from 'react';
+import moment from 'moment';
 
-import { useSetting, useSettingDispatch } from '../../../../../../client/contexts/SettingsContext';
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
-import { useRouteParameter } from '../../../../../../client/contexts/RouterContext';
-import {useInvitePageContext} from "/app/councils/client/views/invite/InvitePageState";
-import moment from "moment";
+import { useInvitePageContext } from '../InvitePageState';
 
 function FinalInviteStep() {
 	const { councilState } = useInvitePageContext();

@@ -149,10 +149,7 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 					<DatePicker
 						dateFormat='dd.MM.yyyy HH:mm'
 						selected={date}
-						onChange={(newDate) => {
-							console.log(newDate)
-							return setDate(newDate);
-						}}
+						onChange={(newDate) => setDate(newDate)}
 						showTimeSelect
 						timeFormat='HH:mm'
 						timeIntervals={5}

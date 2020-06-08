@@ -15,11 +15,6 @@ import CouncilInfoStep from './steps/CouncilInfoStep';
 
 function InviteStepperPage({ currentStep = 1 }) {
 	useWipeInitialPageLoading();
-
-	const { goToErrorStep, councilState } = useInvitePageContext();
-
-
-
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
 
@@ -61,10 +56,6 @@ function InviteStepperPage({ currentStep = 1 }) {
 							<Tile is='section' flexGrow={1} flexShrink={1}>
 								<CouncilInfoStep step={1} title={t('Council_info')} active={currentStep === 1}></CouncilInfoStep>
 								<NewParticipantStep step={2} title={t('Council_participant_info')} active={currentStep === 2}></NewParticipantStep>
-								{/* <AdminUserInformationStep step={1} title={t('Admin_Info')} active={currentStep === 1} />
-								<SettingsBasedStep step={2} title={t('Organization_Info')} active={currentStep === 2} />
-								<SettingsBasedStep step={3} title={t('Server_Info')} active={currentStep === 3} />
-								<RegisterServerStep step={4} title={t('Register_Server')} active={currentStep === 4} />*/}
 							</Tile>
 						</Margins>
 					</Scrollable>

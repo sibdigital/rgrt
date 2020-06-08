@@ -20,6 +20,6 @@ export async function findCouncils({ query = {}, pagination: { offset, count, so
 }
 
 export async function findOneCouncil(_id) {
-	const cursor = await Councils.findOne({ _id }, { fields: { desc: 1, _id: 1, name: 1, ts: 1, invitedUsers: 1 } });
+	const cursor = await Councils.findOne({ _id }, { fields: { desc: 1, name: 1, d: 1 } });
 	return cursor;
 }

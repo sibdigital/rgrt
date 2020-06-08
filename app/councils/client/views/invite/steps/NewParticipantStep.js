@@ -1,13 +1,5 @@
-import {
-	Box,
-	CheckBox,
-	Field,
-	Icon,
-	Margins,
-	RadioButton, TextInput,
-} from '@rocket.chat/fuselage';
-import { useAutoFocus, useMergedRefs, useUniqueId } from '@rocket.chat/fuselage-hooks';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { Box, CheckBox, Field, Margins, TextInput } from '@rocket.chat/fuselage';
+import React, { useMemo, useState } from 'react';
 
 import { useMethod } from '../../../../../../client/contexts/ServerContext';
 import { useBatchSettingsDispatch } from '../../../../../../client/contexts/SettingsContext';
@@ -17,13 +9,10 @@ import { Pager } from '../../../../../../client/components/setupWizard/Pager';
 import { Step } from '../../../../../../client/components/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/components/setupWizard/StepHeader';
-
-import { useEndpointAction } from '/client/hooks/useEndpointAction';
-import { useRouteParameter } from '/client/contexts/RouterContext';
+import { useRouteParameter } from '../../../../../../client/contexts/RouterContext';
 
 function NewParticipantStep({ step, title, active }) {
 	const { goToPreviousStep, goToFinalStep, councilState } = useInvitePageContext();
-	console.log('[NewParticipantStep]', councilState.data);
 	const [newData, setNewData] = useState({
 		firstName: { value: '', required: true },
 		lastName: { value: '', required: true },
@@ -38,10 +27,6 @@ function NewParticipantStep({ step, title, active }) {
 	});
 
 	const [isContactPerson, setIsContactPerson] = useState(false);
-
-	// const saveQuery = useMemo(() => ({ _id: errand._id, ...Object.fromEntries(Object.entries(newData).filter(([, value]) => value !== null)) }), [errand._id, newData]);
-
-	// const saveAction = useEndpointAction('POST', 'errands.update', saveQuery, _t('Errand_updated_successfully'));
 
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
@@ -71,15 +56,9 @@ function NewParticipantStep({ step, title, active }) {
 		setIsContactPerson(!isContactPerson);
 	};
 
-	const [agreeTermsAndPrivacy, setAgreeTermsAndPrivacy] = useState(false);
-
 	const t = useTranslation();
 
 	const [commiting, setComitting] = useState(false);
-
-	const batchSetSettings = useBatchSettingsDispatch();
-
-	const registerCloudWorkspace = useMethod('cloud:registerWorkspace');
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
