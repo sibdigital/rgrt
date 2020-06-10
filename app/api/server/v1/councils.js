@@ -23,3 +23,4 @@ API.v1.addRoute('councils.getOne', { authRequired: false }, {
 		return API.v1.success(Promise.await(findOneCouncil(query._id)));
 	},
 });
+

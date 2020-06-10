@@ -12,12 +12,12 @@ import { StepHeader } from '../../../../../../client/components/setupWizard/Step
 import { useRouteParameter } from '../../../../../../client/contexts/RouterContext';
 
 function NewParticipantStep({ step, title, active }) {
-	const { goToPreviousStep, goToFinalStep, councilState } = useInvitePageContext();
+	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
 	const [newData, setNewData] = useState({
 		firstName: { value: '', required: true },
 		lastName: { value: '', required: true },
 		patronymic: { value: '', required: false },
-		organization: { value: '', required: true },
+		/* organization: { value: '', required: true },*/
 		position: { value: '', required: true },
 		contactPersonFirstName: { value: '', required: false },
 		contactPersonLastName: { value: '', required: false },
@@ -87,10 +87,6 @@ function NewParticipantStep({ step, title, active }) {
 		}
 	};
 
-	!councilState.data && !councilState.data.desc && goToErrorStep();
-	!councilState.data && !councilState.data.d && goToErrorStep();
-
-
 	return <Step active={active} working={commiting} onSubmit={handleSubmit}>
 		<StepHeader number={step} title={title} />
 
@@ -103,33 +99,33 @@ function NewParticipantStep({ step, title, active }) {
 
 					<Margins all='x8'>
 						<Field>
-							<Field.Label>{t('Surname')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_second_name')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.lastName.value} flexGrow={1} onChange={handleChange('lastName')} placeholder={`${ t('Council_second_name') } (${ t('Required') })`}/>
+								<TextInput value={newData.lastName.value} flexGrow={1} onChange={handleChange('lastName')} placeholder={`${ t('Council_second_name_placeholder') }`}/>
 							</Field.Row>
 						</Field>
 						<Field>
-							<Field.Label>{t('Name')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_first_name')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.firstName.value} flexGrow={1} onChange={handleChange('firstName')} placeholder={`${ t('Council_first_name') } (${ t('Required') })`}/>
+								<TextInput value={newData.firstName.value} flexGrow={1} onChange={handleChange('firstName')} placeholder={`${ t('Council_first_name_placeholder') }`}/>
 							</Field.Row>
 						</Field>
 						<Field>
-							<Field.Label>{t('Patronymic')}</Field.Label>
+							<Field.Label>{t('Council_patronymic')}</Field.Label>
 							<Field.Row>
-								<TextInput value={newData.patronymic.value} flexGrow={1} onChange={handleChange('patronymic')} placeholder={`${ t('Council_patronymic') } (${ t('optional') })`} />
+								<TextInput value={newData.patronymic.value} flexGrow={1} onChange={handleChange('patronymic')} placeholder={`${ t('Council_patronymic_placeholder') }`} />
 							</Field.Row>
 						</Field>
-						<Field>
+						{/* <Field>
 							<Field.Label>{t('Organization_Name')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
 								<TextInput value={newData.organization.value} flexGrow={1} onChange={handleChange('organization')} placeholder={`${ t('Council_organization') } (${ t('Required') })`}/>
 							</Field.Row>
-						</Field>
+						</Field>*/}
 						<Field>
-							<Field.Label>{t('Job_Title')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_Organization_Position')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.position.value} flexGrow={1} onChange={handleChange('position')} placeholder={`${ t('Council_Organization_Position') } (${ t('Required') })`}/>
+								<TextInput value={newData.position.value} flexGrow={1} onChange={handleChange('position')} placeholder={`${ t('Council_Organization_Position_placeholder') }`}/>
 							</Field.Row>
 						</Field>
 						<Field.Row>
@@ -137,33 +133,33 @@ function NewParticipantStep({ step, title, active }) {
 							<Field.Label>{t('Council_Is_Contact_person')}</Field.Label>
 						</Field.Row>
 						{ isContactPerson && <Field>
-							<Field.Label>{t('Surname')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_Contact_person_lastname')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.contactPersonLastName.value} flexGrow={1} onChange={handleChange('contactPersonLastName')} placeholder={`${ t('Council_Contact_person_lastname') } (${ t('Required') })`}/>
+								<TextInput value={newData.contactPersonLastName.value} flexGrow={1} onChange={handleChange('contactPersonLastName')} placeholder={`${ t('Council_Contact_person_lastname_placeholder') } (${ t('Required') })`}/>
 							</Field.Row>
 						</Field> }
 						{ isContactPerson && <Field>
-							<Field.Label>{t('Name')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_Contact_person_firstname')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.contactPersonFirstName.value} flexGrow={1} onChange={handleChange('contactPersonFirstName')} placeholder={`${ t('Council_Contact_person_firstname') } (${ t('Required') })`}/>
+								<TextInput value={newData.contactPersonFirstName.value} flexGrow={1} onChange={handleChange('contactPersonFirstName')} placeholder={`${ t('Council_Contact_person_firstname_placeholder') } (${ t('Required') })`}/>
 							</Field.Row>
 						</Field> }
 						{ isContactPerson && <Field>
-							<Field.Label>{t('Patronymic')}</Field.Label>
+							<Field.Label>{t('Council_Contact_person_patronymic')}</Field.Label>
 							<Field.Row>
-								<TextInput value={newData.contactPersonPatronymicName.value} flexGrow={1} onChange={handleChange('contactPersonPatronymicName')} placeholder={`${ t('Council_Contact_person_patronymic') } (${ t('optional') })`}/>
+								<TextInput value={newData.contactPersonPatronymicName.value} flexGrow={1} onChange={handleChange('contactPersonPatronymicName')} placeholder={`${ t('Council_Contact_person_patronymic_placeholder') } (${ t('optional') })`}/>
 							</Field.Row>
 						</Field> }
 						<Field>
-							<Field.Label>{t('Phone_number')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_Contact_person_Phone_number')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.phone.value} flexGrow={1} onChange={handleChange('phone')} placeholder={`${ t('Council_Contact_person_Phone_number') } (${ t('Required') })`}/>
+								<TextInput value={newData.phone.value} flexGrow={1} onChange={handleChange('phone')} placeholder={`${ t('Council_Contact_person_Phone_number_placeholder') }`}/>
 							</Field.Row>
 						</Field>
 						<Field>
-							<Field.Label>{t('Email')} <span style={ { color: 'red' } }>*</span></Field.Label>
+							<Field.Label>{t('Council_Contact_person_email')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.email.value} flexGrow={1} onChange={handleChange('email')} placeholder={`${ t('Council_Contact_person_email') } (${ t('Required') })`}/>
+								<TextInput value={newData.email.value} flexGrow={1} onChange={handleChange('email')} placeholder={`${ t('Council_Contact_person_email_placeholder') }`}/>
 							</Field.Row>
 						</Field>
 						{/* <Field>

@@ -1,11 +1,11 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Icon } from '@rocket.chat/fuselage';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { Councils } from './Councils';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { EditCouncil } from './EditCouncil';
 import { AddCouncil } from './AddCouncil';
@@ -34,7 +34,7 @@ export function CouncilsPage() {
 
 	const query = useQuery(debouncedParams, debouncedSort, cache);
 
-	const data = (useEndpointData('councils.list', query)) || { result: [] };
+	const data = useEndpointData('councils.list', query) || { result: [] };
 
 	const router = useRoute(routeName);
 

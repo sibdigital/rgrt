@@ -152,9 +152,6 @@ Template.CreateErrand.events({
 			const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
 			return toastr.error(errorText);
 		}
-		console.log('initiated_by', initiated_by);
-		console.log('charged_to', charged_to);
-		console.log('expired_at', expired_at);
 		const result = await call('createErrand', { rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply });
 		// callback to enable tracking
 		callbacks.run('afterErrand', Meteor.user(), result);

@@ -159,6 +159,7 @@
 		"core-js": "^2.5.7",
 		"cors": "^2.8.4",
 		"csv-parse": "^4.0.1",
+		"docx": "^5.1.1",
 		"emailreplyparser": "^0.0.5",
 		"emojione": "^4.5.0",
 		"eslint-plugin-import": "^2.19.1",

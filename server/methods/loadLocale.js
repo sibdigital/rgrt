@@ -1,10 +1,11 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
+import moment from 'moment';
 
 Meteor.methods({
 	loadLocale(locale) {
 		check(locale, String);
-
+		moment.locale(locale);
 		try {
 			return Assets.getText(`moment-locales/${ locale.toLowerCase() }.js`);
 		} catch (error) {

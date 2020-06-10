@@ -23,9 +23,9 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field lastName is required', { method: 'addPersonToCouncil', field: 'lastName' });
 		}
 
-		if (!s.trim(person.organization)) {
+		/* if (!s.trim(person.organization)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field organization is required', { method: 'addPersonToCouncil', field: 'organization' });
-		}
+		}*/
 
 		if (!s.trim(person.position)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field position is required', { method: 'addPersonToCouncil', field: 'position' });
@@ -46,10 +46,6 @@ Meteor.methods({
 		if (person.contactPersonLastName !== undefined && !s.trim(person.contactPersonLastName)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field contactPersonLastName is required', { method: 'addPersonToCouncil', field: 'contactPersonLastName' });
 		}
-
-
-
-
 
 
 		/* if (!s.trim(councilData.desc)) {
