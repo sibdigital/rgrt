@@ -1,5 +1,5 @@
 import { API } from '../api';
-import { findCouncils, findOneCouncil } from '../lib/councils';
+import { findCouncils, findOneCouncil, findCouncil } from '../lib/councils';
 
 API.v1.addRoute('councils.list', { authRequired: true }, {
 	get() {
@@ -21,6 +21,13 @@ API.v1.addRoute('councils.getOne', { authRequired: false }, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findOneCouncil(query._id)));
+	},
+});
+
+API.v1.addRoute('councils.findOne', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findCouncil(query._id)));
 	},
 });
 

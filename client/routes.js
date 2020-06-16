@@ -111,6 +111,16 @@ FlowRouter.route('/invite/council/:id/:step?', {
 	},
 });
 
+FlowRouter.route('/council/:id', {
+	name: 'council',
+	action: () => {
+		renderRouteComponent(() => import('../app/councils/client/views/Council'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/councils/:context?/:id?', {
 	name: 'councils',
 	action: () => {
