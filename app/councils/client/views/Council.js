@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Table } from '@rocket.chat/fuselage';
+import {Button, Icon, Table} from '@rocket.chat/fuselage';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -8,6 +8,7 @@ import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { GenericTable, Th } from '../../../ui/client/components/GenericTable';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import {useMethod} from "/client/contexts/ServerContext";
 
 export function CouncilPage() {
 	const t = useTranslation();
@@ -26,6 +27,23 @@ export function CouncilPage() {
 	const invitedUsers = data.invitedUsers || { };
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
+
+	const downloadCouncilParticipants = (_id) => async (e) => {
+		e.preventDefault();
+		try {
+			const res = await downloadCouncilParticipantsMethod({ _id });
+			const url = window.URL.createObjectURL(new Blob([res]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', 'file.docx');
+			document.body.appendChild(link);
+			link.click();
+		} catch (e) {
+			console.error('[index.js].downloadCouncilParticipants :', e);
+		}
+	};
 
 	const header = useMemo(() => [
 		<Th key={'fio'}>{t('Surname')} {t('Name')} {t('Patronymic')}</Th>,
@@ -51,6 +69,9 @@ export function CouncilPage() {
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title={t('Council')}>
+				<Button small onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+					{t('Download_Council_Participant_List')}
+				</Button>
 			</Page.Header>
 			<Page.Content>
 				<GenericTable header={header} renderRow={renderRow} results={invitedUsers} setParams={setParams} params={params} />

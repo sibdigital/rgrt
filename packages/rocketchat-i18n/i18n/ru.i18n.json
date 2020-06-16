@@ -1210,6 +1210,7 @@
   "Domains_allowed_to_embed_the_livechat_widget": "Список доменов, разделенный запятой, куда можно встроить виджет Livechat. Оставьте пустым, чтобы разрешить любые домены.",
   "Downloading_file_from_external_URL": "Загрузка файла с внешнего URL",
   "Download_Info": "Информация о загрузке",
+  "Download_Council_Participant_List": "Скачать список",
   "Download_My_Data": "Загрузить мои данные",
   "Download_Pending_Files": "Скачать оставшиеся файлы",
   "Download_Snippet": "Скачать",

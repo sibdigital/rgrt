@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
+import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../ui/client/components/GenericTable';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
-import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { useMethod } from '../../../../client/contexts/ServerContext';
 
 export function Councils({
 	data,
@@ -19,11 +20,28 @@ export function Councils({
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
+	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
+
+	const downloadCouncilParticipants = (_id) => async (e) => {
+		e.preventDefault();
+		try {
+			const res = await downloadCouncilParticipantsMethod({ _id });
+			const url = window.URL.createObjectURL(new Blob([res]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', 'file.docx');
+			document.body.appendChild(link);
+			link.click();
+		} catch (e) {
+			console.error('[index.js].downloadCouncilParticipants :', e);
+		}
+	};
+
 	const header = useMemo(() => [
 		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d'>{t('Date')}</Th>,
 		<Th key={'desc'}>{t('Description')}</Th>,
 		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '150px' }}>{t('Created_at')}</Th>,
-		<Th w='x40' key='action'></Th>
+		<Th w='x40' key='action'></Th>,
 	], [sort, mediaQuery]);
 
 	const formatDate = useFormatDate();
@@ -37,6 +55,9 @@ export function Councils({
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
+				</Button>
+				<Button small onClick={downloadCouncilParticipants(_id)} aria-label={t('Download')}>
+					<Icon name='download'/>
 				</Button>
 			</Table.Cell>
 		</Table.Row>;
