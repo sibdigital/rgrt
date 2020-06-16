@@ -26,7 +26,7 @@ export function CouncilsPage() {
 	const routeName = 'councils';
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [sort, setSort] = useState(['d', 'asc']);
+	const [sort, setSort] = useState(['d', 'desc']);
 	const [cache, setCache] = useState();
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -45,6 +45,10 @@ export function CouncilsPage() {
 	const id = useRouteParameter('id');
 
 	const onClick = (_id) => () => {
+		FlowRouter.go(`/council/${ _id }`);
+	};
+
+	const onEditClick = (_id) => () => {
 		router.push({
 			context: 'edit',
 			id: _id,
@@ -81,7 +85,7 @@ export function CouncilsPage() {
 				</Button>
 			</Page.Header>
 			<Page.Content>
-				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>
+				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
 			</Page.Content>
 		</Page>
 		{ context
@@ -92,7 +96,7 @@ export function CouncilsPage() {
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
 			<VerticalBar.Content>
 				{context === 'edit' && <EditCouncil _id={id} close={close} onChange={onChange} cache={cache}/>}
-				{context === 'new' && <AddCouncil goToNew={onClick} close={close} onChange={onChange}/>}
+				{context === 'new' && <AddCouncil goToNew={onEditClick} close={close} onChange={onChange}/>}
 			</VerticalBar.Content>
 		</VerticalBar>}
 	</Page>;

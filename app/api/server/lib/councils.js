@@ -23,3 +23,8 @@ export async function findOneCouncil(_id) {
 	const cursor = await Councils.findOne({ _id }, { fields: { desc: 1, name: 1, d: 1 } });
 	return cursor;
 }
+
+export async function findCouncil(_id) {
+	const cursor = await Councils.findOne({ _id });
+	return cursor;
+}
