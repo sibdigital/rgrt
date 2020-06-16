@@ -10,6 +10,7 @@ import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { EditCouncil } from './EditCouncil';
 import { AddCouncil } from './AddCouncil';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { useMethod } from '../../../../client/contexts/ServerContext';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -73,22 +74,48 @@ export function CouncilsPage() {
 		setCache(new Date());
 	}, []);
 
+	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
+
+	const downloadCouncilParticipants = (_id) => async (e) => {
+		e.preventDefault();
+		try {
+			const res = await downloadCouncilParticipantsMethod({ _id });
+			const url = window.URL.createObjectURL(new Blob([res]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', 'file.docx');
+			document.body.appendChild(link);
+			link.click();
+		} catch (e) {
+			console.error('[index.js].downloadCouncilParticipants :', e);
+		}
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title={t('Councils')}>
 				<Button small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					<Icon name='plus'/>
 				</Button>
+				<Button small onClick={downloadCouncilParticipants('new')} aria-label={t('Download')}>
+					<Icon name='download'/>
+				</Button>
 			</Page.Header>
 			<Page.Content>
-				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>
+				<Councils
+					setParam={setParams}
+					params={params}
+					onHeaderClick={onHeaderClick}
+					data={data} onClick={onClick}
+					sort={sort}/>
 			</Page.Content>
 		</Page>
-		{ context
-		&& <VerticalBar mod-small={small} mod-mobile={mobile} style={{ width: '378px' }} qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+		{context
+		&& <VerticalBar mod-small={small} mod-mobile={mobile} style={{ width: '378px' }}
+			qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'edit' && t('Council_Info') }
-				{ context === 'new' && t('Council_Add') }
+				{context === 'edit' && t('Council_Info')}
+				{context === 'new' && t('Council_Add')}
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
 			<VerticalBar.Content>
 				{context === 'edit' && <EditCouncil _id={id} close={close} onChange={onChange} cache={cache}/>}
