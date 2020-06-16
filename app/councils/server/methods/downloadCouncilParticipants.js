@@ -104,7 +104,7 @@ Meteor.methods({
 				return new TableRow({
 					children: [
 						new TableCell({
-							children: [new Paragraph({ text: `${ index }`, alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ index + 1 }`, alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -190,7 +190,7 @@ Meteor.methods({
 				new Paragraph({
 					children: [
 						new TextRun({
-							text: 'Заседание',
+							text: 'Совещание',
 						}),
 					],
 					heading: HeadingLevel.HEADING_1,
