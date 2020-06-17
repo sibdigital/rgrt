@@ -4,7 +4,7 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../ui/client/components/GenericTable';
-import { useFormatDate } from '../../../../client/hooks/useFormatDate';
+import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 
 export function Councils({
@@ -38,24 +38,27 @@ export function Councils({
 	};
 
 	const header = useMemo(() => [
-		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d'>{t('Date')}</Th>,
+		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }}>{t('Date')}</Th>,
 		<Th key={'desc'}>{t('Description')}</Th>,
-		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '150px' }}>{t('Created_at')}</Th>,
-		<Th w='x40' key='action'></Th>,
+		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }}>{t('Created_at')}</Th>,
+		<Th w='x40' key='edit'></Th>,
+		<Th w='x40' key='download'></Th>
 	], [sort, mediaQuery]);
 
-	const formatDate = useFormatDate();
+	const formatDateAndTime = useFormatDateAndTime();
 
 	const renderRow = (council) => {
 		const { _id, d: date, desc, ts } = council;
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'>{formatDate(date)}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'>{formatDateAndTime(date)}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'><Box withTruncatedText>{desc}</Box></Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'>{formatDate(ts)}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'>{formatDateAndTime(ts)}</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
 				</Button>
+			</Table.Cell>
+			<Table.Cell alignItems={'end'}>
 				<Button small onClick={downloadCouncilParticipants(_id)} aria-label={t('Download')}>
 					<Icon name='download'/>
 				</Button>

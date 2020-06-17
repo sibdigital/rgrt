@@ -217,8 +217,6 @@ Meteor.methods({
 		});
 
 		const buffer = await Packer.toBuffer(doc);
-		const fs = require('fs');
-		fs.writeFileSync('/home/victor/My_Document.docx', buffer);
 
 		return buffer;
 	},
