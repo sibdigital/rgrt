@@ -131,6 +131,16 @@ FlowRouter.route('/councils/:context?/:id?', {
 	}],
 });
 
+FlowRouter.route('/manual-mail-sender', {
+	name: 'manual-mail-sender',
+	action: () => {
+		renderRouteComponent(() => import('../app/manual-mail-sender/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
 	action: () => {

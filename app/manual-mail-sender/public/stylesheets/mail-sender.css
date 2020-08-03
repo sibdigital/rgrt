@@ -1,0 +1,9 @@
+.ck.ck-editor {
+	position: relative;
+	width: 100%!important;
+}
+
+.ck-editor__editable {
+	min-height: 20em;
+	max-height: 20em;
+}

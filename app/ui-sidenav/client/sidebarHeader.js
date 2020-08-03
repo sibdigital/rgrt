@@ -60,6 +60,15 @@ const toolbarButtons = (/* user */) => [{
 	},
 },
 {
+	name: t('Send_email'),
+	icon: 'mail',
+	condition: () => hasPermission('send-mail-manually'),
+	action: () => {
+		menu.close();
+		FlowRouter.go('manual-mail-sender');
+	},
+},
+{
 	name: t('Councils'),
 	icon: 'team',
 	condition: () => hasPermission('manage-councils'),

@@ -129,6 +129,7 @@ Meteor.startup(function() {
 		{ name: 'leader',           scope: 'Subscriptions', description: 'Leader' },
 		{ name: 'owner',            scope: 'Subscriptions', description: 'Owner' },
 		{ name: 'user',             scope: 'Users',         description: '' },
+		{ name: 'secretary',        scope: 'Users',         description: '' },
 		{ name: 'bot',              scope: 'Users',         description: '' },
 		{ name: 'app',              scope: 'Users',         description: '' },
 		{ name: 'guest',            scope: 'Users',         description: '' },
