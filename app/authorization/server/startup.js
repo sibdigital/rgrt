@@ -49,7 +49,7 @@ Meteor.startup(function() {
 		{ _id: 'leave-c',                            roles: ['admin', 'user', 'bot', 'anonymous', 'app'] },
 		{ _id: 'leave-p',                            roles: ['admin', 'user', 'bot', 'anonymous', 'app'] },
 		{ _id: 'manage-assets',                      roles: ['admin'] },
-		{ _id: 'manage-councils',                    roles: ['admin'] },
+		{ _id: 'manage-councils',                    roles: ['admin', 'secretary'] },
 		{ _id: 'manage-emoji',                       roles: ['admin'] },
 		{ _id: 'manage-user-status',                 roles: ['admin'] },
 		{ _id: 'manage-outgoing-integrations',       roles: ['admin'] },
