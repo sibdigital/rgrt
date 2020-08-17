@@ -50,9 +50,9 @@ export function Councils({
 	const renderRow = (council) => {
 		const { _id, d: date, desc, ts } = council;
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'>{formatDateAndTime(date)}</Table.Cell>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'><Box withTruncatedText>{desc}</Box></Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='hint'>{formatDateAndTime(ts)}</Table.Cell>}
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} >{formatDateAndTime(date)}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} ><Box withTruncatedText>{desc}</Box></Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} >{formatDateAndTime(ts)}</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>

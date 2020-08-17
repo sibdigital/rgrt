@@ -29,8 +29,6 @@ function MailForm() {
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
 	};
-
-
 	const t = useTranslation();
 
 	const [commiting, setComitting] = useState(false);
@@ -80,6 +78,7 @@ function MailForm() {
 								editor={ ClassicEditor }
 								config={ {
 									language: 'ru',
+									removePlugins: ["ImageUpload"],
 								} }
 								data='<p>Здравствуйте, </p>'
 								onChange={ (event, editor) => {

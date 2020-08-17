@@ -7,3 +7,14 @@
 	min-height: 20em;
 	max-height: 20em;
 }
+
+.ck-editor__editable ol{
+	list-style: decimal;
+	padding-left: 1em;
+
+}
+
+.ck-editor__editable ul{
+	list-style: circle;
+	padding-left: 1em;
+}
