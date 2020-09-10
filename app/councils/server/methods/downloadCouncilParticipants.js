@@ -100,7 +100,7 @@ Meteor.methods({
 		];
 		if (council.invitedUsers) {
 			usersRows = usersRows.concat(council.invitedUsers.map((value, index) => {
-				const contactFace = value.contactPersonFirstName ? `${ value.contactPersonLastName.toUpperCase() } ${ value.contactPersonFirstName } ${ value.contactPersonPatronymicName }`.trim() : '-';
+				const contactFace = value.contactPersonFirstName ? `${ value.contactPersonLastName } ${ value.contactPersonFirstName } ${ value.contactPersonPatronymicName }`.trim() : '-';
 				return new TableRow({
 					children: [
 						new TableCell({
@@ -113,7 +113,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.lastName.toUpperCase() } ${ value.firstName } ${ value.patronymic }`.trim(), alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.lastName } ${ value.firstName } ${ value.patronymic }`.trim(), alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -182,7 +182,7 @@ Meteor.methods({
 				new Paragraph({
 					children: [
 						new TextRun({
-							text: `Отчет сформирован ${ moment().format('DD MMMM YYYY, HH:mm') }`,
+							text: `Отчет сформирован ${ moment(new Date()).format('DD MMMM YYYY, HH:mm') }`,
 						}),
 					],
 					alignment: AlignmentType.RIGHT,

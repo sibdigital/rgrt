@@ -111,22 +111,22 @@ function renderErrandTable(type) {
 
 	const formatDate = useFormatDate();
 	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
-		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' color='hint' style={style}>
+		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' style={style}>
 			{item.initiatedBy.username}
 		</Table.Cell> }
-		{type === 'charged_to_me' || <Table.Cell fontScale='p1' color='hint' style={style}>
+		{type === 'charged_to_me' || <Table.Cell fontScale='p1' style={style}>
 			{item.chargedToUser.username}
 		</Table.Cell> }
-		{ mediaQuery && <Table.Cell fontScale='p1' color='hint' style={style}>
+		{ mediaQuery && <Table.Cell fontScale='p1' style={style}>
 			{item.desc}
 		</Table.Cell> }
-		{ mediaQuery && <Table.Cell fontScale='p1' color='hint' style={style}>
+		{ mediaQuery && <Table.Cell fontScale='p1' style={style}>
 			{formatDate(item.ts)}
 		</Table.Cell>}
-		<Table.Cell fontScale='p1' color='hint' style={style}>
+		<Table.Cell fontScale='p1' style={style}>
 			{formatDate(item.expireAt)}
 		</Table.Cell>
-		<Table.Cell fontScale='p1' color='hint' style={style}>
+		<Table.Cell fontScale='p1' style={style}>
 			{_t(item.t)}
 		</Table.Cell>
 	</Table.Row>

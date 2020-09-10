@@ -11,6 +11,8 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../../app/settings/client';
 
+const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
+
 export function CouncilPage() {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
@@ -60,43 +62,47 @@ export function CouncilPage() {
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
 		return <Table.Row key={iu._id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' color='hint'>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
-			<Table.Cell fontScale='p1' color='hint'>{iu.position}</Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' color='hint'>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' color='hint'>{iu.phone}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' color='hint'>{iu.email}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' color='hint'>{formatDateAndTime(iu.ts)}</Table.Cell>}
+			<Table.Cell fontScale='p1' style={style}>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
+			<Table.Cell fontScale='p1' style={style}>{iu.position}</Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{iu.phone}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{iu.email}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{formatDateAndTime(iu.ts)}</Table.Cell>}
 		</Table.Row>;
 	};
 
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title={t('Council')}>
-				<Button small onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
-					{t('Download_Council_Participant_List')}
-				</Button>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x16'>
+				<Field mbe='x8'>
 					<Field.Label>{t('Date')}</Field.Label>
 					<Field.Row>
 						<Box is='span' fontScale='p1'>{formatDateAndTime(data.d)}</Box>
 					</Field.Row>
 				</Field>
-				<Field mbe='x16'>
+				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
 						<Box is='span' fontScale='p1'>{data.desc}</Box>
 					</Field.Row>
 				</Field>
-				<Field mbe='x16'>
-					<Field.Label>Ссылка для регистрации в совещании</Field.Label>
+				<Field mbe='x8'>
+					<Field.Label>{t('Council_invite_link')}</Field.Label>
 					<Field.Row>
 						<Box is='span' fontScale='p1'>{address}</Box>
 					</Field.Row>
 				</Field>
-				<Label>{t('Council_Invited_Users')}</Label>
-				<GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />
+				<Field mbe='x8'>
+					<Field.Row>
+						<Field.Label>{t('Council_Invited_Users')}</Field.Label>
+						<Button small onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+							{t('Download_Council_Participant_List')}
+						</Button>
+					</Field.Row>
+					<GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />
+				</Field>
 			</Page.Content>
 		</Page>
 	</Page>;
