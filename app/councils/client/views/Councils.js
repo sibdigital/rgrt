@@ -38,9 +38,9 @@ export function Councils({
 	};
 
 	const header = useMemo(() => [
-		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }}>{t('Date')}</Th>,
-		<Th key={'desc'}>{t('Description')}</Th>,
-		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }}>{t('Created_at')}</Th>,
+		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }} color='default'>{t('Date')}</Th>,
+		<Th key={'desc'} color='default'>{t('Description')}</Th>,
+		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
 		<Th w='x40' key='edit'></Th>,
 		<Th w='x40' key='download'></Th>
 	], [sort, mediaQuery]);
@@ -50,9 +50,9 @@ export function Councils({
 	const renderRow = (council) => {
 		const { _id, d: date, desc, ts } = council;
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} >{formatDateAndTime(date)}</Table.Cell>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} ><Box withTruncatedText>{desc}</Box></Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} >{formatDateAndTime(ts)}</Table.Cell>}
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{formatDateAndTime(date)}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{desc}</Box></Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{formatDateAndTime(ts)}</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>

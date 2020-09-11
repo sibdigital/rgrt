@@ -75,12 +75,12 @@ function renderErrandTable(type) {
 	}, [sort]);
 
 	const header = useMemo(() => [
-		type === 'initiated_by_me' || <Th key={'initiatedBy.username'} direction={sort[1]} active={sort[0] === 'initiatedBy.username'} onClick={onHeaderClick} sort='initiatedBy.username'>{_t('Errand_Initiated_by')}</Th>,
-		type === 'charged_to_me' || <Th key={'chargedToUser.username'} direction={sort[1]} active={sort[0] === 'chargedToUser.username'} onClick={onHeaderClick} sort='chargedToUser.username'>{_t('Errand_Charged_to')}</Th>,
-		mediaQuery && <Th key={'desc'} direction={sort[1]} active={sort[0] === 'desc'} onClick={onHeaderClick} sort='desc'>{_t('Description')}</Th>,
-		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '150px' }}>{_t('Started_At')}</Th>,
-		<Th key={'expireAt'} direction={sort[1]} active={sort[0] === 'expireAt'} onClick={onHeaderClick} sort='expireAt' style={{ width: '150px' }}>{_t('Errand_Expired_date')}</Th>,
-		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t'>{_t('Status')}</Th>,
+		type === 'initiated_by_me' || <Th key={'initiatedBy.username'} direction={sort[1]} active={sort[0] === 'initiatedBy.username'} onClick={onHeaderClick} sort='initiatedBy.username' color='default'>{_t('Errand_Initiated_by')}</Th>,
+		type === 'charged_to_me' || <Th key={'chargedToUser.username'} direction={sort[1]} active={sort[0] === 'chargedToUser.username'} onClick={onHeaderClick} sort='chargedToUser.username' color='default'>{_t('Errand_Charged_to')}</Th>,
+		mediaQuery && <Th key={'desc'} direction={sort[1]} active={sort[0] === 'desc'} onClick={onHeaderClick} sort='desc' color='default'>{_t('Description')}</Th>,
+		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '150px' }} color='default'>{_t('Started_At')}</Th>,
+		<Th key={'expireAt'} direction={sort[1]} active={sort[0] === 'expireAt'} onClick={onHeaderClick} sort='expireAt' style={{ width: '150px' }} color='default'>{_t('Errand_Expired_date')}</Th>,
+		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t' color='default'>{_t('Status')}</Th>,
 	].filter(Boolean), [sort, mediaQuery]);
 
 	/* const routeName = 'errands';
@@ -111,22 +111,22 @@ function renderErrandTable(type) {
 
 	const formatDate = useFormatDate();
 	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
-		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' style={style}>
+		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' style={style} color='default'>
 			{item.initiatedBy.username}
 		</Table.Cell> }
-		{type === 'charged_to_me' || <Table.Cell fontScale='p1' style={style}>
+		{type === 'charged_to_me' || <Table.Cell fontScale='p1' style={style} color='default'>
 			{item.chargedToUser.username}
 		</Table.Cell> }
-		{ mediaQuery && <Table.Cell fontScale='p1' style={style}>
+		{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
 			{item.desc}
 		</Table.Cell> }
-		{ mediaQuery && <Table.Cell fontScale='p1' style={style}>
+		{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
 			{formatDate(item.ts)}
 		</Table.Cell>}
-		<Table.Cell fontScale='p1' style={style}>
+		<Table.Cell fontScale='p1' style={style} color='default'>
 			{formatDate(item.expireAt)}
 		</Table.Cell>
-		<Table.Cell fontScale='p1' style={style}>
+		<Table.Cell fontScale='p1' style={style} color='default'>
 			{_t(item.t)}
 		</Table.Cell>
 	</Table.Row>

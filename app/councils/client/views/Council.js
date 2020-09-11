@@ -51,23 +51,23 @@ export function CouncilPage() {
 	const address = settings.get('Site_Url') + 'invite/council/' + councilId;
 
 	const header = useMemo(() => [
-		<Th key={'fio'}>{t('Council_participant')}</Th>,
-		<Th key={'position'}>{t('Council_Organization_Position')}</Th>,
-		mediaQuery && <Th key={'contact'}>{t('Council_Contact_person')}</Th>,
-		mediaQuery && <Th key={'phone'}>{t('Phone_number')}</Th>,
-		mediaQuery && <Th key={'email'}>{t('Email')}</Th>,
-		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }}>{t('Joined_at')}</Th>
+		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
+		<Th key={'position'} color='default'>{t('Council_Organization_Position')}</Th>,
+		mediaQuery && <Th key={'contact'} color='default'>{t('Council_Contact_person')}</Th>,
+		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
+		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
+		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>
 	], [mediaQuery]);
 
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
 		return <Table.Row key={iu._id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' style={style}>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
-			<Table.Cell fontScale='p1' style={style}>{iu.position}</Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{iu.phone}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{iu.email}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style}>{formatDateAndTime(iu.ts)}</Table.Cell>}
+			<Table.Cell fontScale='p1' style={style} color='default'>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
+			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.email}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}
 		</Table.Row>;
 	};
 
