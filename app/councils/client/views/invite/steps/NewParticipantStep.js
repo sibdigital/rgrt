@@ -182,7 +182,7 @@ function NewParticipantStep({ step, title, active }) {
 			</Box>
 		</Margins>
 
-		<Pager disabled={!allFieldAreFilled || commiting} onBackClick={handleBackClick} />
+		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} />
 	</Step>;
 }
 
