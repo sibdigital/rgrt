@@ -1,19 +1,21 @@
-import { Box, Button, ButtonGroup, Field, Margins, TextInput } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, Margins, TextInput, InputBox, Chip } from '@rocket.chat/fuselage';
 import React, { useMemo, useState } from 'react';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
+import { useUniqueId } from '@rocket.chat/fuselage-hooks';
 
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 
 
-function packData(data) {
+function packData(data, files) {
 	const dataToSend = {};
 	Object.keys(data).forEach((key) => {
 		dataToSend[key] = data[key].value.trim();
 	});
+	dataToSend['files'] = files;
 	return dataToSend;
 }
 
@@ -37,10 +39,39 @@ function MailForm() {
 
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value.trim() === '' && current.required === true).length === 0, [JSON.stringify(newData)]);
 
+	const fileSourceInputId = useUniqueId();
+
+	const [files, setFiles] = useState([]);
+
+	const handleImportFileChange = async (event) => {
+		event = event.originalEvent || event;
+
+		let { files } = event.target;
+		if (!files || (files.length === 0)) {
+			files = (event.dataTransfer != null ? event.dataTransfer.files : undefined) || [];
+		}
+
+		Array.from(files, (file) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onloadend = function(e) {
+				setFiles((files) => files.concat([{
+					content: reader.result.split(';base64,')[1],
+					contentType: file.type,
+					filename: file.name
+				}]))
+			}
+		});
+	};
+
+	const handleFileUploadChipClick = (file) => () => {
+		setFiles((files) => files.filter((_file) => _file !== file));
+	};
+
 	const handleSubmit = async () => {
 		setComitting(true);
 		try {
-			const dataToSend = packData(newData);
+			const dataToSend = packData(newData, files);
 			await sendEmail(dataToSend);
 
 			dispatchToastMessage({ type: 'success', message: t('Integrations_Outgoing_Type_SendMessage') });
@@ -88,8 +119,17 @@ function MailForm() {
 							/>
 						</Field.Row>
 					</Field>
-
-
+					<Field>
+						<Field.Label alignSelf='stretch' htmlFor={fileSourceInputId}>{t('Add_files')}</Field.Label>
+						<Field.Row>
+							<InputBox type='file' id={fileSourceInputId} multiple onChange={handleImportFileChange} />
+						</Field.Row>
+						{files?.length > 0 && <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
+							<Margins inlineEnd='x4' blockEnd='x4'>
+								{files.map((file, i) => <Chip pi='x4' key={i} onClick={handleFileUploadChipClick(file)}>{file.filename}</Chip>)}
+							</Margins>
+						</Box>}
+					</Field>
 				</Margins>
 			</Box>
 			<ButtonGroup align='end'>

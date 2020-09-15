@@ -47,6 +47,17 @@ Meteor.methods({
 			});
 		}
 
+		let attachments;
+
+		if (data.files) {
+			attachments = data.files.map((file) => {
+				return {
+					filename: file.filename,
+					content: new Buffer(file.content, 'base64'),
+					contentType: file.contentType
+				}
+			});
+		}
 
 		_.each(emails, (email) => {
 			const receiver = s.trim(email);
@@ -56,6 +67,7 @@ Meteor.methods({
 				replyTo: receiver,
 				subject: data.topic,
 				html: data.message,
+				attachments: attachments
 			});
 		});
 
