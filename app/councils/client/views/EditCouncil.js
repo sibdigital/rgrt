@@ -12,7 +12,9 @@ import {
 	TextInput,
 } from '@rocket.chat/fuselage';
 import moment from 'moment';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import ru from 'date-fns/locale/ru';
+registerLocale('ru', ru);
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
@@ -153,8 +155,9 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 						showTimeSelect
 						timeFormat='HH:mm'
 						timeIntervals={5}
-						timeCaption='time'
+						timeCaption='Время'
 						customInput={<TextInput />}
+						locale='ru'
 					/>
 					{/* <InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />*/}
 				</Field.Row>

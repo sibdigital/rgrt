@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import ru from 'date-fns/locale/ru';
+registerLocale('ru', ru);
 import moment from 'moment';
 import _ from 'underscore';
 
@@ -154,6 +156,7 @@ function EditErrand({ errand, onChange }) {
 					selected={expireAt}
 					onChange={handleChangeDate}
 					customInput={<TextInput />}
+					locale='ru'
 				/>
 
 			</Field.Row>

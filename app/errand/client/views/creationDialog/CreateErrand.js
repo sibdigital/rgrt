@@ -165,13 +165,22 @@ Template.CreateErrand.events({
 
 Template.CreateErrand.onRendered(function() {
 	this.find('#usersCharged').focus();
-
+	this.$('#expired_date').datepicker.dates['ru'] = {
+		days: ["Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресение"],
+		daysShort: ["Вос", "Пон", "Вто", "Сре", "Чет", "Пят", "Суб", "Вос"],
+		daysMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+		months: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+		monthsShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сент", "Окт", "Ноя", "Дек"],
+		today: "Сегодня",
+		clear: "Clear"
+	};
 	this.$('#expired_date').datepicker({
 		autoclose: true,
 		todayHighlight: true,
 		format: moment.localeData().longDateFormat('L').toLowerCase(),
 		changeMonth: true,
 		changeYear: true,
+		language: 'ru'
 	});
 
 

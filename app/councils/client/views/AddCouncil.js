@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import ru from 'date-fns/locale/ru';
+registerLocale('ru', ru);
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -55,8 +57,9 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 					showTimeSelect
 					timeFormat='HH:mm'
 					timeIntervals={5}
-					timeCaption='time'
+					timeCaption='Время'
 					customInput={<TextInput />}
+					locale='ru'
 				/>
 				{/* <InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />*/}
 			</Field.Row>
