@@ -24,14 +24,14 @@
 			<tbody>
 			{{#each errands}}
 				<tr class="table-row" data-id="{{_id}}" data-index="{{@index}}">
-					<td>
-						{{>avatar username=initiatedBy.username}}
+					<td title="{{initiatedBy.username}}">
+						{{initiatedBy.username}}
 					</td>
-					<td>
-						{{>avatar username=chargedToUser.username}}
+					<td title="{{chargedToUser.username}}">
+						{{chargedToUser.username}}
 					</td>
-					<td>{{ desc }}</td>
-					<td>{{ formatDate expireAt }}</td>
+					<td title="{{ desc }}">{{ desc }}</td>
+					<td title="{{ formatDate expireAt }}">{{ formatDate expireAt }}</td>
 					<td>{{_ t}}</td>
 				</tr>
 			{{else}}
