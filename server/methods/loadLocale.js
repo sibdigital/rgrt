@@ -2,18 +2,16 @@ import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import moment from 'moment';
 
+import { getMomentLocale } from '../lib/getMomentLocale';
+
 Meteor.methods({
 	loadLocale(locale) {
 		check(locale, String);
 		moment.locale(locale);
 		try {
-			return Assets.getText(`moment-locales/${ locale.toLowerCase() }.js`);
+			return getMomentLocale(locale);
 		} catch (error) {
-			try {
-				return Assets.getText(`moment-locales/${ locale.split('-').shift().toLowerCase() }.js`);
-			} catch (error) {
-				throw new Meteor.Error('moment-locale-not-found', `Moment locale not found: ${ locale }`);
-			}
+			throw new Meteor.Error(error.message, `Moment locale not found: ${ locale }`);
 		}
 	},
 });

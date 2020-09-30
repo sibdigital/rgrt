@@ -84,7 +84,7 @@ const toolbarButtons = (/* user */) => [{
 	action: async (e) => {
 		const options = [];
 		const config = {
-			template: createTemplateForComponent('SortList', () => import('./SortList')),
+			template: createTemplateForComponent('SortList', () => import('../../../client/components/SortList')),
 			currentTarget: e.currentTarget,
 			data: {
 				options,
@@ -177,8 +177,6 @@ const toolbarButtons = (/* user */) => [{
 				type: 'open',
 				id: 'administration',
 				action: () => {
-					SideNav.setFlex('adminFlex');
-					SideNav.openFlex();
 					FlowRouter.go('admin', { group: 'info' });
 					popover.close();
 				},
@@ -194,18 +192,17 @@ const toolbarButtons = (/* user */) => [{
 							items: AccountBox.getItems().map((item) => {
 								let action;
 
-								if (item.href) {
+								if (item.href || item.sideNav) {
 									action = () => {
-										FlowRouter.go(item.href);
-										popover.close();
-									};
-								}
-
-								if (item.sideNav) {
-									action = () => {
-										SideNav.setFlex(item.sideNav);
-										SideNav.openFlex();
-										popover.close();
+										if (item.href) {
+											FlowRouter.go(item.href);
+											popover.close();
+										}
+										if (item.sideNav) {
+											SideNav.setFlex(item.sideNav);
+											SideNav.openFlex();
+											popover.close();
+										}
 									};
 								}
 
@@ -332,8 +329,6 @@ Template.sidebarHeader.events({
 										type: 'open',
 										id: 'account',
 										action: () => {
-											SideNav.setFlex('accountFlex');
-											SideNav.openFlex();
 											FlowRouter.go('account');
 											popover.close();
 										},

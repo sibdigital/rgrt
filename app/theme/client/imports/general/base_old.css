@@ -1961,6 +1961,29 @@
 	background-size: contain;
 }
 
+.rc-old .popup-user-not_in_channel {
+	overflow: hidden;
+
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.rc-old .popup-user {
+	display: flex;
+	align-items: center;
+
+	&-avatar_wrap,
+	&-name {
+		margin-right: 4px;
+		flex-shrink: 0;
+	}
+}
+
+.rc-old .popup-user-notice {
+	min-width: 0;
+	margin-left: auto;
+}
+
 .rc-old .popup-user-status {
 	display: inline-block;
 
@@ -2090,11 +2113,11 @@
 		border-radius: 2px;
 
 		&--me {
-			background-color: var(--mention-link-me-background);
+			background-color: var(--mention-link-me-text-color);
 		}
 
 		&--group {
-			background-color: var(--mention-link-group-background);
+			background-color: var(--mention-link-group-text-color);
 		}
 	}
 }
@@ -2110,6 +2133,8 @@
 
 	&-unread {
 		display: inline-block;
+
+		float: right;
 
 		width: 10px;
 		height: 10px;
@@ -3179,18 +3204,6 @@
 	}
 }
 
-.rc-old .avatarPrompt {
-	& header p {
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 22px;
-	}
-
-	& img {
-		width: 200px;
-	}
-}
-
 .rc-old #login-card {
 	position: relative;
 	z-index: 1;
@@ -3884,6 +3897,10 @@
 	height: 2rem;
 }
 
+.flex-tab.discussions > .flex-tab__content {
+	padding: 0;
+}
+
 .rc-old .flex-tab {
 	&__content {
 		display: flex;
@@ -3899,6 +3916,7 @@
 	}
 
 	&__result {
+		overflow-x: hidden;
 		overflow-y: auto;
 		flex: 1 1 auto;
 	}
