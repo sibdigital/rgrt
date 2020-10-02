@@ -7,11 +7,11 @@ export class ErrandRoomType extends RoomTypeConfig {
 		super({
 			identifier: 't',
 			order: 25,
-			label: 'Discussion',
+			label: 'Errand',
 		});
 
 		// we need a custom template in order to have a custom query showing the subscriptions to discussions
-		this.customTemplate = 'DiscussionList';
+		this.customTemplate = 'ErrandList';
 	}
 
 	condition() {

@@ -9,7 +9,7 @@ import './views/errandDetails/ErrandDetails';
 import './lib/messageTypes/errandMessage';
 import './createErrandMessageAction';
 import './errandFromMessageBox';
-// import './tabBar';
+import './tabBar';
 
 import '../lib/errandRoomType';
 

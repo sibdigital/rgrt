@@ -4030,7 +4030,7 @@
 	display: block;
 }
 
-.rc-old .hide-usernames .message .user.user-card-message .message-alias {
+.rc-old .hide-usernames .message .user.user-card-message .message-alias .user-errand-initiated-card-message .user-errand-charged-card-message {
 	display: none;
 }
 

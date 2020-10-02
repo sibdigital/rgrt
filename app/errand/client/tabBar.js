@@ -9,7 +9,7 @@ Meteor.startup(function() {
 		id: 'errand',
 		i18nTitle: 'Errand',
 		icon: 'errand',
-		template: 'errandTabbar',
+		template: 'errandsTabbar',
 		order: 1,
 		condition: () => true, /* settings.get('Discussion_enabled')*/
 	});

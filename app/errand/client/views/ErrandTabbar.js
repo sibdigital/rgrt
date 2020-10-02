@@ -3,27 +3,44 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { Mongo } from 'meteor/mongo';
 import { Template } from 'meteor/templating';
 
-import { messageContext } from '../../../ui-utils/client/lib/messageContext';
 import { Messages } from '../../../models/client';
 import { APIClient } from '../../../utils/client';
-import { upsertMessageBulk } from '../../../ui-utils/client/lib/RoomHistoryManager';
 
 import './ErrandTabbar.html';
+import moment from 'moment';
+
+import { timeAgo, formatDateAndTime } from '../../../lib/client/lib/formatDate';
+import { DateFormat } from '../../../lib/client';
 
 const LIMIT_DEFAULT = 50;
 
+
 Template.errandsTabbar.helpers({
-	hasMessages() {
+	hasErrands() {
 		return Template.instance().messages.find().count();
 	},
-	messages() {
-		const instance = Template.instance();
-		return instance.messages.find({}, { limit: instance.limit.get(), sort: { ts: -1 } });
+	errands() {
+		return Template.instance().errands.get();
 	},
 	hasMore() {
 		return Template.instance().hasMore.get();
 	},
-	messageContext,
+
+});
+
+Template.errand.helpers({
+	formatDateAndTime,
+	time() {
+		const { err, timeAgo: useTimeAgo } = this;
+		return useTimeAgo ? timeAgo(err.ts) : DateFormat.formatTime(err.ts);
+	},
+	date() {
+		const { err } = this;
+		return DateFormat.formatDate(err.ts);
+	},
+	formatDate(date) {
+		return moment(date).format(moment.localeData().longDateFormat('L'));
+	},
 });
 
 Template.errandsTabbar.onCreated(function() {
@@ -31,11 +48,14 @@ Template.errandsTabbar.onCreated(function() {
 	this.messages = new Mongo.Collection(null);
 	this.hasMore = new ReactiveVar(true);
 	this.limit = new ReactiveVar(LIMIT_DEFAULT);
+	this.errands = new ReactiveVar([]);
+	this.offset = new ReactiveVar(0);
+	this.query = new ReactiveVar({});
 
 	this.autorun(() => {
 		const query = {
 			rid: this.rid,
-			drid: { $exists: true },
+			errand: { $exists: true },
 		};
 
 		this.cursor && this.cursor.stop();
@@ -57,10 +77,20 @@ Template.errandsTabbar.onCreated(function() {
 
 	this.autorun(async () => {
 		const limit = this.limit.get();
-		const { messages, total } = await APIClient.v1.get(`chat.getErrands?roomId=${ this.rid }&count=${ limit }`);
-
-		upsertMessageBulk({ msgs: messages }, this.messages);
-
+		const { messages } = await APIClient.v1.get(`chat.getDiscussionsWithErrands?roomId=${ this.rid }&count=${ limit }`);
+		const errandsId = [];
+		for (const message of messages) {
+			for (let i = 0; i < message.errand.length; i++) {
+				errandsId.push(message.errand[i]);
+			}
+		}
+		const offset = this.offset.get();
+		const { errands, total } = await APIClient.v1.get(`errands-on-message.list?count=${ LIMIT_DEFAULT }&offset=${ offset }&query=${ JSON.stringify({ _id: { $in: errandsId } }) }`);
+		if (offset === 0) {
+			this.errands.set(errands);
+		} else {
+			this.errands.set(this.errands.get().concat(errands));
+		}
 		this.hasMore.set(total > limit);
 	});
 });
@@ -68,6 +98,7 @@ Template.errandsTabbar.onCreated(function() {
 Template.errandsTabbar.events({
 	'scroll .js-list': _.throttle(function(e, instance) {
 		if (e.target.scrollTop >= e.target.scrollHeight - e.target.clientHeight - 10 && instance.hasMore.get()) {
+			instance.offset.set(instance.offset.get() + LIMIT_DEFAULT);
 			instance.limit.set(instance.limit.get() + LIMIT_DEFAULT);
 		}
 	}, 200),
