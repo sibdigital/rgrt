@@ -149,7 +149,6 @@
 			{{/with}}
 			{{#unless hideMessageActions}}
 				<div class="message-actions">
-
 					<div class="message-actions__buttons">
 						{{#each action in messageActions 'message'}}
 							<button class="message-actions__button"  data-message-action="{{action.id}}" title="{{_ action.label}}">
@@ -182,7 +181,7 @@
 			{{/unless}}
 			{{#if broadcast}}
 				<button type="button" class="js-reply-broadcast rc-button rc-button--primary rc-button--small rc-button--outline" name="button">
-					{{> icon icon="reply"}} {{_'Reply'}}
+					{{> icon icon="reply"}} {{_ 'Reply'}}
 				</button>
 			{{/if}}
 			{{#unless hideReactions}}
@@ -213,6 +212,11 @@
 				</li>
 			</ul>
 			{{/unless}}
+			<div class="reply-buttons-group">
+				<a href="#" class="reply-button" data-type="message-action" data-id="quote-message">{{_ 'Reply'}}</a>
+				<a href="#" class="reply-button" data-type="message-action" data-id="reply-directly">{{_ 'Reply_in_direct_message_short'}}</a>
+			</div>
+
 		{{/if}}
 	</li>
 </template>
