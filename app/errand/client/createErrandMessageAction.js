@@ -45,7 +45,7 @@ Meteor.startup(function() {
 
 				return uid !== u._id ? hasPermission('start-errand-other-user') : hasPermission('start-errand');
 			},
-			order: 1,
+			order: 2,
 			group: 'menu',
 		});
 	});

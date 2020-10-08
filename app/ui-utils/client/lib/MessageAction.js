@@ -212,7 +212,7 @@ Meteor.startup(async function() {
 
 			return true;
 		},
-		order: 3,
+		order: 1,
 		group: 'menu',
 	});
 

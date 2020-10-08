@@ -228,4 +228,23 @@ Template.popover.events({
 
 Template.popover.helpers({
 	isSafariIos: /iP(ad|hone|od).+Version\/[\d\.]+.*Safari/i.test(navigator.userAgent),
+	check_item_name(item) {
+		if (!item.id) {
+			return false;
+		}
+
+		if (item.id === 'reply-in-thread') {
+			return false;
+		}
+		if (item.id === 'start-discussion') {
+			return false;
+		}
+		if (item.id === 'follow-message') {
+			return false;
+		}
+		if (item.id === 'jump-to-pin-message') {
+			return false;
+		}
+		return true;
+	},
 });
