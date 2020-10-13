@@ -22,7 +22,7 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
 
-	const saveAction = async (date, description) => {
+	const saveAction = useCallback(async (date, description) => {
 		const councilData = createCouncilData(date, description);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
@@ -30,7 +30,7 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 			return _id;
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	};
+	}, [dispatchToastMessage, insertOrUpdateCouncil, t]);
 
 	const handleSave = useCallback(async () => {
 		try {
@@ -44,7 +44,7 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [date, description]);
+	}, [dispatchToastMessage, goToNew, date, description, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
@@ -74,7 +74,7 @@ export function AddCouncil({ goToNew, close, onChange, ...props }) {
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={date === ''}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={date === '' || description === ''}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

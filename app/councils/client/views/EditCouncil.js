@@ -10,8 +10,8 @@ import {
 	InputBox,
 	TextAreaInput,
 	TextInput,
+	Modal
 } from '@rocket.chat/fuselage';
-import moment from 'moment';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
@@ -19,9 +19,9 @@ registerLocale('ru', ru);
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
-import { Modal } from '../../../../client/components/basic/Modal';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validate, createCouncilData } from './lib';
+import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
 require('react-datepicker/dist/react-datepicker.css');
@@ -104,7 +104,7 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 
 	const [date, setDate] = useState(new Date(previousDate));
 	const [description, setDescription] = useState(previousDescription);
-	const [modal, setModal] = useState();
+	const setModal = useSetModal();
 
 	useEffect(() => {
 		setDate(new Date(previousDate) || '');
@@ -117,19 +117,19 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 	const hasUnsavedChanges = useMemo(() => previousDate !== date || previousDescription !== description,
 		[date, description]);
 
-	const saveAction = async (date, description) => {
+	const saveAction = useCallback(async (date, description) => {
 		const councilData = createCouncilData(date, description, { previousDate, previousDescription, _id });
 		const validation = validate(councilData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateCouncil(councilData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	};
+	}, [_id, dispatchToastMessage, insertOrUpdateCouncil, date, description, previousDate, previousDescription, previousCouncil, t]);
 
 	const handleSave = useCallback(async () => {
-		await saveAction(date, description);
+		saveAction(date, description);
 		onChange();
-	}, [date, description, _id]);
+	}, [saveAction, onChange]);
 
 	const onDeleteConfirm = useCallback(async () => {
 		try {
@@ -139,51 +139,48 @@ function EditCouncilWithData({ close, onChange, council, ...props }) {
 			dispatchToastMessage({ type: 'error', message: error });
 			onChange();
 		}
-	}, [_id]);
+	}, [_id, close, deleteCouncil, dispatchToastMessage, onChange]);
 
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
-	return <>
-		<VerticalBar.ScrollableContent {...props}>
-			<Field>
-				<Field.Label>{t('Date')}</Field.Label>
-				<Field.Row>
-					<DatePicker
-						dateFormat='dd.MM.yyyy HH:mm'
-						selected={date}
-						onChange={(newDate) => setDate(newDate)}
-						showTimeSelect
-						timeFormat='HH:mm'
-						timeIntervals={5}
-						timeCaption='Время'
-						customInput={<TextInput />}
-						locale='ru'
-					/>
-					{/* <InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />*/}
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Description')}</Field.Label>
-				<Field.Row>
-					<TextAreaInput value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Row>
-					<ButtonGroup stretch w='full'>
-						<Button onClick={close}>{t('Cancel')}</Button>
-						<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
-					</ButtonGroup>
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Row>
-					<ButtonGroup stretch w='full'>
-						<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>
-					</ButtonGroup>
-				</Field.Row>
-			</Field>
-		</VerticalBar.ScrollableContent>
-		{ modal }
-	</>;
+	return <VerticalBar.ScrollableContent {...props}>
+		<Field>
+			<Field.Label>{t('Date')}</Field.Label>
+			<Field.Row>
+				<DatePicker
+					dateFormat='dd.MM.yyyy HH:mm'
+					selected={date}
+					onChange={(newDate) => setDate(newDate)}
+					showTimeSelect
+					timeFormat='HH:mm'
+					timeIntervals={5}
+					timeCaption='Время'
+					customInput={<TextInput />}
+					locale='ru'
+				/>
+				{/* <InputBox type='date' value={date} onChange={(e) => setDate(e.currentTarget.value)} placeholder={t('Date')} />*/}
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Description')}</Field.Label>
+			<Field.Row>
+				<TextAreaInput value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Row>
+				<ButtonGroup stretch w='full'>
+					<Button onClick={close}>{t('Cancel')}</Button>
+					<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+				</ButtonGroup>
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Row>
+				<ButtonGroup stretch w='full'>
+					<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>
+				</ButtonGroup>
+			</Field.Row>
+		</Field>
+	</VerticalBar.ScrollableContent>;
 }

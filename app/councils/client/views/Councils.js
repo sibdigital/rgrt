@@ -3,7 +3,7 @@ import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { GenericTable, Th } from '../../../ui/client/components/GenericTable';
+import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 

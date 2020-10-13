@@ -4,7 +4,7 @@ import React from 'react';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useWipeInitialPageLoading } from '../../../../../client/hooks/useWipeInitialPageLoading';
-import { ConnectionStatusAlert } from '../../../../../client/components/connectionStatus/ConnectionStatusAlert';
+import ConnectionStatusAlert from '../../../../../client/components/connectionStatus/ConnectionStatusAlert';
 import { errorStep, finalStep, useInvitePageContext } from './InvitePageState';
 import FinalInviteStep from './steps/FinalInviteStep';
 import SideBar from './SideBar';

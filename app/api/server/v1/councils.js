@@ -1,8 +1,13 @@
 import { API } from '../api';
 import { findCouncils, findOneCouncil, findCouncil } from '../lib/councils';
+import { hasPermission } from '../../../authorization';
 
 API.v1.addRoute('councils.list', { authRequired: true }, {
 	get() {
+		if (!hasPermission(this.userId, 'view-c-room')) {
+			return API.v1.unauthorized();
+		}
+
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
 

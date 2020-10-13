@@ -2,10 +2,10 @@ import { Box, Margins } from '@rocket.chat/fuselage';
 import React, { useState } from 'react';
 
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
-import { Pager } from '../../../../../../client/components/setupWizard/Pager';
-import { Step } from '../../../../../../client/components/setupWizard/Step';
+import { Pager } from '../../../../../../client/views/setupWizard/Pager';
+import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
-import { StepHeader } from '../../../../../../client/components/setupWizard/StepHeader';
+import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { useFormatDateAndTime } from '../../../../../../client/hooks/useFormatDateAndTime';
 
 function CouncilInfoStep({ step, title, active }) {

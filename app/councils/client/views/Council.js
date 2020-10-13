@@ -5,7 +5,7 @@ import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter} from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
-import { GenericTable, Th } from '../../../ui/client/components/GenericTable';
+import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';

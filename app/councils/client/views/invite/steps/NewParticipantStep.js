@@ -5,10 +5,10 @@ import { useMethod } from '../../../../../../client/contexts/ServerContext';
 import { useBatchSettingsDispatch } from '../../../../../../client/contexts/SettingsContext';
 import { useToastMessageDispatch } from '../../../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
-import { Pager } from '../../../../../../client/components/setupWizard/Pager';
-import { Step } from '../../../../../../client/components/setupWizard/Step';
+import { Pager } from '../../../../../../client/views/setupWizard/Pager';
+import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
-import { StepHeader } from '../../../../../../client/components/setupWizard/StepHeader';
+import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { useRouteParameter } from '../../../../../../client/contexts/RouterContext';
 
 function NewParticipantStep({ step, title, active }) {
