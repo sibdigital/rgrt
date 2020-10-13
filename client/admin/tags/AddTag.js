@@ -15,7 +15,7 @@ export function AddTag({ goToNew, close, onChange, ...props }) {
 
 	const insertOrUpdateTag = useMethod('insertOrUpdateTag');
 
-	const saveAction = async (name) => {
+	const saveAction = useCallback(async (name) => {
 		const tagData = createTagData(name);
 		const validation = validate(tagData);
 		if (validation.length === 0) {
@@ -23,7 +23,7 @@ export function AddTag({ goToNew, close, onChange, ...props }) {
 			return tagId;
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); })
-	};
+	}, [dispatchToastMessage, insertOrUpdateTag, t]);
 
 	const handleSave = useCallback(async () => {
 		try {
@@ -36,7 +36,7 @@ export function AddTag({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [name]);
+	}, [dispatchToastMessage, goToNew, name, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>

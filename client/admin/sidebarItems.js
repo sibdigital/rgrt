@@ -67,11 +67,9 @@ export const {
 		i18nLabel: 'Marketplace',
 		permissionGranted: () => hasPermission(['manage-apps']),
 	}, {
-		icon: 'tags',
+		icon: 'hashtag',
 		href: 'tags',
 		i18nLabel: 'Tags',
-		permissionGranted() {
-			return hasPermission('manage-tags');
-		},
+		permissionGranted: () => hasPermission(['manage-tags']),
 	},
 ]);
