@@ -3658,5 +3658,15 @@
   "Your_temporary_password_is_password": "Ваш временный пароль <strong>[password]</strong>.",
   "Your_workspace_is_ready": "Ваше рабочее пространство готово к работе",
   "Your_information_accepted": "Ваши данные приняты",
-  "Wait_you": "Ожидаем вас на заседании:"
+  "Wait_you": "Ожидаем вас на заседании:",
+  "Working_group": "Рабочая группа",
+  "Working_group_add": "Добавить участника",
+  "Working_group_delete": "Удалить участника",
+  "Working_group_delete_warning": "Удаление участника рабочей группы нельзя отменить",
+  "Working_group_edit": "Редактировать информацию",
+  "Working_group_has_been_deleted": "Участник рабочей группы успешно удален",
+  "Working_group_members": "Члены рабочей группы",
+  "Working_group_other_members": "Иные участники",
+  "Working_group_representatives_of_subjects": "Представители субъектов Российской Федерации",
+  "Working_group_subject": "Субъект Российской Федерации"
 }

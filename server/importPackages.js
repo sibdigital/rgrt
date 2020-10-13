@@ -116,4 +116,5 @@ import '../app/errand/server';
 import '../app/livechat/server';
 import '../app/custom/server';
 import '../app/councils/server';
+import '../app/working-group/server';
 import '../app/manual-mail-sender/server';

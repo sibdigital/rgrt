@@ -40,5 +40,6 @@ import './v1/custom-sounds';
 import './v1/custom-user-status';
 import './v1/tags';
 import './v1/councils';
+import './v1/working-groups';
 
 export { API, APIClass, defaultRateLimiterOptions } from './api';
