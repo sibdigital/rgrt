@@ -108,7 +108,7 @@ export function ErrandPage() {
 	}
 
 	const [sort, setSort] = useState(['ts', 'asc']);
-	const [params, setParams] = useState({ type: type, current: 0, itemsPerPage: 1 });
+	const [params, setParams] = useState({ type: type, current: 0, itemsPerPage: 100 });
 	const [cache, setCache] = useState();
 	const setModal = useSetModal();
 
