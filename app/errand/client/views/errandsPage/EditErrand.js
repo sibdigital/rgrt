@@ -106,7 +106,7 @@ function EditErrand({ errand, onChange }) {
 			console.log('newUser', newUser);
 			newData.chargedToUser = newUser;
 		}
-		onChange(newData);
+		onChange();
 	};
 
 	let chargedToUser = newData.chargedToUser ?? errand.chargedToUser;

@@ -8,6 +8,7 @@ import { findErrands } from '../lib/errands';
 import { saveCustomFields, saveUser } from '/app/lib';
 
 import { Errands, Users } from '../../../models/server';
+import { hasPermission } from '../../../authorization';
 
 
 API.v1.addRoute('errands-on-message.list', { authRequired: true }, {
@@ -27,6 +28,10 @@ API.v1.addRoute('errands-on-message.list', { authRequired: true }, {
 
 API.v1.addRoute('errands', { authRequired: true }, {
 	get() {
+		if (!hasPermission(this.userId, 'view-c-room')) {
+			return API.v1.unauthorized();
+		}
+
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
 
