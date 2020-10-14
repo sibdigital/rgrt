@@ -10,6 +10,7 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../../app/settings/client';
+import moment from 'moment';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -40,7 +41,8 @@ export function CouncilPage() {
 			const url = window.URL.createObjectURL(new Blob([res]));
 			const link = document.createElement('a');
 			link.href = url;
-			link.setAttribute('download', 'file.docx');
+			const fileName = t('Council_Invited_Users_List') + ' ' + moment(new Date()).format('DD MMMM YYYY') + '.docx';
+			link.setAttribute('download', fileName);
 			document.body.appendChild(link);
 			link.click();
 		} catch (e) {
@@ -91,7 +93,7 @@ export function CouncilPage() {
 				<Field mbe='x8'>
 					<Field.Label>{t('Council_invite_link')}</Field.Label>
 					<Field.Row>
-						<Box is='span' fontScale='p1'>{address}</Box>
+						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
