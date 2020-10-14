@@ -10,6 +10,7 @@ import {
 	InputBox,
 	TextAreaInput,
 	TextInput,
+	Modal
 } from '@rocket.chat/fuselage';
 import moment from 'moment';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -19,9 +20,9 @@ registerLocale('ru', ru);
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
-import { Modal } from '../../../../client/components/basic/Modal';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validate, createWorkingGroupData } from './lib';
+import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
 require('react-datepicker/dist/react-datepicker.css');
@@ -125,7 +126,7 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 	const [phone, setPhone] = useState(previousPhone);
 	const [email, setEmail] = useState(previousEmail);
 
-	const [modal, setModal] = useState();
+	const setModal = useSetModal();
 
 	useEffect(() => {
 		setWorkingGroupType(previousWorkingGroupType || '');
@@ -159,7 +160,7 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 		|| previousEmail !== email,
 	[workingGroupType, surname, name, patronymic, position, phone, email]);
 
-	const saveAction = async (workingGroupType, surname, name, patronymic, position, phone, email) => {
+	const saveAction = useCallback(async (workingGroupType, surname, name, patronymic, position, phone, email) => {
 		const workingGroupData = createWorkingGroupData(
 			workingGroupType,
 			surname,
@@ -182,10 +183,29 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 			const _id = await insertOrUpdateWorkingGroup(workingGroupData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	};
+	}, [
+		_id,
+		dispatchToastMessage,
+		insertOrUpdateWorkingGroup,
+		workingGroupType,
+		surname,
+		name,
+		patronymic,
+		position,
+		phone,
+		email,
+		previousWorkingGroupType,
+		previousSurname,
+		previousName,
+		previousPatronymic,
+		previousPosition,
+		previousPhone,
+		previousEmail,
+		previousWorkingGroup
+	]);
 
 	const handleSave = useCallback(async () => {
-		await saveAction(
+		saveAction(
 			workingGroupType,
 			surname,
 			name,
@@ -195,15 +215,7 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 			email
 		);
 		onChange();
-	}, [
-		workingGroupType,
-		surname,
-		name,
-		patronymic,
-		position,
-		phone,
-		email,
-		_id]);
+	}, [saveAction, onChange]);
 
 	const onDeleteConfirm = useCallback(async () => {
 		try {
@@ -213,70 +225,67 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 			dispatchToastMessage({ type: 'error', message: error });
 			onChange();
 		}
-	}, [_id]);
+	}, [_id, close, deleteWorkingGroupUser, dispatchToastMessage, onChange]);
 
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
-	return <>
-		<VerticalBar.ScrollableContent {...props}>
-			<Field>
-				<Field.Label>{t('Working_group')}</Field.Label>
-				<Field.Row>
-					<TextAreaInput value={workingGroupType} onChange={(e) => setWorkingGroupType(e.currentTarget.value)} placeholder={t('Working_group')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Surname')}</Field.Label>
-				<Field.Row>
-					<TextInput value={surname} onChange={(e) => setSurname(e.currentTarget.value)} placeholder={t('Surname')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Name')}</Field.Label>
-				<Field.Row>
-					<TextInput value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Name')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Patronymic')}</Field.Label>
-				<Field.Row>
-					<TextInput value={patronymic} onChange={(e) => setPatronymic(e.currentTarget.value)} placeholder={t('Patronymic')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Council_Organization_Position')}</Field.Label>
-				<Field.Row>
-					<TextAreaInput value={position} onChange={(e) => setPosition(e.currentTarget.value)} placeholder={t('Council_Organization_Position')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Phone_number')}</Field.Label>
-				<Field.Row>
-					<TextInput value={phone} onChange={(e) => setPhone(e.currentTarget.value)} placeholder={t('Phone_number')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Label>{t('Email')}</Field.Label>
-				<Field.Row>
-					<TextInput value={email} onChange={(e) => setEmail(e.currentTarget.value)} placeholder={t('Email')} />
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Row>
-					<ButtonGroup stretch w='full'>
-						<Button onClick={close}>{t('Cancel')}</Button>
-						<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
-					</ButtonGroup>
-				</Field.Row>
-			</Field>
-			<Field>
-				<Field.Row>
-					<ButtonGroup stretch w='full'>
-						<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>
-					</ButtonGroup>
-				</Field.Row>
-			</Field>
-		</VerticalBar.ScrollableContent>
-		{ modal }
-	</>;
+	return <VerticalBar.ScrollableContent {...props}>
+		<Field>
+			<Field.Label>{t('Working_group')}</Field.Label>
+			<Field.Row>
+				<TextAreaInput value={workingGroupType} onChange={(e) => setWorkingGroupType(e.currentTarget.value)} placeholder={t('Working_group')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Surname')}</Field.Label>
+			<Field.Row>
+				<TextInput value={surname} onChange={(e) => setSurname(e.currentTarget.value)} placeholder={t('Surname')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Name')}</Field.Label>
+			<Field.Row>
+				<TextInput value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Name')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Patronymic')}</Field.Label>
+			<Field.Row>
+				<TextInput value={patronymic} onChange={(e) => setPatronymic(e.currentTarget.value)} placeholder={t('Patronymic')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Council_Organization_Position')}</Field.Label>
+			<Field.Row>
+				<TextAreaInput value={position} onChange={(e) => setPosition(e.currentTarget.value)} placeholder={t('Council_Organization_Position')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Phone_number')}</Field.Label>
+			<Field.Row>
+				<TextInput value={phone} onChange={(e) => setPhone(e.currentTarget.value)} placeholder={t('Phone_number')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Email')}</Field.Label>
+			<Field.Row>
+				<TextInput value={email} onChange={(e) => setEmail(e.currentTarget.value)} placeholder={t('Email')} />
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Row>
+				<ButtonGroup stretch w='full'>
+					<Button onClick={close}>{t('Cancel')}</Button>
+					<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+				</ButtonGroup>
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Row>
+				<ButtonGroup stretch w='full'>
+					<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>
+				</ButtonGroup>
+			</Field.Row>
+		</Field>
+	</VerticalBar.ScrollableContent>;
 }

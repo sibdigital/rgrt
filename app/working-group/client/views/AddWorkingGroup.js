@@ -26,7 +26,7 @@ export function AddWorkingGroup({ goToNew, close, onChange, ...props }) {
 
 	const insertOrUpdateWorkingGroup = useMethod('insertOrUpdateWorkingGroup');
 
-	const saveAction = async (workingGroupType, surname, name, patronymic, position, phone, email) => {
+	const saveAction = useCallback(async (workingGroupType, surname, name, patronymic, position, phone, email) => {
 		const workingGroupData = createWorkingGroupData(workingGroupType, surname, name, patronymic, position, phone, email);
 		const validation = validate(workingGroupData);
 		if (validation.length === 0) {
@@ -34,7 +34,7 @@ export function AddWorkingGroup({ goToNew, close, onChange, ...props }) {
 			return _id;
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	};
+	}, [dispatchToastMessage, insertOrUpdateWorkingGroup, t]);
 
 	const handleSave = useCallback(async () => {
 		try {
@@ -53,7 +53,7 @@ export function AddWorkingGroup({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [workingGroupType, surname, name, patronymic, position, phone, email]);
+	}, [dispatchToastMessage, goToNew, onChange, saveAction, workingGroupType, surname, name, patronymic, position, phone, email, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>

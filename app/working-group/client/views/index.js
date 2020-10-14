@@ -16,11 +16,12 @@ import moment from 'moment';
 
 const sortDir = (sortDir) => (sortDir === 'workingGroupType' ? 1 : -1);
 
-export const useQuery = (params, sort) => useMemo(() => ({
-	sort: JSON.stringify({ [sort[0]]: sortDir(sort[1]) }),
-	...params.itemsPerPage && { count: params.itemsPerPage },
-	...params.current && { offset: params.current },
-}), [JSON.stringify(params), JSON.stringify(sort)]);
+export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+	// TODO: remove cache. Is necessary for data invalidation
+}), [text, itemsPerPage, current, column, direction, cache]);
 
 export function WorkingGroupPage() {
 	const t = useTranslation();
@@ -33,14 +34,11 @@ export function WorkingGroupPage() {
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery(debouncedParams, debouncedSort);
+	const query = useQuery(debouncedParams, debouncedSort, cache);
 
 	const data = useEndpointData('working-groups.list', query) || {};
 
 	const router = useRoute(routeName);
-
-	const mobile = useMediaQuery('(max-width: 420px)');
-	const small = useMediaQuery('(max-width: 780px)');
 
 	const context = useRouteParameter('context');
 	const id = useRouteParameter('id');
@@ -67,12 +65,12 @@ export function WorkingGroupPage() {
 		//FlowRouter.go(`/working-group/${ _id }`);
 	};
 
-	const onEditClick = (_id) => () => {
+	const onEditClick = useCallback((_id) => () => {
 		router.push({
 			context: 'edit',
 			id: _id,
 		});
-	};
+	}, [router]);
 
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
@@ -87,9 +85,9 @@ export function WorkingGroupPage() {
 		router.push({ context });
 	}, [router]);
 
-	const close = () => {
+	const close = useCallback(() => {
 		router.push({});
-	};
+	}, [router]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -113,7 +111,7 @@ export function WorkingGroupPage() {
 			</Page.Content>
 		</Page>
 		{ context
-		&& <VerticalBar mod-small={small} mod-mobile={mobile} style={{ width: '378px' }} qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'edit' && t('Working_group_edit') }
 				{ context === 'new' && t('Working_group_add') }
