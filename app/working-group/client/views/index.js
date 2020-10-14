@@ -14,7 +14,7 @@ import { AddWorkingGroup } from './AddWorkingGroup';
 import { EditWorkingGroup } from './EditWorkingGroup';
 import moment from 'moment';
 
-const sortDir = (sortDir) => (sortDir === 'workingGroupType' ? 1 : -1);
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
@@ -75,10 +75,10 @@ export function WorkingGroupPage() {
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
 		if (sortBy === id) {
-			setSort([id]);
+			setSort([id, sortDirection === 'asc' ? 'workingGroupType' : 'asc']);
 			return;
 		}
-		setSort(['workingGroupType']);
+		setSort([id, 'asc']);
 	};
 
 	const handleHeaderButtonClick = useCallback((context) => () => {

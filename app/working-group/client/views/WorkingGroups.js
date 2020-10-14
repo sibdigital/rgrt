@@ -19,7 +19,7 @@ export function WorkingGroups({
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const header = useMemo(() => [
-		<Th key={'workingGroupType'} direction={sort[0]} active={sort[0] === 'workingGroupType'} sort='workingGroupType' onClick={onHeaderClick} color='default'>
+		<Th key={'workingGroupType'} direction={sort[1]} active={sort[0] === 'workingGroupType'} sort='workingGroupType' onClick={onHeaderClick} color='default'>
 			{ t('Working_group') }
 		</Th>,
 		<Th key={'name'} style={{ width: '190px' }} color='default'>
