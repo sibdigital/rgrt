@@ -56,6 +56,8 @@ import { ErrandsRaw } from './ErrandsRaw';
 import Errands from '../models/Errands';
 import CouncilsModel from '../models/Councils';
 import { CouncilsRaw } from './Councils';
+import WorkingGroupsModel from '../models/WorkingGroups';
+import { WorkingGroupRaw } from './WorkingGroupRaw';
 
 export const Permissions = new PermissionsRaw(PermissionsModel.model.rawCollection());
 export const Roles = new RolesRaw(RolesModel.model.rawCollection());
@@ -86,3 +88,4 @@ export const LivechatBusinessHours = new LivechatBusinessHoursRaw(LivechatBusine
 export const ServerEvents = new ServerEventsRaw(ServerEventModel.model.rawCollection());
 export const Tags = new TagsRaw(TagsModel.model.rawCollection());
 export const Councils = new CouncilsRaw(CouncilsModel.model.rawCollection());
+export const WorkingGroups = new WorkingGroupRaw(WorkingGroupsModel.model.rawCollection());

@@ -12,6 +12,7 @@ import Rooms from '../../../models/server/models/Rooms';
 import Users from '../../../models/server/models/Users';
 import Subscriptions from '../../../models/server/models/Subscriptions';
 import { settings } from '../../../settings';
+import { findDiscussionsWithErrandsFromRoom } from '../lib/errands';
 import { findMentionedMessages, findStarredMessages, findSnippetedMessageById, findSnippetedMessages, findDiscussionsFromRoom } from '../lib/messages';
 
 API.v1.addRoute('chat.delete', { authRequired: true }, {
@@ -708,6 +709,28 @@ API.v1.addRoute('chat.getDiscussions', { authRequired: true }, {
 			uid: this.userId,
 			roomId,
 			text,
+			pagination: {
+				offset,
+				count,
+				sort,
+			},
+		}));
+		return API.v1.success(messages);
+	},
+});
+
+API.v1.addRoute('chat.getDiscussionsWithErrands', { authRequired: true }, {
+	get() {
+		const { roomId } = this.queryParams;
+		const { sort } = this.parseJsonQuery();
+		const { offset, count } = this.getPaginationItems();
+
+		if (!roomId) {
+			throw new Meteor.Error('error-invalid-params', 'The required "roomId" query param is missing.');
+		}
+		const messages = Promise.await(findDiscussionsWithErrandsFromRoom({
+			uid: this.userId,
+			roomId,
 			pagination: {
 				offset,
 				count,

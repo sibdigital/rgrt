@@ -5,10 +5,10 @@
 .message-actions {
 	position: absolute;
 	z-index: 2;
-	top: -18px;
-	right: 0.4rem;
+	top: 2px;
+	right: 0.1rem;
 
-	display: none;
+	display: flex;
 
 	box-sizing: border-box;
 
@@ -23,7 +23,7 @@
 
 	background: var(rcx-surface, #ffffff);
 
-	font-size: 1.25rem;
+	font-size: 1.7rem;
 
 	&__buttons {
 		display: flex;
@@ -34,6 +34,8 @@
 		padding: 2px;
 
 		cursor: pointer;
+
+	 	margin-right: 1.1rem;
 
 		&:hover {
 			border-radius: 2px;
@@ -206,6 +208,33 @@
 
 .messages-box .rc-popover__list {
 	padding: 0;
+}
+
+.reply-buttons-group {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	margin-bottom: 0.3rem;
+	margin-top: 0.3rem;
+}
+
+.reply-button {
+	margin: 0.25rem;
+	padding: 0.1em 0.3em;
+	text-align: center;
+	text-decoration: none;
+	color: var(--color-black) !important;
+	border: 2px solid var(--button-reply-primary-background);
+	display: inline-block;
+	border-radius: 0.3em;
+	transition: all 0.5s ease-in-out;
+	position: relative;
+	overflow: hidden;
+	&:hover {
+		 background-color: var(--color-dark-20);
+		 color: var(--color-black) !important;
+		 opacity: 0.6;
+	}
 }
 
 .rtl .message-actions {

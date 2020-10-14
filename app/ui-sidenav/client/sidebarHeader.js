@@ -78,6 +78,15 @@ const toolbarButtons = (/* user */) => [{
 	},
 },
 {
+	name: t('Working_group'),
+	icon: 'team',
+	condition: () => hasPermission('manage-working-group'),
+	action: () => {
+		menu.close();
+		FlowRouter.go('working-group');
+	},
+},
+{
 	name: t('Sort'),
 	icon: 'sort',
 	hasPopup: true,

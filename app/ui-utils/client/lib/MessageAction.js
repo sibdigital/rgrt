@@ -181,7 +181,7 @@ Meteor.startup(async function() {
 
 	MessageAction.addButton({
 		id: 'quote-message',
-		icon: 'quote',
+		icon: 'thread',
 		label: 'Quote',
 		context: ['message', 'message-mobile', 'threads'],
 		action() {
@@ -206,8 +206,8 @@ Meteor.startup(async function() {
 
 			return true;
 		},
-		order: -3,
-		group: ['message', 'menu'],
+		order: 1,
+		group: ['menu', 'message'],
 	});
 
 	MessageAction.addButton({

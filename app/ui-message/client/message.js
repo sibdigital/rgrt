@@ -8,7 +8,7 @@ import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 import { timeAgo, formatDateAndTime } from '../../lib/client/lib/formatDate';
 import { DateFormat } from '../../lib/client';
 import { normalizeThreadTitle } from '../../threads/client/lib/normalizeThreadTitle';
-import { renderMessageBody, MessageTypes, MessageAction } from '../../ui-utils/client';
+import { renderMessageBody, MessageTypes, MessageAction, popover } from '../../ui-utils/client';
 import { RoomRoles, UserRoles, Roles } from '../../models/client';
 import { callbacks } from '../../callbacks/client';
 import { Markdown } from '../../markdown/client';
@@ -615,4 +615,15 @@ const processSequentials = ({ index, currentNode, settings, forceDate, showDateS
 Template.message.onRendered(function() {
 	const currentNode = this.firstNode;
 	this.autorun(() => processSequentials({ currentNode, ...Template.currentData() }));
+});
+
+Template.message.events({
+	'click [data-type="message-action"]'(e, t) {
+		const button = MessageAction.getButtonById(e.currentTarget.dataset.id);
+		if ((button != null ? button.action : undefined) != null) {
+			button.action.call(t.data, e, t.data.instance);
+			popover.close();
+			return false;
+		}
+	},
 });
