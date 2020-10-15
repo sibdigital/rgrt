@@ -4,5 +4,24 @@
 		<div class="content">
 			{{{body}}}
 		</div>
+		<div class="grid-of-icons">
+			{{> gridOfIcons}}
+		</div>
 	</section>
+</template>
+
+<template name="gridOfIcons">
+	<ul class="cbp-ig-grid">
+		{{#each toolbarButtons}}
+			<li class="cbp-ig-grid__elem">
+				<button class="cbp-ig-grid__elem-button js-button">
+					<button class="cbp-ig-grid__elem_icon" title="{{name}}" aria-haspopup="{{hasPopup}}">
+						{{> icon block="sidebar__toolbar-button-icon" icon=icon }}
+					</button> <br>
+					<h3 class="cbp-ig-title">{{name}}</h3>
+				</button>
+			</li>
+		{{/each}}
+	</ul>
+
 </template>

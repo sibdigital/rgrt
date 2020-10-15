@@ -1,0 +1,189 @@
+.grid-of-icons {
+	flex: 5 auto;
+	margin: 15px 0 0 0;
+}
+/* Основные стили */
+.cbp-ig-grid {
+	list-style: none;
+	padding: 0 0 50px 0;
+	margin: 0;
+}
+
+.cbp-ig-grid__elem {
+	text-align: center !important;
+	height: 136px;
+	width: 100%;
+}
+
+.cbp-ig-grid__elem-button {
+	width: 100%;
+	height: 100%;
+	text-align: center !important;
+}
+
+.cbp-ig-grid__elem_icon {
+	font-size: 36px;
+}
+
+/* сброс выравниваний */
+.cbp-ig-grid:before,
+.cbp-ig-grid:after {
+	content: " ";
+	display: table;
+}
+
+.cbp-ig-grid:after {
+	clear: both;
+}
+
+.cbp-ig-grid li {
+	width: 20%;
+	float: left;
+	height: 136px;
+	text-align: center;
+}
+
+/* стили для ссылок */
+.cbp-ig-grid li > a {
+	display: block;
+	height: 40%;
+	color: #47a3da;
+	-webkit-transition: background 0.2s;
+	-moz-transition: background 0.2s;
+	transition: background 0.2s;
+}
+
+/* иконки */
+.cbp-ig-icon {
+	padding: 15px 0 0 0;
+	display: block;
+	-webkit-transition: -webkit-transform 0.2s;
+	transition: -moz-transform 0.2s;
+	transition: transform 0.2s;
+}
+
+.cbp-ig-icon:before {
+	font-size: 7em;
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* элемент title */
+.cbp-ig-grid .cbp-ig-title {
+	margin: 10px 0 10px 0;
+	padding: 10px 0 0 0;
+	font-size: 1em;
+	position: relative;
+	-webkit-transition: -webkit-transform 0.2s;
+	-moz-transition: -moz-transform 0.2s;
+	transition: transform 0.2s;
+}
+
+.cbp-ig-grid .cbp-ig-title:before {
+	content: '';
+	position: absolute;
+	background: #47a3da;
+	/* width: 160px; */
+	height: 6px;
+	top: 0px;
+	left: 50%;
+	margin: -10px 0 0 -80px;
+	-webkit-transition: margin-top 0.2s;
+	-moz-transition: margin-top 0.2s;
+	transition: margin-top 0.2s;
+}
+
+.cbp-ig-grid .cbp-ig-category {
+	text-transform: uppercase;
+	display: inline-block;
+	font-size: 1em;
+	letter-spacing: 1px;
+	color: #fff;
+	margin-bottom: 10px;
+	-webkit-transform: translateY(10px);
+	-moz-transform: -moz-translateY(10px);
+	-ms-transform: -ms-translateY(10px);
+	transform: translateY(10px);
+	opacity: 0;
+	-webkit-transition: -webkit-transform 0.3s, opacity 0.2s;
+	-moz-transition: -moz-transform 0.3s, opacity 0.2s;
+	-webkit-transition: transform 0.3s, opacity 0.2s;
+	margin-top: 20px;
+}
+
+.cbp-ig-grid li:hover .cbp-ig-category,
+.touch .cbp-ig-grid li .cbp-ig-category {
+	opacity: 1;
+	-webkit-transform: translateY(0px);
+	-moz-transform: translateY(0px);
+	-ms-transform: translateY(0px);
+	transform: translateY(0px);
+}
+
+/* Стили для элементов при наведении мыши */
+
+.cbp-ig-grid li > button:hover {
+	background: #47a3da;
+}
+
+.cbp-ig-grid li > button:hover .cbp-ig-icon {
+	-webkit-transform: translateY(10px);
+	-moz-transform: translateY(10px);
+	-ms-transform: translateY(10px);
+	transform: translateY(10px);
+}
+
+.cbp-ig-grid li > button:hover .cbp-ig-icon:before,
+.cbp-ig-grid li > button:hover .cbp-ig-title {
+	color: #fff;
+}
+
+.cbp-ig-grid li > button:hover .cbp-ig-title {
+	-webkit-transform: translateY(-15px);
+	-moz-transform: translateY(-15px);
+	-ms-transform: translateY(-15px);
+	transform: translateY(-15px);
+}
+
+.cbp-ig-grid li > button:hover .cbp-ig-title:before {
+	background: #fff;
+}
+
+@media screen and (max-width: 100em) {
+	.cbp-ig-grid li {
+		width: 25%;
+	}
+}
+
+@media screen and (max-width: 80em) {
+	.cbp-ig-grid li {
+		width: 33%;
+	}
+}
+
+@media screen and (max-width: 60em) {
+	.cbp-ig-grid li {
+		width: 50%;
+	}
+}
+
+@media screen and (max-width: 40em) {
+	.cbp-ig-grid li {
+		width: 100%;
+	}
+}
+
+@media screen and (max-width: 20em) {
+	.cbp-ig-grid {
+		font-size: 40%;
+	}
+
+	.cbp-ig-grid .cbp-ig-category {
+		margin-top: 20px;
+	}
+}
