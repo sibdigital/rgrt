@@ -84,6 +84,139 @@ export const uploadFileWithMessage = async (rid, tmid, { description, fileName, 
 	}
 };
 
+export const uploadFileWithWorkingGroup = async (workingGroupMeetingId, { description, fileName, file }) => {
+	const data = new FormData();
+	description	&& data.append('description', description);
+	data.append('file', file.file, fileName);
+
+	const uploads = Session.get('uploading') || [];
+
+	const upload = {
+		id: Random.id(),
+		name: fileName,
+		percentage: 0,
+	};
+
+	uploads.push(upload);
+	Session.set('uploading', uploads);
+
+	const { xhr, promise, _id } = APIClient.upload(`v1/working-group-meeting.upload/${ workingGroupMeetingId }`, {}, data, {
+		progress(progress) {
+			const uploads = Session.get('uploading') || [];
+
+			if (progress === 100) {
+				return;
+			}
+			uploads.filter((u) => u.id === upload.id).forEach((u) => {
+				u.percentage = Math.round(progress) || 0;
+			});
+			Session.set('uploading', uploads);
+		},
+		error(error) {
+			const uploads = Session.get('uploading') || [];
+			uploads.filter((u) => u.id === upload.id).forEach((u) => {
+				u.error = error.message;
+				u.percentage = 0;
+			});
+			Session.set('uploading', uploads);
+		},
+	});
+
+	Tracker.autorun((computation) => {
+		const isCanceling = Session.get(`uploading-cancel-${ upload.id }`);
+		if (!isCanceling) {
+			return;
+		}
+		computation.stop();
+		Session.delete(`uploading-cancel-${ upload.id }`);
+
+		xhr.abort();
+
+		const uploads = Session.get('uploading') || {};
+		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
+	});
+
+	try {
+		await promise;
+		const uploads = Session.get('uploading') || [];
+		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
+		return { id: _id, description };
+	} catch (error) {
+		const uploads = Session.get('uploading') || [];
+		uploads.filter((u) => u.id === upload.id).forEach((u) => {
+			u.error = (error.xhr && error.xhr.responseJSON && error.xhr.responseJSON.error) || error.message;
+			u.percentage = 0;
+		});
+		Session.set('uploading', uploads);
+	}
+};
+
+export const uploadFileWithCompositionWorkingGroup = async (workingGroupMeetingId, { description, fileName, file }) => {
+	const data = new FormData();
+	description	&& data.append('description', description);
+	data.append('file', file.file, fileName);
+
+	const uploads = Session.get('uploading') || [];
+
+	const upload = {
+		id: Random.id(),
+		name: fileName,
+		percentage: 0,
+	};
+
+	uploads.push(upload);
+	Session.set('uploading', uploads);
+
+	const { xhr, promise, _id } = APIClient.upload(`v1/composition-of-the-working-group.upload//${ workingGroupMeetingId }`, {}, data, {
+		progress(progress) {
+			const uploads = Session.get('uploading') || [];
+
+			if (progress === 100) {
+				return;
+			}
+			uploads.filter((u) => u.id === upload.id).forEach((u) => {
+				u.percentage = Math.round(progress) || 0;
+			});
+			Session.set('uploading', uploads);
+		},
+		error(error) {
+			const uploads = Session.get('uploading') || [];
+			uploads.filter((u) => u.id === upload.id).forEach((u) => {
+				u.error = error.message;
+				u.percentage = 0;
+			});
+			Session.set('uploading', uploads);
+		},
+	});
+
+	Tracker.autorun((computation) => {
+		const isCanceling = Session.get(`uploading-cancel-${ upload.id }`);
+		if (!isCanceling) {
+			return;
+		}
+		computation.stop();
+		Session.delete(`uploading-cancel-${ upload.id }`);
+
+		xhr.abort();
+
+		const uploads = Session.get('uploading') || {};
+		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
+	});
+
+	try {
+		await promise;
+		const uploads = Session.get('uploading') || [];
+		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
+		return { id: _id, description };
+	} catch (error) {
+		const uploads = Session.get('uploading') || [];
+		uploads.filter((u) => u.id === upload.id).forEach((u) => {
+			u.error = (error.xhr && error.xhr.responseJSON && error.xhr.responseJSON.error) || error.message;
+			u.percentage = 0;
+		});
+		Session.set('uploading', uploads);
+	}
+};
 
 const showUploadPreview = (file, callback) => {
 	// If greater then 10MB don't try and show a preview
@@ -205,6 +338,72 @@ const getUploadPreview = async (file, preview) => {
 	}
 
 	return getGenericUploadPreview(file, preview);
+};
+
+export const fileUploadToWorkingGroup = async (files, isWorkingGroupMeeting, { _id }) => {
+	files = [].concat(files);
+
+	const uploadNextFile = () => {
+		const file = files.pop();
+		if (!file) {
+			modal.close();
+			return;
+		}
+
+		if (!fileUploadIsValidContentType(file.file.type)) {
+			modal.open({
+				title: t('FileUpload_MediaType_NotAccepted'),
+				text: file.file.type || `*.${ s.strRightBack(file.file.name, '.') }`,
+				type: 'error',
+				timer: 3000,
+			});
+			return;
+		}
+
+		if (file.file.size === 0) {
+			modal.open({
+				title: t('FileUpload_File_Empty'),
+				type: 'error',
+				timer: 1000,
+			});
+			return;
+		}
+
+		showUploadPreview(file, async (file, preview) => modal.open({
+			title: t('Upload_file_question'),
+			text: await getUploadPreview(file, preview),
+			showCancelButton: true,
+			closeOnConfirm: false,
+			closeOnCancel: false,
+			confirmButtonText: t('Send'),
+			cancelButtonText: t('Cancel'),
+			html: true,
+			onRendered: () => $('#file-name').focus(),
+		}, async (isConfirm) => {
+			if (!isConfirm) {
+				return;
+			}
+
+			const fileName = document.getElementById('file-name').value || file.name || file.file.name;
+			const description = document.getElementById('file-description').value || undefined;
+			if (isWorkingGroupMeeting) {
+				uploadFileWithWorkingGroup(_id, {
+					description,
+					fileName,
+					file,
+				});
+			} else {
+				uploadFileWithCompositionWorkingGroup(_id, {
+					description,
+					fileName,
+					file,
+				});
+			}
+			uploadNextFile();
+		}));
+	};
+
+	uploadNextFile();
 };
 
 export const fileUpload = async (files, input, { rid, tmid }) => {

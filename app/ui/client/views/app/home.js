@@ -44,6 +44,24 @@ const toolbarButtons = () => [
 		},
 	},
 	{
+		name: t('Working_group_composition'),
+		icon: 'team',
+		condition: () => hasPermission('manage-working-group'),
+		action: () => {
+			menu.close();
+			FlowRouter.go('composition-of-the-working-group');
+		},
+	},
+	{
+		name: t('Working_group_meetings'),
+		icon: 'team',
+		condition: () => hasPermission('manage-working-group'),
+		action: () => {
+			menu.close();
+			FlowRouter.go('working-group-meetings');
+		},
+	},
+	{
 		name: t('Create_new'),
 		icon: 'edit-rounded',
 		condition: () => hasAtLeastOnePermission(['create-c', 'create-p', 'create-d', 'start-discussion', 'start-discussion-other-user']),
@@ -148,7 +166,6 @@ Template.home.helpers({
 		return settings.get('Layout_Home_Body');
 	},
 	toolbarButtons() {
-		console.log(toolbarButtons().filter((button) => !button.condition || button.condition()));
 		return toolbarButtons().filter((button) => !button.condition || button.condition());
 	},
 });
@@ -161,7 +178,6 @@ Template.gridOfIcons.helpers({
 
 Template.gridOfIcons.events({
 	'click .js-button'(e) {
-		console.log(this.action);
 		if (document.activeElement === e.currentTarget) {
 			e.currentTarget.blur();
 		}

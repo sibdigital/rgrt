@@ -61,7 +61,7 @@ import './components/tooltip';
 import './lib/Tooltip';
 
 export { ChatMessages } from './lib/chatMessages';
-export { fileUpload } from './lib/fileUpload';
+export { fileUpload, fileUploadToWorkingGroup } from './lib/fileUpload';
 export { MsgTyping } from './lib/msgTyping';
 export { KonchatNotification } from './lib/notification';
 export { Login, animationSupport, animeBack, Button, preLoadImgs } from './lib/rocket';

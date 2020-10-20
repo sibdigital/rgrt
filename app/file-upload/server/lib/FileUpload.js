@@ -18,6 +18,7 @@ import Avatars from '../../../models/server/models/Avatars';
 import Users from '../../../models/server/models/Users';
 import Rooms from '../../../models/server/models/Rooms';
 import Settings from '../../../models/server/models/Settings';
+import WorkingGroupMeetings from '../../../models/server/models/WorkingGroupMeetings';
 import { mime } from '../../../utils/lib/mimeTypes';
 import { roomTypes } from '../../../utils/server/lib/roomTypes';
 import { hasPermission } from '../../../authorization/server/functions/hasPermission';
@@ -53,6 +54,47 @@ export const FileUpload = {
 		return new UploadFS.store[store](Object.assign({
 			name,
 		}, options, FileUpload[`default${ type }`]()));
+	},
+
+	validateFileUploadToWorkingGroup(file) {
+		if (!Match.test(file.workingGroupMeetingId, String)) {
+			console.log('validateFileUploadToWorkingGroup !match test');
+			return false;
+		}
+		const user = file.userId ? Meteor.users.findOne(file.userId) : null;
+		const workingGroupMeeting = WorkingGroupMeetings.findOneById(file.workingGroupMeetingId);
+		const fileUploadAllowed = settings.get('FileUpload_Enabled');
+
+		if (!user) {
+			console.log('!user');
+			return false;
+		}
+		if (!workingGroupMeeting) {
+			console.log('!workingGroupMeeting');
+			return false;
+		}
+		const language = user ? user.language : 'en';
+		if (!fileUploadAllowed) {
+			console.log('!fileUploadAllowed');
+			const reason = TAPi18n.__('FileUpload_Disabled', language);
+			throw new Meteor.Error('error-file-upload-disabled', reason);
+		}
+		// -1 maxFileSize means there is no limit
+		if (maxFileSize > -1 && file.size > maxFileSize) {
+			console.log('maxFileSize > -1 && file.size > maxFileSize');
+			const reason = TAPi18n.__('File_exceeds_allowed_size_of_bytes', {
+				size: filesize(maxFileSize),
+			}, language);
+			throw new Meteor.Error('error-file-too-large', reason);
+		}
+
+		if (!fileUploadIsValidContentType(file.type)) {
+			console.log('fileUploadIsValidContentType');
+			const reason = TAPi18n.__('File_type_is_not_accepted', language);
+			throw new Meteor.Error('error-invalid-file-type', reason);
+		}
+
+		return true;
 	},
 
 	validateFileUpload(file) {
@@ -583,7 +625,11 @@ export class FileUploadClass {
 		// Check if the fileData matches store filter
 		const filter = this.store.getFilter();
 		if (filter && filter.check) {
-			filter.check(fileData);
+			if (fileData.rid) {
+				filter.check(fileData);
+			} else {
+				FileUpload.validateFileUploadToWorkingGroup(fileData);
+			}
 		}
 
 		return this._doInsert(fileData, streamOrBuffer, cb);
