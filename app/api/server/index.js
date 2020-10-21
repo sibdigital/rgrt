@@ -41,6 +41,8 @@ import './v1/custom-user-status';
 import './v1/tags';
 import './v1/councils';
 import './v1/working-groups';
+import './v1/working-group-meetings';
+import './v1/upload-files';
 import './v1/protocols';
 
 export { API, APIClass, defaultRateLimiterOptions } from './api';

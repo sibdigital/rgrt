@@ -1,15 +1,17 @@
-import { API } from '../api';
-import { findWorkingGroups, findOneWorkingGroup, findWorkingGroup } from '../lib/working-groups';
 import { Meteor } from "meteor/meteor";
+
+import { API } from '../api';
+import { findWorkingGroupMeetings, findOneWorkingGroupMeeting, findWorkingGroupMeeting } from '../lib/working-group-meetings';
 import { FileUpload } from '../../../file-upload';
+
 import Busboy from 'busboy';
 
-API.v1.addRoute('working-groups.list', { authRequired: true }, {
+API.v1.addRoute('working-group-meetings.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
 
-		return API.v1.success(Promise.await(findWorkingGroups({
+		return API.v1.success(Promise.await(findWorkingGroupMeetings({
 			query,
 			pagination: {
 				offset,
@@ -20,17 +22,17 @@ API.v1.addRoute('working-groups.list', { authRequired: true }, {
 	},
 });
 
-API.v1.addRoute('working-group.getOne', { authRequired: false }, {
+API.v1.addRoute('working-group-meetings.getOne', { authRequired: false }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findOneWorkingGroup(query._id)));
+		return API.v1.success(Promise.await(findOneWorkingGroupMeeting(query._id)));
 	},
 });
 
-API.v1.addRoute('working-group.findOne', { authRequired: true }, {
+API.v1.addRoute('working-group-meetings.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findWorkingGroup(query._id)));
+		return API.v1.success(Promise.await(findWorkingGroupMeeting(query._id)));
 	},
 });
 
@@ -61,7 +63,7 @@ const getFiles = Meteor.wrapAsync(({ request }, callback) => {
 	request.pipe(busboy);
 });
 
-API.v1.addRoute('composition-of-the-working-group.upload/:id', { authRequired: true }, {
+API.v1.addRoute('working-group-meeting.upload/:id', { authRequired: true }, {
 	post() {
 		const { files, fields } = getFiles({
 			request: this.request,
@@ -83,7 +85,7 @@ API.v1.addRoute('composition-of-the-working-group.upload/:id', { authRequired: t
 			name: file.filename,
 			size: file.fileBuffer.length,
 			type: file.mimetype,
-			compositionOfTheWorkingGroup: this.urlParams.id,
+			workingGroupMeetingId: this.urlParams.id,
 			userId: this.userId,
 		};
 

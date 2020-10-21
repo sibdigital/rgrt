@@ -48,6 +48,7 @@
 @import 'imports/components/table.css';
 @import 'imports/components/tabs.css';
 @import "imports/components/tagPicker.css";
+@import "imports/components/gridOfIcons.css";
 
 /* Modal */
 @import 'imports/components/modal/full-modal.css';

@@ -231,7 +231,7 @@ Template.popover.events({
 Template.popover.helpers({
 	isSafariIos: /iP(ad|hone|od).+Version\/[\d\.]+.*Safari/i.test(navigator.userAgent),
 	check_item_name(item) {
-		if (!item.id) {
+		if (!item) {
 			return false;
 		}
 

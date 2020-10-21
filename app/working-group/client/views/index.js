@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Field, Icon } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Box } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
@@ -14,7 +14,7 @@ import { AddWorkingGroup } from './AddWorkingGroup';
 import { EditWorkingGroup } from './EditWorkingGroup';
 import moment from 'moment';
 
-const sortDir = (sortDir) => (sortDir === 'workingGroupType' ? 1 : -1);
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
@@ -61,9 +61,13 @@ export function WorkingGroupPage() {
 		}
 	};
 
-	const onClick = (_id) => () => {
-		//FlowRouter.go(`/working-group/${ _id }`);
-	};
+	const onClick = useCallback(() => {
+		//FlowRouter.go(`/composition-of-the-working-group`);
+	}, []);
+
+	const onPinnedFilesClick = useCallback(() => {
+		FlowRouter.go(`/composition-of-the-working-group`);
+	}, []);
 
 	const onEditClick = useCallback((_id) => () => {
 		router.push({
@@ -75,10 +79,10 @@ export function WorkingGroupPage() {
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
 		if (sortBy === id) {
-			setSort([id]);
+			setSort([id, sortDirection === 'asc' ? 'workingGroupType' : 'asc']);
 			return;
 		}
-		setSort(['workingGroupType']);
+		setSort([id, 'asc']);
 	};
 
 	const handleHeaderButtonClick = useCallback((context) => () => {
@@ -99,13 +103,17 @@ export function WorkingGroupPage() {
 			</Page.Header>
 			<Page.Content>
 				<Field.Row>
-					<Field.Label>{t('Council_Invited_Users')}</Field.Label>
-					<Button small aria-label={t('Add_User')} onClick={handleHeaderButtonClick('new')}>
-						{t('Working_group_add')}
-					</Button>
-					<Button small onClick={downloadWorkingGroupParticipants(data.workingGroups)} aria-label={t('Download')}>
-						{t('Download_Council_Participant_List')}
-					</Button>
+					<ButtonGroup>
+						<Button small aria-label={t('Pinned_files')} onClick={onPinnedFilesClick}>
+							<Box is='span' fontScale='p1'>{t('Working_group_meeting_pinned_files')}</Box>
+						</Button>
+						<Button small aria-label={t('Add_User')} onClick={handleHeaderButtonClick('new')}>
+							<Box is='span' fontScale='p1'>{t('Working_group_add')}</Box>
+						</Button>
+						<Button small onClick={downloadWorkingGroupParticipants(data.workingGroups)} aria-label={t('Download')}>
+							<Box is='span' fontScale='p1'>{t('Download_Council_Participant_List')}</Box>
+						</Button>
+					</ButtonGroup>
 				</Field.Row>
 				<WorkingGroups setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data.workingGroups} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
 			</Page.Content>

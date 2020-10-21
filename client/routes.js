@@ -140,6 +140,36 @@ FlowRouter.route('/working-group/:context?/:id?', {
 	}],
 });
 
+FlowRouter.route('/composition-of-the-working-group/:context?/:id?', {
+	name: 'composition-of-the-working-group',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group/client/views/compositionOfTheWorkingGroup/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-group-meeting/:id', {
+	name: 'working-group-meeting',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-meetings/client/views/workingGroupMeeting'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-group-meetings/:context?/:id?', {
+	name: 'working-group-meetings',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-meetings/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/manual-mail-sender', {
 	name: 'manual-mail-sender',
 	action: () => {
