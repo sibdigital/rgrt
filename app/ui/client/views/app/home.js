@@ -156,7 +156,17 @@ const toolbarButtons = () => [
 			menu.close();
 			FlowRouter.go('/errands/charged_to_me');
 		},
-	}];
+	},
+	{
+		name: t('Protocols'),
+		icon: 'errand',
+		//condition: () => hasPermission('manage-working-errand'),
+		action: () => {
+			menu.close();
+			FlowRouter.go('/protocols');
+		},
+	}
+];
 
 Template.home.helpers({
 	title() {
