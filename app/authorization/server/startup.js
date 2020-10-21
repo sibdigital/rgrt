@@ -60,6 +60,7 @@ Meteor.startup(function() {
 		{ _id: 'manage-own-outgoing-integrations',   roles: ['admin'] },
 		{ _id: 'manage-own-incoming-integrations',   roles: ['admin'] },
 		{ _id: 'manage-oauth-apps',                  roles: ['admin'] },
+		{ _id: 'manage-protocols',					 roles: ['admin', 'secretary'] },
 		{ _id: 'manage-selected-settings', 	         roles: ['admin'] },
 		{ _id: 'manage-tags',			 			 roles: ['admin'] },
 		{ _id: 'manage-working-group',	 			 roles: ['admin', 'secretary'] },
