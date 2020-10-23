@@ -13,7 +13,7 @@ import UserStatusMenu from '../components/basic/userStatus/UserStatusMenu';
 
 const STATUS_TEXT_MAX_LENGTH = 120;
 
-export default function AccountProfileForm({ values, handlers, user, settings, onSaveStateChange, ...props }) {
+export default function AccountProfileForm({ values, handlers, user, data, settings, onSaveStateChange, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -26,6 +26,9 @@ export default function AccountProfileForm({ values, handlers, user, settings, o
 
 	const {
 		allowRealNameChange,
+		// allowOrganizationChange,
+		// allowPositionChange,
+		// allowPhoneChange,
 		allowUserStatusMessageChange,
 		allowEmailChange,
 		allowPasswordChange,
@@ -48,8 +51,21 @@ export default function AccountProfileForm({ values, handlers, user, settings, o
 		nickname,
 	} = values;
 
+	let phone = data.phone;
 	const {
+		surname,
+		patronymic,
+		organization,
+		position,
+	} = data;
+
+	const {
+		handleSurname,
 		handleRealname,
+		handlePatronymic,
+		handleOrganization,
+		handlePosition,
+		handlePhone,
 		handleEmail,
 		handleUsername,
 		handlePassword,
@@ -111,6 +127,24 @@ export default function AccountProfileForm({ values, handlers, user, settings, o
 
 	const statusTextError = useMemo(() => (!statusText || statusText.length <= STATUS_TEXT_MAX_LENGTH || statusText.length === 0 ? undefined : t('Max_length_is', STATUS_TEXT_MAX_LENGTH)), [statusText, t]);
 	const { emails: [{ verified = false }] } = user;
+	const phoneNumberValidation = (text) => {
+		// console.log(text);
+		// console.log(text.currentTarget);
+		// console.log(text.replace(/[^\d]/g, ''));
+		// this.setState({ phone: text.replace(/[^\d]/g, '') });
+		//return text.replace(/[^\d]/g, '');
+	};
+
+	const isNumberKey = (event) => {
+		const charCode = event.which ? event.which : event.keyCode;
+		// console.log(charCode);
+		if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+			return false;
+		}
+		// console.log(phone);
+		// console.log(charCode.toString());
+		return true;
+	};
 
 	const canSave = !![
 		!!passwordError,
@@ -132,32 +166,81 @@ export default function AccountProfileForm({ values, handlers, user, settings, o
 		{useMemo(() => <Field>
 			<UserAvatarEditor etag={user.avatarETag} username={username} setAvatarObj={handleAvatar} disabled={!allowUserAvatarChange} suggestions={avatarSuggestions}/>
 		</Field>, [username, handleAvatar, allowUserAvatarChange, avatarSuggestions, user.avatarETag])}
-		<Box display='flex' flexDirection='row' justifyContent='space-between'>
-			{useMemo(() => <Field mie='x8'>
-				<Field.Label flexGrow={0}>{t('Name')}</Field.Label>
-				<Field.Row>
-					<TextInput error={nameError} disabled={!allowRealNameChange} flexGrow={1} value={realname} onChange={handleRealname}/>
-				</Field.Row>
-				{!allowRealNameChange && <Field.Hint>
-					{t('RealName_Change_Disabled')}
-				</Field.Hint>}
-				<Field.Error>
-					{nameError}
-				</Field.Error>
-			</Field>, [t, realname, handleRealname, allowRealNameChange, nameError])}
-			{useMemo(() => <Field mis='x8' >
-				<Field.Label flexGrow={0}>{t('Username')}</Field.Label>
-				<Field.Row>
-					<TextInput error={usernameError} disabled={!canChangeUsername} flexGrow={1} value={username} onChange={handleUsername} addon={<Icon name='at' size='x20'/>}/>
-				</Field.Row>
-				{!canChangeUsername && <Field.Hint>
-					{t('Username_Change_Disabled')}
-				</Field.Hint>}
-				<Field.Error>
-					{usernameError}
-				</Field.Error>
-			</Field>, [t, username, handleUsername, canChangeUsername, usernameError])}
-		</Box>
+		{useMemo(() => <Field>
+			<Field.Label flexGrow={0}>{t('Username')}</Field.Label>
+			<Field.Row>
+				<TextInput error={usernameError} disabled={!canChangeUsername} flexGrow={1} value={username} onChange={handleUsername} addon={<Icon name='at' size='x20'/>}/>
+			</Field.Row>
+			{!canChangeUsername && <Field.Hint>
+				{t('Username_Change_Disabled')}
+			</Field.Hint>}
+			<Field.Error>
+				{usernameError}
+			</Field.Error>
+		</Field>, [t, username, handleUsername, canChangeUsername, usernameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Surname')}</Field.Label>
+			<Field.Row>
+				<TextInput error={nameError} disabled={!allowRealNameChange} flexGrow={1} value={surname} onChange={handleSurname} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
+			</Field.Row>
+			{!allowRealNameChange && <Field.Hint>
+				{t('RealName_Change_Disabled')}
+			</Field.Hint>}
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, surname, handleSurname, allowRealNameChange, nameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Name')}</Field.Label>
+			<Field.Row>
+				<TextInput error={nameError} disabled={!allowRealNameChange} onKeyPress={(event) => isNumberKey(event)} flexGrow={1} value={realname} onChange={handleRealname} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
+			</Field.Row>
+			{!allowRealNameChange && <Field.Hint>
+				{t('RealName_Change_Disabled')}
+			</Field.Hint>}
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, realname, handleRealname, allowRealNameChange, nameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Patronymic')}</Field.Label>
+			<Field.Row>
+				<TextInput error={nameError} disabled={!allowRealNameChange} flexGrow={1} value={patronymic} onChange={handlePatronymic} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
+			</Field.Row>
+			{!allowRealNameChange && <Field.Hint>
+				{t('RealName_Change_Disabled')}
+			</Field.Hint>}
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, patronymic, handlePatronymic, allowRealNameChange, nameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Organization')}</Field.Label>
+			<Field.Row>
+				<TextInput error={nameError} flexGrow={1} value={organization} onChange={handleOrganization} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
+			</Field.Row>
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, organization, handleOrganization, nameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Position')}</Field.Label>
+			<Field.Row>
+				<TextInput error={nameError} flexGrow={1} value={position} onChange={handlePosition} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
+			</Field.Row>
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, position, handlePosition, nameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Phone_number')}</Field.Label>
+			<Field.Row>
+				<TextInput error={nameError} flexGrow={1} value={phone} onKeyPress={(event) => { return isNumberKey(event)}} onChange={handlePhone} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
+			</Field.Row>
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, phone, handlePhone, nameError])}
 		{useMemo(() => <Field>
 			<Field.Label>{t('StatusMessage')}</Field.Label>
 			<Field.Row>

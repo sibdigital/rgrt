@@ -44,13 +44,81 @@
 						</div>
 					{{/if}}
 				{{/if}}
-				{{#if state 'register'}}
+				{{#if state 'registerStepOne'}}
+					<div class="rc-input">
+						<label class="rc-input__label" for="surname">
+							<div class="rc-input__wrapper">
+								<input name="surname" id="surname" type="text" class="rc-input__element"
+									   autocapitalize="off" autocorrect="off"
+									   value="{{surname}}" autocomplete="off"
+									   placeholder="{{_ "Surname"}}" autofocus>
+								<div class="input-error"></div>
+							</div>
+						</label>
+					</div>
 					<div class="rc-input">
 						<label class="rc-input__label" for="name">
 							<div class="rc-input__wrapper">
 								<input name="name" id="name" type="text" class="rc-input__element"
+									   autocapitalize="off" autocorrect="off"
+									   value="{{name}}" autocomplete="off"
+									   placeholder="{{_ "Name"}}" autofocus>
+								<div class="input-error"></div>
+							</div>
+						</label>
+					</div>
+					<div class="rc-input">
+						<label class="rc-input__label" for="patronymic">
+							<div class="rc-input__wrapper">
+								<input name="patronymic" id="patronymic" type="text" class="rc-input__element"
+									   autocapitalize="off" autocorrect="off"
+									   value="{{patronymic}}" autocomplete="off"
+									   placeholder="{{_ "Patronymic"}} {{_ "optional"}}" autofocus>
+								<div class="input-error"></div>
+							</div>
+						</label>
+					</div>
+					<div class="rc-input">
+						<label class="rc-input__label" for="organization">
+							<div class="rc-input__wrapper">
+								<input name="organization" id="organization" type="text" class="rc-input__element"
+									   autocapitalize="off" autocorrect="off"
+									   value="{{organization}}" autocomplete="off"
+									   placeholder="{{_ "Organization"}}" autofocus>
+								<div class="input-error"></div>
+							</div>
+						</label>
+					</div>
+					<div class="rc-input">
+						<label class="rc-input__label" for="position">
+							<div class="rc-input__wrapper">
+								<input name="position" id="position" type="text" class="rc-input__element"
+									   autocapitalize="off" autocorrect="off"
+									   value="{{position}}" autocomplete="off"
+									   placeholder="{{_ "Position"}}" autofocus>
+								<div class="input-error"></div>
+							</div>
+						</label>
+					</div>
+					<div class="rc-input">
+						<label class="rc-input__label" for="phone">
+							<div class="rc-input__wrapper">
+								<input name="phone" id="phone" type="text" class="rc-input__element"
+									   autocapitalize="off" autocorrect="off"
+									   value="{{phone}}" autocomplete="off"
+									   placeholder="{{_ "Phone_number"}}, {{_ "optional"}}, +7(123)456-78-90" autofocus>
+								<div class="input-error"></div>
+							</div>
+						</label>
+					</div>
+				{{/if}}
+				{{#if state 'register'}}
+					<div class="rc-input">
+						<label class="rc-input__label" for="login">
+							<div class="rc-input__wrapper">
+								<input name="login" id="login" type="text" class="rc-input__element"
 									autocapitalize="off" autocorrect="off"
-									placeholder="{{namePlaceholder}}" autofocus>
+									placeholder="{{loginPlaceholder}}" autofocus>
 								<div class="input-error"></div>
 							</div>
 						</label>
@@ -139,6 +207,9 @@
 				{{else}}
 					<div class="rc-button__group rc-button__group--vertical">
 						<button class='rc-button rc-button--primary login'>{{btnLoginSave}}</button>
+						{{#if state 'register'}}
+							<button type="button" class="rc-button rc-button--primary registerStepBack" style="margin-top: 10px">{{_ 'Head_back'}}</button>
+						{{/if}}
 					</div>
 				{{/if}}
 			</div>

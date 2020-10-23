@@ -30,6 +30,11 @@ Meteor.methods({
 			email: String,
 			pass: String,
 			name: String,
+			surname: String,
+			patronymic: String,
+			organization: String,
+			position: String,
+			phone: String,
 			secretURL: Match.Optional(String),
 			reason: Match.Optional(String),
 		}));
@@ -60,6 +65,11 @@ Meteor.methods({
 			password: formData.pass,
 			name: formData.name,
 			reason: formData.reason,
+			surname: formData.surname,
+			patronymic: formData.patronymic,
+			organization: formData.organization,
+			position: formData.position,
+			phone: formData.phone,
 		};
 
 		// Check if user has already been imported and never logged in. If so, set password and let it through
@@ -74,9 +84,29 @@ Meteor.methods({
 
 		Users.setName(userId, s.trim(formData.name));
 
-		const reason = s.trim(formData.reason);
+		const reason = s.trim(formData.reason) ?? '';
 		if (manuallyApproveNewUsers && reason) {
 			Users.setReason(userId, reason);
+		}
+		const surname = s.trim(formData.surname) ?? '';
+		if (surname) {
+			Users.addSurname(userId, surname);
+		}
+		const patronymic = s.trim(formData.patronymic) ?? '';
+		if (patronymic) {
+			Users.addPatronymic(userId, patronymic);
+		}
+		const organization = s.trim(formData.organization) ?? '';
+		if (organization) {
+			Users.addOrganization(userId, organization);
+		}
+		const position = s.trim(formData.position) ?? '';
+		if (position) {
+			Users.addPosition(userId, position);
+		}
+		const phone = s.trim(formData.phone) ?? '';
+		if (phone) {
+			Users.addPhone(userId, phone);
 		}
 
 		saveCustomFields(userId, formData);

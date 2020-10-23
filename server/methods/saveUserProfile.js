@@ -28,10 +28,12 @@ Meteor.methods({
 
 		const user = Users.findOneById(this.userId);
 
-		if (settings.realname || settings.username) {
+		if (settings.realname || settings.username || settings.surname || settings.patronymic) {
 			if (!saveUserIdentity(this.userId, {
 				_id: this.userId,
+				surname: settings.surname,
 				name: settings.realname,
+				patronymic: settings.patronymic,
 				username: settings.username,
 			})) {
 				throw new Meteor.Error('error-could-not-save-identity', 'Could not save user identity', { method: 'saveUserProfile' });
@@ -44,6 +46,33 @@ Meteor.methods({
 
 		if (settings.statusType) {
 			Meteor.call('setUserStatus', settings.statusType, null);
+		}
+
+		if (settings.organization || settings.organization === '' || settings.organization != null) {
+			if (typeof settings.organization !== 'string' || settings.organization.length > 150) {
+				throw new Meteor.Error('error-invalid-field', 'organization', {
+					method: 'saveUserProfile',
+				});
+			}
+			Users.setOrganization(user._id, settings.organization.trim());
+		}
+
+		if (settings.position || settings.position === '' || settings.position != null) {
+			if (typeof settings.position !== 'string' || settings.position.length > 150) {
+				throw new Meteor.Error('error-invalid-field', 'position', {
+					method: 'saveUserProfile',
+				});
+			}
+			Users.setPosition(user._id, settings.position.trim());
+		}
+
+		if (settings.phone || settings.phone === '' || settings.phone != null) {
+			if (typeof settings.phone !== 'string' || settings.phone.length > 100) {
+				throw new Meteor.Error('error-invalid-field', 'phone', {
+					method: 'saveUserProfile',
+				});
+			}
+			Users.setPhone(user._id, settings.phone.trim());
 		}
 
 		if (settings.bio != null) {

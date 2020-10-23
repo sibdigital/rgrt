@@ -8,7 +8,9 @@ import { hasPermission } from '../../../authorization';
 const logger = new Logger('getFullUserData');
 
 const defaultFields = {
+	surname: 1,
 	name: 1,
+	patronymic: 1,
 	username: 1,
 	nickname: 1,
 	status: 1,
@@ -23,6 +25,8 @@ const defaultFields = {
 
 const fullFields = {
 	emails: 1,
+	organization: 1,
+	position: 1,
 	phone: 1,
 	statusConnection: 1,
 	bio: 1,

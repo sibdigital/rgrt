@@ -14,6 +14,7 @@ import { useMethod } from '../contexts/ServerContext';
 import { useSetModal } from '../contexts/ModalContext';
 import { useUpdateAvatar } from '../hooks/useUpdateAvatar';
 import { getUserEmailAddress } from '../helpers/getUserEmailAddress';
+import { useEndpointData } from '../hooks/useEndpointData';
 
 const ActionConfirmModal = ({ onSave, onCancel, title, text, isPassword, ...props }) => {
 	const t = useTranslation();
@@ -43,7 +44,12 @@ const ActionConfirmModal = ({ onSave, onCancel, title, text, isPassword, ...prop
 };
 
 const getInitialValues = (user) => ({
+	surname: user.surname ?? '',
 	realname: user.name ?? '',
+	patronymic: user.patronymic ?? '',
+	organization: user.organization ?? '',
+	position: user.position ?? '',
+	phone: user.phone ?? '',
 	email: getUserEmailAddress(user) ?? '',
 	username: user.username ?? '',
 	password: '',
@@ -63,7 +69,12 @@ const AccountProfilePage = () => {
 
 	const user = useUser();
 
-	const { values, handlers, hasUnsavedChanges, commit } = useForm(getInitialValues(user));
+	const userId = user._id;
+	const query = useMemo(() => ({
+		query: JSON.stringify({ _id: userId }),
+	}), [userId]);
+	const data = useEndpointData('users.getOne', query) || { result: [] };
+
 	const [canSave, setCanSave] = useState(true);
 	const setModal = useSetModal();
 	const [loggingOut, setLoggingOut] = useState(false);
@@ -74,11 +85,31 @@ const AccountProfilePage = () => {
 
 	const closeModal = useCallback(() => setModal(null), [setModal]);
 
+	const { values, handlers, hasUnsavedChanges, commit } = useForm(getInitialValues(user));
+	if (values.surname) {
+		data.surname = values.surname;
+	}
+	if (values.patronymic) {
+		data.patronymic = values.patronymic;
+	}
+	if (values.organization) {
+		data.organization = values.organization;
+	}
+	if (values.position) {
+		data.position = values.position;
+	}
+	if (values.phone) {
+		data.phone = values.phone;
+	}
+
 	const localPassword = Boolean(user?.services?.password?.bcrypt?.trim());
 	const requirePasswordConfirmation = (values.email !== getUserEmailAddress(user) || !!values.password) && localPassword;
 
 	const erasureType = useSetting('Message_ErasureType');
 	const allowRealNameChange = useSetting('Accounts_AllowRealNameChange');
+	// const allowOrganizationChange = useSetting('Accounts_AllowOrganizationChange');
+	// const allowPositionChange = useSetting('Accounts_AllowPositionChange');
+	//const allowPhoneChange = useSetting('Accounts_AllowPhoneChange');
 	const allowUserStatusMessageChange = useSetting('Accounts_AllowUserStatusMessageChange');
 	const allowUsernameChange = useSetting('Accounts_AllowUsernameChange');
 	const allowEmailChange = useSetting('Accounts_AllowEmailChange');
@@ -95,6 +126,9 @@ const AccountProfilePage = () => {
 
 	const settings = useMemo(() => ({
 		allowRealNameChange,
+		// allowOrganizationChange,
+		// allowPositionChange,
+		//allowPhoneChange,
 		allowUserStatusMessageChange,
 		allowEmailChange,
 		allowPasswordChange,
@@ -105,6 +139,9 @@ const AccountProfilePage = () => {
 		namesRegex,
 	}), [
 		allowDeleteOwnAccount,
+		// allowOrganizationChange,
+		// allowPositionChange,
+		//allowPhoneChange,
 		allowEmailChange,
 		allowPasswordChange,
 		allowRealNameChange,
@@ -116,7 +153,12 @@ const AccountProfilePage = () => {
 	]);
 
 	const {
+		surname,
 		realname,
+		patronymic,
+		organization,
+		position,
+		phone,
 		email,
 		avatar,
 		username,
@@ -138,12 +180,19 @@ const AccountProfilePage = () => {
 				const avatarResult = await updateAvatar();
 				if (avatarResult) { handleAvatar(''); }
 				await saveFn({
+					...allowRealNameChange && { surname },
 					...allowRealNameChange && { realname },
+					...allowRealNameChange && { patronymic },
+					// ...allowOrganizationChange && { organization },
+					// ...allowPositionChange && { position },
 					...allowEmailChange && getUserEmailAddress(user) !== email && { email },
 					...allowPasswordChange && { newPassword: password },
 					...canChangeUsername && { username },
 					...allowUserStatusMessageChange && { statusText },
 					...typedPassword && { typedPassword: SHA256(typedPassword) },
+					organization,
+					position,
+					phone,
 					statusType,
 					nickname,
 					bio: bio || '',
@@ -173,12 +222,20 @@ const AccountProfilePage = () => {
 		allowEmailChange,
 		allowPasswordChange,
 		allowRealNameChange,
+		// allowOrganizationChange,
+		// allowPositionChange,
+		//allowPhoneChange,
 		allowUserStatusMessageChange,
 		bio,
 		canChangeUsername,
 		email,
 		password,
+		surname,
 		realname,
+		patronymic,
+		organization,
+		position,
+		phone,
 		statusText,
 		username,
 		user,
@@ -259,7 +316,7 @@ const AccountProfilePage = () => {
 		</Page.Header>
 		<Page.ScrollableContentWithShadow>
 			<Box maxWidth='600px' w='full' alignSelf='center'>
-				<AccountProfileForm values={values} handlers={handlers} user={user} settings={settings} onSaveStateChange={setCanSave}/>
+				<AccountProfileForm values={values} data={data} handlers={handlers} user={user} settings={settings} onSaveStateChange={setCanSave}/>
 				<ButtonGroup stretch mb='x12'>
 					<Button onClick={handleLogoutOtherLocations} flexGrow={0} disabled={loggingOut}>
 						{t('Logout_Others')}

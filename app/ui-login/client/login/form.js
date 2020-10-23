@@ -12,16 +12,73 @@ import { settings } from '../../../settings';
 import { callbacks } from '../../../callbacks';
 import { t, handleError } from '../../../utils';
 
+const getLoginExample = (surname, name, patronymic) => {
+	if (!surname || !name) {
+		return '';
+	}
+
+	const translit = (str) => {
+		const L = {
+			'А':'A','а':'a','Б':'B','б':'b','В':'V','в':'v','Г':'G','г':'g',
+			'Д':'D','д':'d','Е':'E','е':'e','Ё':'Yo','ё':'yo','Ж':'Zh','ж':'zh',
+			'З':'Z','з':'z','И':'I','и':'i','Й':'Y','й':'y','К':'K','к':'k',
+			'Л':'L','л':'l','М':'M','м':'m','Н':'N','н':'n','О':'O','о':'o',
+			'П':'P','п':'p','Р':'R','р':'r','С':'S','с':'s','Т':'T','т':'t',
+			'У':'U','у':'u','Ф':'F','ф':'f','Х':'Kh','х':'kh','Ц':'Ts','ц':'ts',
+			'Ч':'Ch','ч':'ch','Ш':'Sh','ш':'sh','Щ':'Sch','щ':'sch','Ъ':'"','ъ':'"',
+			'Ы':'Y','ы':'y','Ь':"'",'ь':"'",'Э':'E','э':'e','Ю':'Yu','ю':'yu',
+			'Я':'Ya','я':'ya'
+		};
+		let reg = '';
+		for (const kr in L) {
+			reg += kr;
+		}
+		reg = new RegExp('[' + reg + ']', 'g');
+		const translate = function(a) {
+			return a in L ? L[a] : a;
+		};
+		return str.replace(reg, translate).toLowerCase();
+	};
+
+	const capitalizeFirstLetter = (translitString) => {
+		return translitString.charAt(0).toUpperCase() + translitString.slice(1);
+	};
+
+	const patron = patronymic ? patronymic[0] : '';
+	return capitalizeFirstLetter(translit(surname + name[0] + patron));
+};
+
 Template.loginForm.helpers({
 	userName() {
 		const user = Meteor.user();
 		return user && user.username;
 	},
+	surname() {
+		return Template.instance().registerStepOneForm.get().surname ?? '';
+	},
+	name() {
+		return Template.instance().registerStepOneForm.get().name ?? '';
+	},
+	patronymic() {
+		return Template.instance().registerStepOneForm.get().patronymic ?? '';
+	},
+	organization() {
+		return Template.instance().registerStepOneForm.get().organization ?? '';
+	},
+	position() {
+		return Template.instance().registerStepOneForm.get().position ?? '';
+	},
+	phone() {
+		return Template.instance().registerStepOneForm.get().phone ?? '';
+	},
 	namePlaceholder() {
 		if (settings.get('Accounts_RequireNameForSignUp')) {
-			return t('Name');
+			return t('Name_login');
 		}
 		return t('Name_optional');
+	},
+	loginPlaceholder() {
+		return t('Name_login') + ', ' + t('For_example') + ': ' + Template.instance().loginExample.get();
 	},
 	showFormLogin() {
 		return settings.get('Accounts_ShowFormLogin');
@@ -42,6 +99,8 @@ Template.loginForm.helpers({
 				return t('Send_confirmation_email');
 			case 'forgot-password':
 				return t('Reset_password');
+			case 'registerStepOne':
+				return t('Further');
 		}
 	},
 	loginTerms() {
@@ -107,7 +166,14 @@ Template.loginForm.events({
 				});
 				return;
 			}
+			if (state === 'registerStepOne') {
+				instance.loginExample.set(getLoginExample(formData.surname, formData.surname, formData.patronymic));
+				instance.registerStepOneForm.set(formData);
+				instance.loading.set(false);
+				return instance.state.set('register');
+			}
 			if (state === 'register') {
+				Object.assign(formData, instance.registerStepOneForm.get());
 				formData.secretURL = FlowRouter.getParam('hash');
 				return Meteor.call('registerUser', formData, function(error) {
 					instance.loading.set(false);
@@ -161,8 +227,19 @@ Template.loginForm.events({
 			});
 		}
 	},
+	'click .registerStepBack'() {
+		Template.instance().state.set('registerStepOne');
+		Template.instance().loading.set(false);
+		return callbacks.run('loginPageStateChange', Template.instance().state.get());
+	},
+	'keyup [name=phone]'(event) {
+		const text = $(event.target).val().replace(/[^\d]/g, '');
+		$(event.target).val(text);
+		$('#login-card input[name=phone], #login-card select[name=phone]').addClass('error');
+		$('#login-card input[name=phone]~.input-error, #login-card select[name=phone]~.input-error').text(t('Incorrect_phone_number_input'));
+	},
 	'click .register'() {
-		Template.instance().state.set('register');
+		Template.instance().state.set('registerStepOne');
 		return callbacks.run('loginPageStateChange', Template.instance().state.get());
 	},
 	'click .back-to-login'() {
@@ -179,6 +256,8 @@ Template.loginForm.onCreated(function() {
 	const instance = this;
 	this.customFields = new ReactiveVar();
 	this.loading = new ReactiveVar(false);
+	this.loginExample = new ReactiveVar('');
+	this.registerStepOneForm = new ReactiveVar({});
 	Tracker.autorun(() => {
 		const Accounts_CustomFields = settings.get('Accounts_CustomFields');
 		if (typeof Accounts_CustomFields === 'string' && Accounts_CustomFields.trim() !== '') {
@@ -241,7 +320,7 @@ Template.loginForm.onCreated(function() {
 			formObj[field.name] = field.value;
 		});
 		const state = instance.state.get();
-		if (state !== 'login') {
+		if (state !== 'login' && state !== 'registerStepOne') {
 			if (!(formObj.email && /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]+\b/i.test(formObj.email))) {
 				validationObj.email = t('Invalid_email');
 			}
@@ -251,14 +330,28 @@ Template.loginForm.onCreated(function() {
 				validationObj.emailOrUsername = t('Invalid_email');
 			}
 		}
-		if (state !== 'forgot-password' && state !== 'email-verification') {
+		if (state !== 'forgot-password' && state !== 'email-verification' && state !== 'registerStepOne') {
 			if (!formObj.pass) {
 				validationObj.pass = t('Invalid_pass');
 			}
 		}
-		if (state === 'register') {
-			if (settings.get('Accounts_RequireNameForSignUp') && !formObj.name) {
+		if (state === 'registerStepOne') {
+			if (!formObj.name) {
 				validationObj.name = t('Invalid_name');
+			}
+			if (!formObj.surname) {
+				validationObj.surname = t('Invalid_surname');
+			}
+			if (!formObj.organization) {
+				validationObj.organization = t('Invalid_organization');
+			}
+			if (!formObj.position) {
+				validationObj.position = t('Invalid_position');
+			}
+		}
+		if (state === 'register') {
+			if (settings.get('Accounts_RequireNameForSignUp') && !formObj.login) {
+				validationObj.login = t('Invalid_login');
 			}
 			if (settings.get('Accounts_RequirePasswordConfirmation') && formObj['confirm-pass'] !== formObj.pass) {
 				validationObj['confirm-pass'] = t('Invalid_confirm_pass');
@@ -282,6 +375,9 @@ Template.loginForm.onCreated(function() {
 			instance.loading.set(false);
 			return false;
 		}
+		// if (state === 'registerStepOne') {
+		// 	this.registerStepOneForm = formObj;
+		// }
 		return formObj;
 	};
 	if (FlowRouter.getParam('hash')) {
