@@ -1272,7 +1272,7 @@
   "Email": "Электронная почта",
   "Email_address_to_send_offline_messages": "Адрес Email для отправки сообщения в режиме офлайн",
   "Email_already_exists": "Такой адрес электронной почты уже используется",
-  "Email_body": "Тело письма",
+  "Email_body": "Текст письма",
   "Email_receivers": "Получатели",
   "Email_Change_Disabled": "Администратор вашего Rocket.Chat запретил изменение адреса электронной почты",
   "Email_Changed_Description": "Вы можете использовать следующие подстановки: <br/><ul><li>[email] для электронной почты получателя.</li><li>[Site_Name] и [Site_URL] для названия приложения и его URL.</li></ul>",

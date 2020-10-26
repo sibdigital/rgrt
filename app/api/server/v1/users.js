@@ -249,6 +249,25 @@ API.v1.addRoute('users.list', { authRequired: true }, {
 	},
 });
 
+API.v1.addRoute('users.all', { authRequired: true }, {
+	get() {
+		if (!hasPermission(this.userId, 'view-d-room')) {
+			return API.v1.unauthorized();
+		}
+
+		const { sort, fields, query } = this.parseJsonQuery();
+
+		const users = Users.find(query, {
+			sort: sort || { username: 1 },
+			fields,
+		}).fetch();
+
+		return API.v1.success({
+			users
+		});
+	},
+});
+
 API.v1.addRoute('users.register', { authRequired: false }, {
 	post() {
 		if (this.userId) {
