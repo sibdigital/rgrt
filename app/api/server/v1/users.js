@@ -19,7 +19,7 @@ import {
 import { getFullUserDataByIdOrUsername } from '../../../lib/server/functions/getFullUserData';
 import { API } from '../api';
 import { setStatusText } from '../../../lib/server';
-import { findUsersToAutocomplete } from '../lib/users';
+import { findUsersToAutocomplete, findUser } from '../lib/users';
 import { getUserForCheck, emailCheck } from '../../../2fa/server/code';
 import { resetUserE2EEncriptionKey } from '../../../../server/lib/resetUserE2EKey';
 import { setUserStatus } from '../../../../imports/users-presence/server/activeUsers';
@@ -29,9 +29,14 @@ API.v1.addRoute('users.create', { authRequired: true }, {
 		check(this.bodyParams, {
 			email: String,
 			name: String,
+			surname: String,
+			patronymic: String,
 			password: String,
 			username: String,
 			active: Match.Maybe(Boolean),
+			organization: Match.Maybe(String),
+			position: Match.Maybe(String),
+			phone: Match.Maybe(String),
 			bio: Match.Maybe(String),
 			nickname: Match.Maybe(String),
 			statusText: Match.Maybe(String),
@@ -464,8 +469,13 @@ API.v1.addRoute('users.update', { authRequired: true, twoFactorRequired: true },
 			data: Match.ObjectIncluding({
 				email: Match.Maybe(String),
 				name: Match.Maybe(String),
+				surname: Match.Maybe(String),
+				patronymic: Match.Maybe(String),
 				password: Match.Maybe(String),
 				username: Match.Maybe(String),
+				organization: Match.Maybe(String),
+				position: Match.Maybe(String),
+				phone: Match.Maybe(String),
 				bio: Match.Maybe(String),
 				nickname: Match.Maybe(String),
 				statusText: Match.Maybe(String),
@@ -867,5 +877,12 @@ API.v1.addRoute('users.resetE2EKey', { authRequired: true, twoFactorRequired: tr
 		}
 
 		return API.v1.success();
+	},
+});
+
+API.v1.addRoute('users.getOne', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findUser(query._id)));
 	},
 });

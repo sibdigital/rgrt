@@ -317,6 +317,12 @@ class Administration extends Page {
 
 	get accountsRealNameChange() { return browser.element('[data-qa-setting-id="Accounts_AllowRealNameChange"]'); }
 
+	get accountsOrganizationChange() { return browser.element('[data-qa-setting-id="Accounts_AllowOrganizationChange"]'); }
+
+	get accountsPositionChange() { return browser.element('[data-qa-setting-id="Accounts_AllowPositionChange"]'); }
+
+	//get accountsPhoneChange() { return browser.element('[data-qa-setting-id="Accounts_AllowPhoneChange"]'); }
+
 	get accountsUserStatusMessageChange() { return browser.element('[data-qa-setting-id="Accounts_AllowUserStatusMessageChange"]'); }
 
 	get accountsUsernameChange() { return browser.element('[data-qa-setting-id="Accounts_AllowUsernameChange"]'); }

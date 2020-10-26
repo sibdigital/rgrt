@@ -45,6 +45,14 @@ settings.addGroup('Accounts', function() {
 		type: 'boolean',
 		public: true,
 	});
+	this.add('Accounts_AllowOrganizationChange', true, {
+		type: 'boolean',
+		public: true,
+	});
+	this.add('Accounts_AllowPositionChange', true, {
+		type: 'boolean',
+		public: true,
+	});
 	this.add('Accounts_AllowUserStatusMessageChange', true, {
 		type: 'boolean',
 		public: true,

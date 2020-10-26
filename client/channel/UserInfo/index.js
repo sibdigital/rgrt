@@ -27,6 +27,10 @@ export const UserInfoWithData = React.memo(function UserInfoWithData({ uid, user
 		),
 	);
 
+	const getShortFio = (surname, name, patronymic) => {
+		return [surname, name, patronymic].join(' ');
+	};
+
 	const user = useMemo(() => {
 		const { user } = data || { user: {} };
 		const {
@@ -35,6 +39,9 @@ export const UserInfoWithData = React.memo(function UserInfoWithData({ uid, user
 			roles = [],
 			status,
 			statusText,
+			organization,
+			position,
+			phone,
 			bio,
 			utcOffset,
 			lastLogin,
@@ -42,13 +49,16 @@ export const UserInfoWithData = React.memo(function UserInfoWithData({ uid, user
 		} = user;
 		return {
 			name: showRealNames ? name : username,
+			shortFio: getShortFio(user.surname, user.name, user.patronymic),
 			username,
 			lastLogin,
 			roles: roles.map((role, index) => (
 				<UserCard.Role key={index}>{role}</UserCard.Role>
 			)),
+			organization,
+			position,
+			phone,
 			bio,
-			phone: user.phone,
 			customFields: user.customFields,
 			email: user.emails?.find(({ address }) => !!address),
 			utcOffset,

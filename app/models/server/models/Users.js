@@ -36,6 +36,11 @@ export class Users extends Base {
 
 		this.tryEnsureIndex({ roles: 1 }, { sparse: 1 });
 		this.tryEnsureIndex({ name: 1 });
+		this.tryEnsureIndex({ surname: 1 });
+		this.tryEnsureIndex({ patronymic: 1 });
+		this.tryEnsureIndex({ organization: 1 });
+		this.tryEnsureIndex({ position: 1 });
+		this.tryEnsureIndex({ phone: 1 });
 		this.tryEnsureIndex({ bio: 1 }, { sparse: 1 });
 		this.tryEnsureIndex({ nickname: 1 }, { sparse: 1 });
 		this.tryEnsureIndex({ createdAt: 1 });
@@ -1048,6 +1053,34 @@ export class Users extends Base {
 		return this.update(query, update);
 	}
 
+	setSurname(_id, surname) {
+		const update = {
+			$set: {
+				surname,
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	unsetSurname(_id) {
+		const update = {
+			$unset: {
+				surname: 1,
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	addSurname(_id, surname) {
+		const update = {
+			$set: {
+				surname,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
 	setName(_id, name) {
 		const update = {
 			$set: {
@@ -1062,6 +1095,34 @@ export class Users extends Base {
 		const update = {
 			$unset: {
 				name,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
+	setPatronymic(_id, patronymic) {
+		const update = {
+			$set: {
+				patronymic,
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	unsetPatronymic(_id) {
+		const update = {
+			$unset: {
+				patronymic: 1,
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	addPatronymic(_id, patronymic) {
+		const update = {
+			$set: {
+				patronymic,
 			},
 		};
 
@@ -1190,6 +1251,81 @@ export class Users extends Base {
 		const update = {
 			$set: {
 				'settings.profile': profile,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
+	setOrganization(_id, organization) {
+		const update = {
+			...organization.trim() ? {
+				$set: {
+					organization,
+				},
+			} : {
+				$unset: {
+					organization: 1,
+				},
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	addOrganization(_id, organization) {
+		const update = {
+			$set: {
+				organization,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
+	setPosition(_id, position) {
+		const update = {
+			...position.trim() ? {
+				$set: {
+					position,
+				},
+			} : {
+				$unset: {
+					position: 1,
+				},
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	addPosition(_id, position) {
+		const update = {
+			$set: {
+				position,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
+	setPhone(_id, phone) {
+		const update = {
+			...phone.trim() ? {
+				$set: {
+					phone,
+				},
+			} : {
+				$unset: {
+					phone: 1,
+				},
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	addPhone(_id, phone) {
+		const update = {
+			$set: {
+				phone,
 			},
 		};
 

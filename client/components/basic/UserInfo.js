@@ -26,6 +26,9 @@ export const UserInfo = React.memo(function UserInfo({
 	email,
 	showRealNames,
 	status,
+	shortFio,
+	organization,
+	position,
 	phone,
 	customStatus,
 	roles = [],
@@ -72,14 +75,24 @@ export const UserInfo = React.memo(function UserInfo({
 			<Label>{t('Last_login')}</Label>
 			<Info>{lastLogin ? timeAgo(lastLogin) : t('Never')}</Info>
 
-			{name && <>
-				<Label>{t('Full Name')}</Label>
-				<Info>{name}</Info>
+			{shortFio && <>
+				<Label>{t('Full_Name')}</Label>
+				<Info>{shortFio}</Info>
 			</>}
 
 			{nickname && <>
 				<Label>{t('Nickname')}</Label>
 				<Info>{nickname}</Info>
+			</>}
+
+			{organization && <>
+				<Label>{t('Organization')}</Label>
+				<Info>{organization}</Info>
+			</>}
+
+			{position && <>
+				<Label>{t('Position')}</Label>
+				<Info>{position}</Info>
 			</>}
 
 			{bio && <>

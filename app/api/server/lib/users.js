@@ -30,4 +30,7 @@ export async function findUsersToAutocomplete({ uid, selector }) {
 	};
 }
 
-
+export async function findUser(_id) {
+	const cursor = await Users.findOne({ _id });
+	return cursor;
+}
