@@ -75,10 +75,12 @@ export function CouncilsPage() {
 		setCache(new Date());
 	}, []);
 
+	const styleButton = { 'font-size': '1.3rem', 'background-color': 'var(--button-primary-background)', color: 'var(--button-primary-text-color)' };
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title={t('Councils')}>
-				<Button small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+				<Button style={styleButton} small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					<Icon name='plus'/>
 				</Button>
 			</Page.Header>

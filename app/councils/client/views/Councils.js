@@ -82,9 +82,11 @@ export function Councils({
 
 	const formatDateAndTime = useFormatDateAndTime();
 
+	const styleTr = { 'border-bottom-width': '10px', 'border-bottom-color': 'white' };
+
 	const renderRow = (council) => {
 		const { _id, d: date, desc, ts } = council;
-		return <Table.Row key={_id} tabIndex={0} role='link' action backgroundColor={colorBackgroundCouncil(date)}>
+		return <Table.Row key={_id} tabIndex={0} role='link' action style={styleTr} backgroundColor={colorBackgroundCouncil(date)}>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(date)} {statusCouncil(date)}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}><Box withTruncatedText>{desc}</Box></Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(ts)}</Table.Cell>}
