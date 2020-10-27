@@ -82,7 +82,7 @@ export function Councils({
 
 	const formatDateAndTime = useFormatDateAndTime();
 
-	const styleTr = { 'border-bottom-width': '10px', 'border-bottom-color': 'white' };
+	const styleTr = { borderBottomWidth: '10px', borderBottomColor: 'var(--color-white)' };
 
 	const renderRow = (council) => {
 		const { _id, d: date, desc, ts } = council;

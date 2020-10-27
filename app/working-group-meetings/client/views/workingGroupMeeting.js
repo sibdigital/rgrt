@@ -227,9 +227,19 @@ export function WorkingGroupMeetingPage() {
 		</Table.Row>;
 	};
 
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={t('Working_group_meeting')}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Working_group_meeting')}</Label>
+				</Field>
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x8'>
@@ -245,7 +255,7 @@ export function WorkingGroupMeetingPage() {
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
-					<Button small width='25%' onClick={fileUploadClick(data._id)} data-id='file-upload'>
+					<Button small primary width='25%' onClick={fileUploadClick(data._id)} data-id='file-upload'>
 						<Box is='span' fontScale='p1'>{t('FileUpload')}</Box>
 					</Button>
 				</Field>

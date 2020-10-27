@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, ButtonGroup, Field, Icon, Modal, Table } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, Icon, Label, Modal, Table } from '@rocket.chat/fuselage';
 
 import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
@@ -228,9 +228,19 @@ export function CompositionOfTheWorkingGroupPage() {
 		</Table.Row>;
 	};
 
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={t('Working_group_composition')}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Working_group_composition')}</Label>
+				</Field>
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x8'>
