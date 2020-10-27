@@ -197,6 +197,57 @@ function validateUserEditing(userId, userData) {
 	}
 }
 
+const handleOrganization = (updateUser, organization) => {
+	if (organization) {
+		if (organization.trim()) {
+			if (typeof organization !== 'string' || organization.length > 260) {
+				throw new Meteor.Error('error-invalid-field', 'organization', {
+					method: 'saveUserProfile',
+				});
+			}
+			updateUser.$set = updateUser.$set || {};
+			updateUser.$set.organization = organization;
+		} else {
+			updateUser.$unset = updateUser.$unset || {};
+			updateUser.$unset.organization = 1;
+		}
+	}
+};
+
+const handlePosition = (updateUser, position) => {
+	if (position) {
+		if (position.trim()) {
+			if (typeof position !== 'string' || position.length > 260) {
+				throw new Meteor.Error('error-invalid-field', 'position', {
+					method: 'saveUserProfile',
+				});
+			}
+			updateUser.$set = updateUser.$set || {};
+			updateUser.$set.position = position;
+		} else {
+			updateUser.$unset = updateUser.$unset || {};
+			updateUser.$unset.position = 1;
+		}
+	}
+};
+
+const handlePhone = (updateUser, phone) => {
+	if (phone) {
+		if (phone.trim()) {
+			if (typeof phone !== 'string' || phone.length > 15) {
+				throw new Meteor.Error('error-invalid-field', 'phone', {
+					method: 'saveUserProfile',
+				});
+			}
+			updateUser.$set = updateUser.$set || {};
+			updateUser.$set.phone = phone;
+		} else {
+			updateUser.$unset = updateUser.$unset || {};
+			updateUser.$unset.phone = 1;
+		}
+	}
+};
+
 const handleBio = (updateUser, bio) => {
 	if (bio) {
 		if (bio.trim()) {
@@ -263,7 +314,9 @@ export const saveUser = function(userId, userData) {
 		const updateUser = {
 			$set: {
 				roles: userData.roles || ['user'],
+				surname: userData.surname,
 				...typeof userData.name !== 'undefined' && { name: userData.name },
+				...typeof userData.patronymic !== 'undefined' && { patronymic: userData.patronymic },
 				settings: userData.settings || {},
 			},
 		};
@@ -276,6 +329,9 @@ export const saveUser = function(userId, userData) {
 			updateUser.$set['emails.0.verified'] = userData.verified;
 		}
 
+		handleOrganization(updateUser, userData.organization);
+		handlePosition(updateUser, userData.position);
+		handlePhone(updateUser, userData.phone);
 		handleBio(updateUser, userData.bio);
 		handleNickname(updateUser, userData.nickname);
 
@@ -312,6 +368,8 @@ export const saveUser = function(userId, userData) {
 			_id: userData._id,
 			username: userData.username,
 			name: userData.name,
+			surname: userData.surname,
+			patronymic: userData.patronymic,
 		})) {
 			throw new Meteor.Error('error-could-not-save-identity', 'Could not save user identity', { method: 'saveUser' });
 		}
@@ -336,6 +394,9 @@ export const saveUser = function(userId, userData) {
 		$set: {},
 	};
 
+	handleOrganization(updateUser, userData.organization);
+	handlePosition(updateUser, userData.position);
+	handlePhone(updateUser, userData.phone);
 	handleBio(updateUser, userData.bio);
 	handleNickname(updateUser, userData.nickname);
 
