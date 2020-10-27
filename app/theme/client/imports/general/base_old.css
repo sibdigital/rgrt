@@ -2216,6 +2216,18 @@
 		cursor: pointer;
 	}
 
+	& .errand-tag {
+		margin: 0 1px;
+		padding: 1px 4px;
+
+		color: #ffffff;
+
+		border-radius: 5px;
+		background: #1d74f5;
+
+		line-height: initial;
+	}
+
 	&:hover:not(.system) .message-action {
 		display: block;
 	}
@@ -2286,18 +2298,6 @@
 			background: #ffffff;
 
 			line-height: initial;
-		}
-
-		& .errand-tag {
-			  margin: 0 3px;
-			  padding: 1px 4px;
-
-			  border-width: 1px;
-
-			  border-radius: 5px;
-			  background: #1d74f5;
-				color: #fff;
-			  line-height: initial;
 		}
 	}
 

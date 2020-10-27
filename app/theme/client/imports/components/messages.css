@@ -18,12 +18,9 @@
 
 	color: var(--color-darkest);
 
-	border: 2px solid #f2f3f7;
-	border-radius: 4px;
+	background: var(rcx-surface, transparent);
 
-	background: var(rcx-surface, #ffffff);
-
-	font-size: 1.7rem;
+	font-size: 0.85rem;
 
 	&__buttons {
 		display: flex;
@@ -31,15 +28,13 @@
 
 	&__button,
 	&__menu {
-		padding: 2px;
-
 		cursor: pointer;
 
 	 	margin-right: 1.1rem;
 
 		&:hover {
-			border-radius: 2px;
-			background: #eeeff1;
+			border-radius: 1px;
+			color: #4fb0fc;
 		}
 
 		&-icon {
@@ -211,29 +206,25 @@
 }
 
 .reply-buttons-group {
-	display: -webkit-box;
-	display: -ms-flexbox;
 	display: flex;
 	margin-bottom: 0.3rem;
-	margin-top: 0.3rem;
 }
 
 .reply-button {
-	margin: 0.25rem;
 	padding: 0.1em 0.3em;
 	text-align: center;
 	text-decoration: none;
 	color: var(--color-black) !important;
-	border: 2px solid var(--button-reply-primary-background);
+	border: 1px solid var(--button-reply-primary-background);
 	display: inline-block;
-	border-radius: 0.3em;
+	border-radius: 0.6em;
 	transition: all 0.5s ease-in-out;
 	position: relative;
 	overflow: hidden;
 	&:hover {
-		 background-color: var(--color-dark-20);
+		 border-color: #4fb0fc;
 		 color: var(--color-black) !important;
-		 opacity: 0.6;
+		 opacity: 1 !important;
 	}
 }
 

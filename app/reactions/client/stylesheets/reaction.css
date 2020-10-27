@@ -1,6 +1,6 @@
 .message {
 	& .reactions {
-		margin-top: 4px;
+		margin-top: 10px;
 		padding: 0;
 	    display: inline-block;
 
@@ -9,7 +9,7 @@
 
 			display: inline-block;
 
-			height: 22px;
+			height: 32px;
 			padding: 0 4px 0 2px;
 
 			cursor: pointer;
@@ -19,6 +19,7 @@
 			border-radius: 5px;
 			background-color: #fcfcfc;
 
+			font-size: 20px;
 			line-height: 20px;
 
 			& .reaction-emoji {
@@ -44,7 +45,7 @@
 
 				margin-left: -3px;
 
-				font-size: 0.65rem;
+				font-size: 0.9rem;
 			}
 
 			&.add-reaction {

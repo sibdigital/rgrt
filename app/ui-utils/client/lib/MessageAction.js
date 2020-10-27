@@ -158,6 +158,7 @@ Meteor.startup(async function() {
 		id: 'reply-directly',
 		icon: 'reply-directly',
 		label: 'Reply_in_direct_message',
+		labelMessage: 'Reply_in_direct_message_short',
 		context: ['message', 'message-mobile', 'threads'],
 		action() {
 			const { msg } = messageArgs(this);
@@ -175,14 +176,15 @@ Meteor.startup(async function() {
 			}
 			return true;
 		},
-		order: 0,
-		group: 'menu',
+		order: 1,
+		group: ['menu', 'message'],
 	});
 
 	MessageAction.addButton({
 		id: 'quote-message',
 		icon: 'thread',
 		label: 'Quote',
+		labelMessage: 'Reply',
 		context: ['message', 'message-mobile', 'threads'],
 		action() {
 			const { msg: message } = messageArgs(this);
@@ -206,7 +208,7 @@ Meteor.startup(async function() {
 
 			return true;
 		},
-		order: 1,
+		order: 0,
 		group: ['menu', 'message'],
 	});
 
