@@ -316,7 +316,7 @@ export const saveUser = function(userId, userData) {
 				roles: userData.roles || ['user'],
 				surname: userData.surname,
 				...typeof userData.name !== 'undefined' && { name: userData.name },
-				...typeof userData.patronymic !== 'undefined' && { patronymic: userData.patronymic },
+				patronymic: userData.patronymic,
 				settings: userData.settings || {},
 			},
 		};
