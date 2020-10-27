@@ -113,7 +113,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.lastName } ${ value.firstName } ${ value.patronymic }`.trim(), alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.lastName.toUpperCase() } ${ value.firstName } ${ value.patronymic }`.trim(), alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {

@@ -11,11 +11,16 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 	const [hasCustomFields, setHasCustomFields] = useState(false);
 
 	const {
+		surname,
 		name,
+		patronymic,
 		username,
 		email,
 		verified,
 		statusText,
+		organization,
+		position,
+		phone,
 		bio,
 		nickname,
 		password,
@@ -28,11 +33,16 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 	} = formValues;
 
 	const {
+		handleSurname,
 		handleName,
+		handlePatronymic,
 		handleUsername,
 		handleEmail,
 		handleVerified,
 		handleStatusText,
+		handleOrganization,
+		handlePosition,
+		handlePhone,
 		handleBio,
 		handleNickname,
 		handlePassword,
@@ -50,17 +60,47 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 		<FieldGroup>
 			{ prepend }
 			{useMemo(() => <Field>
+				<Field.Label>{t('Surname')}</Field.Label>
+				<Field.Row>
+					<TextInput flexGrow={1} value={surname} onChange={handleSurname}/>
+				</Field.Row>
+			</Field>, [t, surname, handleSurname])}
+			{useMemo(() => <Field>
 				<Field.Label>{t('Name')}</Field.Label>
 				<Field.Row>
 					<TextInput flexGrow={1} value={name} onChange={handleName}/>
 				</Field.Row>
 			</Field>, [t, name, handleName])}
 			{useMemo(() => <Field>
+				<Field.Label>{t('Patronymic')}</Field.Label>
+				<Field.Row>
+					<TextInput flexGrow={1} value={patronymic} onChange={handlePatronymic}/>
+				</Field.Row>
+			</Field>, [t, patronymic, handlePatronymic])}
+			{useMemo(() => <Field>
 				<Field.Label>{t('Username')}</Field.Label>
 				<Field.Row>
 					<TextInput flexGrow={1} value={username} onChange={handleUsername} addon={<Icon name='at' size='x20'/>}/>
 				</Field.Row>
 			</Field>, [t, username, handleUsername])}
+			{useMemo(() => <Field>
+				<Field.Label>{t('Organization')}</Field.Label>
+				<Field.Row>
+					<TextInput flexGrow={1} value={organization} onChange={handleOrganization}/>
+				</Field.Row>
+			</Field>, [t, organization, handleOrganization])}
+			{useMemo(() => <Field>
+				<Field.Label>{t('Position')}</Field.Label>
+				<Field.Row>
+					<TextInput flexGrow={1} value={position} onChange={handlePosition}/>
+				</Field.Row>
+			</Field>, [t, position, handlePosition])}
+			{useMemo(() => <Field>
+				<Field.Label>{t('Phone_number')}</Field.Label>
+				<Field.Row>
+					<TextInput flexGrow={1} value={phone} onChange={handlePhone}/>
+				</Field.Row>
+			</Field>, [t, phone, handlePhone])}
 			{useMemo(() => <Field>
 				<Field.Label>{t('Email')}</Field.Label>
 				<Field.Row>

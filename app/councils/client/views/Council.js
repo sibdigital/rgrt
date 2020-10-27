@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Field, Label, Table } from '@rocket.chat/fuselage';
+import { Box, Button, Field, Label, Table, TextInput } from '@rocket.chat/fuselage';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -12,7 +12,7 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../../app/settings/client';
 import moment from 'moment';
 
-const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
+const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
 export function CouncilPage() {
 	const t = useTranslation();
@@ -61,9 +61,11 @@ export function CouncilPage() {
 		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>
 	], [mediaQuery]);
 
+	const styleTableRow = { 'word-wrap': 'break-word' };
+
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
-		return <Table.Row key={iu._id} tabIndex={0} role='link' action>
+		return <Table.Row key={iu._id} style={styleTableRow} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
@@ -81,13 +83,13 @@ export function CouncilPage() {
 				<Field mbe='x8'>
 					<Field.Label>{t('Date')}</Field.Label>
 					<Field.Row>
-						<Box is='span' fontScale='p1'>{formatDateAndTime(data.d)}</Box>
+						<TextInput readonly is='span' fontScale='p1'>{formatDateAndTime(data.d)}</TextInput>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<Box is='span' fontScale='p1'>{data.desc}</Box>
+						<TextInput readonly is='span' fontScale='p1'>{data.desc}</TextInput>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
@@ -99,7 +101,7 @@ export function CouncilPage() {
 				<Field mbe='x8'>
 					<Field.Row>
 						<Field.Label>{t('Council_Invited_Users')}</Field.Label>
-						<Button small onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+						<Button small color='var(--button-primary-text-color)' backgroundColor='var(--button-primary-background)' className='rc-button rc-button--small' onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
 							{t('Download_Council_Participant_List')}
 						</Button>
 					</Field.Row>

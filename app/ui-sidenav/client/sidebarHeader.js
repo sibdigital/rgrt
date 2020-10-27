@@ -38,47 +38,38 @@ export const toolbarSearch = {
 
 const toolbarButtons = (/* user */) => [
 	{
-	name: t('Home'),
-	icon: 'home',
-	condition: () => settings.get('Layout_Show_Home_Button'),
-	action: () => {
-		menu.close();
-		FlowRouter.go('home');
+		name: t('Home'),
+		icon: 'home',
+		condition: () => settings.get('Layout_Show_Home_Button'),
+		action: () => {
+			menu.close();
+			FlowRouter.go('home');
+		},
 	},
-},
-{
-	name: t('Search'),
-	icon: 'magnifier',
-	action: () => {
-		toolbarSearch.show(false);
+	{
+		name: t('Search'),
+		icon: 'magnifier',
+		action: () => {
+			toolbarSearch.show(false);
+		},
 	},
-},
-{
-	name: t('Send_email'),
-	icon: 'mail',
-	condition: () => hasPermission('send-mail-manually'),
-	action: () => {
-		menu.close();
-		FlowRouter.go('manual-mail-sender');
-	},
-},
-{
-	name: t('Sort'),
-	icon: 'sort',
-	hasPopup: true,
-	action: async (e) => {
-		const options = [];
-		const config = {
-			template: createTemplateForComponent('SortList', () => import('../../../client/components/SortList')),
-			currentTarget: e.currentTarget,
-			data: {
-				options,
-			},
-			offsetVertical: e.currentTarget.clientHeight + 10,
-		};
-		popover.open(config);
-	},
-}];
+	{
+		name: t('Sort'),
+		icon: 'sort',
+		hasPopup: true,
+		action: async (e) => {
+			const options = [];
+			const config = {
+				template: createTemplateForComponent('SortList', () => import('../../../client/components/SortList')),
+				currentTarget: e.currentTarget,
+				data: {
+					options,
+				},
+				offsetVertical: e.currentTarget.clientHeight + 10,
+			};
+			popover.open(config);
+		},
+	}];
 Template.sidebarHeader.helpers({
 	myUserInfo() {
 		const id = Meteor.userId();

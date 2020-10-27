@@ -51,11 +51,11 @@ export function saveUserIdentity(userId, { _id, name: rawName, username: rawUser
 		}
 	}
 
-	if (typeof rawPatronymc !== 'undefined' && patronymicChanged) {
-		if (!setPatronymic(_id, patronymic, user)) {
-			return false;
-		}
-	}
+	// if (typeof rawPatronymc !== 'undefined' && patronymicChanged) {
+	// 	if (!setPatronymic(_id, patronymic, user)) {
+	// 		return false;
+	// 	}
+	// }
 
 	// if coming from old username, update all references
 	if (previousUsername && usernameChanged) {

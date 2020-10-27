@@ -29,10 +29,15 @@ export function EditUserWithData({ uid, ...props }) {
 
 const getInitialValue = (data) => ({
 	roles: data.roles,
+	surname: data.surname,
 	name: data.name ?? '',
+	patronymic: data.patronymic,
 	password: '',
 	username: data.username,
 	status: data.status,
+	organization: data.organization,
+	position: data.position,
+	phone: data.phone,
 	bio: data.bio ?? '',
 	nickname: data.nickname ?? '',
 	email: (data.emails && data.emails[0].address) || '',
