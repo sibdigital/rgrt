@@ -27,7 +27,7 @@ const toolbarButtons = () => [
 	},
 	{
 		name: t('Councils'),
-		icon: 'team',
+		icon: 'events',
 		condition: () => hasPermission('manage-councils'),
 		action: () => {
 			menu.close();
@@ -36,7 +36,7 @@ const toolbarButtons = () => [
 	},
 	{
 		name: t('Working_group'),
-		icon: 'team',
+		icon: 'working_group',
 		condition: () => hasPermission('manage-working-group'),
 		action: () => {
 			menu.close();
@@ -54,7 +54,7 @@ const toolbarButtons = () => [
 	},
 	{
 		name: t('Working_group_meetings'),
-		icon: 'team',
+		icon: 'working_group_meetings',
 		condition: () => hasPermission('manage-working-group'),
 		action: () => {
 			menu.close();
@@ -141,8 +141,7 @@ const toolbarButtons = () => [
 	},
 	{
 		name: t('Errands_from_me'),
-		icon: 'errand',
-		//condition: () => hasPermission('manage-working-errand'),
+		icon: 'errands_from_me',
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/initiated_by_me');
@@ -150,8 +149,7 @@ const toolbarButtons = () => [
 	},
 	{
 		name: t('Errands_for_me'),
-		icon: 'errand',
-		//condition: () => hasPermission('manage-working-errand'),
+		icon: 'errands_to_me',
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/charged_to_me');
@@ -160,7 +158,7 @@ const toolbarButtons = () => [
 
 Template.home.helpers({
 	title() {
-		return settings.get('Layout_Home_Title');
+		return t('Layout_Home_Title');
 	},
 	body() {
 		return settings.get('Layout_Home_Body');

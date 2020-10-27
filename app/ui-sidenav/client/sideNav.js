@@ -23,7 +23,8 @@ Template.sideNav.helpers({
 	},
 
 	roomType() {
-		return roomTypes.getTypes().map((roomType) => ({
+		const arr = roomTypes.getTypes().filter((item) => item._identifier !== 'c');
+		return arr.map((roomType) => ({
 			template: roomType.customTemplate || 'roomList',
 			data: {
 				header: roomType.header,

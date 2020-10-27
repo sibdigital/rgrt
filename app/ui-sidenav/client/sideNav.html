@@ -7,16 +7,7 @@
 					<i class="icon-up-big"></i> {{_ "More_unreads"}}
 				</div>
 			</div>
-
-
-
-
-
-
 			<div class="rooms-list" aria-label="{{_ "Channels"}}" role="region">
-
-<!--				{{> errandsNav}}-->
-
 				{{#each roomType}}
 					{{> Template.dynamic template=template data=data }}
 				{{/each}}
