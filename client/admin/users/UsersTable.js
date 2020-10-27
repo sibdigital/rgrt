@@ -26,9 +26,9 @@ const FilterByText = ({ setFilter, ...props }) => {
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const UserRow = ({ emails, _id, username, name, roles, status, avatarETag, onClick, mediaQuery, active }) => {
+const UserRow = ({ emails, _id, username, surname, name, patronymic, organization, position, phone, roles, status, avatarETag, onClick, mediaQuery, active }) => {
 	const t = useTranslation();
-
+	const getShortFio = (surname, name, patronymic) => [surname, name.charAt(0).toUpperCase(), patronymic ? patronymic.charAt(0).toUpperCase() : ''].join(' ');
 	const statusText = active ? t(capitalize(status)) : t('Disabled');
 	return <Table.Row onKeyDown={onClick(_id)} onClick={onClick(_id)} tabIndex={0} role='link' action qa-user-id={_id}>
 		<Table.Cell style={style}>
@@ -36,15 +36,22 @@ const UserRow = ({ emails, _id, username, name, roles, status, avatarETag, onCli
 				<UserAvatar size={mediaQuery ? 'x28' : 'x40'} title={username} username={username} etag={avatarETag}/>
 				<Box display='flex' style={style} mi='x8'>
 					<Box display='flex' flexDirection='column' alignSelf='center' style={style}>
-						<Box fontScale='p2' style={style} color='default'>{name || username}</Box>
+						<Box fontScale='p2' style={style} color='default'>{username}</Box>
 						{!mediaQuery && name && <Box fontScale='p1' color='hint' style={style}> {`@${ username }`} </Box>}
 					</Box>
 				</Box>
 			</Box>
 		</Table.Cell>
 		{mediaQuery && <Table.Cell>
-			<Box fontScale='p2' style={style} color='hint'>{ username }</Box> <Box mi='x4'/>
+			<Box fontScale='p2' style={style} color='hint'>{ getShortFio(surname, name, patronymic) }</Box> <Box mi='x4'/>
 		</Table.Cell>}
+		{mediaQuery && <Table.Cell>
+			<Box fontScale='p2' style={style} color='hint'>{ organization }</Box> <Box mi='x4'/>
+		</Table.Cell>}
+		{mediaQuery && <Table.Cell>
+			<Box fontScale='p2' style={style} color='hint'>{ position }</Box> <Box mi='x4'/>
+		</Table.Cell>}
+		<Table.Cell style={style}>{phone}</Table.Cell>
 		<Table.Cell style={style}>{emails && emails.length && emails[0].address}</Table.Cell>
 		{mediaQuery && <Table.Cell style={style}>{roles && roles.join(', ')}</Table.Cell>}
 		<Table.Cell fontScale='p1' color='hint' style={style}>{statusText}</Table.Cell>
@@ -53,7 +60,8 @@ const UserRow = ({ emails, _id, username, name, roles, status, avatarETag, onCli
 
 
 const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	fields: JSON.stringify({ name: 1, username: 1, emails: 1, roles: 1, status: 1, avatarETag: 1, active: 1 }),
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1, roles: 1, status: 1, avatarETag: 1, active: 1,
+		surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	query: JSON.stringify({
 		$or: [
 			{ 'emails.address': { $regex: text || '', $options: 'i' } },
@@ -77,6 +85,7 @@ export function UsersTable() {
 	const query = useQuery(debouncedParams, debouncedSort);
 
 	const data = useEndpointData('users.list', query) || {};
+	console.log(data);
 
 	const usersRoute = useRoute('admin-users');
 
@@ -100,13 +109,22 @@ export function UsersTable() {
 	return <GenericTable
 		FilterComponent={FilterByText}
 		header={<>
-			<GenericTable.HeaderCell key={'name'} direction={sort[1]} active={sort[0] === 'name'} onClick={onHeaderClick} sort='name' w='x200'>
-				{t('Name')}
-			</GenericTable.HeaderCell>
 			{mediaQuery && <GenericTable.HeaderCell key={'username'} direction={sort[1]} active={sort[0] === 'username'} onClick={onHeaderClick} sort='username' w='x140'>
 				{t('Username')}
 			</GenericTable.HeaderCell>}
-			<GenericTable.HeaderCell key={'email'} direction={sort[1]} active={sort[0] === 'emails.adress'} onClick={onHeaderClick} sort='emails.address' w='x120'>
+			<GenericTable.HeaderCell key={'name'} direction={sort[1]} active={sort[0] === 'name'} onClick={onHeaderClick} sort='name' w='x200'>
+				{t('Name')}
+			</GenericTable.HeaderCell>
+			{mediaQuery && <GenericTable.HeaderCell key={'organization'} direction={sort[1]} active={sort[0] === 'organization'} onClick={onHeaderClick} sort='organization' w='x140'>
+				{t('Organization')}
+			</GenericTable.HeaderCell>}
+			{mediaQuery && <GenericTable.HeaderCell key={'position'} direction={sort[1]} active={sort[0] === 'position'} onClick={onHeaderClick} sort='position' w='x140'>
+				{t('Position')}
+			</GenericTable.HeaderCell>}
+			<GenericTable.HeaderCell key={'phone'} direction={sort[1]} active={sort[0] === 'phone'} onClick={onHeaderClick} sort='phone' w='x120'>
+				{t('Phone_number')}
+			</GenericTable.HeaderCell>
+			<GenericTable.HeaderCell key={'email'} direction={sort[1]} active={sort[0] === 'emails.address'} onClick={onHeaderClick} sort='emails.address' w='x120'>
 				{t('Email')}
 			</GenericTable.HeaderCell>
 			{mediaQuery && <GenericTable.HeaderCell key={'roles'} direction={sort[1]} active={sort[0] === 'roles'} onClick={onHeaderClick} sort='roles' w='x120'>
