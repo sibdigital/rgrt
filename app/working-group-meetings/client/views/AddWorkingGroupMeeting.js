@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Field, Button, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
+import { Field, Button, ButtonGroup, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
@@ -65,7 +65,7 @@ export function AddWorkingGroupMeeting({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Description')}</Field.Label>
 			<Field.Row>
-				<TextInput value={desc} onChange={(e) => setDesc(e.currentTarget.value)} placeholder={t('Description')} />
+				<TextAreaInput value={desc} onChange={(e) => setDesc(e.currentTarget.value)} placeholder={t('Description')} />
 			</Field.Row>
 		</Field>
 		<Field>
