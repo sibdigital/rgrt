@@ -8,9 +8,11 @@ import _ from 'underscore';
 import s from 'underscore.string';
 import toastr from 'toastr';
 
+import { APIClient } from '../../../utils/client';
 import { settings } from '../../../settings';
 import { callbacks } from '../../../callbacks';
 import { t, handleError } from '../../../utils';
+import { useEndpointData } from '/client/hooks/useEndpointData';
 
 const getLoginExample = (surname, name, patronymic) => {
 	if (!surname || !name) {
@@ -70,6 +72,9 @@ Template.loginForm.helpers({
 	},
 	phone() {
 		return Template.instance().registerStepOneForm.get().phone ?? '';
+	},
+	workingGroups() {
+		return Template.instance().workingGroups.get();
 	},
 	namePlaceholder() {
 		if (settings.get('Accounts_RequireNameForSignUp')) {
@@ -258,6 +263,8 @@ Template.loginForm.onCreated(function() {
 	this.loading = new ReactiveVar(false);
 	this.loginExample = new ReactiveVar('');
 	this.registerStepOneForm = new ReactiveVar({});
+	this.workingGroups = new ReactiveVar(['Члены рабочей группы', 'Представители субъектов Российской Федерации', 'Иные участники']);
+
 	Tracker.autorun(() => {
 		const Accounts_CustomFields = settings.get('Accounts_CustomFields');
 		if (typeof Accounts_CustomFields === 'string' && Accounts_CustomFields.trim() !== '') {
@@ -348,6 +355,9 @@ Template.loginForm.onCreated(function() {
 			if (!formObj.position) {
 				validationObj.position = t('Invalid_position');
 			}
+			if (formObj.isWorkingGroup) {
+				formObj.isWorkingGroup = true;
+			}
 		}
 		if (state === 'register') {
 			if (settings.get('Accounts_RequireNameForSignUp') && !formObj.login) {
@@ -375,9 +385,6 @@ Template.loginForm.onCreated(function() {
 			instance.loading.set(false);
 			return false;
 		}
-		// if (state === 'registerStepOne') {
-		// 	this.registerStepOneForm = formObj;
-		// }
 		return formObj;
 	};
 	if (FlowRouter.getParam('hash')) {

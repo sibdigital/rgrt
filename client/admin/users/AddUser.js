@@ -31,6 +31,7 @@ export function AddUser({ roles, ...props }) {
 		organization: '',
 		position: '',
 		phone: '',
+		workingGroup: '',
 		bio: '',
 		nickname: '',
 		email: '',

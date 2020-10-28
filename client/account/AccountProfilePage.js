@@ -58,6 +58,7 @@ const getInitialValues = (user) => ({
 	url: user.avatarUrl ?? '',
 	statusText: user.statusText ?? '',
 	statusType: user.status ?? '',
+	workingGroup: user.workingGroup ?? '',
 	bio: user.bio ?? '',
 	customFields: user.customFields ?? {},
 	nickname: user.nickname ?? '',
@@ -100,6 +101,9 @@ const AccountProfilePage = () => {
 	}
 	if (values.phone) {
 		data.phone = values.phone;
+	}
+	if (values.workingGroup) {
+		data.workingGroup = values.workingGroup;
 	}
 
 	const localPassword = Boolean(user?.services?.password?.bcrypt?.trim());
@@ -168,6 +172,7 @@ const AccountProfilePage = () => {
 		customFields,
 		bio,
 		nickname,
+		workingGroup,
 	} = values;
 
 	const { handleAvatar, handlePassword, handleConfirmationPassword } = handlers;
@@ -180,7 +185,7 @@ const AccountProfilePage = () => {
 				const avatarResult = await updateAvatar();
 				if (avatarResult) { handleAvatar(''); }
 				await saveFn({
-					...allowRealNameChange && { surname },
+					...allowRealNameChange && { surname: surname === '' ? data.surname : surname },
 					...allowRealNameChange && { realname },
 					...allowRealNameChange && { patronymic },
 					// ...allowOrganizationChange && { organization },
@@ -190,11 +195,12 @@ const AccountProfilePage = () => {
 					...canChangeUsername && { username },
 					...allowUserStatusMessageChange && { statusText },
 					...typedPassword && { typedPassword: SHA256(typedPassword) },
-					organization,
-					position,
+					organization: organization === '' ? data.organization : organization,
+					position: position === '' ? data.position : position,
 					phone,
 					statusType,
 					nickname,
+					workingGroup,
 					bio: bio || '',
 				}, customFields);
 				handlePassword('');
@@ -250,6 +256,7 @@ const AccountProfilePage = () => {
 		setModal,
 		commit,
 		nickname,
+		workingGroup,
 		handlePassword,
 		handleConfirmationPassword,
 	]);

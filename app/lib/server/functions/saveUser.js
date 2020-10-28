@@ -282,6 +282,23 @@ const handleNickname = (updateUser, nickname) => {
 	}
 };
 
+const handleWorkingGroup = (updateUser, workingGroup) => {
+	if (workingGroup) {
+		if (workingGroup.trim()) {
+			if (typeof workingGroup !== 'string' || workingGroup.length > 120) {
+				throw new Meteor.Error('error-invalid-field', 'workingGroup', {
+					method: 'saveUserProfile',
+				});
+			}
+			updateUser.$set = updateUser.$set || {};
+			updateUser.$set.workingGroup = workingGroup;
+		} else {
+			updateUser.$unset = updateUser.$unset || {};
+			updateUser.$unset.workingGroup = 1;
+		}
+	}
+};
+
 export const saveUser = function(userId, userData) {
 	validateUserData(userId, userData);
 	let sendPassword = false;
@@ -334,6 +351,7 @@ export const saveUser = function(userId, userData) {
 		handlePhone(updateUser, userData.phone);
 		handleBio(updateUser, userData.bio);
 		handleNickname(updateUser, userData.nickname);
+		handleWorkingGroup(updateUser, userData.workingGroup);
 
 		Meteor.users.update({ _id }, updateUser);
 
@@ -399,6 +417,7 @@ export const saveUser = function(userId, userData) {
 	handlePhone(updateUser, userData.phone);
 	handleBio(updateUser, userData.bio);
 	handleNickname(updateUser, userData.nickname);
+	handleWorkingGroup(updateUser, userData.workingGroup);
 
 	if (userData.roles) {
 		updateUser.$set.roles = userData.roles;
