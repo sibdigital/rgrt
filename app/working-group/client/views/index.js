@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Box } from '@rocket.chat/fuselage';
-import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { ButtonGroup, Button, Field, Box, Label, Icon } from '@rocket.chat/fuselage';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -97,20 +97,30 @@ export function WorkingGroupPage() {
 		setCache(new Date());
 	}, []);
 
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={t('Working_group')}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Working_group')}</Label>
+				</Field>
 			</Page.Header>
 			<Page.Content>
 				<Field.Row>
 					<ButtonGroup>
-						<Button small aria-label={t('Pinned_files')} onClick={onPinnedFilesClick}>
-							<Box is='span' fontScale='p1'>{t('Working_group_meeting_pinned_files')}</Box>
-						</Button>
-						<Button small aria-label={t('Add_User')} onClick={handleHeaderButtonClick('new')}>
-							<Box is='span' fontScale='p1'>{t('Working_group_add')}</Box>
-						</Button>
-						<Button small onClick={downloadWorkingGroupParticipants(data.workingGroups)} aria-label={t('Download')}>
+						{/*<Button small aria-label={t('Pinned_files')} onClick={onPinnedFilesClick}>*/}
+						{/*	<Box is='span' fontScale='p1'>{t('Working_group_meeting_pinned_files')}</Box>*/}
+						{/*</Button>*/}
+						{/*<Button small aria-label={t('Add_User')} onClick={handleHeaderButtonClick('new')}>*/}
+						{/*	<Box is='span' fontScale='p1'>{t('Working_group_add')}</Box>*/}
+						{/*</Button>*/}
+						<Button small primary onClick={downloadWorkingGroupParticipants(data.workingGroups)} aria-label={t('Download')}>
 							<Box is='span' fontScale='p1'>{t('Download_Council_Participant_List')}</Box>
 						</Button>
 					</ButtonGroup>

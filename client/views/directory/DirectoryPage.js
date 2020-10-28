@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { Tabs } from '@rocket.chat/fuselage';
+import { Button, Field, Icon, Label, Tabs } from '@rocket.chat/fuselage';
 
 import Page from '../../components/basic/Page';
 import { useTranslation } from '../../contexts/TranslationContext';
@@ -26,8 +26,19 @@ function DirectoryPage() {
 		}
 	}, [directoryRoute, tab, federationEnabled, defaultTab]);
 
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page>
-		<Page.Header title={t('Directory')} />
+		<Page.Header>
+			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+				<Button className='go-back-button' onClick={goBack}>
+					<Icon name='back'/>
+				</Button>
+				<Label fontScale='h1'>{t('Directory')}</Label>
+			</Field>
+		</Page.Header>
 		<Tabs flexShrink={0} >
 			<Tabs.Item selected={tab === 'channels'} onClick={handleTabClick('channels')}>{t('Channels')}</Tabs.Item>
 			<Tabs.Item selected={tab === 'users'} onClick={handleTabClick('users')}>{t('Users')}</Tabs.Item>

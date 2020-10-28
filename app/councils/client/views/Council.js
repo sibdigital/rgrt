@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Field, Label, Table, TextInput } from '@rocket.chat/fuselage';
+import { Box, Button, Field, Icon, Label, Table, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -61,7 +61,7 @@ export function CouncilPage() {
 		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>
 	], [mediaQuery]);
 
-	const styleTableRow = { 'word-wrap': 'break-word' };
+	const styleTableRow = { wordWrap: 'break-word' };
 
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
@@ -75,21 +75,31 @@ export function CouncilPage() {
 		</Table.Row>;
 	};
 
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={t('Council')}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Council')}</Label>
+				</Field>
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x8'>
 					<Field.Label>{t('Date')}</Field.Label>
 					<Field.Row>
-						<TextInput readonly is='span' fontScale='p1'>{formatDateAndTime(data.d)}</TextInput>
+						<TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data.d)}</TextInput>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextInput readonly is='span' fontScale='p1'>{data.desc}</TextInput>
+						<TextAreaInput row='3' readOnly is='span' fontScale='p1'>{data.desc}</TextAreaInput>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
@@ -101,7 +111,7 @@ export function CouncilPage() {
 				<Field mbe='x8'>
 					<Field.Row>
 						<Field.Label>{t('Council_Invited_Users')}</Field.Label>
-						<Button small color='var(--button-primary-text-color)' backgroundColor='var(--button-primary-background)' className='rc-button rc-button--small' onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+						<Button small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
 							{t('Download_Council_Participant_List')}
 						</Button>
 					</Field.Row>

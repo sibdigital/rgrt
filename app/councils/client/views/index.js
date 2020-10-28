@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Icon } from '@rocket.chat/fuselage';
+import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
@@ -75,12 +75,20 @@ export function CouncilsPage() {
 		setCache(new Date());
 	}, []);
 
-	const styleButton = { 'font-size': '1.3rem', 'background-color': 'var(--button-primary-background)', color: 'var(--button-primary-text-color)' };
+	const goBack = () => {
+		window.history.back();
+	};
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={t('Councils')}>
-				<Button style={styleButton} small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Councils')}</Label>
+				</Field>
+				<Button fontSize={'1.3rem'} primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					<Icon name='plus'/>
 				</Button>
 			</Page.Header>

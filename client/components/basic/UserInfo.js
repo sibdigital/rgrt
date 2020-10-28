@@ -63,7 +63,7 @@ export const UserInfo = React.memo(function UserInfo({
 			</>}
 
 			{Number.isInteger(utcOffset) && <>
-				<Label>{t('Local Time')}</Label>
+				<Label>{t('Local_Time')}</Label>
 				<Info><UTCClock utcOffset={utcOffset}/></Info>
 			</>}
 
@@ -96,11 +96,11 @@ export const UserInfo = React.memo(function UserInfo({
 			</>}
 
 			{bio && <>
-				<Label>{t('Bio')}</Label>
+				<Label>{t('Description')}</Label>
 				<Info withTruncatedText={false}><MarkdownText content={bio}/></Info>
 			</>}
 
-			{phone && <> <Label>{t('Phone')}</Label>
+			{phone && <> <Label>{t('Phone_number')}</Label>
 				<Info display='flex' flexDirection='row' alignItems='center'>
 					<Box is='a' withTruncatedText href={`tel:${ phone }`}>{phone}</Box>
 				</Info>

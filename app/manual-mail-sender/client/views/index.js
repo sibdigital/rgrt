@@ -1,10 +1,11 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import '../../public/stylesheets/mail-sender.css';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import MailForm from './MailForm';
+import { Button, Field, Label, Icon } from '@rocket.chat/fuselage';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -62,10 +63,20 @@ export function MailSenderPage() {
 		assignObjectPaths(recipients);
 
 		setRecipients(recipients);
-	}, [data])
+	}, [data]);
+
+	const goBack = () => {
+		window.history.back();
+	};
 
 	return <Page>
-		<Page.Header title={t('Send_email')}>
+		<Page.Header>
+			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+				<Button className='go-back-button' onClick={goBack}>
+					<Icon name='back'/>
+				</Button>
+				<Label fontScale='h1'>{t('Send_email')}</Label>
+			</Field>
 		</Page.Header>
 		<Page.Content>
 			<MailForm recipients={recipients}/>

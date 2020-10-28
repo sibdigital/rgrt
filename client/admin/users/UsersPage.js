@@ -36,10 +36,10 @@ function UsersPage() {
 			<Page.Header title={t('Users')}>
 				<ButtonGroup>
 					<Button onClick={handleNewButtonClick}>
-						<Icon name='plus'/> {t('New')}
+						<Icon name='plus'/> {t('Add_User')}
 					</Button>
 					<Button onClick={handleInviteButtonClick}>
-						<Icon name='send'/> {t('Invite')}
+						<Icon name='send'/> {t('Invite_Users')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>

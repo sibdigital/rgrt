@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Field, Icon } from '@rocket.chat/fuselage';
+import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
@@ -73,14 +73,24 @@ export function WorkingGroupMeetingsPage() {
 		setCache(new Date());
 	}, []);
 
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={t('Working_group_meetings')}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Working_group_meetings')}</Label>
+				</Field>
 			</Page.Header>
 			<Page.Content>
 				<Field.Row>
 					<Field.Label>{t('Working_group_meeting_list')}</Field.Label>
-					<Button small aria-label={t('Working_group_meeting_add')} onClick={handleHeaderButtonClick('new')}>
+					<Button small primary aria-label={t('Working_group_meeting_add')} onClick={handleHeaderButtonClick('new')}>
 						{t('Working_group_meeting_add')}
 					</Button>
 				</Field.Row>
