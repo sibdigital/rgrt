@@ -194,7 +194,7 @@ function EditWorkingGroupMeetingWithData({ close, onChange, workingGroupMeeting,
 		<Field>
 			<Field.Label>{t('Description')}</Field.Label>
 			<Field.Row>
-				<TextInput value={desccription} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
+				<TextAreaInput value={desccription} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 			</Field.Row>
 		</Field>
 		<Field>

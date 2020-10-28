@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
-import { Field, FieldGroup, TextInput, TextAreaInput, Box, Icon, AnimatedVisibility, PasswordInput, Button, Grid, Margins } from '@rocket.chat/fuselage';
+import { Field, FieldGroup, TextInput, TextAreaInput, Select, Icon, AnimatedVisibility, PasswordInput, Button, Grid, Margins } from '@rocket.chat/fuselage';
 import { useDebouncedCallback, useSafely } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../contexts/TranslationContext';
@@ -51,12 +51,13 @@ export default function AccountProfileForm({ values, handlers, user, data, setti
 		nickname,
 	} = values;
 
-	let phone = data.phone;
 	const {
 		surname,
 		patronymic,
 		organization,
 		position,
+		phone,
+		workingGroup,
 	} = data;
 
 	const {
@@ -76,6 +77,7 @@ export default function AccountProfileForm({ values, handlers, user, data, setti
 		handleBio,
 		handleCustomFields,
 		handleNickname,
+		handleWorkingGroup,
 	} = handlers;
 
 	const previousEmail = getUserEmailAddress(user);
@@ -153,6 +155,13 @@ export default function AccountProfileForm({ values, handlers, user, data, setti
 		!!nameError,
 		!!statusTextError,
 	].filter(Boolean);
+
+	const workingGroupOptions = useMemo(() => [
+		['Не выбрано', t('Not_chosen')],
+		['Члены рабочей группы', 'Члены рабочей группы'],
+		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+		['Иные участники', 'Иные участники'],
+	], [t]);
 
 	useEffect(() => {
 		onSaveStateChange(canSave);
@@ -241,6 +250,15 @@ export default function AccountProfileForm({ values, handlers, user, data, setti
 				{nameError}
 			</Field.Error>
 		</Field>, [t, phone, handlePhone, nameError])}
+		{useMemo(() => <Field mie='x8'>
+			<Field.Label flexGrow={0}>{t('Working_group')}</Field.Label>
+			<Field.Row>
+				<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
+			</Field.Row>
+			<Field.Error>
+				{nameError}
+			</Field.Error>
+		</Field>, [t, workingGroup, handleWorkingGroup, nameError])}
 		{useMemo(() => <Field>
 			<Field.Label>{t('StatusMessage')}</Field.Label>
 			<Field.Row>
@@ -260,7 +278,7 @@ export default function AccountProfileForm({ values, handlers, user, data, setti
 			</Field.Row>
 		</Field>, [nickname, handleNickname, t])}
 		{useMemo(() => <Field>
-			<Field.Label>{t('Bio')}</Field.Label>
+			<Field.Label>{t('Description')}</Field.Label>
 			<Field.Row>
 				<TextAreaInput rows={3} flexGrow={1} value={bio} onChange={handleBio} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
 			</Field.Row>

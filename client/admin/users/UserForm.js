@@ -1,5 +1,17 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Field, TextInput, TextAreaInput, PasswordInput, MultiSelectFiltered, Box, ToggleSwitch, Icon, Divider, FieldGroup } from '@rocket.chat/fuselage';
+import {
+	Field,
+	TextInput,
+	TextAreaInput,
+	PasswordInput,
+	MultiSelectFiltered,
+	Box,
+	ToggleSwitch,
+	Icon,
+	Divider,
+	FieldGroup,
+	Select,
+} from '@rocket.chat/fuselage';
 
 import { useTranslation } from '../../contexts/TranslationContext';
 import { isEmail } from '../../../app/utils/lib/isEmail.js';
@@ -22,6 +34,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 		position,
 		phone,
 		bio,
+		workingGroup,
 		nickname,
 		password,
 		setRandomPassword,
@@ -44,6 +57,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 		handlePosition,
 		handlePhone,
 		handleBio,
+		handleWorkingGroup,
 		handleNickname,
 		handlePassword,
 		handleSetRandomPassword,
@@ -55,6 +69,13 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 	} = formHandlers;
 
 	const onLoadCustomFields = useCallback((hasCustomFields) => setHasCustomFields(hasCustomFields), []);
+
+	const workingGroupOptions = useMemo(() => [
+		['Не выбрано', t('Not_chosen')],
+		['Члены рабочей группы', 'Члены рабочей группы'],
+		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+		['Иные участники', 'Иные участники'],
+	], [t]);
 
 	return <VerticalBar.ScrollableContent is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} { ...props }>
 		<FieldGroup>
@@ -112,6 +133,12 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 					</Box>
 				</Field.Row>
 			</Field>, [t, email, handleEmail, verified, handleVerified])}
+			{useMemo(() => <Field mie='x8'>
+				<Field.Label flexGrow={0}>{t('Working_group')}</Field.Label>
+				<Field.Row>
+					<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
+				</Field.Row>
+			</Field>, [t, workingGroup, handleWorkingGroup])}
 			{useMemo(() => <Field>
 				<Field.Label>{t('StatusMessage')}</Field.Label>
 				<Field.Row>
@@ -119,7 +146,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 				</Field.Row>
 			</Field>, [t, statusText, handleStatusText])}
 			{useMemo(() => <Field>
-				<Field.Label>{t('Bio')}</Field.Label>
+				<Field.Label>{t('Description')}</Field.Label>
 				<Field.Row>
 					<TextAreaInput rows={3} flexGrow={1} value={bio} onChange={handleBio} addon={<Icon name='edit' size='x20' alignSelf='center'/>}/>
 				</Field.Row>

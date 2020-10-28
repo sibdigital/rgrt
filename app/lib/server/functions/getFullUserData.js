@@ -28,6 +28,7 @@ const fullFields = {
 	organization: 1,
 	position: 1,
 	phone: 1,
+	workingGroup: 1,
 	statusConnection: 1,
 	bio: 1,
 	createdAt: 1,

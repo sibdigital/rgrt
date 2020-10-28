@@ -75,6 +75,10 @@ Meteor.methods({
 			Users.setPhone(user._id, settings.phone.trim());
 		}
 
+		if (settings.workingGroup && settings.workingGroup !== 'undefined') {
+			Users.setWorkingGroup(user._id, settings.workingGroup);
+		}
+
 		if (settings.bio != null) {
 			if (typeof settings.bio !== 'string' || settings.bio.length > 260) {
 				throw new Meteor.Error('error-invalid-field', 'bio', {

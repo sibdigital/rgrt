@@ -70,6 +70,7 @@ Meteor.methods({
 			organization: formData.organization,
 			position: formData.position,
 			phone: formData.phone,
+			workingGroup: formData.workingGroup,
 		};
 
 		// Check if user has already been imported and never logged in. If so, set password and let it through
@@ -107,6 +108,9 @@ Meteor.methods({
 		const phone = s.trim(formData.phone) ?? '';
 		if (phone) {
 			Users.addPhone(userId, phone);
+		}
+		if (formData.workingGroup && formData.workingGroup !== 'undefined') {
+			Users.setWorkingGroup(userId, formData.workingGroup);
 		}
 
 		saveCustomFields(userId, formData);

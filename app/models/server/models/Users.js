@@ -54,6 +54,7 @@ export class Users extends Base {
 		this.tryEnsureIndex({ 'visitorEmails.address': 1 });
 		this.tryEnsureIndex({ federation: 1 }, { sparse: true });
 		this.tryEnsureIndex({ isRemote: 1 }, { sparse: true });
+		this.tryEnsureIndex({ workingGroup: 1 });
 		this.tryEnsureIndex({ 'services.saml.inResponseTo': 1 });
 		this.tryEnsureIndex({ openBusinessHours: 1 }, { sparse: true });
 	}
@@ -1126,6 +1127,24 @@ export class Users extends Base {
 			},
 		};
 
+		return this.update(_id, update);
+	}
+
+	setWorkingGroup(_id, workingGroup) {
+		const update = {
+			$set: {
+				workingGroup,
+			},
+		};
+		return this.update(_id, update);
+	}
+
+	unsetWorkingGroup(_id) {
+		const update = {
+			$unset: {
+				workingGroup: 1,
+			},
+		};
 		return this.update(_id, update);
 	}
 

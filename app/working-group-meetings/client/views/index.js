@@ -100,8 +100,8 @@ export function WorkingGroupMeetingsPage() {
 		{ context
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'edit' && t('Working_group_edit') }
-				{ context === 'new' && t('Working_group_add') }
+				{ context === 'edit' && t('Working_group_meeting_edit') }
+				{ context === 'new' && t('Working_group_meeting_add') }
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
 			<VerticalBar.Content>
 				{context === 'edit' && <EditWorkingGroupMeeting _id={id} close={close} onChange={onChange} cache={cache}/>}

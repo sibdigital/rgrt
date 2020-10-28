@@ -111,6 +111,20 @@
 							</div>
 						</label>
 					</div>
+					<div class="rc-select">
+						<select size="1" name="workingGroup" style="width: 100%;border: none;margin-left: 10px;">
+							<option selected disabled>{{_ "Working_group_add_register"}}</option>
+							<option value="undefined">{{_ "Not_chosen"}}</option>
+							{{#each workingGroup in workingGroups}}
+								<option value={{workingGroup}}>{{workingGroup}}</option>
+							{{/each}}
+						</select>
+					</div>
+					<label class="rc-checkbox">
+						<input type="checkbox" name="isWorkingGroup" class="rc-checkbox__input">
+							{{> icon icon="check" block="rc-checkbox__icon"}}
+						<span class="rc-checkbox__text rc-text__small">{{_ "Working_group_add_register"}}</span>
+					</label>
 				{{/if}}
 				{{#if state 'register'}}
 					<div class="rc-input">
