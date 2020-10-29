@@ -2451,6 +2451,7 @@
   "No_available_agents_to_transfer": "Нет доступных сотрудников для передачи",
   "No_channel_with_name_%s_was_found": "Канал с названием <strong>\"%s\"</strong> не найден!",
   "No_channels_yet": "Вы пока не участвуете ни в одном канале.",
+  "No_data_found": "Данные не найдены",
   "No_direct_messages_yet": "Нет личных переписок.",
   "No_Discussions_found": "Обсуждения не найдены",
   "No_emojis_found": "Не найдено Emoji",
