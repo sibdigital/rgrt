@@ -8,13 +8,13 @@ import {
 	Skeleton,
 	Throbber,
 	InputBox,
-	TextAreaInput,
 	TextInput,
-	Modal
+	Select,
+	Modal,
 } from '@rocket.chat/fuselage';
-import moment from 'moment';
-import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
+
+import { registerLocale } from 'react-datepicker';
 registerLocale('ru', ru);
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -24,6 +24,7 @@ import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client
 import { validate, createWorkingGroupData } from './lib';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { useEndpointData } from '/client/hooks/useEndpointData';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -67,17 +68,11 @@ const SuccessModal = ({ onClose, ...props }) => {
 };
 
 export function EditWorkingGroup({ _id, cache, onChange, ...props }) {
-	//b8vBMZpYCf4n82x3c
-	// const query = useMemo(() => ({
-	// 	query: JSON.stringify({ _id }),
-	// }), [_id, cache]);
-	//_id = 'b8vBMZpYCf4n82x3c';
-	const query = useMemo(() => ({
+	const queryUser = useMemo(() => ({
 		query: JSON.stringify({ _id }),
 	}), [_id, cache]);
 
-	const { data, state, error } = useEndpointDataExperimental('working-groups.list', query);
-
+	const { data, state, error } = useEndpointDataExperimental('users.list', queryUser);
 
 	if (state === ENDPOINT_STATES.LOADING) {
 		return <Box pb='x20'>
@@ -95,30 +90,30 @@ export function EditWorkingGroup({ _id, cache, onChange, ...props }) {
 		</Box>;
 	}
 
-	if (error || !data || data.workingGroups.length < 1) {
+	if (error || !data || data.users.length < 1) {
 		return <Box fontScale='h1' pb='x20'>{error}</Box>;
 	}
 
-	return <EditWorkingGroupWithData workingGroup={data.workingGroups[0]} onChange={onChange} {...props}/>;
+	return <EditWorkingGroupWithData workingGroupUser={data.users[0]} onChange={onChange} {...props}/>;
 }
 
-function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
+function EditWorkingGroupWithData({ close, onChange, workingGroupUser, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const {
 		_id,
-		workingGroupType: previousWorkingGroupType,
+		workingGroup: previousWorkingGroup,
 		surname: previousSurname,
 		name: previousName,
 		patronymic: previousPatronymic,
 		position: previousPosition,
 		phone: previousPhone,
 		email: previousEmail
-	} = workingGroup || {};
-	const previousWorkingGroup = workingGroup || {};
+	} = workingGroupUser || {};
+	const previousWorkingGroupUser = workingGroupUser || {};
 
-	const [workingGroupType, setWorkingGroupType] = useState(previousWorkingGroupType);
+	const [workingGroup, setWorkingGroup] = useState(previousWorkingGroup);
 	const [surname, setSurname] = useState(previousSurname);
 	const [name, setName] = useState(previousName);
 	const [patronymic, setPatronymic] = useState(previousPatronymic);
@@ -129,7 +124,7 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 	const setModal = useSetModal();
 
 	useEffect(() => {
-		setWorkingGroupType(previousWorkingGroupType || '');
+		setWorkingGroup(previousWorkingGroup || '');
 		setSurname(previousSurname || '');
 		setName(previousName || '');
 		setPatronymic(previousPatronymic || '');
@@ -137,32 +132,32 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 		setPhone(previousPhone || '');
 		setEmail(previousEmail || '');
 	}, [
-		previousWorkingGroupType,
+		previousWorkingGroup,
 		previousSurname,
 		previousName,
 		previousPatronymic,
 		previousPosition,
 		previousPhone,
 		previousEmail,
-		previousWorkingGroup,
+		previousWorkingGroupUser,
 		_id]);
 
 	const deleteWorkingGroupUser = useMethod('deleteWorkingGroupUser');
 	const insertOrUpdateWorkingGroup = useMethod('insertOrUpdateWorkingGroup');
 
 	const hasUnsavedChanges = useMemo(() =>
-		previousWorkingGroupType !== workingGroupType
+		previousWorkingGroup !== workingGroup
 		|| previousSurname !== surname
 		|| previousName !== name
 		|| previousPatronymic !== patronymic
 		|| previousPosition !== position
 		|| previousPhone !== phone
 		|| previousEmail !== email,
-	[workingGroupType, surname, name, patronymic, position, phone, email]);
+	[workingGroup, surname, name, patronymic, position, phone, email]);
 
-	const saveAction = useCallback(async (workingGroupType, surname, name, patronymic, position, phone, email) => {
+	const saveAction = useCallback(async (workingGroup, surname, name, patronymic, position, phone, email) => {
 		const workingGroupData = createWorkingGroupData(
-			workingGroupType,
+			workingGroup,
 			surname,
 			name,
 			patronymic,
@@ -170,7 +165,7 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 			phone,
 			email,
 			{
-				previousWorkingGroupType,
+				previousWorkingGroup,
 				previousSurname,
 				previousName,
 				previousPatronymic,
@@ -187,26 +182,26 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 		_id,
 		dispatchToastMessage,
 		insertOrUpdateWorkingGroup,
-		workingGroupType,
+		workingGroup,
 		surname,
 		name,
 		patronymic,
 		position,
 		phone,
 		email,
-		previousWorkingGroupType,
+		previousWorkingGroup,
 		previousSurname,
 		previousName,
 		previousPatronymic,
 		previousPosition,
 		previousPhone,
 		previousEmail,
-		previousWorkingGroup
+		previousWorkingGroupUser
 	]);
 
 	const handleSave = useCallback(async () => {
 		saveAction(
-			workingGroupType,
+			workingGroup,
 			surname,
 			name,
 			patronymic,
@@ -229,47 +224,26 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
+	const workingGroupOptions = useMemo(() => [
+		['Не выбрано', t('Not_chosen')],
+		['Члены рабочей группы', 'Члены рабочей группы'],
+		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+		['Иные участники', 'Иные участники'],
+	], [t]);
+
+	const getShortFio = (surname, name, patronymic) => [surname, name.charAt(0).toUpperCase(), patronymic ? patronymic.charAt(0).toUpperCase() : ''].join(' ');
+
 	return <VerticalBar.ScrollableContent {...props}>
+		<Field>
+			<Field.Label>{t('Full_Name')}</Field.Label>
+			<Field.Row>
+				<TextInput readOnly value={getShortFio(surname, name, patronymic)}/>
+			</Field.Row>
+		</Field>
 		<Field>
 			<Field.Label>{t('Working_group')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput value={workingGroupType} onChange={(e) => setWorkingGroupType(e.currentTarget.value)} placeholder={t('Working_group')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Surname')}</Field.Label>
-			<Field.Row>
-				<TextInput value={surname} onChange={(e) => setSurname(e.currentTarget.value)} placeholder={t('Surname')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Name')}</Field.Label>
-			<Field.Row>
-				<TextInput value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Name')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Patronymic')}</Field.Label>
-			<Field.Row>
-				<TextInput value={patronymic} onChange={(e) => setPatronymic(e.currentTarget.value)} placeholder={t('Patronymic')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Council_Organization_Position')}</Field.Label>
-			<Field.Row>
-				<TextAreaInput value={position} onChange={(e) => setPosition(e.currentTarget.value)} placeholder={t('Council_Organization_Position')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Phone_number')}</Field.Label>
-			<Field.Row>
-				<TextInput value={phone} onChange={(e) => setPhone(e.currentTarget.value)} placeholder={t('Phone_number')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Email')}</Field.Label>
-			<Field.Row>
-				<TextInput value={email} onChange={(e) => setEmail(e.currentTarget.value)} placeholder={t('Email')} />
+				<Select options={workingGroupOptions} onChange={setWorkingGroup} value={workingGroup} selected={workingGroup}/>
 			</Field.Row>
 		</Field>
 		<Field>
@@ -280,12 +254,12 @@ function EditWorkingGroupWithData({ close, onChange, workingGroup, ...props }) {
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Row>
-				<ButtonGroup stretch w='full'>
-					<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>
-				</ButtonGroup>
-			</Field.Row>
-		</Field>
+		{/*<Field>*/}
+		{/*	<Field.Row>*/}
+		{/*		<ButtonGroup stretch w='full'>*/}
+		{/*			<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>*/}
+		{/*		</ButtonGroup>*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 	</VerticalBar.ScrollableContent>;
 }

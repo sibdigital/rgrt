@@ -57,7 +57,15 @@ Meteor.methods({
 						},
 					}),
 					new TableCell({
-						children: [new Paragraph({ text: 'Должность с указанием названия организации', bold: true, alignment: AlignmentType.CENTER })],
+						children: [new Paragraph({ text: 'Организация', bold: true, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						width: {
+							size: 19,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: 'Должность', bold: true, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						width: {
 							size: 19,
@@ -106,11 +114,20 @@ Meteor.methods({
 						},
 					}),
 					new TableCell({
-						children: [new Paragraph({ text: `${ value.workingGroupType }`, alignment: AlignmentType.CENTER })],
+						children: [new Paragraph({ text: `${ value.workingGroup }`, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						alignment: AlignmentType.CENTER,
 						width: {
 							size: 5,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: `${ value.organization }`, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						alignment: AlignmentType.CENTER,
+						width: {
+							size: 19,
 							type: WidthType.PERCENTAGE,
 						},
 					}),
@@ -133,7 +150,7 @@ Meteor.methods({
 						},
 					}),
 					new TableCell({
-						children: [new Paragraph({ text: `${ value.email }`, alignment: AlignmentType.CENTER })],
+						children: [new Paragraph({ text: `${ value.emails[0].address ?? '' }`, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						alignment: AlignmentType.CENTER,
 						width: {
@@ -143,7 +160,7 @@ Meteor.methods({
 					}),
 				],
 			});
-			},
+		},
 		));
 
 

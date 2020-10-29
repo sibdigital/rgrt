@@ -46,5 +46,5 @@ export function WorkingGroupsMeetings({
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data} total={data.total} setParams={setParams} params={params} />;
+	return <GenericTable header={header} renderRow={renderRow} results={data} total={data.length} setParams={setParams} params={params} />;
 }
