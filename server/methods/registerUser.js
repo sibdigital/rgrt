@@ -28,6 +28,7 @@ Meteor.methods({
 		}
 		check(formData, Match.ObjectIncluding({
 			email: String,
+			login: String,
 			pass: String,
 			name: String,
 			surname: String,
@@ -62,6 +63,7 @@ Meteor.methods({
 
 		const userData = {
 			email: s.trim(formData.email.toLowerCase()),
+			username: formData.login,
 			password: formData.pass,
 			name: formData.name,
 			reason: formData.reason,
@@ -83,6 +85,7 @@ Meteor.methods({
 			userId = Accounts.createUser(userData);
 		}
 
+		Users.setUsername(userId, s.trim(formData.login));
 		Users.setName(userId, s.trim(formData.name));
 
 		const reason = s.trim(formData.reason) ?? '';
