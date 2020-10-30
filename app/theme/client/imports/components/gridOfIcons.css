@@ -1,23 +1,30 @@
 .grid-of-icons {
+	overflow: auto;
+
 	flex: 5 auto;
-	margin: 15px 0 0 0;
+
+	margin: 15px 0 0;
 }
-/* Основные стили */
+
 .cbp-ig-grid {
-	list-style: none;
-	padding: 0 0 50px 0;
 	margin: 0;
+
+	padding: 0 0 50px;
+
+	list-style: none;
 }
 
 .cbp-ig-grid__elem {
-	text-align: center !important;
-	height: 136px;
 	width: 100%;
+	height: 136px;
+
+	text-align: center !important;
 }
 
 .cbp-ig-grid__elem-button {
 	width: 100%;
 	height: 100%;
+
 	text-align: center !important;
 }
 
@@ -25,107 +32,127 @@
 	font-size: 36px;
 }
 
-/* сброс выравниваний */
-.cbp-ig-grid:before,
-.cbp-ig-grid:after {
-	content: " ";
+.cbp-ig-grid::before,
+.cbp-ig-grid::after {
 	display: table;
+
+	content: " ";
 }
 
-.cbp-ig-grid:after {
+.cbp-ig-grid::after {
 	clear: both;
 }
 
 .cbp-ig-grid li {
-	width: 20%;
 	float: left;
+
+	width: 20%;
 	height: 136px;
+
 	text-align: center;
 }
 
-/* стили для ссылок */
 .cbp-ig-grid li > a {
 	display: block;
+
 	height: 40%;
-	color: #47a3da;
+
 	-webkit-transition: background 0.2s;
 	-moz-transition: background 0.2s;
 	transition: background 0.2s;
+
+	color: #47a3da;
 }
 
-/* иконки */
 .cbp-ig-icon {
-	padding: 15px 0 0 0;
 	display: block;
+
+	padding: 15px 0 0;
+
 	-webkit-transition: -webkit-transform 0.2s;
 	transition: -moz-transform 0.2s;
 	transition: transform 0.2s;
 }
 
-.cbp-ig-icon:before {
-	font-size: 7em;
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
+.cbp-ig-icon::before {
 	text-transform: none;
+
+	font-size: 7em;
+	font-weight: normal;
+	font-style: normal;
+	font-variant: normal;
+
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
+	speak: none;
 }
 
-/* элемент title */
 .cbp-ig-grid .cbp-ig-title {
-	margin: 10px 0 10px 0;
-	padding: 10px 0 0 0;
-	font-size: 1em;
 	position: relative;
+
+	margin: 10px 0;
+	padding: 10px 0 0;
+
 	-webkit-transition: -webkit-transform 0.2s;
 	-moz-transition: -moz-transform 0.2s;
 	transition: transform 0.2s;
+
+	font-size: 1em;
 }
 
-.cbp-ig-grid .cbp-ig-title:before {
-	content: '';
+.cbp-ig-grid .cbp-ig-title::before {
 	position: absolute;
-	background: #47a3da;
-	/* width: 160px; */
-	height: 6px;
-	top: 0px;
+
+	top: 0;
 	left: 50%;
+
+	height: 6px;
 	margin: -10px 0 0 -80px;
+
+	content: '';
+
 	-webkit-transition: margin-top 0.2s;
 	-moz-transition: margin-top 0.2s;
 	transition: margin-top 0.2s;
+
+	background: #47a3da;
 }
 
 .cbp-ig-grid .cbp-ig-category {
-	text-transform: uppercase;
 	display: inline-block;
-	font-size: 1em;
-	letter-spacing: 1px;
-	color: #fff;
+
+	margin-top: 20px;
 	margin-bottom: 10px;
+
+	-moz-transition: -moz-transform 0.3s, opacity 0.2s;
+	-webkit-transition: -webkit-transform 0.3s, opacity 0.2s;
+	-webkit-transition: transform 0.3s, opacity 0.2s;
 	-webkit-transform: translateY(10px);
+
 	-moz-transform: -moz-translateY(10px);
 	-ms-transform: -ms-translateY(10px);
+
 	transform: translateY(10px);
+
+	letter-spacing: 1px;
+
+	text-transform: uppercase;
+
 	opacity: 0;
-	-webkit-transition: -webkit-transform 0.3s, opacity 0.2s;
-	-moz-transition: -moz-transform 0.3s, opacity 0.2s;
-	-webkit-transition: transform 0.3s, opacity 0.2s;
-	margin-top: 20px;
+	color: #ffffff;
+
+	font-size: 1em;
 }
 
 .cbp-ig-grid li:hover .cbp-ig-category,
 .touch .cbp-ig-grid li .cbp-ig-category {
-	opacity: 1;
-	-webkit-transform: translateY(0px);
-	-moz-transform: translateY(0px);
-	-ms-transform: translateY(0px);
-	transform: translateY(0px);
-}
+	-webkit-transform: translateY(0);
+	-moz-transform: translateY(0);
+	-ms-transform: translateY(0);
+	transform: translateY(0);
 
-/* Стили для элементов при наведении мыши */
+	opacity: 1;
+}
 
 .cbp-ig-grid li > button:hover {
 	background: #47a3da;
@@ -138,9 +165,9 @@
 	transform: translateY(10px);
 }
 
-.cbp-ig-grid li > button:hover .cbp-ig-icon:before,
+.cbp-ig-grid li > button:hover .cbp-ig-icon::before,
 .cbp-ig-grid li > button:hover .cbp-ig-title {
-	color: #fff;
+	color: #ffffff;
 }
 
 .cbp-ig-grid li > button:hover .cbp-ig-title {
@@ -150,8 +177,8 @@
 	transform: translateY(-15px);
 }
 
-.cbp-ig-grid li > button:hover .cbp-ig-title:before {
-	background: #fff;
+.cbp-ig-grid li > button:hover .cbp-ig-title::before {
+	background: #ffffff;
 }
 
 @media screen and (max-width: 100em) {

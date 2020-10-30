@@ -4,20 +4,23 @@ import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { WorkingGroups } from './WorkingGroups';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 
+import { WorkingGroups } from './WorkingGroups';
 import { AddWorkingGroup } from './AddWorkingGroup';
 import { EditWorkingGroup } from './EditWorkingGroup';
+
 import moment from 'moment';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
+export const useQueryUser = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	query: JSON.stringify({ workingGroup: { $regex: text || '', $options: 'i' } }),
+	fields: JSON.stringify({ emails: 1, surname: 1, name: 1, patronymic: 1, position: 1, organization: 1, phone: 1, workingGroup: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation
@@ -28,15 +31,15 @@ export function WorkingGroupPage() {
 	const routeName = 'working-group';
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [sort, setSort] = useState(['workingGroupType']);
+	const [sort, setSort] = useState(['_id']);
 	const [cache, setCache] = useState();
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery(debouncedParams, debouncedSort, cache);
+	const queryUser = useQueryUser(debouncedParams, debouncedSort, cache);
 
-	const data = useEndpointData('working-groups.list', query) || {};
+	const data = useEndpointData('users.list', queryUser) || {};
 
 	const router = useRoute(routeName);
 
@@ -66,7 +69,7 @@ export function WorkingGroupPage() {
 	}, []);
 
 	const onPinnedFilesClick = useCallback(() => {
-		FlowRouter.go(`/composition-of-the-working-group`);
+		//FlowRouter.go('/composition-of-the-working-group');
 	}, []);
 
 	const onEditClick = useCallback((_id) => () => {
@@ -120,12 +123,12 @@ export function WorkingGroupPage() {
 						{/*<Button small aria-label={t('Add_User')} onClick={handleHeaderButtonClick('new')}>*/}
 						{/*	<Box is='span' fontScale='p1'>{t('Working_group_add')}</Box>*/}
 						{/*</Button>*/}
-						<Button small primary onClick={downloadWorkingGroupParticipants(data.workingGroups)} aria-label={t('Download')}>
+						<Button small primary onClick={downloadWorkingGroupParticipants(data.users)} aria-label={t('Download')}>
 							<Box is='span' fontScale='p1'>{t('Download_Council_Participant_List')}</Box>
 						</Button>
 					</ButtonGroup>
 				</Field.Row>
-				<WorkingGroups setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data.workingGroups} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
+				<WorkingGroups setParam={setParams} params={params} onHeaderClick={onHeaderClick} userData={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
 			</Page.Content>
 		</Page>
 		{ context

@@ -38,6 +38,7 @@ export function Councils({
 			console.error('[index.js].downloadCouncilParticipants :', e);
 		}
 	};
+
 	const colorBackgroundCouncil = (date) => {
 		const today = new Date();
 		const dt = new Date(date);

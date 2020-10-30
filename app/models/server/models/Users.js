@@ -1005,6 +1005,16 @@ export class Users extends Base {
 		return this.update(_id, update);
 	}
 
+	updateWorkingGroupById(_id, workingGroup) {
+		const update = {
+			$set: {
+				workingGroup,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
 	setServiceId(_id, serviceName, serviceId) {
 		const update =		{ $set: {} };
 

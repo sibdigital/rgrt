@@ -2,38 +2,14 @@
 export function validate(workingGroupData) {
 	const errors = [];
 
-	if(!workingGroupData.workingGroupType) {
-		errors.push('workingGroupType');
-	}
-
-	if (!workingGroupData.name) {
-		errors.push('Name');
-	}
-
-	if (!workingGroupData.surname) {
-		errors.push('Surname');
-	}
-
-	if (!workingGroupData.patronymic) {
-		errors.push('patronymic');
-	}
-
-	if (!workingGroupData.position) {
-		errors.push('position');
-	}
-
-	if (!workingGroupData.phone) {
-		errors.push('phone');
-	}
-
-	if (!workingGroupData.email) {
-		errors.push('email');
+	if (!workingGroupData.workingGroup) {
+		errors.push('workingGroup');
 	}
 
 	return errors;
 }
 
-export function createWorkingGroupData(workingGroupType, surname, name, patronymic, position, phone, email, previousData) {
+export function createWorkingGroupData(workingGroup, surname, name, patronymic, position, phone, email, previousData) {
 	const workingGroupData = {
 	};
 
@@ -41,7 +17,7 @@ export function createWorkingGroupData(workingGroupType, surname, name, patronym
 		workingGroupData._id = previousData._id;
 	}
 
-	workingGroupData.workingGroupType = workingGroupType;
+	workingGroupData.workingGroup = workingGroup;
 	workingGroupData.surname = surname;
 	workingGroupData.name = name;
 	workingGroupData.patronymic = patronymic;

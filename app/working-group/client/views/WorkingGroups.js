@@ -6,7 +6,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 
 export function WorkingGroups({
-	data,
+	userData,
 	sort,
 	onClick,
 	onEditClick,
@@ -19,33 +19,34 @@ export function WorkingGroups({
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const header = useMemo(() => [
-		<Th key={'workingGroupType'} direction={sort[1]} active={sort[0] === 'workingGroupType'} sort='workingGroupType' onClick={onHeaderClick} color='default'>
+		<Th key={'workingGroup'} direction={sort[1]} active={sort[0] === 'workingGroup'} sort='workingGroup' onClick={onHeaderClick} color='default'>
 			{ t('Working_group') }
 		</Th>,
 		<Th key={'name'} style={{ width: '190px' }} color='default'>
-			{t('Surname')} {t('Name')} {t('Patronymic')}
+			{t('Full_Name')}
 		</Th>,
-		mediaQuery && <Th key={'type'} color='default'>
-			{t('Council_Organization_Position')}
+		mediaQuery && <Th key={'Organization'} color='default'>
+			{t('Organization')}
+		</Th>,
+		mediaQuery && <Th key={'Position'} color='default'>
+			{t('Position')}
 		</Th>,
 		mediaQuery && <Th key={'Phone_number'} style={{ width: '190px' }} color='default'>{t('Phone_number')}</Th>,
 		mediaQuery && <Th key={'Email'} color='default'>
 			{t('Email')}
 		</Th>,
 		<Th w='x40' key='edit'></Th>,
-		<Th w='x40' key='download'></Th>
 	], [sort, mediaQuery]);
 
-	if (!data) {
-		data = {};
-	}
+	const filterUserData = userData.users ? userData.users.filter((item) => item.workingGroup !== 'Не выбрано') : {};
 
-
-	const renderRow = (workingGroup) => {
-		const { _id, workingGroupType, name, surname, patronymic, position, email, phone } = workingGroup;
+	const renderRow = (userWorkingGroup) => {
+		const { _id, workingGroup, name, surname, patronymic, organization, position, emails, phone } = userWorkingGroup;
+		const email = emails[0].address ?? '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{workingGroupType}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{workingGroup}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{surname} {name} {patronymic}</Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{organization}</Box></Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{position}</Box></Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{email}</Box></Table.Cell>}
@@ -57,5 +58,5 @@ export function WorkingGroups({
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data} total={data.total} setParams={setParams} params={params} />;
+	return <GenericTable header={header} renderRow={renderRow} results={filterUserData} total={filterUserData.length} setParams={setParams} params={params} />;
 }

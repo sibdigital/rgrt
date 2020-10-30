@@ -239,9 +239,15 @@ Template.loginForm.events({
 	},
 	'keyup [name=phone]'(event) {
 		const text = $(event.target).val().replace(/[^\d]/g, '');
-		$(event.target).val(text);
-		$('#login-card input[name=phone], #login-card select[name=phone]').addClass('error');
-		$('#login-card input[name=phone]~.input-error, #login-card select[name=phone]~.input-error').text(t('Incorrect_phone_number_input'));
+		if (text !== $(event.target).val()) {
+			$(event.target).val(text);
+			$('#login-card input[name=phone], #login-card select[name=phone]').addClass('error');
+			$('#login-card input[name=phone]~.input-error, #login-card select[name=phone]~.input-error').text(t('Incorrect_phone_number_input'));
+		} else {
+			$('#login-card h2').removeClass('error');
+			$('#login-card input.error, #login-card select.error').removeClass('error');
+			$('#login-card .input-error').text('');
+		}
 	},
 	'click .register'() {
 		Template.instance().state.set('registerStepOne');
@@ -355,8 +361,8 @@ Template.loginForm.onCreated(function() {
 			if (!formObj.position) {
 				validationObj.position = t('Invalid_position');
 			}
-			if (formObj.isWorkingGroup) {
-				formObj.isWorkingGroup = true;
+			if (!formObj.workingGroup) {
+				validationObj.workingGroup = t('Working_group');
 			}
 		}
 		if (state === 'register') {
