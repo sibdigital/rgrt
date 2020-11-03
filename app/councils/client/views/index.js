@@ -46,12 +46,13 @@ export function CouncilsPage() {
 		FlowRouter.go(`/council/${ _id }`);
 	};
 
-	const onEditClick = useCallback((_id) => () => {
-		router.push({
-			context: 'edit',
-			id: _id,
-		});
-	}, [router]);
+	const onEditClick = (_id) => () => {
+		FlowRouter.go(`/council/edit/${ _id }`);
+	};
+
+	const onAddClick = () => {
+		FlowRouter.go('/council/edit/new');
+	};
 
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
@@ -88,22 +89,22 @@ export function CouncilsPage() {
 					</Button>
 					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
-				<Button fontSize={'1.3rem'} primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
-					<Icon name='plus'/>
+				<Button width='200px' primary small onClick={onAddClick} aria-label={t('Council_Add')}>
+					{ t('Council_Add') }
 				</Button>
 			</Page.Header>
 			<Page.Content>
-				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
+				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
 		{ context
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'edit' && t('Council_Info') }
+				{/*{ context === 'edit' && t('Council_Info') }*/}
 				{ context === 'new' && t('Council_Add') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
-			{context === 'edit' && <EditCouncil _id={id} close={close} onChange={onChange} cache={cache}/>}
+			{/*{context === 'edit' && <EditCouncil _id={id} close={close} onChange={onChange} cache={cache}/>}*/}
 			{context === 'new' && <AddCouncil goToNew={onEditClick} close={close} onChange={onChange}/>}
 		</VerticalBar>}
 	</Page>;

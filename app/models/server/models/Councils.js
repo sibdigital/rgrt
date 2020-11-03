@@ -28,6 +28,14 @@ class Councils extends Base {
 
 		return this.update({ _id }, { $set: { ...data } });
 	}
+
+	updatePersonCouncil(_id, person, index) {
+		const data = this.findOne({ _id });
+		data._updatedAt = new Date();
+		data.invitedUsers[index] = person;
+
+		return this.update({ _id }, { $set: { ...data } });
+	}
 }
 
 export default new Councils();
