@@ -26,13 +26,13 @@
 			}
 
 			&.add-tag {
-				visibility: hidden;
+				visibility: visible;
 
 				padding: 0 2px;
 
 				transition: opacity 0.2s ease;
 
-				opacity: 0;
+				opacity: 0.5;
 				color: #888888;
 			}
 

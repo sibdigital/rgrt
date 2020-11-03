@@ -334,7 +334,7 @@ Template.message.helpers({
 	hideReactions() {
 		const { msg } = this;
 		if (_.isEmpty(msg.reactions)) {
-			return 'hidden';
+			//return 'hidden';
 		}
 	},
 	tags() {
@@ -370,7 +370,7 @@ Template.message.helpers({
 	hideTags() {
 		const { msg } = this;
 		if (_.isEmpty(msg.tags)) {
-			return 'hidden';
+			//return 'hidden';
 		}
 	},
 	hideAddReaction() {

@@ -2130,6 +2130,7 @@
 	padding: 8px 50px 4px 70px;
 
 	line-height: 20px;
+	margin-block-end: 15px;
 
 	&-unread {
 		display: inline-block;

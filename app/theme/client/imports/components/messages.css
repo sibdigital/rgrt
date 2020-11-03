@@ -215,14 +215,13 @@
 	text-align: center;
 	text-decoration: none;
 	color: var(--color-black) !important;
-	border: 1px solid var(--button-reply-primary-background);
 	display: inline-block;
 	border-radius: 0.6em;
 	transition: all 0.5s ease-in-out;
 	position: relative;
 	overflow: hidden;
 	&:hover {
-		 border-color: #4fb0fc;
+		 border: 1px solid #4fb0fc;
 		 color: var(--color-black) !important;
 		 opacity: 1 !important;
 	}

@@ -1,5 +1,7 @@
 .go-back-button {
-	border-color: transparent !important;
+	border-width: 0.12rem !important;
+	border-color: var(--rc-color-button-primary) !important;
+	border-radius: 10rem !important;
 	background-color: transparent !important;
 
 	font-size: 24px !important;

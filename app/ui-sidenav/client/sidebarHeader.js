@@ -87,6 +87,15 @@ Template.sidebarHeader.helpers({
 	toolbarButtons() {
 		return toolbarButtons(/* Meteor.userId() */).filter((button) => !button.condition || button.condition());
 	},
+	homeButton(titleButton) {
+		return titleButton === 'Home';
+	},
+	getButtonStyle(titleButton) {
+		if (titleButton === 'Home') {
+			return 'margin-left: auto;';
+		}
+		return '';
+	},
 	showToolbar() {
 		return showToolbar.get();
 	},
