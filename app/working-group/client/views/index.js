@@ -82,7 +82,7 @@ export function WorkingGroupPage() {
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
 		if (sortBy === id) {
-			setSort([id, sortDirection === 'asc' ? 'workingGroupType' : 'asc']);
+			setSort([id, sortDirection === 'asc' ? 'workingGroup' : 'asc']);
 			return;
 		}
 		setSort([id, 'asc']);
