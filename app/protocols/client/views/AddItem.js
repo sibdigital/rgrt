@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
+import { Field, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
@@ -10,6 +10,8 @@ import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validateItemData, createItemData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import CKEditor from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 export function AddItem({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -61,7 +63,18 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Item_Name')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='10' multiple value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Item_Name')} />
+				<CKEditor
+					editor={ ClassicEditor }
+					config={ {
+						language: 'ru',
+						toolbar: [ 'bold', 'italic', 'link' ]
+					} }
+					data={name}
+					onChange={ (event, editor) => {
+						const data = editor.getData();
+						setName(data);
+					} }
+				/>
 			</Field.Row>
 		</Field>
 		<Field>

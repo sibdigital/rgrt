@@ -8,13 +8,11 @@ import {
 	Skeleton,
 	Throbber,
 	InputBox,
-	TextAreaInput,
-	TextInput,
 	Modal
 } from '@rocket.chat/fuselage';
-import DatePicker, { registerLocale } from 'react-datepicker';
-import ru from 'date-fns/locale/ru';
-registerLocale('ru', ru);
+import CKEditor from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
@@ -155,7 +153,18 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 		<Field>
 			<Field.Label>{t('Section_Name')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Section_Name')} />
+				<CKEditor
+					editor={ ClassicEditor }
+					config={ {
+						language: 'ru',
+						toolbar: [ 'bold', 'italic', 'link' ]
+					} }
+					data={name}
+					onChange={ (event, editor) => {
+						const data = editor.getData();
+						setName(data);
+					} }
+				/>
 			</Field.Row>
 		</Field>
 		<Field>

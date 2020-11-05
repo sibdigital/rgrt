@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
+import { Field, Button, InputBox, ButtonGroup } from '@rocket.chat/fuselage';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -7,6 +7,8 @@ import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import CKEditor from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 export function AddSection({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -53,7 +55,18 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Section_Name')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Section_Name')} />
+				<CKEditor
+					editor={ ClassicEditor }
+					config={ {
+						language: 'ru',
+						toolbar: [ 'bold', 'italic', 'link' ]
+					} }
+					data={name}
+					onChange={ (event, editor) => {
+						const data = editor.getData();
+						setName(data);
+					} }
+				/>
 			</Field.Row>
 		</Field>
 		<Field>

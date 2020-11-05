@@ -8,13 +8,16 @@ import {
 	Skeleton,
 	Throbber,
 	InputBox,
-	TextAreaInput,
 	TextInput,
 	Modal
 } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
+
+import CKEditor from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
@@ -74,6 +77,10 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 
 	if (state === ENDPOINT_STATES.LOADING) {
 		return <Box pb='x20'>
+			<Skeleton mbs='x8'/>
+			<InputBox.Skeleton w='full'/>
+			<Skeleton mbs='x8'/>
+			<InputBox.Skeleton w='full'/>
 			<Skeleton mbs='x8'/>
 			<InputBox.Skeleton w='full'/>
 			<Skeleton mbs='x8'/>
@@ -159,7 +166,18 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 		<Field>
 			<Field.Label>{t('Item_Name')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='10' multiple value={name} onChange={(e) => setName(e.currentTarget.value)} placeholder={t('Item_name')} />
+				<CKEditor
+					editor={ ClassicEditor }
+					config={ {
+						language: 'ru',
+						toolbar: [ 'bold', 'italic', 'link' ]
+					} }
+					data={name}
+					onChange={ (event, editor) => {
+						const data = editor.getData();
+						setName(data);
+					} }
+				/>
 			</Field.Row>
 		</Field>
 		<Field>
