@@ -23,14 +23,14 @@ function CouncilInfoStep({ step, title, active }) {
 
 		<Margins blockEnd='x32'>
 			<Box>
-				<Box is='p' fontScale='s1' color='hint' marginBlockEnd='x16'>{t('Council_info_description')}</Box>
+				<Box is='p' fontScale='p1' marginBlockEnd='x16'>{t('Council_info_description')}</Box>
 
 				<Box display='flex' flexDirection='column'>
 					<Margins all='x8'>
-						<Box is='span' color='hint' fontScale='c2'>{t('Description')}</Box>
-						<Box is='h1' fontScale='h1' marginBlockEnd='x32'>{councilState.data.desc}</Box>
-						<Box fontScale='micro'>{t('Date')}</Box>
-						<Box color='primary' fontScale='s1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>
+						<Box fontScale='s1'>{t('Description')}</Box>
+						<Box fontScale='p1' marginBlockEnd='x32'>{councilState.data.desc}</Box>
+						<Box fontScale='s1'>{t('Date')}</Box>
+						<Box color='primary' fontScale='p1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>
 					</Margins>
 				</Box>
 			</Box>
