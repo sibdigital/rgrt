@@ -23,7 +23,7 @@ const clickable = css`
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQuery = ({ _id, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
-	_id,
+	query: JSON.stringify({ _id }),
 	fields: JSON.stringify({ name: 1, username: 1, emails: 1,
 		surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),

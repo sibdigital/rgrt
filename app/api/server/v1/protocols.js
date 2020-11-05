@@ -52,7 +52,7 @@ API.v1.addRoute('protocols.participants', { authRequired: true }, {
 			users,
 			count: users.length,
 			offset,
-			total: Users.find(query).count(),
+			total: Users.find({ _id: { $in: protocol.participants } }).count(),
 		});
 	},
 });
