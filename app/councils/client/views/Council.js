@@ -155,7 +155,11 @@ export function CouncilPage() {
 	};
 
 	const onNewParticipantClick = (_id) => () => {
-		FlowRouter.go(`/council/edit/newParticipant/${ _id }`);
+		FlowRouter.go(`/council/edit/${ _id }/newParticipant`);
+	};
+
+	const onEmailSendClick = () => () => {
+		FlowRouter.go('manual-mail-sender');
 	};
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
@@ -212,6 +216,9 @@ export function CouncilPage() {
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onNewParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
+						</Button>
+						<Button marginInlineEnd='10px' small primary onClick={onEmailSendClick} aria-label={t('Send_email')}>
+							{t('Send_email')}
 						</Button>
 						<Button small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
 							{t('Download_Council_Participant_List')}

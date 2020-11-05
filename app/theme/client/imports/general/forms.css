@@ -165,6 +165,10 @@
 	}
 }
 
+.date-picker {
+	z-index: 1000 !important;
+}
+
 @media (width <= 500px) {
 	.rc-grid {
 		display: flex;

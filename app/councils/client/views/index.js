@@ -51,7 +51,7 @@ export function CouncilsPage() {
 	};
 
 	const onAddClick = () => {
-		FlowRouter.go('/council/edit/new');
+		FlowRouter.go('/council/add/new');
 	};
 
 	const onHeaderClick = (id) => {

@@ -120,7 +120,17 @@ FlowRouter.route('/council/:id', {
 	}],
 });
 
-FlowRouter.route('/council/edit/:context?/:id?', {
+FlowRouter.route('/council/add/:context?', {
+	name: 'council-add',
+	action: () => {
+		renderRouteComponent(() => import('../app/councils/client/views/AddCouncil'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/council/edit/:id?/:context?', {
 	name: 'council-edit',
 	action: () => {
 		renderRouteComponent(() => import('../app/councils/client/views/EditCouncil'), { template: 'main', region: 'center' });
