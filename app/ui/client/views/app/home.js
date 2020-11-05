@@ -37,7 +37,6 @@ const toolbarButtons = () => [
 	{
 		name: t('Working_group'),
 		icon: 'working_group',
-		condition: () => hasPermission('manage-working-group'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('working-group');

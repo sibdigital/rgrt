@@ -71,10 +71,10 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 };
 
 export function EditCouncilPage() {
-	const _id = useRouteParameter('id');
+	const councilId = useRouteParameter('id');
 	const context = useRouteParameter('context');
-	const councilId = _id ? _id : (context === 'new' ? '1' : context);
-	console.log(_id);
+	//const councilId = _id ? _id : (context === 'new' ? '1' : context);
+	//console.log(_id);
 	console.log(context);
 	console.log(councilId);
 
@@ -97,17 +97,7 @@ export function EditCouncilPage() {
 		data.invitedUsers = [];
 	}
 
-	const getNewData = () => {
-		return {
-			d: new Date(),
-			desc: '',
-			invitedUsers: [],
-		};
-	};
-
-	console.log(data);
-
-	return <EditCouncilWithNewData council={context === 'new' ? getNewData() : data} onChange={onChange} context={context}/>;
+	return <EditCouncilWithNewData council={data} onChange={onChange} context={context}/>;
 }
 
 EditCouncilPage.displayName = 'EditCouncilPage';
@@ -319,6 +309,7 @@ function EditCouncilWithNewData({ council, onChange, context }) {
 							timeCaption='Время'
 							customInput={<TextInput border='1px solid #4fb0fc' />}
 							locale='ru'
+							popperClassName='date-picker'
 						/>
 					</Field.Row>
 				</Field>

@@ -15,8 +15,8 @@ function FinalInviteStep() {
 		<Tile is='main' padding='x40'>
 			<Box margin='x32'>
 				<Box is='h1' fontScale='h1' marginBlockEnd='x32'>{t('Your_information_accepted')}</Box>
-				<Box fontScale='micro'>{t('Wait_you')}</Box>
-				<Box color='primary' fontScale='s1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>
+				<Box fontScale='h1'>{t('Wait_you')}</Box>
+				<Box color='primary' fontScale='h1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>
 			</Box>
 		</Tile>
 	</Box>;

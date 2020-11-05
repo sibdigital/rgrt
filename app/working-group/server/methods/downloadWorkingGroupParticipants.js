@@ -18,9 +18,9 @@ import { hasPermission } from '../../../authorization';
 
 Meteor.methods({
 	async downloadWorkingGroupParticipants({ workingGroup }) {
-		if (!hasPermission(this.userId, 'manage-working-group')) {
-			throw new Meteor.Error('not_authorized');
-		}
+		// if (!hasPermission(this.userId, 'manage-working-group')) {
+		// 	throw new Meteor.Error('not_authorized');
+		// }
 
 		if (!workingGroup) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field _id is required', { method: 'downloadWorkingGroupParticipants', field: '_id' });

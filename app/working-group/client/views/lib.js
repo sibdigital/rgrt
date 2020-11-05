@@ -27,3 +27,26 @@ export function createWorkingGroupData(workingGroup, surname, name, patronymic, 
 
 	return workingGroupData;
 }
+
+export function validateWorkingGroupCompositionData(workingGroupCompositionData) {
+	const errors = [];
+
+	if (!workingGroupCompositionData.title) {
+		errors.push('title');
+	}
+
+	return errors;
+}
+
+export function createWorkingGroupCompositionData(title, previousData) {
+	const workingGroupCompositionData = {
+	};
+
+	if (previousData) {
+		workingGroupCompositionData._id = previousData._id;
+	}
+
+	workingGroupCompositionData.title = title;
+
+	return workingGroupCompositionData;
+}
