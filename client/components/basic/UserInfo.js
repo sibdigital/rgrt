@@ -54,8 +54,15 @@ export const UserInfo = React.memo(function UserInfo({
 		{actions}
 
 		<Margins block='x4'>
-			<UserCard.Username name={(showRealNames && name) || username || name} status={status} />
-			<Info>{customStatus}</Info>
+			{shortFio && <>
+				<Label>{t('Full_Name')}</Label>
+				<Info>{shortFio}</Info>
+			</>}
+			{username && <>
+				<Label>{ t('Username') }</Label>
+				<UserCard.Username name={ username } status={ status } />
+				<Info>{ customStatus }</Info>
+			</>}
 
 			{!!roles && <>
 				<Label>{t('Roles')}</Label>
@@ -67,18 +74,8 @@ export const UserInfo = React.memo(function UserInfo({
 				<Info><UTCClock utcOffset={utcOffset}/></Info>
 			</>}
 
-			{username && username !== name && <>
-				<Label>{t('Username')}</Label>
-				<Info>{username}</Info>
-			</>}
-
 			<Label>{t('Last_login')}</Label>
 			<Info>{lastLogin ? timeAgo(lastLogin) : t('Never')}</Info>
-
-			{shortFio && <>
-				<Label>{t('Full_Name')}</Label>
-				<Info>{shortFio}</Info>
-			</>}
 
 			{nickname && <>
 				<Label>{t('Nickname')}</Label>

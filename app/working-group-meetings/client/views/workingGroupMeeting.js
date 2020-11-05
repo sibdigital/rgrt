@@ -127,7 +127,6 @@ export function WorkingGroupMeetingPage() {
 			console.log('!fileupload_enabled');
 			return null;
 		}
-		console.log('fileuploadenabled');
 		const $input = $(document.createElement('input'));
 		$input.css('display', 'none');
 		$input.attr({

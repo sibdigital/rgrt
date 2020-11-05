@@ -11,7 +11,7 @@ import { updateGroupDMsName } from './updateGroupDMsName';
  * @param {string} userId user performing the action
  * @param {object} changes changes to the user
  */
-export function saveUserIdentity(userId, { _id, name: rawName, username: rawUsername, surname: rawSurname, patronymic: rawPatronymc }) {
+export function saveUserIdentity(userId, { _id, name: rawName, username: rawUsername, surname: rawSurname, patronymic: rawPatronymic }) {
 	if (!_id) {
 		return false;
 	}
@@ -19,7 +19,7 @@ export function saveUserIdentity(userId, { _id, name: rawName, username: rawUser
 	const name = String(rawName).trim();
 	const username = String(rawUsername).trim();
 	const surname = String(rawSurname).trim();
-	const patronymic = String(rawPatronymc).trim();
+	const patronymic = String(rawPatronymic).trim();
 
 	const user = Users.findOneById(_id);
 
@@ -51,11 +51,11 @@ export function saveUserIdentity(userId, { _id, name: rawName, username: rawUser
 		}
 	}
 
-	// if (typeof rawPatronymc !== 'undefined' && patronymicChanged) {
-	// 	if (!setPatronymic(_id, patronymic, user)) {
-	// 		return false;
-	// 	}
-	// }
+	if (typeof rawPatronymic !== 'undefined' && patronymicChanged) {
+		if (!setPatronymic(_id, patronymic, user)) {
+			return false;
+		}
+	}
 
 	// if coming from old username, update all references
 	if (previousUsername && usernameChanged) {

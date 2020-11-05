@@ -120,6 +120,16 @@ FlowRouter.route('/council/:id', {
 	}],
 });
 
+FlowRouter.route('/council/edit/:context?/:id?', {
+	name: 'council-edit',
+	action: () => {
+		renderRouteComponent(() => import('../app/councils/client/views/EditCouncil'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/councils/:context?/:id?', {
 	name: 'councils',
 	action: () => {

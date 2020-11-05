@@ -340,6 +340,10 @@ const getUploadPreview = async (file, preview) => {
 	return getGenericUploadPreview(file, preview);
 };
 
+const getFileExtension = (fileName) => fileName.slice((fileName.lastIndexOf('.') - 1 >>> 0) + 2);
+
+const getFileNameWithoutExtension = (fileName) => fileName.replace(/\..+$/, '');
+
 export const fileUploadToWorkingGroup = async (files, isWorkingGroupMeeting, { _id }) => {
 	files = [].concat(files);
 
@@ -369,6 +373,9 @@ export const fileUploadToWorkingGroup = async (files, isWorkingGroupMeeting, { _
 			return;
 		}
 
+		const fileExtension = getFileExtension(file.name);
+		file.name = getFileNameWithoutExtension(file.name);
+
 		showUploadPreview(file, async (file, preview) => modal.open({
 			title: t('Upload_file_question'),
 			text: await getUploadPreview(file, preview),
@@ -384,7 +391,7 @@ export const fileUploadToWorkingGroup = async (files, isWorkingGroupMeeting, { _
 				return;
 			}
 
-			const fileName = document.getElementById('file-name').value || file.name || file.file.name;
+			const fileName = (document.getElementById('file-name').value || file.name || file.file.name) + '.' + fileExtension;
 			const description = document.getElementById('file-description').value || undefined;
 			if (isWorkingGroupMeeting) {
 				uploadFileWithWorkingGroup(_id, {
@@ -450,6 +457,9 @@ export const fileUpload = async (files, input, { rid, tmid }) => {
 			return;
 		}
 
+		const fileExtension = getFileExtension(file.name);
+		file.name = getFileNameWithoutExtension(file.name);
+
 		showUploadPreview(file, async (file, preview) => modal.open({
 			title: t('Upload_file_question'),
 			text: await getUploadPreview(file, preview),
@@ -465,7 +475,7 @@ export const fileUpload = async (files, input, { rid, tmid }) => {
 				return;
 			}
 
-			const fileName = document.getElementById('file-name').value || file.name || file.file.name;
+			const fileName = (document.getElementById('file-name').value || file.name || file.file.name) + '.' + fileExtension;
 
 			uploadFileWithMessage(rid, tmid, {
 				description: document.getElementById('file-description').value || undefined,
