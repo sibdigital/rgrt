@@ -122,6 +122,22 @@ class Protocols extends Base {
 		return itemData._id;
 	}
 
+	addParticipant(protocolId, userId) {
+		return this.update({
+			_id: protocolId,
+			participants: { $ne: userId },
+		}, {
+			$addToSet: { participants: userId },
+		});
+	}
+
+	removeParticipantById(protocolId, userId) {
+		const data = this.findOne({ _id: protocolId });
+
+		if (data.participants) {
+			this.update({ _id: protocolId }, { $pull: { participants: userId }});
+		}
+	}
 }
 
 export default new Protocols();

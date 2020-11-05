@@ -11,6 +11,7 @@ import { getURL } from '../../../utils';
 import {
 	validateCustomFields,
 	saveUser,
+	saveParticipant,
 	saveCustomFieldsWithoutValidation,
 	checkUsernameAvailability,
 	setUserAvatar,
@@ -112,6 +113,27 @@ API.v1.addRoute('users.deleteOwnAccount', { authRequired: true }, {
 		});
 
 		return API.v1.success();
+	},
+});
+
+API.v1.addRoute('users.createParticipant', { authRequired: true }, {
+	post() {
+		check(this.bodyParams, {
+			email: String,
+			name: String,
+			surname: String,
+			patronymic: String,
+			organization: Match.Maybe(String),
+			position: Match.Maybe(String),
+			phone: Match.Maybe(String),
+			workingGroup: Match.Maybe(String),
+		});
+
+		const newUserId = saveParticipant(this.userId, this.bodyParams);
+
+		const { fields } = this.parseJsonQuery();
+
+		return API.v1.success({ user: Users.findOneById(newUserId, { fields }) });
 	},
 });
 

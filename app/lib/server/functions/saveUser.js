@@ -197,6 +197,79 @@ function validateUserEditing(userId, userData) {
 	}
 }
 
+function validateParticipantData(userId, userData) {
+	if (userData._id && userId !== userData._id && !hasPermission(userId, 'edit-other-user-info')) {
+		throw new Meteor.Error('error-action-not-allowed', 'Editing user is not allowed', {
+			method: 'insertOrUpdateUser',
+			action: 'Editing_user',
+		});
+	}
+
+	if (!userData._id && !hasPermission(userId, 'create-user')) {
+		throw new Meteor.Error('error-action-not-allowed', 'Adding user is not allowed', {
+			method: 'insertOrUpdateUser',
+			action: 'Adding_user',
+		});
+	}
+
+	// if (userData.roles && _.indexOf(userData.roles, 'admin') >= 0 && !hasPermission(userId, 'assign-admin-role')) {
+	// 	throw new Meteor.Error('error-action-not-allowed', 'Assigning admin is not allowed', {
+	// 		method: 'insertOrUpdateUser',
+	// 		action: 'Assign_admin',
+	// 	});
+	// }
+
+	if (!userData._id && !s.trim(userData.username)) {
+		throw new Meteor.Error('error-the-field-is-required', 'The field Username is required', {
+			method: 'insertOrUpdateUser',
+			field: 'Username',
+		});
+	}
+
+	// if (userData.roles) {
+	// 	validateUserRoles(userId, userData);
+	// }
+
+	// let nameValidation;
+
+	// try {
+	// 	nameValidation = new RegExp(`^${ settings.get('UTF8_Names_Validation') }$`);
+	// } catch (e) {
+	// 	nameValidation = new RegExp('^[0-9a-zA-Z-_.]+$');
+	// }
+
+	// if (userData.username && !nameValidation.test(userData.username)) {
+	// 	throw new Meteor.Error('error-input-is-not-a-valid-field', `${ _.escape(userData.username) } is not a valid username`, {
+	// 		method: 'insertOrUpdateUser',
+	// 		input: userData.username,
+	// 		field: 'Username',
+	// 	});
+	// }
+
+	// if (!userData._id && !userData.password && !userData.setRandomPassword) {
+	// 	throw new Meteor.Error('error-the-field-is-required', 'The field Password is required', {
+	// 		method: 'insertOrUpdateUser',
+	// 		field: 'Password',
+	// 	});
+	// }
+
+	if (!userData._id) {
+		if (!checkUsernameAvailability(userData.username)) {
+			throw new Meteor.Error('error-field-unavailable', `${ _.escape(userData.username) } is already in use :(`, {
+				method: 'insertOrUpdateUser',
+				field: userData.username,
+			});
+		}
+
+		if (userData.email && !checkEmailAvailability(userData.email)) {
+			throw new Meteor.Error('error-field-unavailable', `${ _.escape(userData.email) } is already in use :(`, {
+				method: 'insertOrUpdateUser',
+				field: userData.email,
+			});
+		}
+	}
+}
+
 const handleOrganization = (updateUser, organization) => {
 	if (organization) {
 		if (organization.trim()) {
@@ -442,6 +515,109 @@ export const saveUser = function(userId, userData) {
 
 	if (sendPassword) {
 		_sendUserEmail(settings.get('Password_Changed_Email_Subject'), passwordChangedHtml, userData);
+	}
+
+	return true;
+};
+
+const getLoginExample = (surname, name, patronymic) => {
+	if (!surname || !name) {
+		return '';
+	}
+
+	const translit = (str) => {
+		const L = {
+			'А':'A','а':'a','Б':'B','б':'b','В':'V','в':'v','Г':'G','г':'g',
+			'Д':'D','д':'d','Е':'E','е':'e','Ё':'Yo','ё':'yo','Ж':'Zh','ж':'zh',
+			'З':'Z','з':'z','И':'I','и':'i','Й':'Y','й':'y','К':'K','к':'k',
+			'Л':'L','л':'l','М':'M','м':'m','Н':'N','н':'n','О':'O','о':'o',
+			'П':'P','п':'p','Р':'R','р':'r','С':'S','с':'s','Т':'T','т':'t',
+			'У':'U','у':'u','Ф':'F','ф':'f','Х':'Kh','х':'kh','Ц':'Ts','ц':'ts',
+			'Ч':'Ch','ч':'ch','Ш':'Sh','ш':'sh','Щ':'Sch','щ':'sch','Ъ':'"','ъ':'"',
+			'Ы':'Y','ы':'y','Ь':"'",'ь':"'",'Э':'E','э':'e','Ю':'Yu','ю':'yu',
+			'Я':'Ya','я':'ya'
+		};
+		let reg = '';
+		for (const kr in L) {
+			reg += kr;
+		}
+		reg = new RegExp('[' + reg + ']', 'g');
+		const translate = function(a) {
+			return a in L ? L[a] : a;
+		};
+		return str.replace(reg, translate).toLowerCase();
+	};
+
+	const capitalizeFirstLetter = (translitString) => {
+		return translitString.charAt(0).toUpperCase() + translitString.slice(1);
+	};
+
+	const patron = patronymic ? patronymic[0] : '';
+	return capitalizeFirstLetter(translit(surname + name[0] + patron));
+};
+
+export const saveParticipant = function(userId, userData) {
+	userData.username = getLoginExample(userData.surname, userData.name, userData.patronymic);
+
+	validateParticipantData(userId, userData);
+
+	userData.password = passwordPolicy.generatePassword();
+	userData.requirePasswordChange = true;
+
+	delete userData.setRandomPassword;
+
+	if (!userData._id) {
+		validateEmailDomain(userData.email);
+
+		// insert user
+		const createUser = {
+			username: userData.username,
+			password: userData.password,
+			joinDefaultChannels: false,
+		};
+		if (userData.email) {
+			createUser.email = userData.email;
+		}
+
+		const _id = Accounts.createUser(createUser);
+
+		const updateUser = {
+			$set: {
+				// roles: userData.roles || ['user'],
+				surname: userData.surname,
+				...typeof userData.name !== 'undefined' && { name: userData.name },
+				...typeof userData.patronymic !== 'undefined' && { patronymic: userData.patronymic },
+				settings: userData.settings || {},
+				participant: true,
+			},
+		};
+
+		if (typeof userData.requirePasswordChange !== 'undefined') {
+			updateUser.$set.requirePasswordChange = userData.requirePasswordChange;
+		}
+
+		updateUser.$set['emails.0.verified'] = false;
+
+		handleOrganization(updateUser, userData.organization);
+		handlePosition(updateUser, userData.position);
+		handlePhone(updateUser, userData.phone);
+		handleWorkingGroup(updateUser, userData.workingGroup);
+
+		Meteor.users.update({ _id }, updateUser);
+
+		userData._id = _id;
+
+		if (settings.get('Accounts_SetDefaultAvatar') === true && userData.email) {
+			const gravatarUrl = Gravatar.imageUrl(userData.email, { default: '404', size: 200, secure: true });
+
+			try {
+				setUserAvatar(userData, gravatarUrl, '', 'url');
+			} catch (e) {
+				// Ignore this error for now, as it not being successful isn't bad
+			}
+		}
+
+		return _id;
 	}
 
 	return true;
