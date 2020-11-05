@@ -65,8 +65,8 @@ export class APIClass extends Restivus {
 		};
 		this.defaultLimitedUserFieldsToExclude = {
 			avatarOrigin: 0,
-			emails: 0,
-			phone: 0,
+			// emails: 0,
+			// phone: 0,
 			statusConnection: 0,
 			createdAt: 0,
 			lastLogin: 0,

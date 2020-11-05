@@ -42,7 +42,7 @@ export function WorkingGroups({
 
 	const renderRow = (userWorkingGroup) => {
 		const { _id, workingGroup, name, surname, patronymic, organization, position, emails, phone } = userWorkingGroup;
-		const email = emails[0].address ?? '';
+		const email = emails ? emails[0].address : '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{workingGroup}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{surname} {name} {patronymic}</Table.Cell>
