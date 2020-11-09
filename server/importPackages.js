@@ -119,3 +119,4 @@ import '../app/councils/server';
 import '../app/working-group/server';
 import '../app/working-group-meetings/server';
 import '../app/manual-mail-sender/server';
+import '../app/protocols/server';

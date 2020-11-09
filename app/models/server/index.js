@@ -43,6 +43,7 @@ import Tags from './models/Tags';
 import Councils from './models/Councils';
 import WorkingGroups from './models/WorkingGroups';
 import WorkingGroupMeetings from './models/WorkingGroupMeetings';
+import Protocols from './models/Protocols';
 
 export { AppsLogsModel } from './models/apps-logs-model';
 export { AppsPersistenceModel } from './models/apps-persistence-model';
@@ -98,4 +99,5 @@ export {
 	Councils,
 	WorkingGroups,
 	WorkingGroupMeetings,
+	Protocols,
 };

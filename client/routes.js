@@ -200,6 +200,26 @@ FlowRouter.route('/manual-mail-sender', {
 	}],
 });
 
+FlowRouter.route('/protocols/:context?/:id?', {
+	name: 'protocols',
+	action: () => {
+		renderRouteComponent(() => import('../app/protocols/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/protocol/:id/:context?/:sectionId?/:itemId?', {
+	name: 'protocol',
+	action: () => {
+		renderRouteComponent(() => import('../app/protocols/client/views/Protocol'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
 	action: () => {
