@@ -89,8 +89,8 @@ export function CouncilsPage() {
 					</Button>
 					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
-				<Button width='200px' primary small onClick={onAddClick} aria-label={t('Council_Add')}>
-					{ t('Council_Add') }
+				<Button width='200px' primary small onClick={onAddClick} aria-label={t('Add')}>
+					{ t('Add') }
 				</Button>
 			</Page.Header>
 			<Page.Content>

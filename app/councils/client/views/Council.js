@@ -11,8 +11,8 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../../app/settings/client';
 import moment from 'moment';
-import { useSetModal } from '/client/contexts/ModalContext';
-import { useToastMessageDispatch } from '/client/contexts/ToastMessagesContext';
+import { useSetModal } from '../../../../client/contexts/ModalContext';
+import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 
 const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -132,7 +132,7 @@ export function CouncilPage() {
 
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
-		return <Table.Row key={iu._id} style={styleTableRow} border={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
+		return <Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
@@ -203,7 +203,7 @@ export function CouncilPage() {
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput value={data.desc} row='3' readOnly fontScale='p1'/>
+						<TextAreaInput style={ { whiteSpace: 'normal' } } value={data.desc} row='3' readOnly fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>

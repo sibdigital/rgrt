@@ -19,13 +19,13 @@ import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpoin
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { validate, createCouncilData } from './lib';
 
-import { useFormatDateAndTime } from '/client/hooks/useFormatDateAndTime';
-import { useRouteParameter } from '/client/contexts/RouterContext';
+import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
+import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
-import { GenericTable, Th } from '/client/components/GenericTable';
-import Page from '/client/components/basic/Page';
+import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import Page from '../../../../client/components/basic/Page';
 
 registerLocale('ru', ru);
 
@@ -316,7 +316,7 @@ function EditCouncilWithNewData({ council, onChange, context }) {
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')} <span style={ { color: 'red' } }>{t('Editing')}</span></Field.Label>
 					<Field.Row>
-						<TextAreaInput border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
+						<TextAreaInput style={ { whiteSpace: 'normal' } } row='3' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
