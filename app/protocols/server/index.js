@@ -4,4 +4,6 @@ import './methods/insertOrUpdateItem';
 import './methods/deleteProtocol';
 import './methods/deleteSection';
 import './methods/deleteItem';
+import './methods/addParticipantToProtocol';
+import './methods/deleteParticipantFromProtocol';
 import './methods/downloadProtocolParticipants';

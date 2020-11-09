@@ -78,6 +78,8 @@ export function EditProtocol({ _id, cache, onChange, ...props }) {
 			<InputBox.Skeleton w='full'/>
 			<Skeleton mbs='x8'/>
 			<InputBox.Skeleton w='full'/>
+			<Skeleton mbs='x8'/>
+			<InputBox.Skeleton w='full'/>
 			<ButtonGroup stretch w='full' mbs='x8'>
 				<Button disabled><Throbber inheritColor/></Button>
 				<Button primary disabled><Throbber inheritColor/></Button>

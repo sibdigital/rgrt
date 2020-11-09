@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {Box, Button, Field, Icon, Scrollable, Tabs} from '@rocket.chat/fuselage';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Button, ButtonGroup, Field, Icon, Label } from '@rocket.chat/fuselage';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -13,6 +13,9 @@ import { AddSection } from './AddSection';
 import { AddItem } from './AddItem';
 import { EditSection } from './EditSection';
 import { EditItem } from './EditItem';
+import { Participants } from '../views/participants/Participants';
+import { AddParticipant } from '../views/participants/AddParticipant';
+import { CreateParticipant } from '../views/participants/CreateParticipant';
 
 export function ProtocolPage() {
 	const t = useTranslation();
@@ -90,20 +93,47 @@ export function ProtocolPage() {
 		});
 	}, [router]);
 
+	const onParticipantsClick = useCallback((context) => () => {
+		router.push({ id: protocolId, context: context });
+	}, [router]);
+
+	const onAddParticipantClick = useCallback((context) => () => {
+		router.push({
+			id: protocolId,
+			context: context
+		});
+	}, [router]);
+
+	const goBack = () => {
+		window.history.back();
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title={title}>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={goBack}>
+						<Icon name='back'/>
+					</Button>
+					<Label fontScale='h1'>{t('Protocol')}</Label>
+				</Field>
 			</Page.Header>
 			<Page.ScrollableContent>
-				<Box maxWidth='700px' w='full' alignSelf='center'>
-					<Field mbe='x8'>
-						<Field.Row alignSelf='center'>
-							<Box is='span' fontScale='p1'>{data.place}</Box>
-						</Field.Row>
-					</Field>
+				<ButtonGroup>
+					<Button mbe='x8' small primary onClick={onParticipantsClick('participants')} aria-label={t('Participants')}>
+						{t('Participants')}
+					</Button>
+				</ButtonGroup>
+				<Box maxWidth='x800' w='full' alignSelf='center' pi='x32' pb='x24' fontSize='x16' borderStyle='solid' borderWidth='x2' borderColor='hint'>
+					<Box mbe='x24' display='flex' flexDirection='column'>
+						<Box is='span' fontScale='h1' alignSelf='center'>{title}</Box>
+					</Box>
+					<Box mbe='x16' display='flex' flexDirection='column'>
+						<Box is='span' alignSelf='center'>{data.place}</Box>
+					</Box>
 					<Sections data={data.sections} onSectionClick={onSectionClick}
 							  onAddItemClick={onAddItemClick} onItemClick={onItemClick}/>
-					<Button mbe='x8' small onClick={onAddSectionClick('new-section')} aria-label={t('New')}>
+					<Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('New')}>
 						{t('Section_Add')}
 					</Button>
 				</Box>
@@ -116,12 +146,18 @@ export function ProtocolPage() {
 				{ context === 'new-item' && t('Item_Add') }
 				{ context === 'edit-section' && t('Section_Info') }
 				{ context === 'edit-item' && t('Item_Info') }
+				{ context === 'participants' && t('Participants') }
+				{ context === 'add-participant' && t('Participant_Add') }
+				{ context === 'create-participant' && t('Participant_Create') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'new-section' && <AddSection goToNew={onSectionClick} close={close} onChange={onChange}/>}
 			{context === 'new-item' && <AddItem goToNew={onItemClick} close={close} onChange={onChange}/>}
 			{context === 'edit-section' && <EditSection protocolId={protocolId} _id={sectionId} close={close} onChange={onChange} cache={cache}/>}
 			{context === 'edit-item' && <EditItem protocolId={protocolId} sectionId={sectionId} _id={itemId} close={close} onChange={onChange} cache={cache}/>}
+			{context === 'participants' && <Participants protocolId={protocolId} onAddParticipantClick={onAddParticipantClick} close={close}/>}
+			{context === 'add-participant' && <AddParticipant protocolId={protocolId} close={onParticipantsClick} onCreateParticipant={onAddParticipantClick}/>}
+			{context === 'create-participant' && <CreateParticipant goTo={onParticipantsClick} close={onParticipantsClick}/>}
 		</VerticalBar>}
 	</Page>;
 }
