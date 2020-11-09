@@ -316,7 +316,7 @@ function EditCouncilWithNewData({ council, onChange, context }) {
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')} <span style={ { color: 'red' } }>{t('Editing')}</span></Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ { whiteSpace: 'normal' } } row='3' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
+						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>

@@ -7,8 +7,8 @@ import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import moment from 'moment';
-import { useSetModal } from '/client/contexts/ModalContext';
-import { useToastMessageDispatch } from '/client/contexts/ToastMessagesContext';
+import { useSetModal } from '../../../../client/contexts/ModalContext';
+import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();

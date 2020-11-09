@@ -158,8 +158,8 @@ export function CouncilPage() {
 		FlowRouter.go(`/council/edit/${ _id }/newParticipant`);
 	};
 
-	const onEmailSendClick = () => () => {
-		FlowRouter.go('manual-mail-sender');
+	const onEmailSendClick = (_id) => () => {
+		FlowRouter.go(`/manual-mail-sender/council/${ _id }`);
 	};
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
@@ -203,7 +203,7 @@ export function CouncilPage() {
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ { whiteSpace: 'normal' } } value={data.desc} row='3' readOnly fontScale='p1'/>
+						<TextAreaInput style={ { whiteSpace: 'normal' } } value={data.desc} row='4' readOnly fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
@@ -217,7 +217,7 @@ export function CouncilPage() {
 						<Button marginInlineEnd='10px' small primary onClick={onNewParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
-						<Button marginInlineEnd='10px' small primary onClick={onEmailSendClick} aria-label={t('Send_email')}>
+						<Button marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
 							{t('Send_email')}
 						</Button>
 						<Button small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>

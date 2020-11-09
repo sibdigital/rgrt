@@ -190,7 +190,7 @@ FlowRouter.route('/working-group-meetings/:context?/:id?', {
 	}],
 });
 
-FlowRouter.route('/manual-mail-sender', {
+FlowRouter.route('/manual-mail-sender/:context?/:id?', {
 	name: 'manual-mail-sender',
 	action: () => {
 		renderRouteComponent(() => import('../app/manual-mail-sender/client/views/index'), { template: 'main', region: 'center' });
