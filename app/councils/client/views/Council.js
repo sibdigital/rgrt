@@ -97,7 +97,7 @@ export function CouncilPage() {
 		}
 	};
 
-	const address = settings.get('Site_Url') + 'invite/council/' + councilId;
+	const address = settings.get('Site_Url') + 'i/' + data.inviteLink || '';
 
 	const header = useMemo(() => [
 		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,

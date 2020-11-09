@@ -24,6 +24,11 @@ export async function findOneCouncil(_id) {
 	return cursor;
 }
 
+export async function findOneCouncilByInviteLink(inviteLink) {
+	const cursor = await Councils.findCouncilByInviteLink({ inviteLink }, {});
+	return cursor;
+}
+
 export async function findCouncil(_id) {
 	const cursor = await Councils.findOne({ _id });
 	return cursor;

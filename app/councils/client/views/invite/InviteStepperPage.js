@@ -5,7 +5,7 @@ import React from 'react';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useWipeInitialPageLoading } from '../../../../../client/hooks/useWipeInitialPageLoading';
 import ConnectionStatusAlert from '../../../../../client/components/connectionStatus/ConnectionStatusAlert';
-import { errorStep, finalStep, useInvitePageContext } from './InvitePageState';
+import { errorStep, finalStep } from './InvitePageState';
 import FinalInviteStep from './steps/FinalInviteStep';
 import SideBar from './SideBar';
 import NewParticipantStep from './steps/NewParticipantStep';
@@ -13,7 +13,7 @@ import ErrorInviteStep from './steps/ErrorInviteStep';
 import CouncilInfoStep from './steps/CouncilInfoStep';
 
 
-function InviteStepperPage({ currentStep = 1 }) {
+function InviteStepperPage({ currentStep = 1, council = {} }) {
 	useWipeInitialPageLoading();
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
@@ -55,7 +55,7 @@ function InviteStepperPage({ currentStep = 1 }) {
 						<Margins all='x16'>
 							<Tile is='section' flexGrow={1} flexShrink={1}>
 								<CouncilInfoStep step={1} title={t('Council_info')} active={currentStep === 1}></CouncilInfoStep>
-								<NewParticipantStep step={2} title={t('Council_participant_info')} active={currentStep === 2}></NewParticipantStep>
+								<NewParticipantStep step={2} title={t('Council_participant_info')} active={currentStep === 2} council={council}></NewParticipantStep>
 							</Tile>
 						</Margins>
 					</Scrollable>

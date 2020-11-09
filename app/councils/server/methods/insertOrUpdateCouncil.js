@@ -19,8 +19,9 @@ Meteor.methods({
 		}
 
 		if (!councilData._id) {
-
 			const user = Meteor.user();
+
+			const inviteLink = new Date().getTime().toString().substr(0, 9);
 
 			const createCouncil = {
 				ts: new Date(),
@@ -30,11 +31,12 @@ Meteor.methods({
 				},
 				d: new Date(councilData.d),
 				desc: councilData.desc,
+				inviteLink,
 			};
 
 			const _id = Councils.create(createCouncil);
 
-			return _id;
+			return { _id, ts: createCouncil.ts };
 		}
 
 		return Councils.updateCouncil(councilData._id, councilData);

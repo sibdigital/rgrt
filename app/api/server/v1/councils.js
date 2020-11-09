@@ -1,5 +1,5 @@
 import { API } from '../api';
-import { findCouncils, findOneCouncil, findCouncil } from '../lib/councils';
+import { findCouncils, findOneCouncil, findCouncil, findOneCouncilByInviteLink } from '../lib/councils';
 import { hasPermission } from '../../../authorization';
 
 API.v1.addRoute('councils.list', { authRequired: true }, {
@@ -29,10 +29,16 @@ API.v1.addRoute('councils.getOne', { authRequired: false }, {
 	},
 });
 
+API.v1.addRoute('councils.getOneByInviteLink', { authRequired: false }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findOneCouncilByInviteLink(query.inviteLink)));
+	},
+});
+
 API.v1.addRoute('councils.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findCouncil(query._id)));
 	},
 });
-

@@ -202,8 +202,8 @@ function AddCouncilWithNewData({ council, onChange, context }) {
 		const councilData = createCouncilData(date, description, { previousDate, previousDescription, _id }, invitedUsers);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
-			const _id = await insertOrUpdateCouncil(councilData);
-			goBack();
+			const { _id, ts } = await insertOrUpdateCouncil(councilData);
+			//console.log(ts.getTime().toString().substr(0, 9));
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	}, [_id, dispatchToastMessage, insertOrUpdateCouncil, date, description, invitedUsers, previousDate, previousDescription, previousCouncil, t]);
@@ -212,6 +212,7 @@ function AddCouncilWithNewData({ council, onChange, context }) {
 		await saveAction(date, description, invitedUsers);
 		dispatchToastMessage({ type: 'success', message: t('Council_edited') });
 		onChange();
+		goBack();
 	}, [saveAction, onChange]);
 
 	const onDeleteParticipantConfirm = (invitedUser) => () => {

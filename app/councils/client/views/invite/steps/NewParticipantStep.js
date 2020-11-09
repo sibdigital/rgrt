@@ -11,7 +11,7 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { useRouteParameter } from '../../../../../../client/contexts/RouterContext';
 
-function NewParticipantStep({ step, title, active }) {
+function NewParticipantStep({ step, title, active, council }) {
 	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
 	const [newData, setNewData] = useState({
 		firstName: { value: '', required: true },
@@ -69,7 +69,7 @@ function NewParticipantStep({ step, title, active }) {
 		goToPreviousStep();
 	};
 	const addPersonToCouncil = useMethod('addPersonToCouncil');
-	const councilId = useRouteParameter('id');
+	const councilId = council._id;
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 

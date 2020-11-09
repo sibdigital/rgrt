@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import {Box, Skeleton, Scrollable, Margins, InputBox} from '@rocket.chat/fuselage';
+import { Box, Skeleton, Scrollable, Margins, InputBox } from '@rocket.chat/fuselage';
 
 import { useRouteParameter, useRoute } from '../../../../../client/contexts/RouterContext';
 import InviteStepperPage from './InviteStepperPage';
@@ -45,10 +45,10 @@ function InvitePageState() {
 	const [currentStep, setCurrentStep, councilId] = useStepRouting();
 
 	const query = useMemo(() => ({
-		query: JSON.stringify({ _id: councilId }),
+		query: JSON.stringify({ inviteLink: councilId }),
 	}), [councilId]);
 
-	const { data, state, error } = useEndpointDataExperimental('councils.getOne', query);
+	const { data, state, error } = useEndpointDataExperimental('councils.getOneByInviteLink', query);
 
 	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => (currentStep !== 1 ? currentStep - 1 : currentStep)), []);
 	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
@@ -88,7 +88,7 @@ function InvitePageState() {
 
 
 	return <InvitePageContext.Provider value={value}>
-		<InviteStepperPage currentStep={currentStep}/>
+		<InviteStepperPage currentStep={currentStep} council={data}/>
 	</InvitePageContext.Provider>;
 }
 
