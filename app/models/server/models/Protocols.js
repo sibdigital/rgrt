@@ -27,7 +27,22 @@ class Protocols extends Base {
 		sectionData._id = _id;
 
 		const data = this.findOne({ _id: protocolId });
-		data.sections = data.sections ? [...data.sections, sectionData] : [sectionData];
+
+		if (data.sections) {
+			let internalNum = 0;
+			data.sections.forEach((section) => {
+				if (section.inum > internalNum) {
+					internalNum = section.inum;
+				}
+			})
+			internalNum++;
+			sectionData.inum = internalNum;
+			data.sections = [...data.sections, sectionData];
+		} else {
+			sectionData.inum = 1;
+			data.sections = [sectionData];
+		}
+
 		data._updatedAt = new Date();
 		this.update({ _id: protocolId }, { $set: { ...data } });
 
@@ -73,7 +88,22 @@ class Protocols extends Base {
 
 			data.sections.forEach((section) => {
 				if (section._id === sectionId) {
-					section.items = section.items ? [...section.items, item] : [item];
+
+					if (section.items) {
+						let internalNum = 0;
+						section.items.forEach((item) => {
+							if (item.inum > internalNum) {
+								internalNum = item.inum;
+							}
+						})
+						internalNum++;
+						item.inum = internalNum;
+						section.items = [...section.items, item];
+					} else {
+						item.inum = 1;
+						section.items = [item];
+					}
+
 				}
 			});
 
