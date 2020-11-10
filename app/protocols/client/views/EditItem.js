@@ -94,8 +94,9 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 
 	const handleSave = useCallback(async () => {
 		saveAction(number, name, responsible, expireAt);
+		close();
 		onChange();
-	}, [saveAction, onChange]);
+	}, [saveAction, close, onChange]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>

@@ -65,7 +65,7 @@ class Protocols extends Base {
 		if (data.sections) {
 			data.sections = data.sections.map((section) => {
 				if (section._id === sectionData._id) {
-					return { ...sectionData, items: section.items };
+					return { ...sectionData, inum: section.inum, items: section.items };
 				}
 				return section;
 			});
@@ -137,7 +137,7 @@ class Protocols extends Base {
 				if (section._id === sectionId) {
 					section.items = section.items.map((item) => {
 						if (item._id === itemData._id) {
-							return { ...itemData };
+							return { ...itemData, inum: item.inum };
 						}
 						return item;
 					})

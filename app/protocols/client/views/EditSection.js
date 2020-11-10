@@ -81,8 +81,9 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 
 	const handleSave = useCallback(async () => {
 		saveAction(number, name);
+		close();
 		onChange();
-	}, [saveAction, onChange]);
+	}, [saveAction, close, onChange]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>

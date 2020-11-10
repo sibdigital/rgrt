@@ -38,12 +38,12 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 				name
 			);
 			dispatchToastMessage({ type: 'success', message: t('Section_Added_Successfully') });
-			goToNew(result)();
+			close()
 			onChange();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [dispatchToastMessage, goToNew, number, name, onChange, saveAction, t]);
+	}, [dispatchToastMessage, close, number, name, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
