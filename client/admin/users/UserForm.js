@@ -134,7 +134,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 				</Field.Row>
 			</Field>, [t, email, handleEmail, verified, handleVerified])}
 			{useMemo(() => <Field mie='x8'>
-				<Field.Label flexGrow={0}>{t('Working_group')}</Field.Label>
+				<Field.Label flexGrow={0}>{t('Group')}</Field.Label>
 				<Field.Row>
 					<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
 				</Field.Row>

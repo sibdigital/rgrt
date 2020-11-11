@@ -96,7 +96,7 @@ export function CouncilPage() {
 	const downloadCouncilParticipants = (_id) => async (e) => {
 		e.preventDefault();
 		try {
-			const res = await downloadCouncilParticipantsMethod({ _id });
+			const res = await downloadCouncilParticipantsMethod({ _id, dateString: formatDateAndTime(data.d) });
 			const url = window.URL.createObjectURL(new Blob([res]));
 			const link = document.createElement('a');
 			link.href = url;

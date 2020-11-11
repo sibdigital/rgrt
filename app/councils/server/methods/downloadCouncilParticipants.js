@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import s from 'underscore.string';
 import {
 	AlignmentType,
 	Document,
@@ -15,10 +14,10 @@ import {
 import moment from 'moment';
 
 import { hasPermission } from '../../../authorization';
-import { Councils } from '../../../models';
+import { Councils, Users } from '../../../models';
 
 Meteor.methods({
-	async downloadCouncilParticipants({ _id }) {
+	async downloadCouncilParticipants({ _id, dateString }) {
 		if (!hasPermission(this.userId, 'manage-councils')) {
 			throw new Meteor.Error('not_authorized');
 		}
@@ -28,6 +27,8 @@ Meteor.methods({
 		}
 
 		const council = Councils.findOne({ _id });
+		const users = Users.find({ _id: { $in: council.invitedUsers } }) || [];
+		console.log(users);
 
 		if (!council) {
 			throw new Meteor.Error('error-council-does-not-exists', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadCouncilParticipants', field: '_id' });
@@ -99,7 +100,7 @@ Meteor.methods({
 			}),
 		];
 		if (council.invitedUsers) {
-			usersRows = usersRows.concat(council.invitedUsers.map((value, index) => {
+			usersRows = usersRows.concat(users.map((value, index) => {
 				const contactFace = value.contactPersonFirstName ? `${ value.contactPersonLastName } ${ value.contactPersonFirstName } ${ value.contactPersonPatronymicName }`.trim() : '-';
 				return new TableRow({
 					children: [
@@ -113,7 +114,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.lastName.toUpperCase() } ${ value.firstName } ${ value.patronymic }`.trim(), alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.surname.toUpperCase() } ${ value.name } ${ value.patronymic ?? '' }`.trim(), alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -140,7 +141,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.email }`, alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.emails ? value.emails[0].address : '' }`, alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -149,7 +150,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.phone }`, alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.phone ?? '' }`, alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -172,7 +173,6 @@ Meteor.methods({
 			),
 			);
 		}
-
 
 		doc.addSection({
 			size: {
@@ -199,7 +199,7 @@ Meteor.methods({
 				new Paragraph({
 					children: [
 						new TextRun({
-							text: `От ${ moment(council.d).format('DD MMMM YYYY, HH:mm') }`,
+							text: `От ${ dateString ?? moment(council.d).format('DD MMMM YYYY, HH:mm') }`,
 						}),
 					],
 					heading: HeadingLevel.HEADING_2,
