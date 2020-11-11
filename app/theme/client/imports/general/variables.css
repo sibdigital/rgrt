@@ -307,6 +307,13 @@
 	--rooms-list-small-padding: var(--sidebar-small-default-padding);
 
 	/*
+	* List Elements
+	*/
+	--list-element-background-color: '';
+	--list-even-element-background-color: var(--color-lighter-blue);
+	--list-selected-element-background-color: #c2ffcf;
+
+	/*
 	* Chip
 	*/
 	--chip-background: #dddddd;

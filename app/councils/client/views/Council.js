@@ -3,16 +3,19 @@ import { ButtonGroup, Button, Field, Icon, Label, Table, TextInput, TextAreaInpu
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useRouteParameter} from '../../../../client/contexts/RouterContext';
+import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { settings } from '../../../../app/settings/client';
+import { settings } from '../../../settings/client';
 import moment from 'moment';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { Participants } from './Participants/Participants';
+import { AddParticipant } from './Participants/AddParticipant';
+import { CreateParticipant } from './Participants/CreateParticipant';
 
 const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -56,12 +59,19 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 };
 
 export function CouncilPage() {
+	console.log('council');
+	const routeName = 'council';
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
+	const councilId = useRouteParameter('id');
+	const router = useRoute(routeName);
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [isAddUser, setIsAddUser] = useState(false);
+	const [context, setContext] = useState('participants');
+	const [cache, setCache] = useState();
 
-	const councilId = useRouteParameter('id');
+	const onChange = () => { console.log('onChange'); setCache(new Date()); };
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
@@ -69,8 +79,10 @@ export function CouncilPage() {
 
 	const data = useEndpointData('councils.findOne', query) || { result: [] };
 
-	const invitedUsers = data.invitedUsers || { };
+	const invitedUsers = data.invitedUsers || [];
 
+	console.log(data);
+	console.log(invitedUsers);
 	const setModal = useSetModal();
 
 	const deleteCouncil = useMethod('deleteCouncil');
@@ -154,12 +166,20 @@ export function CouncilPage() {
 		FlowRouter.go(`/council/edit/${ _id }`);
 	};
 
-	const onNewParticipantClick = (_id) => () => {
-		FlowRouter.go(`/council/edit/${ _id }/newParticipant`);
+	const onAddParticipantClick = (_id) => () => {
+		setContext('addParticipants');
 	};
+
+	const onParticipantClick = useCallback((context) => () => {
+		setContext(context);
+	}, [context]);
 
 	const onEmailSendClick = (_id) => () => {
 		FlowRouter.go(`/manual-mail-sender/council/${ _id }`);
+	};
+
+	const onClose = () => {
+		setContext('participants');
 	};
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
@@ -212,9 +232,9 @@ export function CouncilPage() {
 						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
 					</Field.Row>
 				</Field>
-				<Field mbe='x8'>
+				{context === 'participants' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
-						<Button marginInlineEnd='10px' small primary onClick={onNewParticipantClick(councilId)} aria-label={t('Add')}>
+						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
 						<Button marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
@@ -224,8 +244,10 @@ export function CouncilPage() {
 							{t('Download_Council_Participant_List')}
 						</Button>
 					</Field.Row>
-				</Field>
-				<GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />
+				</Field>}
+				{context === 'participants' && <Participants councilId={councilId} onChange={onChange}/>}
+				{context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{context === 'newParticipants' && <CreateParticipant goTo={onClose} close={onParticipantClick} />}
 			</Page.Content>
 		</Page>
 	</Page>;
