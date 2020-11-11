@@ -40,7 +40,7 @@ export function CreateParticipant({ goTo, close, ...props }) {
 
 	const availableRoles = useMemo(() => (roleData && roleData.roles ? roleData.roles.map(({ _id, description }) => [_id, description || _id]) : []), [roleData]);
 
-	const append = useMemo(() => <Field>
+	const append = useMemo(() => <Field width='98%'>
 		<Field.Row>
 			<Box display='flex' flexDirection='row' justifyContent='space-between' w='full'>
 				<Button flexGrow={1} onClick={close('participants')} mie='x4'>{t('Cancel')}</Button>

@@ -117,7 +117,7 @@ export function AddParticipant({ councilId, onChange, close, invitedUsers, onNew
 		onChange();
 	};
 
-	return <Scrollable>
+	return <>
 		<Field mbe='x8'>
 			<Label fontScale='p1'>{t('Selected')}: {countSelectedUsers}</Label>
 			<ButtonGroup marginInlineStart='auto'>
@@ -144,7 +144,7 @@ export function AddParticipant({ councilId, onChange, close, invitedUsers, onNew
 				<UsersTable invitedUsers={ usersWithoutCurrentCouncil } usersIdToAdd={ usersIdToAdd } handleAddUser={ onAddClick }/>
 			</>
 		}
-	</Scrollable>;
+	</>;
 }
 
 const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
@@ -194,7 +194,7 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 		return <Table.Row key={iu._id} style={styleTableRow} onClick={handleAddUser(iu._id)} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.organization}</Table.Cell>
-			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{email}</Table.Cell>}
 		</Table.Row>;
