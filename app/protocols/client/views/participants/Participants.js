@@ -72,7 +72,6 @@ const SuccessModal = ({ onClose, ...props }) => {
 };
 
 export function Participants({ protocolId, onAddParticipantClick }) {
-	console.log('Participants')
 	const [params, setParams] = useState({ _id: protocolId, current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
 	const [cache, setCache] = useState();
@@ -92,7 +91,6 @@ export function Participants({ protocolId, onAddParticipantClick }) {
 };
 
 function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
-	console.log('WithData')
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 

@@ -46,12 +46,12 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				expireAt
 			);
 			dispatchToastMessage({ type: 'success', message: t('Item_Added_Successfully') });
-			goToNew(sectionId, result)();
+			close();
 			onChange();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [dispatchToastMessage, goToNew, number, name, responsible, expireAt, onChange, saveAction, t]);
+	}, [dispatchToastMessage, close, number, name, responsible, expireAt, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>

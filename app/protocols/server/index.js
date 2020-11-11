@@ -6,4 +6,5 @@ import './methods/deleteSection';
 import './methods/deleteItem';
 import './methods/addParticipantToProtocol';
 import './methods/deleteParticipantFromProtocol';
-import './methods/downloadProtocolParticipants';
+import './methods/moveSection';
+import './methods/moveItem';
