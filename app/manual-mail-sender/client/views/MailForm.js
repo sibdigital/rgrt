@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Chip, Field, InputBox, Margins, Scrollable, TextInput } from '@rocket.chat/fuselage';
-import React, { Component, useMemo, useState } from 'react';
+import React, { Component, useMemo, useState, useEffect, useCallback } from 'react';
 import 'react-dropdown-tree-select/dist/styles.css'
 import '../../public/stylesheets/mail-sender.css'
 import CKEditor from '@ckeditor/ckeditor5-react';
@@ -26,63 +26,78 @@ function packData(data, files) {
 class DropdownTreeSelectContainer extends Component {
 	constructor(props) {
 		super(props);
-		this.state = { data: props.data }
+		this.state = { data: props.data };
 	}
 
 	componentWillReceiveProps = (nextProps) => {
 		if (!isEqual(nextProps.data, this.state.data)) {
-			this.setState({data: nextProps.data})
+			this.setState({ data: nextProps.data });
 		}
 	}
 
 	shouldComponentUpdate = (nextProps) => {
-		return !isEqual(nextProps.data, this.state.data)
+		return !isEqual(nextProps.data, this.state.data);
 	}
 
 	render() {
 		const { data, ...rest } = this.props;
 		return (
 			<DropdownTreeSelect data={this.state.data} {...rest} />
-		)
+		);
 	}
 }
 
 const getEmails = (obj, path) => {
 	let emails = '';
-	obj.forEach(node => {
+	obj.forEach((node) => {
 		if (!node.children && node.path.startsWith(path)) {
 			emails += node.value + ',';
 		}
 		if (node.children) {
-			emails += getEmails(node.children, path)
+			emails += getEmails(node.children, path);
 		}
-	})
+	});
 	return emails;
-}
+};
 
-function MailForm({ recipients }) {
+function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 	const [newData, setNewData] = useState({
 		email: { value: '', required: true },
 		topic: { value: '', required: true },
-		message: { value: '', required: true },
+		message: { value: '<p>Здравствуйте, </p>', required: true },
 	});
+	const [email, setEmail] = useState('');
+	const [topic, setTopic] = useState('');
+	const [message, setMessage] = useState('');
+
+	const t = useTranslation();
 
 	const sendEmail = useMethod('sendEmailManually');
-
-	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
-		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
-	};
-	const t = useTranslation();
 
 	const [commiting, setComitting] = useState(false);
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value.trim() === '' && current.required === true).length === 0, [JSON.stringify(newData)]);
+	const sendFromContext = useMemo(() => { return mailBody !== undefined && mailBody.length > 0 && mailSubject !== undefined && mailSubject.length > 0 }, [mailSubject, mailBody, defaultEmails]);
+	//const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value.trim() === '' && current.required === true).length === 0, [JSON.stringify(newData)]);
+	const allFieldAreFilled = useMemo(() => email.trim() !== '' && topic.trim() !== '' && message.trim() !== '', [email, topic, message]);
 
 	const fileSourceInputId = useUniqueId();
 
 	const [files, setFiles] = useState([]);
+
+	useEffect(() => {
+		if (sendFromContext) {
+			setNewData({
+				email: { value: defaultEmails ?? '', required: true },
+				topic: { value: mailSubject, required: true },
+				message: { value: mailBody, required: true },
+			});
+			setEmail(defaultEmails ?? '');
+			setTopic(mailSubject);
+			setMessage(mailBody);
+		}
+	}, [setNewData, sendFromContext, defaultEmails, mailSubject, mailBody]);
 
 	const handleImportFileChange = async (event) => {
 		event = event.originalEvent || event;
@@ -99,9 +114,9 @@ function MailForm({ recipients }) {
 				setFiles((files) => files.concat([{
 					content: reader.result.split(';base64,')[1],
 					contentType: file.type,
-					filename: file.name
-				}]))
-			}
+					filename: file.name,
+				}]));
+			};
 		});
 	};
 
@@ -112,6 +127,11 @@ function MailForm({ recipients }) {
 	const handleSubmit = async () => {
 		setComitting(true);
 		try {
+			setNewData({
+				email: { value: email, required: true },
+				topic: { value: topic, required: true },
+				message: { value: message, required: true },
+			});
 			const dataToSend = packData(newData, files);
 			await sendEmail(dataToSend);
 
@@ -127,12 +147,18 @@ function MailForm({ recipients }) {
 
 	$('.main-content').removeClass('rc-old');
 
+	const handleTopicChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
+		//setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
+		setTopic(getValue(e));
+	};
+
 	const handleDropdownTreeSelectChange = (currentNode, selectedNodes) => {
 		let emails = '';
-		selectedNodes.forEach(item => {
-			emails += getEmails(recipients, item.path)
-		})
-		setNewData( { ...newData, email: { value: emails, required: newData.email.required } });
+		selectedNodes.forEach((item) => {
+			emails += getEmails(recipients, item.path);
+		});
+		//setNewData({ ...newData, email: { value: emails, required: newData.email.required } });
+		setEmail(emails);
 	};
 
 	return <>
@@ -146,7 +172,7 @@ function MailForm({ recipients }) {
 					texts={
 						{
 							placeholder: 'Поиск...',
-							noMatches: 'Не найдено совпадений'
+							noMatches: 'Не найдено совпадений',
 						}
 					}
 				/>
@@ -155,7 +181,7 @@ function MailForm({ recipients }) {
 		<Field mbe='x8'>
 			<Field.Label>{t('Email_subject')} <span style={ { color: 'red' } }>*</span></Field.Label>
 			<Field.Row>
-				<TextInput value={newData.topic.value} flexGrow={1} onChange={handleChange('topic')} placeholder={`${ t('Email_subject_placeholder') }`}/>
+				<TextInput value={topic} flexGrow={1} onChange={handleTopicChange('topic')} placeholder={`${ t('Email_subject_placeholder') }`}/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
@@ -165,12 +191,13 @@ function MailForm({ recipients }) {
 					editor={ ClassicEditor }
 					config={ {
 						language: 'ru',
-						removePlugins: ["ImageUpload"],
+						removePlugins: ['ImageUpload'],
 					} }
-					data='<p>Здравствуйте, </p>'
+					data={ message }
 					onChange={ (event, editor) => {
 						const data = editor.getData();
-						setNewData({ ...newData, message: { value: data, required: newData.message.required } });
+						setMessage(data);
+						//setNewData({ ...newData, message: { value: data, required: newData.message.required } });
 					} }
 				/>
 			</Field.Row>
