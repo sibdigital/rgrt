@@ -60,6 +60,7 @@ export function Councils({
 	params,
 }) {
 	const t = useTranslation();
+	const formatDateAndTime = useFormatDateAndTime();
 
 	const setModal = useSetModal();
 
@@ -127,10 +128,8 @@ export function Councils({
 		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
 		<Th w='x40' key='edit'></Th>,
 		<Th w='x40' key='delete'></Th>,
-		<Th w='x40' key='download'></Th>
+		<Th w='x40' key='download'></Th>,
 	], [sort, mediaQuery]);
-
-	const formatDateAndTime = useFormatDateAndTime();
 
 	const styleTr = { borderBottomWidth: '10px', borderBottomColor: 'var(--color-white)' };
 

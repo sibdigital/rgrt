@@ -34,7 +34,7 @@ export function CreateParticipant({ goTo, close, ...props }) {
 	const handleSave = useCallback(async () => {
 		const result = await saveAction();
 		if (result.success) {
-			goTo();
+			goTo(result.user._id)();
 		}
 	}, [values, saveQuery, saveAction]);
 

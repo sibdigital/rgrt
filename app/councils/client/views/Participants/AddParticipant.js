@@ -63,7 +63,7 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 	...current && { offset: current },
 }), [text, itemsPerPage, current, column, direction]);
 
-export function AddParticipant({ councilId, onChange, close, invitedUsers, onNewParticipant }) {
+export function AddParticipant({ councilId, onChange, close, invitedUsers, onNewParticipant, onCreateParticipantId }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -96,6 +96,7 @@ export function AddParticipant({ councilId, onChange, close, invitedUsers, onNew
 		try {
 			if (usersIdToAdd.length > 0) {
 				await saveAction();
+				setUsersIdToAdd([]);
 				dispatchToastMessage({ type: 'success', message: t('Participant_Added_Successfully') });
 			}
 		} catch (error) {
@@ -105,6 +106,12 @@ export function AddParticipant({ councilId, onChange, close, invitedUsers, onNew
 			close();
 		}
 	}, [dispatchToastMessage, saveAction, t]);
+
+	// if create new user
+	if (onCreateParticipantId && usersIdToAdd.length === 0) {
+		usersIdToAdd.push(onCreateParticipantId);
+		handleSave();
+	}
 
 	const onAddClick = (_id) => () => {
 		const index = usersIdToAdd.indexOf(_id);
@@ -121,6 +128,9 @@ export function AddParticipant({ councilId, onChange, close, invitedUsers, onNew
 		<Field mbe='x8'>
 			<Label fontScale='p1'>{t('Selected')}: {countSelectedUsers}</Label>
 			<ButtonGroup marginInlineStart='auto'>
+				<Button onClick={onNewParticipant('newParticipants')} small primary aria-label={ t('New') }>
+					{ t('Participant_Create') }
+				</Button>
 				<Button onClick={onAddUserCancelClick} small primary aria-label={t('Cancel')}>
 					{t('Cancel')}
 				</Button>
@@ -201,140 +211,4 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	};
 
 	return <GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />;
-}
-
-
-function AddInvitedUser({ invitedUser, handleCancel, handleInsertOrUpdateSubmit }) {
-	const [newData, setNewData] = useState({
-		surname: { value: invitedUser.surname ?? '', required: true },
-		name: { value: invitedUser.name ?? '', required: true },
-		patronymic: { value: invitedUser.patronymic ?? '', required: false },
-		organization: { value: invitedUser.organization ?? '', required: true },
-		position: { value: invitedUser.position ?? '', required: true },
-		contactPersonFirstName: { value: invitedUser.contactPersonFirstName ?? '', required: false },
-		contactPersonLastName: { value: invitedUser.contactPersonLastName ?? '', required: false },
-		contactPersonPatronymicName: { value: invitedUser.contactPersonPatronymicName ?? '', required: false },
-		phone: { value: invitedUser.phone ?? '', required: true },
-		email: { value: invitedUser.emails ? invitedUser.emails[0].address : '', required: true },
-		ts: { value: invitedUser.ts ?? '', required: false },
-	});
-
-	const isContact = !!(invitedUser.contactPersonFirstName && invitedUser.contactPersonLastName);
-
-	const [isContactPerson, setIsContactPerson] = useState(isContact);
-
-	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
-		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
-	};
-
-	const packNewData = () => {
-		const dataToSend = {};
-		Object.keys(newData).forEach((key) => {
-			dataToSend[key] = newData[key].value.trim();
-		});
-		if (!isContactPerson) {
-			delete dataToSend.contactPersonFirstName;
-			delete dataToSend.contactPersonLastName;
-			delete dataToSend.contactPersonPatronymicName;
-		}
-		if (!dataToSend.ts) {
-			dataToSend.ts = new Date();
-		}
-		return dataToSend;
-	};
-
-	const handleIAmContactPerson = () => {
-		setNewData({
-			...newData,
-			contactPersonFirstName: { value: newData.contactPersonFirstName.value, required: !isContactPerson },
-			contactPersonLastName: { value: newData.contactPersonLastName.value, required: !isContactPerson },
-		});
-		setIsContactPerson(!isContactPerson);
-	};
-
-	const t = useTranslation();
-
-	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [JSON.stringify(newData)]);
-
-	console.log('allFieldAreFilled', allFieldAreFilled);
-
-	const inputsStyle = { width: '99%' };
-
-	return <Margins blockStart='x32' blockEnd='x32'>
-		<Box height='100%'>
-			<Box display='flex' fontScale='s1' color='hint' marginBlockEnd='x16'>
-				<Field.Label width='auto'>{t('Council_participant_info_description')}</Field.Label>
-				<ButtonGroup>
-					<Button fontSize={'1.1rem'} primary small aria-label={t('Cancel')} onClick={handleCancel}>
-						{t('Cancel')}
-					</Button>
-					<Button fontSize={'1.1rem'} disabled={!allFieldAreFilled} primary small aria-label={t('Accept')} onClick={handleInsertOrUpdateSubmit(packNewData(), invitedUser)}>
-						{t('Accept')}
-					</Button>
-				</ButtonGroup>
-			</Box>
-			<Box display='flex' flexDirection='column' overflow='auto' height='85%'>
-				<Margins all='x8'>
-					<Field style={inputsStyle}>
-						<Field.Label>{t('Council_second_name')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.surname.value} flexGrow={1} onChange={handleChange('lastName')} placeholder={`${ t('Council_second_name_placeholder') }`}/>
-						</Field.Row>
-					</Field>
-					<Field style={inputsStyle}>
-						<Field.Label>{t('Council_first_name')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.name.value} flexGrow={1} onChange={handleChange('firstName')} placeholder={`${ t('Council_first_name_placeholder') }`}/>
-						</Field.Row>
-					</Field>
-					<Field style={inputsStyle}>
-						<Field.Label>{t('Council_patronymic')}</Field.Label>
-						<Field.Row>
-							<TextInput value={newData.patronymic.value} flexGrow={1} onChange={handleChange('patronymic')} placeholder={`${ t('Council_patronymic_placeholder') }`} />
-						</Field.Row>
-					</Field>
-					<Field style={inputsStyle}>
-						<Field.Label>{t('Council_Organization_Position')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.organization.value + ' ' + newData.position.value} flexGrow={1} onChange={handleChange('position')} placeholder={`${ t('Council_Organization_Position_placeholder') }`}/>
-						</Field.Row>
-					</Field>
-					<Field.Row style={inputsStyle}>
-						<CheckBox checked={isContactPerson} onChange={handleIAmContactPerson}/>
-						<Field.Label>{t('Council_Is_Contact_person')}</Field.Label>
-					</Field.Row>
-					{ isContactPerson && <Field style={inputsStyle}>
-						<Field.Label>{t('Council_Contact_person_lastname')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.contactPersonLastName.value} flexGrow={1} onChange={handleChange('contactPersonLastName')} placeholder={`${ t('Council_Contact_person_lastname_placeholder') } (${ t('Required') })`}/>
-						</Field.Row>
-					</Field> }
-					{ isContactPerson && <Field style={inputsStyle}>
-						<Field.Label>{t('Council_Contact_person_firstname')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.contactPersonFirstName.value} flexGrow={1} onChange={handleChange('contactPersonFirstName')} placeholder={`${ t('Council_Contact_person_firstname_placeholder') } (${ t('Required') })`}/>
-						</Field.Row>
-					</Field> }
-					{ isContactPerson && <Field style={inputsStyle}>
-						<Field.Label>{t('Council_Contact_person_patronymic')}</Field.Label>
-						<Field.Row>
-							<TextInput value={newData.contactPersonPatronymicName.value} flexGrow={1} onChange={handleChange('contactPersonPatronymicName')} placeholder={`${ t('Council_Contact_person_patronymic_placeholder') } (${ t('optional') })`}/>
-						</Field.Row>
-					</Field> }
-					<Field style={inputsStyle}>
-						<Field.Label>{t('Council_Contact_person_Phone_number')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.phone.value} flexGrow={1} onChange={handleChange('phone')} placeholder={`${ t('Council_Contact_person_Phone_number_placeholder') }`}/>
-						</Field.Row>
-					</Field>
-					<Field style={inputsStyle}>
-						<Field.Label>{t('Council_Contact_person_email')} <span style={ { color: 'red' } }>*</span></Field.Label>
-						<Field.Row>
-							<TextInput value={newData.email.value} flexGrow={1} onChange={handleChange('email')} placeholder={`${ t('Council_Contact_person_email_placeholder') }`}/>
-						</Field.Row>
-					</Field>
-				</Margins>
-			</Box>
-		</Box>
-	</Margins>;
 }

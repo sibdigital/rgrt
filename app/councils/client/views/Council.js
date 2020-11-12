@@ -1,13 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Icon, Label, Table, TextInput, TextAreaInput, Modal } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal } from '@rocket.chat/fuselage';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
+import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
-import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../settings/client';
 import moment from 'moment';
@@ -16,8 +14,6 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { Participants } from './Participants/Participants';
 import { AddParticipant } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
-
-const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -60,14 +56,11 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 
 export function CouncilPage() {
 	console.log('council');
-	const routeName = 'council';
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const councilId = useRouteParameter('id');
-	const router = useRoute(routeName);
 
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [isAddUser, setIsAddUser] = useState(false);
+	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [context, setContext] = useState('participants');
 	const [cache, setCache] = useState();
 
@@ -89,8 +82,6 @@ export function CouncilPage() {
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
-
 	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
 
 	const downloadCouncilParticipants = (_id) => async (e) => {
@@ -110,49 +101,6 @@ export function CouncilPage() {
 	};
 
 	const address = settings.get('Site_Url') + 'i/' + data.inviteLink || '';
-
-	const header = useMemo(() => [
-		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
-		<Th key={'position'} color='default'>{t('Council_Organization_Position')}</Th>,
-		mediaQuery && <Th key={'contact'} color='default'>{t('Council_Contact_person')}</Th>,
-		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
-		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
-		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>,
-	], [mediaQuery]);
-
-	const styleTableRow = { wordWrap: 'break-word' };
-
-	const getBackgroundColor = (invitedUser) => {
-		const index = invitedUsers.findIndex((user) => (
-			user.firstName === invitedUser.firstName
-			&& user.lastName === invitedUser.lastName
-			&& user.patronymic === invitedUser.patronymic
-			&& user.position === invitedUser.position
-			&& user.contactPersonFirstName === invitedUser.contactPersonFirstName
-			&& user.contactPersonLastName === invitedUser.contactPersonLastName
-			&& user.contactPersonPatronymicName === invitedUser.contactPersonPatronymicName
-			&& user.phone === invitedUser.phone
-			&& user.email === invitedUser.email
-			&& user.ts === invitedUser.ts
-		));
-		if (index > 0 && index % 2 === 1) {
-			return 'var(--color-lighter-blue)';
-		}
-
-		return '';
-	};
-
-	const renderRow = (invitedUser) => {
-		const iu = invitedUser;
-		return <Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' style={style} color='default'>{iu.lastName} {iu.firstName} {iu.patronymic}</Table.Cell>
-			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.email}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}
-		</Table.Row>;
-	};
 
 	const goBack = () => {
 		window.history.back();
@@ -180,7 +128,15 @@ export function CouncilPage() {
 
 	const onClose = () => {
 		setContext('participants');
+		if (onCreateParticipantId) {
+			setOnCreateParticipantId(undefined);
+		}
 	};
+
+	const onCreateParticipantClick = useCallback((_id) => () => {
+		setOnCreateParticipantId(_id);
+		setContext('onCreateParticipant');
+	}, [onCreateParticipantId, context]);
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
 		try {
@@ -247,7 +203,8 @@ export function CouncilPage() {
 				</Field>}
 				{context === 'participants' && <Participants councilId={councilId} onChange={onChange}/>}
 				{context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onClose} close={onParticipantClick} />}
+				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} />}
+				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
 			</Page.Content>
 		</Page>
 	</Page>;

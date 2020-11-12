@@ -26,6 +26,9 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import Page from '../../../../client/components/basic/Page';
+import { AddParticipant } from './Participants/AddParticipant';
+import { CreateParticipant } from './Participants/CreateParticipant';
+import { Participants } from './Participants/Participants';
 
 registerLocale('ru', ru);
 
@@ -97,7 +100,7 @@ export function EditCouncilPage() {
 		data.invitedUsers = [];
 	}
 
-	return <EditCouncilWithNewData council={data} onChange={onChange} context={context}/>;
+	return <EditCouncilWithNewData council={data} onChange={onChange}/>;
 }
 
 EditCouncilPage.displayName = 'EditCouncilPage';
@@ -106,19 +109,20 @@ export default EditCouncilPage;
 
 const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
-function EditCouncilWithNewData({ council, onChange, context }) {
+function EditCouncilWithNewData({ council, onChange }) {
 	const t = useTranslation();
 
 	const { _id, d: previousDate, desc: previousDescription } = council || {};
 	const previousInvitedUsers = useMemo(() => council.invitedUsers ? council.invitedUsers.slice() : [], [council.invitedUsers.slice()]);
 	const previousCouncil = council || {};
 
-	const isEditUserState = context === 'newParticipant';
-	const [isEditUser, setIsEditUser] = useState(isEditUserState);
+	const [context, setContext] = useState('participants');
+	const [isEditUser, setIsEditUser] = useState(false);
 	const [date, setDate] = useState(new Date(previousDate));
 	const [description, setDescription] = useState(previousDescription);
 	const [invitedUsers, setInvitedUsers] = useState(previousInvitedUsers);
 	const [currentInvitedUser, setCurrentInvitedUser] = useState({});
+	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 
 	const setModal = useSetModal();
 
@@ -213,6 +217,26 @@ function EditCouncilWithNewData({ council, onChange, context }) {
 		setCurrentInvitedUser({});
 		onChange();
 		handleEditUser();
+	};
+
+	const onAddParticipantClick = (_id) => () => {
+		setContext('addParticipants');
+	};
+
+	const onCreateParticipantClick = useCallback((_id) => () => {
+		setOnCreateParticipantId(_id);
+		setContext('onCreateParticipant');
+	}, [onCreateParticipantId, context]);
+
+	const onParticipantClick = useCallback((context) => () => {
+		setContext(context);
+	}, [context]);
+
+	const onClose = () => {
+		setContext('participants');
+		if (onCreateParticipantId) {
+			setOnCreateParticipantId(undefined);
+		}
 	};
 
 	const saveAction = useCallback(async (date, description, invitedUsers) => {
@@ -319,12 +343,25 @@ function EditCouncilWithNewData({ council, onChange, context }) {
 						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
-				<Field mbe='x8'>
-					<Field height={'600px'}>
-						{ isEditUser && <EditInvitedUser invitedUser={currentInvitedUser} handleCancel={handleEditUser} handleInsertOrUpdateSubmit={handleInsertOrUpdatePerson}/>}
-						{ !isEditUser && <InvitedUsersTable invitedUsers={invitedUsers} onEdit={onEditClick} onDelete={onDeleteParticipantClick}/>}
-					</Field>
-				</Field>
+				{context === 'participants' && <Field mbe='x8'>
+					<Field.Row marginInlineStart='auto'>
+						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(_id)} aria-label={t('Add')}>
+							{t('Council_Add_Participant')}
+						</Button>
+					</Field.Row>
+				</Field>}
+				{context === 'participants' && <Participants councilId={_id} onChange={onChange}/>}
+				{context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} />}
+				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{/*<Field mbe='x8'>*/}
+				{/*	<Field height={'600px'}>*/}
+				{/*		{ isEditUser && <EditInvitedUser invitedUser={currentInvitedUser} handleCancel={handleEditUser} handleInsertOrUpdateSubmit={handleInsertOrUpdatePerson}/>}*/}
+				{/*		{ !isEditUser && <InvitedUsersTable invitedUsers={invitedUsers} onEdit={onEditClick} onDelete={onDeleteParticipantClick}/>}*/}
+				{/*		/!*{context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}*!/*/}
+				{/*		/!*{context === 'newParticipants' && <CreateParticipant goTo={onClose} close={onParticipantClick} />}*!/*/}
+				{/*	</Field>*/}
+				{/*</Field>*/}
 			</Page.Content>
 		</Page>
 	</Page>;
