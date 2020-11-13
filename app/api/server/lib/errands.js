@@ -45,6 +45,11 @@ export async function findDiscussionsWithErrandsFromRoom({ uid, roomId, paginati
 	};
 }
 
+export async function findErrand(_id) {
+	const cursor = await CustomErrand.findOne({ _id });
+	return cursor;
+}
+
 /*
 export async function findErrandsOnMessage({ query = {}, pagination: { offset, count, sort } }) {
 	const cursor = await CustomErrand.find(query, {

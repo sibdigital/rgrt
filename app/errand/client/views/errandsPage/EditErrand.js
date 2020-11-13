@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
@@ -17,11 +17,11 @@ import { useUserId } from '../../../../../client/contexts/UserContext';
 
 require('react-datepicker/dist/react-datepicker.css');
 
-export function EditErrandContextBar({ erid, onChange }) {
-	return <EditErrandWithData erid={erid} onChange={onChange}/>;
+export function EditErrandContextBar({ erid, onChange, onClose }) {
+	return <EditErrandWithData erid={erid} onChange={onChange} onClose={onClose}/>;
 }
 
-function EditErrandWithData({ erid, onChange }) {
+function EditErrandWithData({ erid, onChange, onClose }) {
 	const query = useMemo(() => ({
 		query: JSON.stringify({
 			_id: erid,
@@ -48,10 +48,10 @@ function EditErrandWithData({ erid, onChange }) {
 		return error.message;
 	}
 
-	return <EditErrand errand={data.result[0]} onChange={onChange}/>;
+	return <EditErrand errand={data.result[0]} onChange={onChange} onClose={onClose}/>;
 }
 
-function EditErrand({ errand, onChange }) {
+function EditErrand({ errand, onChange, onClose }) {
 	const _t = useTranslation();
 	errand.expireAt = new Date(errand.expireAt);
 	const [newData, setNewData] = useState({});
@@ -98,6 +98,11 @@ function EditErrand({ errand, onChange }) {
 	const curUser = _.findWhere(users.items, { _id: errand.chargedToUser._id });
 	!curUser && users.items.push(errand.chargedToUser);
 	const availableUsers = useMemo(() => users.items.map((item) => [item._id, item.username]), [users, users.items]);
+
+	const onEmailSendClick = () => {
+		onClose();
+		FlowRouter.go(`/manual-mail-sender/errand/${ errand._id }`);
+	};
 
 	const handleSave = async () => {
 		await Promise.all([hasUnsavedChanges && saveAction()].filter(Boolean));
@@ -168,9 +173,10 @@ function EditErrand({ errand, onChange }) {
 			</Field.Row>
 		</Field>
 		<Field>
-			<Field.Row>
+			<ButtonGroup>
+				<Button flexGrow={1} onClick={onEmailSendClick}>{_t('Send_email')}</Button>
 				<Button mie='none' flexGrow={1} disabled={!hasUnsavedChanges || (!isCurrentUsesResponsible() && !isCurrentUsesInitiator())} onClick={handleSave}>{_t('Save')}</Button>
-			</Field.Row>
+			</ButtonGroup>
 		</Field>
 	</VerticalBar.ScrollableContent>;
 }

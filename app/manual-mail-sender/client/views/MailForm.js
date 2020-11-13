@@ -42,7 +42,7 @@ class DropdownTreeSelectContainer extends Component {
 	render() {
 		const { data, ...rest } = this.props;
 		return (
-			<DropdownTreeSelect data={this.state.data} {...rest} />
+			<DropdownTreeSelect data={this.state.data} contentClassName='date-picker' {...rest} />
 		);
 	}
 }
@@ -69,6 +69,9 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 	const [email, setEmail] = useState('');
 	const [topic, setTopic] = useState('');
 	const [message, setMessage] = useState('');
+	const mailSubjectContext = mailSubject;
+	const mailBodyContext = mailBody;
+	const defaultEmailsContext = defaultEmails;
 
 	const t = useTranslation();
 
@@ -78,7 +81,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const sendFromContext = useMemo(() => { return mailBody !== undefined && mailBody.length > 0 && mailSubject !== undefined && mailSubject.length > 0 }, [mailSubject, mailBody, defaultEmails]);
+	//const sendFromContext = useMemo(() => mailBodyContext !== undefined && mailBodyContext.length > 0 && mailSubjectContext !== undefined && mailSubjectContext.length > 0, [mailSubjectContext, mailBodyContext]);
 	//const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value.trim() === '' && current.required === true).length === 0, [JSON.stringify(newData)]);
 	const allFieldAreFilled = useMemo(() => email.trim() !== '' && topic.trim() !== '' && message.trim() !== '', [email, topic, message]);
 
@@ -87,17 +90,13 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 	const [files, setFiles] = useState([]);
 
 	useEffect(() => {
-		if (sendFromContext) {
-			setNewData({
-				email: { value: defaultEmails ?? '', required: true },
-				topic: { value: mailSubject, required: true },
-				message: { value: mailBody, required: true },
-			});
-			setEmail(defaultEmails ?? '');
-			setTopic(mailSubject);
-			setMessage(mailBody);
+		if (mailBodyContext !== undefined && mailBodyContext.length > 0 && mailSubjectContext !== undefined && mailSubjectContext.length > 0) {
+			console.log('rerender');
+			setEmail(defaultEmailsContext ?? '');
+			setTopic(mailSubjectContext);
+			setMessage(mailBodyContext);
 		}
-	}, [setNewData, sendFromContext, defaultEmails, mailSubject, mailBody]);
+	}, [mailSubjectContext, mailBodyContext, defaultEmailsContext]);
 
 	const handleImportFileChange = async (event) => {
 		event = event.originalEvent || event;

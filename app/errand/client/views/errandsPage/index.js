@@ -40,7 +40,7 @@ function renderEditModal({ onCancel, erid, onChange, ...props }) {
 			<Modal.Close onClick={onCancel}/>
 		</Modal.Header>
 		<Modal.Content fontScale='p1'>
-			<EditErrandContextBar erid={erid} onChange={onChange}/>
+			<EditErrandContextBar erid={erid} onChange={onChange} onClose={onCancel}/>
 		</Modal.Content>
 	</Modal>;
 }

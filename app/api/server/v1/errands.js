@@ -3,7 +3,7 @@ import { check, Match } from 'meteor/check';
 import _ from 'underscore';
 
 import { API } from '../api';
-import { findErrands } from '../lib/errands';
+import { findErrands, findErrand } from '../lib/errands';
 
 import { saveCustomFields, saveUser } from '/app/lib';
 
@@ -80,6 +80,13 @@ API.v1.addRoute('errands', { authRequired: true }, {
 			offset,
 			total: result.total,
 		});
+	},
+});
+
+API.v1.addRoute('errands.findOne', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findErrand(query._id)));
 	},
 });
 
