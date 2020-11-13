@@ -1,4 +1,4 @@
-import { Box, Margins } from '@rocket.chat/fuselage';
+import { Box, Margins, TextAreaInput } from '@rocket.chat/fuselage';
 import React, { useState } from 'react';
 
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
@@ -28,7 +28,7 @@ function CouncilInfoStep({ step, title, active }) {
 				<Box display='flex' flexDirection='column'>
 					<Margins all='x8'>
 						<Box fontScale='s1'>{t('Description')}</Box>
-						<Box fontScale='p1' marginBlockEnd='x32'>{councilState.data.desc}</Box>
+						<TextAreaInput style={ { whiteSpace: 'normal' } } rows='6' readOnly fontScale='p1' marginBlockEnd='x32'>{councilState.data.desc}</TextAreaInput>
 						<Box fontScale='s1'>{t('Date')}</Box>
 						<Box color='primary' fontScale='p1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>
 					</Margins>
