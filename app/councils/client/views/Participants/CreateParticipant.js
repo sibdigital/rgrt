@@ -9,8 +9,6 @@ import ParticipantForm from './ParticipantForm';
 export function CreateParticipant({ goTo, close, ...props }) {
 	const t = useTranslation();
 
-	const roleData = useEndpointData('roles.list', '') || {};
-
 	const {
 		values,
 		handlers,
@@ -26,6 +24,7 @@ export function CreateParticipant({ goTo, close, ...props }) {
 		email: '',
 		workingGroup: '',
 	});
+	console.log('createPartic');
 
 	const saveQuery = useMemo(() => values, [values]);
 
@@ -34,11 +33,9 @@ export function CreateParticipant({ goTo, close, ...props }) {
 	const handleSave = useCallback(async () => {
 		const result = await saveAction();
 		if (result.success) {
-			goTo(result.user._id)();
+			goTo(result.user)();
 		}
 	}, [values, saveQuery, saveAction]);
-
-	const availableRoles = useMemo(() => (roleData && roleData.roles ? roleData.roles.map(({ _id, description }) => [_id, description || _id]) : []), [roleData]);
 
 	const append = useMemo(() => <Field width='98%'>
 		<Field.Row>
@@ -49,5 +46,5 @@ export function CreateParticipant({ goTo, close, ...props }) {
 		</Field.Row>
 	</Field>, [close, t, handleSave]);
 
-	return <ParticipantForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} append={append} {...props}/>;
+	return <ParticipantForm formValues={values} formHandlers={handlers} append={append} {...props}/>;
 }

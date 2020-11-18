@@ -46,6 +46,7 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 
 	return <Scrollable is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} { ...props }>
 		<Field mb='x16'>
+			{ append }
 			{useMemo(() => <Field mb='x4' width='98%'>
 				<Field.Label>{t('Surname')}</Field.Label>
 				<Field.Row>
@@ -94,7 +95,6 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 					<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
 				</Field.Row>
 			</Field>, [t, workingGroup, handleWorkingGroup])}
-			{ append }
 		</Field>
 	</Scrollable>;
 }

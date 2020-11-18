@@ -6,9 +6,6 @@ import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { Councils } from './Councils';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { EditCouncil } from './EditCouncil';
-import { AddCouncil } from './AddCouncil';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
@@ -39,9 +36,6 @@ export function CouncilsPage() {
 
 	const router = useRoute(routeName);
 
-	const context = useRouteParameter('context');
-	const id = useRouteParameter('id');
-
 	const onClick = (_id) => () => {
 		FlowRouter.go(`/council/${ _id }`);
 	};
@@ -66,10 +60,6 @@ export function CouncilsPage() {
 
 	const handleHeaderButtonClick = useCallback((context) => () => {
 		router.push({ context });
-	}, [router]);
-
-	const close = useCallback(() => {
-		router.push({});
 	}, [router]);
 
 	const onChange = useCallback(() => {
@@ -97,16 +87,6 @@ export function CouncilsPage() {
 				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
-		{ context
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
-			<VerticalBar.Header>
-				{/*{ context === 'edit' && t('Council_Info') }*/}
-				{ context === 'new' && t('Council_Add') }
-				<VerticalBar.Close onClick={close}/>
-			</VerticalBar.Header>
-			{/*{context === 'edit' && <EditCouncil _id={id} close={close} onChange={onChange} cache={cache}/>}*/}
-			{context === 'new' && <AddCouncil goToNew={onEditClick} close={close} onChange={onChange}/>}
-		</VerticalBar>}
 	</Page>;
 }
 

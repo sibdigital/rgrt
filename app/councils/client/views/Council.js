@@ -133,8 +133,8 @@ export function CouncilPage() {
 		}
 	};
 
-	const onCreateParticipantClick = useCallback((_id) => () => {
-		setOnCreateParticipantId(_id);
+	const onCreateParticipantClick = useCallback((user) => () => {
+		setOnCreateParticipantId(user._id);
 		setContext('onCreateParticipant');
 	}, [onCreateParticipantId, context]);
 

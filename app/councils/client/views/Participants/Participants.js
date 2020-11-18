@@ -72,8 +72,29 @@ const SuccessModal = ({ onClose, ...props }) => {
 	</Modal>;
 };
 
-export function Participants({ councilId, onChange }) {
+export function Participants({ councilId, onChange, context, invitedUsers, setInvitedUsers }) {
 	console.log('Participants');
+	let form = {};
+	if (councilId || context === undefined || context === '') {
+		form = <ParticipantsWithData councilId={councilId} onChange={onChange}/>;
+	}
+	if (context === 'new') {
+		form = <ParticipantsWithoutData onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers}/>;
+	}
+	return form;
+}
+
+function ParticipantsWithoutData({ onChange, invitedUsers, setInvitedUsers }) {
+	const onDeleteUserFromCouncilClick = (userId) => () => {
+		const users = invitedUsers.filter((user) => user._id !== userId).map((user) => user._id);
+		setInvitedUsers(users);
+		onChange();
+	};
+
+	return <InvitedUsersTable invitedUsers={invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
+}
+
+function ParticipantsWithData({ councilId, onChange }) {
 	const t = useTranslation();
 	const [params, setParams] = useState({ _id: councilId, current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
@@ -89,8 +110,6 @@ export function Participants({ councilId, onChange }) {
 	const deleteUserFromCouncil = useMethod('deleteUserFromCouncil');
 	const setModal = useSetModal();
 	const dispatchToastMessage = useToastMessageDispatch();
-
-	//const onChange = () => setCache(new Date());
 
 	const onDeleteUserFromCouncilConfirm = useCallback(async (userId) => {
 		try {
@@ -108,8 +127,6 @@ export function Participants({ councilId, onChange }) {
 
 	return <InvitedUsersTable invitedUsers={data.invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
 }
-
-const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
 export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	const t = useTranslation();
@@ -131,6 +148,7 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	], [mediaQuery]);
 
 	const styleTableRow = { wordWrap: 'break-word' };
+	const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 
 	const getBackgroundColor = (invitedUser) => {
 		const index = invitedUsers.findIndex((user) => (

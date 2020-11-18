@@ -32,6 +32,7 @@ Meteor.methods({
 				d: new Date(councilData.d),
 				desc: councilData.desc,
 				inviteLink,
+				invitedUsers: councilData.invitedUsers ?? [],
 			};
 
 			const _id = Councils.create(createCouncil);
