@@ -28,7 +28,6 @@ Meteor.methods({
 
 		const council = Councils.findOne({ _id });
 		const users = Users.find({ _id: { $in: council.invitedUsers } }) || [];
-		console.log(users);
 
 		if (!council) {
 			throw new Meteor.Error('error-council-does-not-exists', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadCouncilParticipants', field: '_id' });
@@ -114,7 +113,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.surname.toUpperCase() } ${ value.name } ${ value.patronymic ?? '' }`.trim(), alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.surname?.toUpperCase() || '' } ${ value.name ?? '' } ${ value.patronymic ?? '' }`.trim(), alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -123,7 +122,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.position }`, alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.position ?? '' }`, alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
