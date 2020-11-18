@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Chip, Field, InputBox, Margins, Scrollable, TextInput } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Chip, Field, InputBox, Margins, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import React, { Component, useMemo, useState, useEffect, useCallback } from 'react';
 import 'react-dropdown-tree-select/dist/styles.css'
 import '../../public/stylesheets/mail-sender.css'
@@ -42,7 +42,7 @@ class DropdownTreeSelectContainer extends Component {
 	render() {
 		const { data, ...rest } = this.props;
 		return (
-			<DropdownTreeSelect data={this.state.data} contentClassName='date-picker' {...rest} />
+			<DropdownTreeSelect data={this.state.data} className='date-picker' dropdownClassName='date-picker' {...rest} />
 		);
 	}
 }
@@ -163,7 +163,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 	return <>
 		<Field mbe='x8'>
 			<Field.Label>{t('Email_receivers')} <span style={ { color: 'red' } }>*</span></Field.Label>
-			<Field.Row>
+			<Field>
 				<DropdownTreeSelectContainer
 					className='tree-select'
 					data={recipients}
@@ -175,7 +175,8 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 						}
 					}
 				/>
-			</Field.Row>
+				<TextAreaInput backgroundColor={'var(--tertiary-background-color)'} row='1' style={{ whiteSpace: 'normal' }} flexGrow={1} value={email} readOnly placeholder={t('Email')}/>
+			</Field>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Email_subject')} <span style={ { color: 'red' } }>*</span></Field.Label>

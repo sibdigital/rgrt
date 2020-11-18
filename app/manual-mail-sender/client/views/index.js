@@ -61,8 +61,8 @@ export function MailSenderPage() {
 	const [params, setParams] = useState({ text: '' });
 	const [sort, setSort] = useState(['name', 'asc']);
 
-	const debouncedParams = useDebouncedValue(params, 50);
-	const debouncedSort = useDebouncedValue(sort, 50);
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
 	const query = useQuery(debouncedParams, debouncedSort);
 	const workingGroupsQuery = useWorkingGroupsQuery(debouncedParams, debouncedSort);
 
@@ -104,7 +104,7 @@ function MailSender({ workingGroupsData, usersData }) {
 		const recipients = [{
 			label: 'Все пользователи',
 			value: 'all_users',
-			children: workingGroups.map((workingGroup) => {
+			children: workingGroups.filter((workingGroup) => workingGroup.type !== 'subject').map((workingGroup) => {
 				return {
 					label: workingGroup.title,
 					value: workingGroup._id,
@@ -151,7 +151,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 					return {
 						label: workingGroup.title,
 						value: workingGroup._id,
-						children: users.filter((user) => user.workingGroup === workingGroup.title).map((value) => {
+						children: users.filter((user) => user.workingGroup === workingGroup.title && workingGroup.type !== 'subject').map((value) => {
 							return {
 								label: [value.surname, value.name, value.patronymic].join(' '),
 								value: value.emails ? value.emails[0].address : '',
@@ -180,7 +180,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			};
 
 			recipients[0].children.push(child);
-			const mailSubject = ['Council', 'От', formatDateAndTime(councilData.d)].join(' ');
+			const mailSubject = [t('Council'), 'От', formatDateAndTime(councilData.d)].join(' ');
 
 			setDefaultEmails(emails);
 			setMailSubject(mailSubject);
@@ -233,7 +233,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 					return {
 						label: workingGroup.title,
 						value: workingGroup._id,
-						children: users.filter((user) => user.workingGroup === workingGroup.title).map((value) => {
+						children: users.filter((user) => user.workingGroup === workingGroup.title && workingGroup.type !== 'subject').map((value) => {
 							return {
 								label: [value.surname, value.name, value.patronymic].join(' '),
 								value: value.emails ? value.emails[0].address : '',
