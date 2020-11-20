@@ -49,7 +49,9 @@ export function AddCouncilPage() {
 	const data = useEndpointData('users.list', query) || { users: [] };
 
 	useEffect(() => {
-		setUsers(data.users);
+		if (data.users) {
+			setUsers(data.users);
+		}
 	}, [data]);
 
 	const onChange = useCallback(() => {
@@ -71,6 +73,7 @@ function AddCouncilWithNewData({ users, setUsers, onChange }) {
 	const [description, setDescription] = useState('');
 	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
 
+	// TODO: maybe
 	const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');

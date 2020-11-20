@@ -97,7 +97,44 @@ export const FileUpload = {
 		return true;
 	},
 
-	validateFileUpload(file) {
+	validateFileUploadToWorkingGroupRequestAnswer(file) {
+		console.log('validateFileUploadToWorkingGroupRequestAnswer');
+		if (!Match.test(file.workingGroupRequestId, String)) {
+			console.log('validateFileUploadToWorkingGroupRequestAnswer !match test');
+			return false;
+		}
+		const fileUploadAllowed = settings.get('FileUpload_Enabled');
+		// const workingGroupMeeting = WorkingGroupMeetings.findOneById(file.workingGroupMeetingId);
+		//
+		// if (!workingGroupMeeting) {
+		// 	console.log('!workingGroupMeeting');
+		// 	return false;
+		// }
+		const language = 'ru';
+		if (!fileUploadAllowed) {
+			console.log('!fileUploadAllowed');
+			const reason = TAPi18n.__('FileUpload_Disabled', language);
+			throw new Meteor.Error('error-file-upload-disabled', reason);
+		}
+		// -1 maxFileSize means there is no limit
+		if (maxFileSize > -1 && file.size > maxFileSize) {
+			console.log('maxFileSize > -1 && file.size > maxFileSize');
+			const reason = TAPi18n.__('File_exceeds_allowed_size_of_bytes', {
+				size: filesize(maxFileSize),
+			}, language);
+			throw new Meteor.Error('error-file-too-large', reason);
+		}
+
+		if (!fileUploadIsValidContentType(file.type)) {
+			console.log('fileUploadIsValidContentType');
+			const reason = TAPi18n.__('File_type_is_not_accepted', language);
+			throw new Meteor.Error('error-invalid-file-type', reason);
+		}
+
+		return true;
+	},
+
+	validateFileUploadToMessage(file) {
 		if (!Match.test(file.rid, String)) {
 			return false;
 		}
@@ -167,7 +204,7 @@ export const FileUpload = {
 		return {
 			collection: Uploads.model,
 			filter: new UploadFS.Filter({
-				onCheck: FileUpload.validateFileUpload,
+				onCheck: FileUpload.validateFileUploadToMessage,
 			}),
 			getPath(file) {
 				return `${ settings.get('uniqueID') }/uploads/${ file.rid }/${ file.userId }/${ file._id }`;
@@ -576,7 +613,6 @@ export class FileUploadClass {
 		return store.delete(file._id);
 	}
 
-
 	deleteByRoomId(rid) {
 		const file = this.model.findOneByRoomId(rid);
 
@@ -621,15 +657,16 @@ export class FileUploadClass {
 
 	insert(fileData, streamOrBuffer, cb) {
 		fileData.size = parseInt(fileData.size) || 0;
-
 		// Check if the fileData matches store filter
 		const filter = this.store.getFilter();
 		if (filter && filter.check) {
 			if (fileData.rid) {
 				filter.check(fileData);
-			} else {
-				FileUpload.validateFileUploadToWorkingGroup(fileData);
 			}
+			// else if (!FileUpload.validateFileUploadToWorkingGroupRequestAnswer(fileData)) {
+			// 	return;
+			// 	//FileUpload.validateFileUploadToWorkingGroup(fileData);
+			// }
 		}
 
 		return this._doInsert(fileData, streamOrBuffer, cb);

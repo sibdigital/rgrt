@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ButtonGroup, Button, Field, Box, Label, Icon } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import moment from 'moment';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -12,8 +13,6 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { WorkingGroups } from './WorkingGroups';
 import { AddWorkingGroup } from './AddWorkingGroup';
 import { EditWorkingGroup } from './EditWorkingGroup';
-
-import moment from 'moment';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 

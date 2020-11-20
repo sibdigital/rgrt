@@ -50,3 +50,54 @@ export function createWorkingGroupCompositionData(title, previousData) {
 
 	return workingGroupCompositionData;
 }
+
+export function validateWorkingGroupRequestData(workingGroupRequestData) {
+	const errors = [];
+
+	if (!workingGroupRequestData.desc) {
+		errors.push('desc');
+	}
+
+	return errors;
+}
+
+export function createWorkingGroupRequestData(desc, previousData) {
+	const workingGroupRequestData = {
+	};
+
+	if (previousData) {
+		workingGroupRequestData._id = previousData._id;
+	}
+
+	workingGroupRequestData.desc = desc;
+
+	return workingGroupRequestData;
+}
+
+export function validateWorkingGroupRequestMessageData(workingGroupRequestData) {
+	const errors = [];
+
+	if (!workingGroupRequestData.description) {
+		errors.push('description');
+	}
+
+	if (!workingGroupRequestData.number) {
+		errors.push('number');
+	}
+
+	return errors;
+}
+
+export function createWorkingGroupRequestMessageData(description, number, previousData) {
+	const workingGroupRequestData = {
+	};
+
+	if (previousData) {
+		workingGroupRequestData._id = previousData._id;
+	}
+
+	workingGroupRequestData.description = description;
+	workingGroupRequestData.number = number;
+
+	return workingGroupRequestData;
+}

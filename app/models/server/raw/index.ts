@@ -64,6 +64,8 @@ import UploadsFilesModel from '../models/Uploads';
 import { UploadsFilesRaw } from './UploadsFilesRaw';
 import ProtocolsModel from '../models/Protocols';
 import { ProtocolsRaw } from './Protocols';
+import WorkingGroupsRequestsModel from '../models/WorkingGroupsRequests';
+import { WorkingGroupsRequestsRaw } from './WorkingGroupsRequestsRaw';
 
 export const Permissions = new PermissionsRaw(PermissionsModel.model.rawCollection());
 export const Roles = new RolesRaw(RolesModel.model.rawCollection());
@@ -98,3 +100,4 @@ export const WorkingGroups = new WorkingGroupRaw(WorkingGroupsModel.model.rawCol
 export const WorkingGroupMeetings = new WorkingGroupMeetingRaw(WorkingGroupMeetingsModel.model.rawCollection());
 export const UploadFiles = new UploadsFilesRaw(UploadsFilesModel.model.rawCollection());
 export const Protocols = new ProtocolsRaw(ProtocolsModel.model.rawCollection());
+export const WorkingGroupsRequests = new WorkingGroupsRequestsRaw(WorkingGroupsRequestsModel.model.rawCollection());

@@ -1,10 +1,11 @@
 import { Protocols } from '../../../models/server/raw';
 
-export async function findProtocols({ query = {}, pagination: { offset, count, sort } }) {
+export async function findProtocols({ query = {}, fields = {}, pagination: { offset, count, sort } }) {
 	const cursor = await Protocols.find(query, {
 		sort: sort || { time: 1 },
 		skip: offset,
 		limit: count,
+		fields,
 	});
 
 	const total = await cursor.count();

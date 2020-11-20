@@ -23,6 +23,26 @@ API.v1.addRoute('protocols.list', { authRequired: true }, {
 	},
 });
 
+API.v1.addRoute('protocols.list.requestAnswer', { authRequired: false }, {
+	get() {
+		const { offset, count } = this.getPaginationItems();
+		const { sort, query } = this.parseJsonQuery();
+
+		return API.v1.success(Promise.await(findProtocols({
+			query,
+			fields: {
+				sections: 1,
+				num: 1,
+			},
+			pagination: {
+				offset,
+				count,
+				sort,
+			},
+		})));
+	},
+});
+
 API.v1.addRoute('protocols.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();

@@ -110,6 +110,13 @@ FlowRouter.route('/i/:id/:step?', {
 	},
 });
 
+FlowRouter.route('/d/:id/:step?', {
+	name: 'request-answer',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group/client/views/requests/formForSendingDocuments/InviteStepperRoute'));
+	},
+});
+
 FlowRouter.route('/council/:id', {
 	name: 'council',
 	action: () => {
@@ -214,6 +221,26 @@ FlowRouter.route('/protocol/:id/:context?/:sectionId?/:itemId?', {
 	name: 'protocol',
 	action: () => {
 		renderRouteComponent(() => import('../app/protocols/client/views/Protocol'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-groups-requests/:context?/:id?', {
+	name: 'working-groups-requests',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group/client/views/requests/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-groups-request/:id/:context?', {
+	name: 'working-groups-request',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group/client/views/requests/request'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');

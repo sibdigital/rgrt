@@ -43,6 +43,14 @@ const toolbarButtons = () => [
 		},
 	},
 	{
+		name: t('Working_group_requests'),
+		icon: 'working_group',
+		action: () => {
+			menu.close();
+			FlowRouter.go('working-groups-requests');
+		},
+	},
+	{
 		name: t('Working_group_composition'),
 		icon: 'team',
 		condition: () => hasPermission('manage-working-group'),
