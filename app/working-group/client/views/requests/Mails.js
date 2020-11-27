@@ -24,32 +24,29 @@ export function Mails({
 		<Th key={'Number'} color='default'>
 			{ t('Number') }
 		</Th>,
-		// mediaQuery && <Th key={'Description'} style={{ width: '190px' }} color='default'>
-		// 	{t('Description')}
-		// </Th>,
-		<Th key={'Answers'} style={{ width: '190px' }} color='default'>
-			{t('Answers')}
+		<Th key={'Working_group_request_answers_count'} style={{ width: '190px' }} color='default'>
+			{t('Working_group_request_answers_count')}
 		</Th>,
 		mediaQuery && <Th key={'Created_at'} color='default'>
 			{t('Created_at')}
 		</Th>,
-		<Th w='x40' key='edit'></Th>,
+		<Th w='x40' key='edit'/>,
 	], [mediaQuery]);
 
 	const renderRow = (mail) => {
-		const { number, description, answers, ts } = mail;
+		const { number, answers, ts } = mail;
 		const countAnswers = answers?.filter((answer) => answer.unread).length || 0;
 		const labelAnswers = t('Unread');
+		const labelNumber = number ?? t('Working_group_request_mail_not_chosen_answer');
 		return <Table.Row tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(mail)} color='default'>{number}</Table.Cell>
-			{/*{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(mail)} color='default'>{description}</Table.Cell>}*/}
+			<Table.Cell fontScale='p1' onClick={onClick(mail)} color='default'>{labelNumber}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(mail)} color='default'><Box withTruncatedText>{labelAnswers}: {countAnswers}</Box></Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(mail)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>}
-			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('Edit')}>
+			{number && <Table.Cell alignItems={'end'}>
+				<Button onClick={onEditClick(mail)} small aria-label={t('Edit')}>
 					<Icon name='edit'/>
 				</Button>
-			</Table.Cell>
+			</Table.Cell>}
 		</Table.Row>;
 	};
 

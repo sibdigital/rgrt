@@ -33,6 +33,8 @@ API.v1.addRoute('protocols.list.requestAnswer', { authRequired: false }, {
 			fields: {
 				sections: 1,
 				num: 1,
+				place: 1,
+				d: 1,
 			},
 			pagination: {
 				offset,

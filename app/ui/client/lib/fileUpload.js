@@ -274,8 +274,7 @@ export const uploadFileWithWorkingGroupRequestAnswer = async (workingGroupReques
 		await promise;
 		const uploads = Session.get('uploading') || [];
 		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
-		const _id = promise.responseJSON._id;
-		return { id: _id, description };
+		return { id: promise.responseJSON._id, description };
 	} catch (error) {
 		const uploads = Session.get('uploading') || [];
 		uploads.filter((u) => u.id === upload.id).forEach((u) => {
@@ -415,7 +414,6 @@ const getFileNameWithoutExtension = (fileName) => fileName.replace(/\..+$/, '');
 
 export const fileUploadToWorkingGroupRequestAnswer = async (files, { _id, mailId, answerId }) => {
 	files = [].concat(files);
-	let fullFileName = {};
 
 	const uploadNextFile = () => {
 		const file = files.pop();
@@ -443,38 +441,18 @@ export const fileUploadToWorkingGroupRequestAnswer = async (files, { _id, mailId
 			return;
 		}
 
-		const fileExtension = getFileExtension(file.name);
-		file.name = getFileNameWithoutExtension(file.name);
-
-		showUploadPreview(file, async (file, preview) => modal.open({
-			title: t('Upload_file_question'),
-			text: await getUploadPreview(file, preview),
-			showCancelButton: true,
-			closeOnConfirm: false,
-			closeOnCancel: false,
-			confirmButtonText: t('Send'),
-			cancelButtonText: t('Cancel'),
-			html: true,
-			onRendered: () => $('#file-name').focus(),
-		}, async (isConfirm) => {
-			if (!isConfirm) {
-				return;
-			}
-
-			const fileName = (document.getElementById('file-name').value || file.name || file.file.name) + '.' + fileExtension;
-			const description = document.getElementById('file-description').value || undefined;
-			fullFileName = { fileName, description };
-			// filesId = await uploadFileWithWorkingGroupRequestAnswer(_id, mailId, answerId, {
-			// 	description,
-			// 	fileName,
-			// 	file,
-			// });
+		const upload = async () => {
+			await uploadFileWithWorkingGroupRequestAnswer(_id, mailId, answerId, {
+				description: '',
+				fileName: file.name,
+				file: file.file,
+			});
 			uploadNextFile();
-		}));
+		};
+		upload();
 	};
 
 	uploadNextFile();
-	return fullFileName;
 };
 
 export const fileUploadToWorkingGroup = async (files, isWorkingGroupMeeting, { _id }) => {

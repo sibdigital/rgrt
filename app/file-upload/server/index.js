@@ -5,6 +5,7 @@ import './lib/requests';
 import './config/_configUploadStorage';
 import './methods/sendFileMessage';
 import './methods/getS3FileUrl';
+import './methods/sendFileWorkingGroupRequestAnswer';
 import './startup/settings';
 
 export {

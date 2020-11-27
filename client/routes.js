@@ -237,7 +237,7 @@ FlowRouter.route('/working-groups-requests/:context?/:id?', {
 	}],
 });
 
-FlowRouter.route('/working-groups-request/:id/:context?', {
+FlowRouter.route('/working-groups-request/:id/:context?/:tab?', {
 	name: 'working-groups-request',
 	action: () => {
 		renderRouteComponent(() => import('../app/working-group/client/views/requests/request'), { template: 'main', region: 'center' });

@@ -7,17 +7,17 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { createWorkingGroupRequestMessageData, validateWorkingGroupRequestMessageData } from '../lib';
 import VerticalBar from '../../../../../client/components/basic/VerticalBar';
 
-export function AddMail({ goToNew, close, onChange, requestId, ...props }) {
+export function AddMail({ goToNew, close, onChange, requestId, data, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const [description, setDescription] = useState('');
-	const [number, setNumber] = useState('');
+	const [description, setDescription] = useState(data?.description ?? '');
+	const [number, setNumber] = useState(data?.number ?? '');
 
 	const insertOrUpdateWorkingGroupRequestMail = useMethod('insertOrUpdateWorkingGroupRequestMail');
 
 	const saveAction = useCallback(async (description, number) => {
-		const messageData = createWorkingGroupRequestMessageData(description, number);
+		const messageData = createWorkingGroupRequestMessageData(description, number, data);
 		const validation = validateWorkingGroupRequestMessageData(messageData);
 		if (validation.length === 0) {
 			const result = await insertOrUpdateWorkingGroupRequestMail(requestId, messageData);
@@ -29,7 +29,7 @@ export function AddMail({ goToNew, close, onChange, requestId, ...props }) {
 	const handleSave = useCallback(async () => {
 		try {
 			const result = await saveAction(description, number);
-			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
+			dispatchToastMessage({ type: 'success', message: !data ? t('Working_group_request_mail_added_successfully') : t('Working_group_request_mail_edited_successfully') });
 			goToNew(result)();
 			onChange();
 		} catch (error) {

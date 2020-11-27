@@ -13,10 +13,6 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field workingGroupRequestAnswerData is required', { method: 'addWorkingGroupRequestAnswer', field: 'workingGroupRequestAnswerData' });
 		}
 
-		if (!workingGroupRequestAnswerData.document) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field document is required', { method: 'addWorkingGroupRequestAnswer', field: 'document' });
-		}
-
 		if (!s.trim(workingGroupRequestAnswerData.phone)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field phone is required', { method: 'addWorkingGroupRequestAnswer', field: 'phone' });
 		}

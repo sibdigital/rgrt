@@ -18,21 +18,17 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field number is required', { method: 'insertOrUpdateWorkingGroupRequestMessage', field: 'number' });
 		}
 
-		const createWorkingGroupRequestMail = {
-			description: workingGroupRequestMailData.description,
-			number: workingGroupRequestMailData.number,
-			ts: new Date(),
-			answers: [],
-		};
-		// if (!workingGroupRequestData.number) {
-		// 	const inviteLink = new Date().getTime().toString().substr(0, 9);
-		//
-		//
-		// 	const _id = WorkingGroupsRequests.create(createWorkingGroupRequest);
-		//
-		// 	return { _id, ts: createWorkingGroupRequest.ts };
-		// }
-		createWorkingGroupRequestMail._id = WorkingGroupsRequests.createWorkingGroupRequestMail(requestId, createWorkingGroupRequestMail);
-		return createWorkingGroupRequestMail;
+		if (!workingGroupRequestMailData._id) {
+			const createWorkingGroupRequestMail = {
+				description: workingGroupRequestMailData.description,
+				number: workingGroupRequestMailData.number,
+				ts: new Date(),
+				answers: [],
+			};
+			createWorkingGroupRequestMail._id = WorkingGroupsRequests.createWorkingGroupRequestMail(requestId, createWorkingGroupRequestMail);
+			return createWorkingGroupRequestMail;
+		}
+		WorkingGroupsRequests.updateWorkingGroupRequestMail(requestId, workingGroupRequestMailData);
+		return workingGroupRequestMailData;
 	},
 });

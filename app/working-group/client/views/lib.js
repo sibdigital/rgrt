@@ -94,6 +94,9 @@ export function createWorkingGroupRequestMessageData(description, number, previo
 
 	if (previousData) {
 		workingGroupRequestData._id = previousData._id;
+		workingGroupRequestData.ts = previousData.ts;
+		workingGroupRequestData.inum = previousData.inum;
+		workingGroupRequestData.answers = previousData.answers;
 	}
 
 	workingGroupRequestData.description = description;

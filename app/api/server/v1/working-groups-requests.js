@@ -95,6 +95,9 @@ API.v1.addRoute('working-groups-requests.upload/:id/:mailId/:answerId', { authRe
 			const uploadedFile = fileStore.insertSync(details, file.fileBuffer);
 
 			uploadedFile.description = fields.description;
+
+			Meteor.call('sendFileWorkingGroupRequestAnswer', this.urlParams.id, this.urlParams.mailId, this.urlParams.answerId, uploadedFile);
+
 			return uploadedFile;
 		});
 		return API.v1.success({ _id: fileData._id });

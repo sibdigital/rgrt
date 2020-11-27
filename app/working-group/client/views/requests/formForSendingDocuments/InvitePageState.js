@@ -45,7 +45,7 @@ const InvitePageContext = createContext({
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ text, itemsPerPage, current }, [ column, direction ]) => useMemo(() => ({
+const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMemo(() => ({
 	//query: JSON.stringify({ _id: { $regex: text || '', $options: 'i' } }),
 	//fields: JSON.stringify({ sections: 1, num: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
