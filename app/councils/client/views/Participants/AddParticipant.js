@@ -1,41 +1,30 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-	Box,
-	Button,
-	ButtonGroup,
-	Icon,
-	TextInput,
-	Tile,
-	Scrollable,
-	Margins,
-	Field,
-	CheckBox, Table, Label,
-} from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Field, Table, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
-import { css } from '@rocket.chat/css-in-js';
+
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
 
-const clickable = css`
-		cursor: pointer;
-		// border-bottom: 2px solid #F2F3F5 !important;
-		&:hover,
-		&:focus {
-			background: #F7F8FA;
-		}
-	`;
-
-const SearchByText = ({ setParams, ...props }) => {
+const SearchByText = ({ setParams, usersData, setUsersData, ...props }) => {
 	const t = useTranslation();
 	const [text, setText] = useState('');
 	const handleChange = useCallback((event) => setText(event.currentTarget.value), []);
 
 	useEffect(() => {
-		setParams({ text });
-	}, [setParams, text]);
+		const regExp = new RegExp('^'.concat(text), 'i');
+		try {
+			setUsersData(usersData.filter((user) => (user.name && user.name.match(regExp))
+				|| (user.surname && user.surname.match(regExp))
+				|| (user.username && user.username.match(regExp))
+				|| text.length === 0));
+		} catch (e) {
+			setUsersData(usersData);
+			console.log(e);
+		}
+	}, [usersData, setUsersData, text]);
 
 	return <Box mbe='x16' is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} display='flex' flexDirection='column' {...props}>
 		<TextInput flexShrink={0} placeholder={t('Search_Users')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
@@ -65,7 +54,7 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 export function AddParticipant({ councilId, onChange, close, users, invitedUsers, setInvitedUsers, onNewParticipant, onCreateParticipantId }) {
 	let form = {};
 	if (councilId) {
-		form = <AddParticipantWithData councilId={councilId} onChange={onChange} close={close} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} onCreateParticipantId={onCreateParticipantId}/>;
+		form = <AddParticipantWithData councilId={councilId} onChange={onChange} close={close} users={users} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} onCreateParticipantId={onCreateParticipantId}/>;
 	} else {
 		form = <AddParticipantWithoutData onChange={onChange} close={close} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} setInvitedUsers={setInvitedUsers} users={users} onCreateParticipantId={onCreateParticipantId}/>;
 	}
@@ -80,10 +69,17 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [countSelectedUsers, setCountSelectedUsers] = useState(0);
 	const [usersIdToAdd, setUsersIdToAdd] = useState([]);
+	const [findUsers, setFindUsers] = useState([]);
 
-	const usersWithoutCurrentCouncil = users ? users.filter((user) =>
-		invitedUsers.findIndex((invitedUser) => invitedUser === user._id) < 0)
-		: [];
+	useEffect(() => {
+		if (users) {
+			setFindUsers(users.filter((user) => invitedUsers.findIndex((invitedUser) => invitedUser === user._id) < 0));
+		}
+	}, [users, invitedUsers]);
+
+	// const usersWithoutCurrentCouncil = users ? users.filter((user) =>
+	// 	invitedUsers.findIndex((invitedUser) => invitedUser === user._id) < 0)
+	// 	: [];
 
 	const handleSave = useCallback(async () => {
 		try {
@@ -132,8 +128,8 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 				</Button>
 			</ButtonGroup>
 		</Field>}
-		{!onCreateParticipantId && <SearchByText setParams={ setParams }/>}
-		{ users && !users.length && !onCreateParticipantId
+		{!onCreateParticipantId && <SearchByText setParams={ setParams } usersData={users} setUsersData={setFindUsers}/>}
+		{ findUsers && !findUsers.length && !onCreateParticipantId
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
 					{ t('No_data_found') }
@@ -144,13 +140,13 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 				</Button> }
 			</>
 			: <>
-				<UsersTable invitedUsers={ usersWithoutCurrentCouncil } usersIdToAdd={ usersIdToAdd } handleAddUser={ onAddClick }/>
+				<UsersTable invitedUsers={ findUsers } usersIdToAdd={ usersIdToAdd } handleAddUser={ onAddClick }/>
 			</>
 		}
 	</>;
 }
 
-function AddParticipantWithData({ councilId, onChange, close, invitedUsers, onNewParticipant, onCreateParticipantId }) {
+function AddParticipantWithData({ councilId, onChange, close, users, invitedUsers, onNewParticipant, onCreateParticipantId }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -158,6 +154,7 @@ function AddParticipantWithData({ councilId, onChange, close, invitedUsers, onNe
 	const [sort, setSort] = useState(['surname', 'asc']);
 	const [countSelectedUsers, setCountSelectedUsers] = useState(0);
 	const [usersIdToAdd, setUsersIdToAdd] = useState([]);
+	const [findUsers, setFindUsers] = useState([]);
 	const addUsersToCouncil = useMethod('addUsersToCouncil');
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -165,11 +162,12 @@ function AddParticipantWithData({ councilId, onChange, close, invitedUsers, onNe
 	const query = useQuery(debouncedParams, debouncedSort);
 
 	const data = useEndpointData('users.list', query) || { users: [] };
-	//const invitedUsersData = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
 
-	const usersWithoutCurrentCouncil = data.users ? data.users.filter((user) =>
-		invitedUsers.findIndex((invitedUser) => invitedUser === user._id) < 0)
-		: [];
+	useEffect(() => {
+		if (data.users) {
+			setFindUsers(invitedUsers && invitedUsers.length > 0 ? data.users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers === user._id) < 0) : data.users);
+		}
+	}, [data, invitedUsers]);
 
 	const onAddUserCancelClick = () => {
 		close();
@@ -226,8 +224,8 @@ function AddParticipantWithData({ councilId, onChange, close, invitedUsers, onNe
 				</Button>
 			</ButtonGroup>
 		</Field>}
-		{!onCreateParticipantId && <SearchByText setParams={ setParams }/>}
-		{ data.users && !data.users.length && !onCreateParticipantId
+		{!onCreateParticipantId && <SearchByText setParams={ setParams } usersData={data.users} setUsersData={setFindUsers}/>}
+		{ findUsers && !findUsers.length && !onCreateParticipantId
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
 					{ t('No_data_found') }
@@ -238,7 +236,7 @@ function AddParticipantWithData({ councilId, onChange, close, invitedUsers, onNe
 				</Button> }
 			</>
 			: <>
-				<UsersTable invitedUsers={ usersWithoutCurrentCouncil } usersIdToAdd={ usersIdToAdd } handleAddUser={ onAddClick }/>
+				<UsersTable invitedUsers={ findUsers } usersIdToAdd={ usersIdToAdd } handleAddUser={ onAddClick }/>
 			</>
 		}
 	</>;
@@ -263,7 +261,7 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	const styleTableRow = { wordWrap: 'break-word' };
 
 	const getBackgroundColor = (invitedUser) => {
-		const index = invitedUsers.findIndex((user) => (
+		const index = invitedUsers.findIndex((user) =>
 			user.name === invitedUser.name
 			&& user.surname === invitedUser.surname
 			&& user.patronymic === invitedUser.patronymic
@@ -272,8 +270,7 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 			&& user.position === invitedUser.position
 			&& user.phone === invitedUser.phone
 			&& user.emails === invitedUser.emails
-			&& user.ts === invitedUser.ts
-		));
+			&& user.ts === invitedUser.ts);
 		if (usersIdToAdd && usersIdToAdd.findIndex((userId) => invitedUser._id === userId) > -1) {
 			return 'var(--list-selected-element-background-color)';
 		}

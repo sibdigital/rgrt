@@ -18,14 +18,23 @@ const clickable = css`
 		}
 	`;
 
-const SearchByText = ({ setParams, ...props }) => {
+const SearchByText = ({ setParams, usersData, setUsersData, ...props }) => {
 	const t = useTranslation();
 	const [text, setText] = useState('');
 	const handleChange = useCallback((event) => setText(event.currentTarget.value), []);
 
 	useEffect(() => {
-		setParams({ text });
-	}, [setParams, text]);
+		const regExp = new RegExp('^'.concat(text), 'i');
+		try {
+			setUsersData(usersData.filter((user) => (user.name && user.name.match(regExp))
+				|| (user.surname && user.surname.match(regExp))
+				|| (user.username && user.username.match(regExp))
+				|| text.length === 0));
+		} catch (e) {
+			setUsersData(usersData);
+			console.log(e);
+		}
+	}, [setUsersData, text]);
 
 	return <Box mbe='x16' is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} display='flex' flexDirection='column' {...props}>
 		<TextInput flexShrink={0} placeholder={t('Search_Users')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
@@ -35,8 +44,7 @@ const SearchByText = ({ setParams, ...props }) => {
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	fields: JSON.stringify({ name: 1, username: 1, emails: 1,
-		surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	query: JSON.stringify({
 		$or: [
 			{ 'emails.address': { $regex: text || '', $options: 'i' } },
@@ -45,8 +53,8 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 			{ surname: { $regex: text || '', $options: 'i' } },
 		],
 		$and: [
-			{ type: { $ne: 'bot' } }
-		]
+			{ type: { $ne: 'bot' } },
+		],
 	}),
 	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
@@ -54,18 +62,25 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 }), [text, itemsPerPage, current, column, direction]);
 
 export function AddParticipant({ protocolId, close, onCreateParticipant }) {
-	console.log('AddParticipant')
+	console.log('AddParticipant');
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
+	const [findUsers, setFindUsers] = useState([]);
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 	const query = useQuery(debouncedParams, debouncedSort);
 
-	const data = useEndpointData('users.list', query) || { users: []};
+	const data = useEndpointData('users.list', query) || { users: [] };
+
+	useEffect(() => {
+		if (data.users) {
+			setFindUsers(data.users);
+		}
+	}, [data]);
 
 	const insertOrUpdateSection = useMethod('addParticipantToProtocol');
 
@@ -94,26 +109,26 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 	</Box>;
 
 	return <VerticalBar.ScrollableContent>
-		<SearchByText setParams={setParams}/>
-		{data.users && !data.users.length
+		<SearchByText setParams={ setParams } usersData={data.users} setUsersData={setFindUsers}/>
+		{findUsers && !findUsers.length
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
 					{t('No_data_found')}
 				</Tile>
 				{params.text !== '' && <Button
-						mbe='x8' primary onClick={onCreateParticipant('create-participant')} aria-label={t('New')}>
-						{t('Participant_Create')}
-					</Button>
+					mbe='x8' primary onClick={onCreateParticipant('create-participant')} aria-label={t('New')}>
+					{t('Participant_Create')}
+				</Button>
 				}
 			</>
 			: <>
 				<Scrollable>
-						<Box mb='x8' flexGrow={1}>
-							{data
-								? data.users.map((props, index) => <User key={props._id || index} { ...props}/>)
-								: <></>
-							}
-						</Box>
+					<Box mb='x8' flexGrow={1}>
+						{data
+							? findUsers.map((props, index) => <User key={props._id || index} { ...props}/>)
+							: <></>
+						}
+					</Box>
 				</Scrollable>
 				<ButtonGroup stretch w='full'>
 					<Button mie='x4' onClick={close('participants')}>{t('Cancel')}</Button>
