@@ -1,10 +1,11 @@
-import { API } from '../api';
-import { findWorkingGroups, findOneWorkingGroup, findWorkingGroup } from '../lib/working-groups';
-import { Meteor } from "meteor/meteor";
-import { FileUpload } from '../../../file-upload';
+import { Meteor } from 'meteor/meteor';
 import Busboy from 'busboy';
 
-API.v1.addRoute('working-groups.list', { authRequired: true }, {
+import { API } from '../api';
+import { findWorkingGroups, findOneWorkingGroup, findWorkingGroup } from '../lib/working-groups';
+import { FileUpload } from '../../../file-upload';
+
+API.v1.addRoute('working-groups.list', { authRequired: false }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();

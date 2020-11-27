@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { Box, Button, Field } from '@rocket.chat/fuselage';
+
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useForm } from '../../../../../client/hooks/useForm';
 import { useEndpointAction } from '../../../../../client/hooks/useEndpointAction';
 import ParticipantForm from './ParticipantForm';
 
-export function CreateParticipant({ goTo, close, ...props }) {
+export function CreateParticipant({ goTo, close, workingGroupOptions, ...props }) {
 	const t = useTranslation();
 
 	const {
@@ -46,5 +46,5 @@ export function CreateParticipant({ goTo, close, ...props }) {
 		</Field.Row>
 	</Field>, [close, t, handleSave]);
 
-	return <ParticipantForm formValues={values} formHandlers={handlers} append={append} {...props}/>;
+	return <ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} append={append} {...props}/>;
 }

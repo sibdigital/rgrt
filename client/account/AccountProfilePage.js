@@ -75,6 +75,7 @@ const AccountProfilePage = () => {
 		query: JSON.stringify({ _id: userId }),
 	}), [userId]);
 	const data = useEndpointData('users.getOne', query) || { result: [] };
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
 	const [canSave, setCanSave] = useState(true);
 	const setModal = useSetModal();
@@ -323,7 +324,7 @@ const AccountProfilePage = () => {
 		</Page.Header>
 		<Page.ScrollableContentWithShadow>
 			<Box maxWidth='600px' w='full' alignSelf='center'>
-				<AccountProfileForm values={values} data={data} handlers={handlers} user={user} settings={settings} onSaveStateChange={setCanSave}/>
+				<AccountProfileForm values={values} data={data} handlers={handlers} user={user} workingGroups={workingGroups} settings={settings} onSaveStateChange={setCanSave}/>
 				<ButtonGroup stretch mb='x12'>
 					<Button onClick={handleLogoutOtherLocations} flexGrow={0} disabled={loggingOut}>
 						{t('Logout_Others')}

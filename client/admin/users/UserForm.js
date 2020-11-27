@@ -18,7 +18,7 @@ import { isEmail } from '../../../app/utils/lib/isEmail.js';
 import VerticalBar from '../../components/basic/VerticalBar';
 import CustomFieldsForm from '../../components/CustomFieldsForm';
 
-export default function UserForm({ formValues, formHandlers, availableRoles, append, prepend, ...props }) {
+export default function UserForm({ formValues, formHandlers, availableRoles, workingGroups, append, prepend, ...props }) {
 	const t = useTranslation();
 	const [hasCustomFields, setHasCustomFields] = useState(false);
 
@@ -69,13 +69,21 @@ export default function UserForm({ formValues, formHandlers, availableRoles, app
 	} = formHandlers;
 
 	const onLoadCustomFields = useCallback((hasCustomFields) => setHasCustomFields(hasCustomFields), []);
+	console.log(workingGroups);
 
-	const workingGroupOptions = useMemo(() => [
-		['Не выбрано', t('Not_chosen')],
-		['Члены рабочей группы', 'Члены рабочей группы'],
-		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
-		['Иные участники', 'Иные участники'],
-	], [t]);
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups?.length > 0) {
+			return res.concat(workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+	// const workingGroupOptions = useMemo(() => [
+	// 	['Не выбрано', t('Not_chosen')],
+	// 	['Члены рабочей группы', 'Члены рабочей группы'],
+	// 	['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+	// 	['Иные участники', 'Иные участники'],
+	// ], [t]);
 
 	return <VerticalBar.ScrollableContent is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} { ...props }>
 		<FieldGroup>

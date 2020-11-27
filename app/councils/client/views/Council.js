@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal } from '@rocket.chat/fuselage';
+import moment from 'moment';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -8,7 +9,6 @@ import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../settings/client';
-import moment from 'moment';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { Participants } from './Participants/Participants';
@@ -63,6 +63,7 @@ export function CouncilPage() {
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [context, setContext] = useState('participants');
 	const [cache, setCache] = useState();
+	const [users, setUsers] = useState([]);
 
 	const onChange = () => { console.log('onChange'); setCache(new Date()); };
 
@@ -71,11 +72,10 @@ export function CouncilPage() {
 	}), [councilId]);
 
 	const data = useEndpointData('councils.findOne', query) || { result: [] };
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
 	const invitedUsers = data.invitedUsers || [];
 
-	console.log(data);
-	console.log(invitedUsers);
 	const setModal = useSetModal();
 
 	const deleteCouncil = useMethod('deleteCouncil');
@@ -150,6 +150,14 @@ export function CouncilPage() {
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups && workingGroups.workingGroups?.length > 0) {
+			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -202,8 +210,8 @@ export function CouncilPage() {
 					</Field.Row>
 				</Field>}
 				{context === 'participants' && <Participants councilId={councilId} onChange={onChange}/>}
-				{context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} />}
+				{context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
 				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
 			</Page.Content>
 		</Page>

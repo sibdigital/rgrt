@@ -37,6 +37,7 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 }), [text, itemsPerPage, current, column, direction]);
 
 export function AddCouncilPage() {
+	const t = useTranslation();
 	const [cache, setCache] = useState();
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
@@ -46,8 +47,8 @@ export function AddCouncilPage() {
 	const debouncedSort = useDebouncedValue(sort, 500);
 	const query = useQuery(debouncedParams, debouncedSort);
 
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 	const data = useEndpointData('users.list', query) || { users: [] };
-
 	useEffect(() => {
 		if (data.users) {
 			setUsers(data.users);
@@ -58,14 +59,22 @@ export function AddCouncilPage() {
 		setCache(new Date());
 	}, [data]);
 
-	return <AddCouncilWithNewData users={users} setUsers={setUsers} onChange={onChange}/>;
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups && workingGroups.workingGroups?.length > 0) {
+			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+
+	return <AddCouncilWithNewData users={users} setUsers={setUsers} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
 }
 
 AddCouncilPage.displayName = 'AddCouncilPage';
 
 export default AddCouncilPage;
 
-function AddCouncilWithNewData({ users, setUsers, onChange }) {
+function AddCouncilWithNewData({ users, setUsers, onChange, workingGroupOptions }) {
 	const t = useTranslation();
 
 	const [context, setContext] = useState('participants');
@@ -169,7 +178,7 @@ function AddCouncilWithNewData({ users, setUsers, onChange }) {
 				</Field>}
 				{context === 'participants' && <Participants onChange={onChange} context={'new'} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
 				{context === 'addParticipants' && <AddParticipant onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} users={users} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} />}
+				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions} />}
 			</Page.Content>
 		</Page>
 	</Page>;

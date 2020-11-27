@@ -1,18 +1,16 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
 	Field,
 	TextInput,
 	Icon,
-	FieldGroup,
 	Scrollable,
-	Select, Margins, Box, ButtonGroup, Button, CheckBox,
+	Select,
 } from '@rocket.chat/fuselage';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { isEmail } from '../../../../utils/lib/isEmail.js';
-import VerticalBar from '../../../../../client/components/basic/VerticalBar';
 
-export default function ParticipantForm({ formValues, formHandlers, availableRoles, append, ...props }) {
+export default function ParticipantForm({ formValues, formHandlers, workingGroupOptions, availableRoles, append, ...props }) {
 	const t = useTranslation();
 
 	const {
@@ -37,12 +35,16 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 		handleWorkingGroup,
 	} = formHandlers;
 
-	const workingGroupOptions = useMemo(() => [
-		['Не выбрано', t('Not_chosen')],
-		['Члены рабочей группы', 'Члены рабочей группы'],
-		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
-		['Иные участники', 'Иные участники'],
-	], [t]);
+	// const workingGroupOptions = useMemo(() => {
+	// 	const res = [[null, t('Not_chosen')]];
+	// 	return res.concat(workingGroups?.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+	// }, [workingGroups]);
+	// const workingGroupOptions = useMemo(() => [
+	// 	['Не выбрано', t('Not_chosen')],
+	// 	['Члены рабочей группы', 'Члены рабочей группы'],
+	// 	['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+	// 	['Иные участники', 'Иные участники'],
+	// ], [t]);
 
 	return <Scrollable is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} { ...props }>
 		<Field mb='x16'>

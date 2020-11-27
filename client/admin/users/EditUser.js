@@ -15,16 +15,17 @@ export function EditUserWithData({ uid, ...props }) {
 	const t = useTranslation();
 	const { data: roleData, state: roleState, error: roleError } = useEndpointDataExperimental('roles.list', '') || {};
 	const { data, state, error } = useEndpointDataExperimental('users.info', useMemo(() => ({ userId: uid }), [uid]));
+	const { data: workingGroupsData, state: workingGroupState, error: workingGroupError } = useEndpointDataExperimental('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
-	if ([state, roleState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, roleState, workingGroupState].includes(ENDPOINT_STATES.LOADING)) {
 		return <FormSkeleton/>;
 	}
 
-	if (error || roleError) {
+	if (error || roleError || workingGroupError) {
 		return <Callout m='x16' type='danger'>{t('User_not_found')}</Callout>;
 	}
 
-	return <EditUser data={data.user} roles={roleData.roles} {...props}/>;
+	return <EditUser data={data.user} roles={roleData.roles} workingGroups={workingGroupsData.workingGroups} {...props}/>;
 }
 
 const getInitialValue = (data) => ({
@@ -49,7 +50,7 @@ const getInitialValue = (data) => ({
 	statusText: data.statusText ?? '',
 });
 
-export function EditUser({ data, roles, ...props }) {
+export function EditUser({ data, roles, workingGroups, ...props }) {
 	const t = useTranslation();
 
 	const [avatarObj, setAvatarObj] = useState();
@@ -122,5 +123,5 @@ export function EditUser({ data, roles, ...props }) {
 		</Field.Row>
 	</Field>, [handleSave, canSaveOrReset, reset, t]);
 
-	return <UserForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} prepend={prepend} append={append} {...props}/>;
+	return <UserForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} workingGroups={workingGroups} prepend={prepend} append={append} {...props}/>;
 }

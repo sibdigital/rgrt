@@ -13,19 +13,17 @@ import {
 	Modal,
 } from '@rocket.chat/fuselage';
 import ru from 'date-fns/locale/ru';
-
 import { registerLocale } from 'react-datepicker';
-registerLocale('ru', ru);
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
-import { validate, createWorkingGroupData } from './lib';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { useEndpointData } from '/client/hooks/useEndpointData';
+import { validate, createWorkingGroupData } from './lib';
 
+registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
 const DeleteWarningModal = ({ onDelete, onCancel, ...props }) => {
@@ -67,7 +65,7 @@ const SuccessModal = ({ onClose, ...props }) => {
 	</Modal>;
 };
 
-export function EditWorkingGroup({ _id, cache, onChange, ...props }) {
+export function EditWorkingGroup({ _id, workingGroupOptions, cache, onChange, ...props }) {
 	const queryUser = useMemo(() => ({
 		query: JSON.stringify({ _id }),
 	}), [_id, cache]);
@@ -94,10 +92,10 @@ export function EditWorkingGroup({ _id, cache, onChange, ...props }) {
 		return <Box fontScale='h1' pb='x20'>{error}</Box>;
 	}
 
-	return <EditWorkingGroupWithData workingGroupUser={data.users[0]} onChange={onChange} {...props}/>;
+	return <EditWorkingGroupWithData workingGroupUser={data.users[0]} workingGroupOptions={workingGroupOptions} onChange={onChange} {...props}/>;
 }
 
-function EditWorkingGroupWithData({ close, onChange, workingGroupUser, ...props }) {
+function EditWorkingGroupWithData({ close, workingGroupOptions, onChange, workingGroupUser, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -109,7 +107,7 @@ function EditWorkingGroupWithData({ close, onChange, workingGroupUser, ...props 
 		patronymic: previousPatronymic,
 		position: previousPosition,
 		phone: previousPhone,
-		email: previousEmail
+		email: previousEmail,
 	} = workingGroupUser || {};
 	const previousWorkingGroupUser = workingGroupUser || {};
 
@@ -224,12 +222,12 @@ function EditWorkingGroupWithData({ close, onChange, workingGroupUser, ...props 
 
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
-	const workingGroupOptions = useMemo(() => [
-		['Не выбрано', t('Not_chosen')],
-		['Члены рабочей группы', 'Члены рабочей группы'],
-		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
-		['Иные участники', 'Иные участники'],
-	], [t]);
+	// const workingGroupOptions = useMemo(() => [
+	// 	['Не выбрано', t('Not_chosen')],
+	// 	['Члены рабочей группы', 'Члены рабочей группы'],
+	// 	['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+	// 	['Иные участники', 'Иные участники'],
+	// ], [t]);
 
 	const getShortFio = (surname, name, patronymic) => [surname, name.charAt(0).toUpperCase(), patronymic ? patronymic.charAt(0).toUpperCase() : ''].join(' ');
 

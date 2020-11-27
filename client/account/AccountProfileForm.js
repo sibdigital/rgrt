@@ -13,7 +13,7 @@ import UserStatusMenu from '../components/basic/userStatus/UserStatusMenu';
 
 const STATUS_TEXT_MAX_LENGTH = 120;
 
-export default function AccountProfileForm({ values, handlers, user, data, settings, onSaveStateChange, ...props }) {
+export default function AccountProfileForm({ values, handlers, user, workingGroups, data, settings, onSaveStateChange, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -156,12 +156,19 @@ export default function AccountProfileForm({ values, handlers, user, data, setti
 		!!statusTextError,
 	].filter(Boolean);
 
-	const workingGroupOptions = useMemo(() => [
-		['Не выбрано', t('Not_chosen')],
-		['Члены рабочей группы', 'Члены рабочей группы'],
-		['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
-		['Иные участники', 'Иные участники'],
-	], [t]);
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups?.length > 0) {
+			return res.concat(workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+	// const workingGroupOptions = useMemo(() => [
+	// 	['Не выбрано', t('Not_chosen')],
+	// 	['Члены рабочей группы', 'Члены рабочей группы'],
+	// 	['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
+	// 	['Иные участники', 'Иные участники'],
+	// ], [t]);
 
 	useEffect(() => {
 		onSaveStateChange(canSave);

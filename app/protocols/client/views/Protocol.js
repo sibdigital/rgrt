@@ -14,9 +14,9 @@ import { AddSection } from './AddSection';
 import { AddItem } from './AddItem';
 import { EditSection } from './EditSection';
 import { EditItem } from './EditItem';
-import { Participants } from '../views/participants/Participants';
-import { AddParticipant } from '../views/participants/AddParticipant';
-import { CreateParticipant } from '../views/participants/CreateParticipant';
+import { Participants } from './participants/Participants';
+import { AddParticipant } from './participants/AddParticipant';
+import { CreateParticipant } from './participants/CreateParticipant';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
@@ -78,6 +78,7 @@ export function ProtocolPage() {
 	}), [protocolId, cache]);
 
 	const data = useEndpointData('protocols.findOne', query) || {};
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
 	const title = t('Protocol').concat(' ').concat(data.num).concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d));
 
@@ -272,6 +273,14 @@ export function ProtocolPage() {
 		window.history.back();
 	};
 
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups && workingGroups.workingGroups?.length > 0) {
+			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -320,7 +329,7 @@ export function ProtocolPage() {
 			{context === 'edit-item' && <EditItem protocolId={protocolId} sectionId={sectionId} _id={itemId} close={close} onChange={onChange} cache={cache}/>}
 			{context === 'participants' && <Participants protocolId={protocolId} onAddParticipantClick={onAddParticipantClick} close={close}/>}
 			{context === 'add-participant' && <AddParticipant protocolId={protocolId} close={onParticipantsClick} onCreateParticipant={onAddParticipantClick}/>}
-			{context === 'create-participant' && <CreateParticipant goTo={onParticipantsClick} close={onParticipantsClick}/>}
+			{context === 'create-participant' && <CreateParticipant goTo={onParticipantsClick} close={onParticipantsClick} workingGroupOptions={workingGroupOptions}/>}
 		</VerticalBar>}
 	</Page>;
 }

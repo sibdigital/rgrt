@@ -1,31 +1,17 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import {
-	Box,
-	Button,
-	ButtonGroup,
-	Field,
-	Icon,
-	TextAreaInput,
-	TextInput,
-	Modal, Table, Label, Margins, CheckBox,
-} from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, Icon, TextAreaInput, TextInput, Modal, Label } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
+import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
-import { validate, createCouncilData } from './lib';
-
-import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-
-import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
-
-import { GenericTable, Th } from '../../../../client/components/GenericTable';
-import Page from '../../../../client/components/basic/Page';
+import { validate, createCouncilData } from './lib';
 import { AddParticipant } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
 import { Participants } from './Participants/Participants';
@@ -74,6 +60,7 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 };
 
 export function EditCouncilPage() {
+	const t = useTranslation();
 	const context = useRouteParameter('context');
 	const councilId = useRouteParameter('id');
 
@@ -82,11 +69,20 @@ export function EditCouncilPage() {
 	}), [councilId]);
 
 	const { data } = useEndpointDataExperimental('councils.findOne', query) || { result: [] };
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 	const [cache, setCache] = useState();
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
 	}, []);
+
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups && workingGroups.workingGroups?.length > 0) {
+			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
 
 	if (!data) {
 		return <Box fontScale='h1' pb='x20'>{'error'}</Box>;
@@ -96,14 +92,14 @@ export function EditCouncilPage() {
 		data.invitedUsers = [];
 	}
 
-	return <EditCouncilWithNewData council={data} onChange={onChange}/>;
+	return <EditCouncilWithNewData council={data} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
 }
 
 EditCouncilPage.displayName = 'EditCouncilPage';
 
 export default EditCouncilPage;
 
-function EditCouncilWithNewData({ council, onChange }) {
+function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 	const t = useTranslation();
 
 	const { _id, d: previousDate, desc: previousDescription } = council || {};
@@ -322,7 +318,7 @@ function EditCouncilWithNewData({ council, onChange }) {
 				</Field>}
 				{context === 'participants' && <Participants councilId={_id} onChange={onChange}/>}
 				{context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} />}
+				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
 				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
 			</Page.Content>
 		</Page>

@@ -198,15 +198,16 @@ function validateUserEditing(userId, userData) {
 }
 
 function validateParticipantData(userId, userData) {
+	// eslint-disable-next-line react-hooks/rules-of-hooks
 	if (userData._id && userId !== userData._id && !hasPermission(userId, 'edit-other-user-info')) {
-		throw new Meteor.Error('error-action-not-allowed', 'Editing user is not allowed', {
+		throw new Meteor.Error('error-action-not-allowed', 'Editing_user_is_not_allowed', {
 			method: 'insertOrUpdateUser',
 			action: 'Editing_user',
 		});
 	}
 
 	if (!userData._id && !hasPermission(userId, 'create-user')) {
-		throw new Meteor.Error('error-action-not-allowed', 'Adding user is not allowed', {
+		throw new Meteor.Error('error-action-not-allowed', 'Adding_user_is_not_allowed', {
 			method: 'insertOrUpdateUser',
 			action: 'Adding_user',
 		});
@@ -220,7 +221,7 @@ function validateParticipantData(userId, userData) {
 	// }
 
 	if (!userData._id && !s.trim(userData.username)) {
-		throw new Meteor.Error('error-the-field-is-required', 'The field Username is required', {
+		throw new Meteor.Error('error-the-field-is-required', 'The_field_is_required', {
 			method: 'insertOrUpdateUser',
 			field: 'Username',
 		});

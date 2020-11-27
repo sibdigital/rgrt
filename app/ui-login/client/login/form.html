@@ -116,7 +116,7 @@
 							<option selected disabled>{{_ "Working_group_add_register"}}</option>
 							<option value="undefined">{{_ "Not_chosen"}}</option>
 							{{#each workingGroup in workingGroups}}
-								<option value={{workingGroup}}>{{workingGroup}}</option>
+								<option value={{workingGroup.title}}>{{workingGroup.title}}</option>
 							{{/each}}
 						</select>
 					</div>

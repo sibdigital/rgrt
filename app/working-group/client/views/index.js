@@ -9,7 +9,6 @@ import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterC
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-
 import { WorkingGroups } from './WorkingGroups';
 import { AddWorkingGroup } from './AddWorkingGroup';
 import { EditWorkingGroup } from './EditWorkingGroup';
@@ -39,6 +38,7 @@ export function WorkingGroupPage() {
 	const queryUser = useQueryUser(debouncedParams, debouncedSort, cache);
 
 	const data = useEndpointData('users.list', queryUser) || {};
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
 	const router = useRoute(routeName);
 
@@ -103,6 +103,14 @@ export function WorkingGroupPage() {
 		window.history.back();
 	};
 
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups && workingGroups.workingGroups?.length > 0) {
+			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -116,12 +124,6 @@ export function WorkingGroupPage() {
 			<Page.Content>
 				<Field.Row>
 					<ButtonGroup>
-						{/*<Button small aria-label={t('Pinned_files')} onClick={onPinnedFilesClick}>*/}
-						{/*	<Box is='span' fontScale='p1'>{t('Working_group_meeting_pinned_files')}</Box>*/}
-						{/*</Button>*/}
-						{/*<Button small aria-label={t('Add_User')} onClick={handleHeaderButtonClick('new')}>*/}
-						{/*	<Box is='span' fontScale='p1'>{t('Working_group_add')}</Box>*/}
-						{/*</Button>*/}
 						<Button small primary onClick={downloadWorkingGroupParticipants(data.users)} aria-label={t('Download')}>
 							<Box is='span' fontScale='p1'>{t('Download_Council_Participant_List')}</Box>
 						</Button>
@@ -137,7 +139,7 @@ export function WorkingGroupPage() {
 				{ context === 'new' && t('Working_group_add') }
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
 			<VerticalBar.Content>
-				{context === 'edit' && <EditWorkingGroup _id={id} close={close} onChange={onChange} cache={cache}/>}
+				{context === 'edit' && <EditWorkingGroup _id={id} workingGroupOptions={workingGroupOptions} close={close} onChange={onChange} cache={cache}/>}
 				{context === 'new' && <AddWorkingGroup goToNew={onEditClick} close={close} onChange={onChange}/>}
 			</VerticalBar.Content>
 		</VerticalBar>}

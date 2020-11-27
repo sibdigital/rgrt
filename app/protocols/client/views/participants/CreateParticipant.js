@@ -6,7 +6,7 @@ import { useForm } from '../../../../../client/hooks/useForm';
 import { useEndpointAction } from '../../../../../client/hooks/useEndpointAction';
 import ParticipantForm from './ParticipantForm';
 
-export function CreateParticipant({ goTo, close, ...props }) {
+export function CreateParticipant({ goTo, close, workingGroupOptions, ...props }) {
 	const t = useTranslation();
 
 	const roleData = useEndpointData('roles.list', '') || {};
@@ -50,5 +50,5 @@ export function CreateParticipant({ goTo, close, ...props }) {
 		</Field.Row>
 	</Field>, [hasUnsavedChanges, close, t, handleSave]);
 
-	return <ParticipantForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} append={append} {...props}/>;
+	return <ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} availableRoles={availableRoles} append={append} {...props}/>;
 }

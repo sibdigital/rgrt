@@ -12,7 +12,6 @@ import { APIClient } from '../../../utils/client';
 import { settings } from '../../../settings';
 import { callbacks } from '../../../callbacks';
 import { t, handleError } from '../../../utils';
-import { useEndpointData } from '/client/hooks/useEndpointData';
 
 const getLoginExample = (surname, name, patronymic) => {
 	if (!surname || !name) {
@@ -35,7 +34,7 @@ const getLoginExample = (surname, name, patronymic) => {
 		for (const kr in L) {
 			reg += kr;
 		}
-		reg = new RegExp('[' + reg + ']', 'g');
+		reg = new RegExp(['[', reg, ']'].join(''), 'g');
 		const translate = function(a) {
 			return a in L ? L[a] : a;
 		};
@@ -269,7 +268,12 @@ Template.loginForm.onCreated(function() {
 	this.loading = new ReactiveVar(false);
 	this.loginExample = new ReactiveVar('');
 	this.registerStepOneForm = new ReactiveVar({});
-	this.workingGroups = new ReactiveVar(['Члены рабочей группы', 'Представители субъектов Российской Федерации', 'Иные участники']);
+	this.workingGroups = new ReactiveVar([]);
+
+	this.autorun(async () => {
+		const { workingGroups } = await APIClient.v1.get(`working-groups.list?&query=${ JSON.stringify({ type: { $ne: 'subject' } }) }`);
+		return this.workingGroups.set(workingGroups);
+	});
 
 	Tracker.autorun(() => {
 		const Accounts_CustomFields = settings.get('Accounts_CustomFields');

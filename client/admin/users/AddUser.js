@@ -15,6 +15,7 @@ export function AddUser({ roles, ...props }) {
 	const router = useRoute('admin-users');
 
 	const roleData = useEndpointData('roles.list', '') || {};
+	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
 	const {
 		values,
@@ -72,5 +73,5 @@ export function AddUser({ roles, ...props }) {
 		</Field.Row>
 	</Field>, [hasUnsavedChanges, reset, t, handleSave]);
 
-	return <UserForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} append={append} {...props}/>;
+	return <UserForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} workingGroups={workingGroups.workingGroups} append={append} {...props}/>;
 }
