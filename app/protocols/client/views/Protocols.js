@@ -53,7 +53,7 @@ export function Protocols({
 	const renderRow = (protocol) => {
 		const { _id, d: date, num, place, ts } = protocol;
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{num}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>№ {num}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(date)}</Box></Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{place}</Box></Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{formatDateAndTime(ts)}</Table.Cell>}

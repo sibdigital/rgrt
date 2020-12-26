@@ -23,6 +23,7 @@ import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client
 import { validate, createProtocolData } from './lib';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -118,6 +119,12 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	const deleteProtocol = useMethod('deleteProtocol');
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
+	const filterNumber = (value) => {
+		if (checkNumberWithDot(value, number) !== null || value === '') {
+			setNumber(value);
+		}
+	};
+
 	const hasUnsavedChanges = useMemo(() => previousDate !== date || previousNumber !== number || previousPlace !== place,
 		[date, number, place]);
 
@@ -151,7 +158,7 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 		<Field>
 			<Field.Label>{t('Protocol_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Protocol_Number')} />
+				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Protocol_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>

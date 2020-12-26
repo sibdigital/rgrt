@@ -9,6 +9,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validate, createProtocolData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -21,6 +22,12 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 	const [place, setPlace] = useState('');
 
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
+
+	const filterNumber = (value) => {
+		if (checkNumberWithDot(value, number) !== null || value === '') {
+			setNumber(value);
+		}
+	};
 
 	const saveAction = useCallback(async (date, number, place) => {
 		const protocolData = createProtocolData(date, number, place);
@@ -51,7 +58,7 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Protocol_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Protocol_Number')} />
+				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Protocol_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>

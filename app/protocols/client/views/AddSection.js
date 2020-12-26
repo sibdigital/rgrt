@@ -9,6 +9,7 @@ import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import CKEditor from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
 export function AddSection({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -20,6 +21,12 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 	const protocolId = useRouteParameter('id');
 
 	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
+
+	const filterNumber = (value) => {
+		if (checkNumberWithDot(value, number) !== null || value === '') {
+			setNumber(value);
+		}
+	};
 
 	const saveAction = useCallback(async (number, name) => {
 		const sectionData = createSectionData(number, name);
@@ -49,7 +56,7 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Section_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Section_Number')} />
+				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Section_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>
