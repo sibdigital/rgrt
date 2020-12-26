@@ -6,6 +6,8 @@ import { Errands, Rooms, Messages } from '../../../models/server';
 import { settings } from '../../../settings/server';
 
 const createErrandMessage = (rid, mid, dsc, expired_at, initiated_by, charged_to) => Errands.createWithRoomIdMessageIdDescriptionEndDateAndUsers(rid, mid, dsc, expired_at, initiated_by, charged_to);
+const createErrandWithoutMentionInMessage = (rid, mid, dsc, expired_at, initiated_by, charged_to) => 
+	Errands.createWithDescriptionAndDataAndUsers(rid, mid, dsc, expired_at, initiated_by,charged_to)
 
 const getRoom = (rid) => {
 	const room = Rooms.findOne(rid);
@@ -40,15 +42,21 @@ const create = ({ rid, mid, errandDescription, expired_at, initiated_by, charged
 		} else {
 			rid = message.rid;
 		}
-	}
 
-	if (!rid) {
-		throw new Meteor.Error('error-invalid-arguments', { method: 'ErrandCreation' });
+		if (!rid) {
+			throw new Meteor.Error('error-invalid-arguments', { method: 'ErrandCreation' });
+		}
 	}
-
-	const p_room = Rooms.findOne(rid);
-	if (!p_room) {
-		throw new Meteor.Error('error-invalid-room', 'Invalid room', { method: 'ErrandCreation' });
+	
+	if(rid){
+		const p_room = Rooms.findOne(rid);
+		if (!p_room) {
+			throw new Meteor.Error('error-invalid-room', 'Invalid room', { method: 'ErrandCreation' });
+		}
+		var errand = createErrandMessage(rid, mid, errandDescription, expired_at, initiated_by, charged_to); //Создание поручения с привязкой к сообщению
+		mentionMessage(mid, errand._id); //Присваивание поручения к сообщению
+	}else{
+		var errand = createErrandWithoutMentionInMessage(rid, mid, errandDescription,expired_at,initiated_by, charged_to) //Создание поручения без привязки к сообщению
 	}
 
 	// Этот блок не позволяет согздавать много поручений на одном и том же сообщении
@@ -64,7 +72,7 @@ const create = ({ rid, mid, errandDescription, expired_at, initiated_by, charged
 			throw new Meteor.Error('error-errand-exists', { method: 'ErrandCreation' });
 		}
 	}*/
-	const errand = createErrandMessage(rid, mid, errandDescription, expired_at, initiated_by, charged_to);
+	
 
 
 	/* const errand = createErrandMessage('p', name, user.username, [...new Set(invitedUsers)], false, {
@@ -89,9 +97,6 @@ const create = ({ rid, mid, errandDescription, expired_at, initiated_by, charged
 		sendMessage(user, { msg: reply }, errand);
 	}*/
 
-
-	mentionMessage(mid, errand._id);
-
 	return errand;
 };
 
@@ -108,6 +113,7 @@ Meteor.methods({
 	* @param {string} reply - The reply, optional
 	*/
 	createErrand({ rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply }) {
+
 		if (!settings.get('Errand_enabled')) {
 			throw new Meteor.Error('error-action-not-allowed', 'You are not allowed to create a errand', { method: 'createErrand' });
 		}

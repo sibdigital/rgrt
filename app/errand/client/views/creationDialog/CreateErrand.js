@@ -137,21 +137,31 @@ Template.CreateErrand.events({
 
 		const chargedUsers = instance.selectedUsers.get();
 		const initiatedUsers = instance.initiatedByUsers.get();
-		const { message } = instance;
+		
+		var message;
+		if(instance == null){
+			message = null;
+		} else {
+			message = instance.message;
+		}
 
 		const reply = instance.reply.get();
 
-
-		const { rid, _id: mid } = message;
+		if(message == null) {
+			rid = "isAbsent"
+			mid = "isAbsent"
+		} else {
+			var { rid, _id: mid } = message;
+		}	
+		
 		const initiated_by = initiatedUsers[0];
 		const charged_to = chargedUsers[0];
 		const expired_at = moment(instance.expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
 
-
-		if (!rid) {
-			const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
-			return toastr.error(errorText);
-		}
+		// if (!rid) {
+		// 	const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
+		// 	return toastr.error(errorText);
+		// }
 		const result = await call('createErrand', { rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply });
 		// callback to enable tracking
 		callbacks.run('afterErrand', Meteor.user(), result);
@@ -164,7 +174,11 @@ Template.CreateErrand.events({
 });
 
 Template.CreateErrand.onRendered(function() {
-	this.find('#usersCharged').focus();
+	if(this.data.message == null){
+		this.find('#usersInitiated').focus();
+	}else{
+		this.find('#usersCharged').focus();
+	}
 	this.$('#expired_date').datepicker.dates['ru'] = {
 		days: ["Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресение"],
 		daysShort: ["Вос", "Пон", "Вто", "Сре", "Чет", "Пят", "Суб", "Вос"],
@@ -190,13 +204,19 @@ Template.CreateErrand.onRendered(function() {
 const suggestName = (msg = '') => msg.substr(0, 140);
 
 Template.CreateErrand.onCreated(function() {
-	const { message: msg } = this.data;
-	this.message = msg;
-
-	this.errandDescription = new ReactiveVar(suggestName(msg && msg.msg));
-	this.expiredDate = new ReactiveVar(new Date());
-
+	if(this.data.message != null) {
+		var { message: msg } = this.data;
+		this.message = msg;
+		this.errandDescription = new ReactiveVar(suggestName(msg && msg.msg));
+		console.log(msg.u)
+	}else{
+		this.message = "isAbsent";
+		this.errandDescription = new ReactiveVar("");
+		console.log(Meteor)
+	}
 	this.pmid = msg && msg._id;
+
+	this.expiredDate = new ReactiveVar(new Date());
 
 	this.reply = new ReactiveVar('');
 
@@ -211,7 +231,6 @@ Template.CreateErrand.onCreated(function() {
 	this.deleteLastItemUser = () => {
 		this.selectedUsers.set([]);
 	};
-
 
 	this.initiatedByUsers = new ReactiveVar([]);
 	if (msg) {

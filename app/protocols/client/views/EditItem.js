@@ -23,6 +23,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validateItemData, createItemData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -83,6 +84,12 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 	const hasUnsavedChanges = useMemo(() => previousNumber !== number || previousName !== name || previousResponsible !== responsible || previousExpireAt !== expireAt,
 		[number, name, responsible, expireAt]);
 
+	const filterNumber = (value) => {
+		if (checkNumberWithDot(value, number) !== null || value === '') {
+			setNumber(value);
+		}
+	};
+
 	const saveAction = useCallback(async (number, name, responsible, expireAt) => {
 		const itemData = createItemData(number, name, responsible, expireAt, { previousNumber, previousName, _id });
 		const validation = validateItemData(itemData);
@@ -102,7 +109,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 		<Field>
 			<Field.Label>{t('Item_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Item_Number')} />
+				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Item_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>

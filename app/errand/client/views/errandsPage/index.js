@@ -10,6 +10,7 @@ import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
 import { EditErrandContextBar } from './EditErrand';
+import {modal} from '../../../../ui-utils/client';
 
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
@@ -43,6 +44,23 @@ function renderEditModal({ onCancel, erid, onChange, ...props }) {
 			<EditErrandContextBar erid={erid} onChange={onChange} onClose={onCancel}/>
 		</Modal.Content>
 	</Modal>;
+}
+
+function renderAddErrandModal(){
+	const t = useTranslation();
+	modal.open({
+		title: t('Errand_title'),
+		modifier: 'modal',
+		content: 'CreateErrand',
+		data: {
+			onCreate() {
+				modal.close();
+			},
+		},
+		confirmOnEnter: false,
+		showConfirmButton: false,
+		showCancelButton: false,
+	});
 }
 
 function Errands({
@@ -142,25 +160,51 @@ export function ErrandPage() {
 
 	const onClick = useCallback((errand) => () => setModal(() => renderEditModal({ onCancel: cancelModal, erid: errand._id, onChange: onChange, key: 'modal-errand' })), []);
 
+	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal()),[]);
+
 	const goBack = () => {
 		window.history.back();
 	};
 
-	return <Page flexDirection='row'>
-		<Page>
-			<Page.Header>
-				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
-					<Label fontScale='h1'>{t(title)}</Label>
-				</Field>
-			</Page.Header>
-			<Page.Content>
-				<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
-			</Page.Content>
-		</Page>
-	</Page>;
+	let result;
+	if(title === 'Errands_from_me') {
+		result = <Page flexDirection='row'>
+						<Page>
+							<Page.Header>
+								<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+									<Button className='go-back-button' onClick={goBack}>
+										<Icon name='back'/>
+									</Button>
+									<Label fontScale='h1'>{t(title)}</Label>
+								</Field>
+								<Button width={'25%'} primary small aria-label={t('New')} onClick={addErrand()}>
+									{t('Add')}
+								</Button>
+							</Page.Header>
+							<Page.Content>
+								<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
+							</Page.Content>
+						</Page>
+					</Page>;
+	} else {
+		result = <Page flexDirection='row'>
+						<Page>
+							<Page.Header>
+								<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+									<Button className='go-back-button' onClick={goBack}>
+										<Icon name='back'/>
+									</Button>
+									<Label fontScale='h1'>{t(title)}</Label>
+								</Field>
+							</Page.Header>
+							<Page.Content>
+								<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
+							</Page.Content>
+						</Page>
+					</Page>;
+	}
+	
+	return result;
 }
 
 ErrandPage.displayName = 'ErrandsPage';

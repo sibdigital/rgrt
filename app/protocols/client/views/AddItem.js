@@ -12,6 +12,7 @@ import { validateItemData, createItemData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import CKEditor from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
 export function AddItem({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -26,6 +27,12 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 	const sectionId = useRouteParameter('sectionId');
 
 	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
+
+	const filterNumber = (value) => {
+		if (checkNumberWithDot(value, number) !== null || value === '') {
+			setNumber(value);
+		}
+	};
 
 	const saveAction = useCallback(async (number, name, responsible, expireAt) => {
 		const itemData = createItemData(number, name, responsible, expireAt);
@@ -57,7 +64,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 		<Field>
 			<Field.Label>{t('Item_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Item_Number')} />
+				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Item_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>

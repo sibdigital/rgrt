@@ -18,6 +18,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -67,6 +68,12 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 
 	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
 
+	const filterNumber = (value) => {
+		if (checkNumberWithDot(value, number) !== null || value === '') {
+			setNumber(value);
+		}
+	};
+
 	const hasUnsavedChanges = useMemo(() => previousNumber !== number || previousName !== name,
 		[number, name]);
 
@@ -89,7 +96,7 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 		<Field>
 			<Field.Label>{t('Section_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Section_Number')} />
+				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Section_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>
