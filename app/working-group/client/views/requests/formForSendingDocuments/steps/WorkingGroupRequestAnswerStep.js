@@ -1,5 +1,7 @@
 import { Box, Field, Margins, Select, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
 import React, { useMemo, useState } from 'react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 import { useTranslation } from '../../../../../../../client/contexts/TranslationContext';
 import { Pager } from '../../../../../../../client/views/setupWizard/Pager';
@@ -22,6 +24,10 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 	};
 	const handleChangeSelect = (field) => (val) => {
 		setNewData({ ...newData, [field]: { value: val, required: newData[field].required } });
+	};
+	const handleChangePhone = (val) => {
+		console.log(val);
+		setNewData({ ...newData, phone: { value: val, required: newData.phone.required } });
 	};
 
 	const packNewData = () => {
@@ -56,12 +62,12 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 	};
 
 	const workingGroupOptions = useMemo(() => [
-		['Другое', 'Другое'],
 		['Член рабочей группы', 'Член рабочей группы'],
 		['Федеральный орган исполнительной власти', 'Федеральный орган исполнительной власти'],
 		['Субъект Российской Федерации', 'Субъект Российской Федерации'],
 		['Организация', 'Организация'],
 		['Иные участники', 'Иные участники'],
+		['Другое', 'Другое'],
 	], []);
 	const subjectsOptions = useMemo(() => [
 		['Алтайский край', 'Алтайский край'],
@@ -88,7 +94,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 						<Field>
 							<Field.Label>{t('Working_group_request_sender_organization')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								{newData.sender.value === 'Субъект Российской Федерации' && <Select width='100%' options={subjectsOptions} onChange={handleChangeSelect('senderOrganization')} value={newData.senderOrganization.value}/>}
+								{newData.sender.value === 'Субъект Российской Федерации' && <Select width='100%' options={subjectsOptions} onChange={handleChangeSelect('senderOrganization')} value={newData.senderOrganization.value} placeholder={t('Working_group_request_sender_organization')}/>}
 								{newData.sender.value !== 'Субъект Российской Федерации'
 								&& <TextAreaInput style={{ whiteSpace: 'normal' }} value={newData.senderOrganization.value} flexGrow={1} onChange={handleChange('senderOrganization')} placeholder={t('Working_group_request_sender_organization')}/>}
 							</Field.Row>
@@ -99,9 +105,16 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 						<Field>
 							<Field.Label>{t('Phone_number')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<TextInput value={newData.phone.value} flexGrow={1} onChange={handleChange('phone')} placeholder={`${ t('Council_Contact_person_Phone_number_placeholder') }`}/>
+								<PhoneInput inputStyle={{ width: '100%', borderWidth: '0.125rem', borderRadius: '0' }} value={newData.phone.value} onChange={handleChangePhone} country={'ru'}
+									countryCodeEditable={false} placeholder={'+7 (123)-456-78-90'}/>
 							</Field.Row>
 						</Field>
+						{/*<Field>*/}
+						{/*	<Field.Label>{t('Phone_number')} <span style={ { color: 'red' } }>*</span></Field.Label>*/}
+						{/*	<Field.Row>*/}
+						{/*		<TextInput value={newData.phone.value} flexGrow={1} onChange={handleChange('phone')} placeholder={`${ t('Council_Contact_person_Phone_number_placeholder') }`}/>*/}
+						{/*	</Field.Row>*/}
+						{/*</Field>*/}
 						<Field>
 							<Field.Label>{t('Email')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
@@ -118,3 +131,6 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 }
 
 export default WorkingGroupRequestAnswerStep;
+
+
+

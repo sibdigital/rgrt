@@ -19,6 +19,7 @@ Meteor.methods({
 
 			const createWorkingGroupRequest = {
 				ts: new Date(),
+				number: workingGroupRequestData.number,
 				desc: workingGroupRequestData.desc,
 				inviteLink,
 			};

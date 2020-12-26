@@ -54,6 +54,10 @@ export function createWorkingGroupCompositionData(title, previousData) {
 export function validateWorkingGroupRequestData(workingGroupRequestData) {
 	const errors = [];
 
+	if (!workingGroupRequestData.number) {
+		errors.push('number');
+	}
+
 	if (!workingGroupRequestData.desc) {
 		errors.push('desc');
 	}
@@ -61,7 +65,7 @@ export function validateWorkingGroupRequestData(workingGroupRequestData) {
 	return errors;
 }
 
-export function createWorkingGroupRequestData(desc, previousData) {
+export function createWorkingGroupRequestData(number, desc, previousData) {
 	const workingGroupRequestData = {
 	};
 
@@ -69,6 +73,7 @@ export function createWorkingGroupRequestData(desc, previousData) {
 		workingGroupRequestData._id = previousData._id;
 	}
 
+	workingGroupRequestData.number = number;
 	workingGroupRequestData.desc = desc;
 
 	return workingGroupRequestData;

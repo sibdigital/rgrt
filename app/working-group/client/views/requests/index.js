@@ -111,11 +111,19 @@ export function WorkingGroupRequestsPage() {
 				}
 			</Page.Header>
 			<Page.Content>
-				{(context === undefined || context === 'requests') && <Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
-				{context === 'new' && <AddRequest onChange={onChange}/>}
-				{context === 'edit' && <AddRequest onChange={onChange} editData={currentRequestToEdit}/>}
+				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
 			</Page.Content>
 		</Page>
+		{(context === 'new' || context === 'edit')
+		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+			<VerticalBar.Header>
+				{ context === 'new' && t('Add') }
+				{ context === 'edit' && t('Edit') }
+				<VerticalBar.Close onClick={close}/>
+			</VerticalBar.Header>
+			{context === 'new' && <AddRequest onChange={onChange}/>}
+			{context === 'edit' && <AddRequest onChange={onChange} editData={currentRequestToEdit}/>}
+		</VerticalBar>}
 	</Page>;
 }
 
