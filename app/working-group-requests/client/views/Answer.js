@@ -1,28 +1,48 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Field, Icon, Label, Table, TextInput, TextAreaInput, Tabs, Box, Skeleton } from '@rocket.chat/fuselage';
+import {
+	Button,
+	Field,
+	Icon,
+	Label,
+	Table,
+	TextInput,
+	TextAreaInput,
+	Tabs,
+	Box,
+	Skeleton,
+} from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
-import Page from '../../../../../client/components/basic/Page';
-import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { GenericTable, Th } from '../../../../../client/components/GenericTable';
-import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
-import { useRouteParameter } from '../../../../../client/contexts/RouterContext';
-import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
+import Page from '../../../../client/components/basic/Page';
+import { useTranslation } from '../../../../client/contexts/TranslationContext';
+import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
+import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 
-export function Answer({ answer, router, requestId }) {
-	const data = {
-		documents: [],
-		ts: '',
-	};
+export function AnswerPage() {
+	const requestId = useRouteParameter('requestid');
+	const mailId = useRouteParameter('mailid');
+	const answerId = useRouteParameter('answerid');
 
-	const query = useMemo(() => ({ query: JSON.stringify({ _id: answer ? { $in: answer.documents?.map((doc) => doc._id ?? '') } : data }) }), [answer]);
+	const query = useMemo(() => ({
+		query: JSON.stringify({ _id: requestId, mailId, answerId }),
+	}), [mailId]);
 
-	const { data: files, state, error } = useEndpointDataExperimental('upload-files.list', query);
+	const data = useEndpointData('working-groups-requests.findAnswerOne', query) || { documents: [] };
+
+	const filesQuery = useMemo(() => ({ query: JSON.stringify({ _id: data ? { $in: data.documents?.map((doc) => doc._id ?? '') } : {} }) }), [data]);
+
+	const { data: files, state, error } = useEndpointDataExperimental('upload-files.list', filesQuery);
+
+	useMemo(() => console.log(files), [files]);
 
 	if (state === ENDPOINT_STATES.LOADING) {
 		return <Box w='full' pb='x24'>
 			<Skeleton mbe='x4'/>
-			<Skeleton mbe='x8' />
+			<Skeleton mbe='x8'/>
 			<Skeleton mbe='x4'/>
 			<Skeleton mbe='x8'/>
 			<Skeleton mbe='x4'/>
@@ -34,36 +54,37 @@ export function Answer({ answer, router, requestId }) {
 		return error.message;
 	}
 
-	return <AnswerWithData answer={answer ?? data} files={files.files} router={router} requestId={requestId}/>;
+	return <AnswerWithData answer={data} files={files.files} requestId={requestId} mailId={mailId} answerId={answerId}/>;
 }
 
-function AnswerWithData({ answer, files, router, requestId }) {
+AnswerPage.displayName = 'AnswerPage';
+
+export default AnswerPage;
+
+function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 	const t = useTranslation();
 
-	const tab = useRouteParameter('tab');
+	// const router = useRoute(`/working-groups-request/${ requestId }/mail/${ mailId }/answer/${ answerId }/:tab`);
+	// const tab = useRouteParameter('tab');
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [tab, setTab] = useState('info');
 
-	const handleTabClick = useCallback((tab) => () => router.push({ id: requestId, context: 'answer', tab }), [router]);
+	// const handleTabClick = useCallback((selectedTab) => () => router.push({ requestid: requestId, mailid: mailId, answerid: answerId, tab: selectedTab }), [router]);
+	// const handleTabClick = useCallback((selectedTab) => () => setTab());
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	// const goBack = () => {
+	// 	FlowRouter.go(`/working-groups-request/${ requestId }/mail/${ mailId }`);
+	// };
 
 	const goBack = () => {
 		window.history.back();
 	};
-	// const goBack = useCallback(() => {
-	// 	console.log('click');
-	// 	router.push({ id: requestId, context: 'answers' });
-	// }, [router]);
 
-	const onDownloadClick = (_id) => async (e) => {
+	const onDownloadClick = (file) => async (e) => {
 		e.preventDefault();
-		const index = files.findIndex((_file) => _file._id === _id);
-		if (index < 0) {
-			return;
-		}
-
-		const file = files[index];
 		try {
 			const filename = `${ file.name }`;
 			if (window.navigator && window.navigator.msSaveOrOpenBlob) {
@@ -90,11 +111,11 @@ function AnswerWithData({ answer, files, router, requestId }) {
 	], [mediaQuery]);
 
 	const renderRow = (document) => {
-		const { _id, title } = document;
+		const { name } = document;
 		return <Table.Row tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
+			<Table.Cell fontScale='p1' color='default'>{name}</Table.Cell>
 			<Table.Cell alignItems={'end'}>
-				<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
+				<Button onClick={onDownloadClick(document)} small aria-label={t('download')}>
 					<Icon name='download'/>
 				</Button>
 			</Table.Cell>
@@ -111,12 +132,14 @@ function AnswerWithData({ answer, files, router, requestId }) {
 			</Field>
 		</Page.Header>
 		<Tabs flexShrink={0} mbe='x8'>
-			<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Info')}</Tabs.Item>
-			<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
+			{/*<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Info')}</Tabs.Item>*/}
+			{/*<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>*/}
+			<Tabs.Item selected={tab === 'info'} onClick={() => setTab('info')}>{t('Info')}</Tabs.Item>
+			<Tabs.Item selected={tab === 'files'} onClick={() => setTab('files')}>{t('Files')}</Tabs.Item>
 		</Tabs>
 		<Page.Content>
 			{ (tab === 'info' && <InfoData answer={answer}/>)
-				|| (tab === 'files' && <GenericTable header={header} renderRow={renderRow} results={answer.documents ?? []} total={answer.documents?.length || 0} setParams={setParams} params={params}/>)
+				|| (tab === 'files' && <GenericTable header={header} renderRow={renderRow} results={files ?? []} total={files?.length || 0} setParams={setParams} params={params}/>)
 			}
 		</Page.Content>
 	</Page>;

@@ -27,3 +27,31 @@ export async function findWorkingGroupRequest(_id) {
 	const cursor = await WorkingGroupsRequests.findOne({ _id });
 	return cursor;
 }
+
+export async function findWorkingGroupRequestMailByMailId(requestId, mailId) {
+	const cursor = await WorkingGroupsRequests.findWorkingGroupRequestMailByMailId(requestId, mailId, {});
+	const mails = cursor.mails ?? [];
+
+	for (let i = 0; i < mails.length; i++) {
+		if (mails[i]._id === mailId) {
+			return mails[i];
+		}
+	}
+	return {};
+}
+
+export async function findWorkingGroupRequestMailAnswerByAnswerId(requestId, mailId, answerId) {
+	const cursor = await WorkingGroupsRequests.findOne({ _id: requestId });
+	const mails = cursor.mails ?? [];
+
+	for (let i = 0; i < mails.length; i++) {
+		if (mails[i]._id === mailId) {
+			for (let j = 0; j < mails[i].answers.length; j++) {
+				if (mails[i].answers[j]._id === answerId) {
+					return mails[i].answers[j];
+				}
+			}
+		}
+	}
+	return {};
+}

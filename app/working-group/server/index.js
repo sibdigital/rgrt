@@ -4,7 +4,3 @@ import './methods/downloadWorkingGroupParticipants';
 import './methods/deleteFileFromCompositionOfTheWorkingGroup';
 import './methods/insertOrUpdateWorkingGroupComposition';
 import './methods/deleteWorkingGroupComposition';
-import './methods/insertOrUpdateWorkingGroupRequest';
-import './methods/addWorkingGroupRequestAnswer';
-import './methods/readAnswer';
-import './methods/insertOrUpdateWorkingGroupRequestMail';

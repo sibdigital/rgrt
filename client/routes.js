@@ -113,7 +113,7 @@ FlowRouter.route('/i/:id/:step?', {
 FlowRouter.route('/d/:id/:step?', {
 	name: 'request-answer',
 	action: () => {
-		renderRouteComponent(() => import('../app/working-group/client/views/requests/formForSendingDocuments/InviteStepperRoute'));
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/formForSendingDocuments/InviteStepperRoute'));
 	},
 });
 
@@ -230,17 +230,37 @@ FlowRouter.route('/protocol/:id/:context?/:sectionId?/:itemId?', {
 FlowRouter.route('/working-groups-requests/:context?/:id?', {
 	name: 'working-groups-requests',
 	action: () => {
-		renderRouteComponent(() => import('../app/working-group/client/views/requests/index'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/index'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
 	}],
 });
 
-FlowRouter.route('/working-groups-request/:id/:context?/:tab?', {
+FlowRouter.route('/working-groups-request/:id/:context?', {
 	name: 'working-groups-request',
 	action: () => {
-		renderRouteComponent(() => import('../app/working-group/client/views/requests/request'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/request'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-groups-request/:requestid/mail/:mailid', {
+	name: 'working-groups-request-mail',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/Mail'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-groups-request/:requestid/mail/:mailid/answer/:answerid', {
+	name: 'working-groups-request-answer',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/Answer'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');

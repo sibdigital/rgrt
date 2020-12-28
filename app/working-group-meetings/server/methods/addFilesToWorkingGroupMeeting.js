@@ -4,7 +4,6 @@ import { WorkingGroupMeetings } from '../../../models';
 
 Meteor.methods({
 	addFilesToWorkingGroupMeeting(id, files) {
-		console.log('app/working-group-meetings/server/methods/addFilesToWorkingGroupMeeting');
 		if (!id) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field id is required', { method: 'addFilesToWorkingGroupMeeting', field: 'id' });
 		}

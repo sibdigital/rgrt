@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 
 import { API } from '../api';
 import { FileUpload } from '../../../file-upload';
-import { findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest } from '../lib/working-groups-requests';
+import { findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId } from '../lib/working-groups-requests';
 
 API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 	get() {
@@ -25,6 +25,20 @@ API.v1.addRoute('working-groups-requests.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findWorkingGroupRequest(query._id)));
+	},
+});
+
+API.v1.addRoute('working-groups-requests.findMailOne', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findWorkingGroupRequestMailByMailId(query._id, query.mailId)));
+	},
+});
+
+API.v1.addRoute('working-groups-requests.findAnswerOne', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findWorkingGroupRequestMailAnswerByAnswerId(query._id, query.mailId, query.answerId)));
 	},
 });
 
