@@ -10,7 +10,7 @@ import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
 import { EditErrandContextBar } from './EditErrand';
-import {modal} from '../../../../ui-utils/client';
+import { modal } from '../../../../ui-utils/client';
 
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
@@ -46,7 +46,7 @@ function renderEditModal({ onCancel, erid, onChange, ...props }) {
 	</Modal>;
 }
 
-function renderAddErrandModal(){
+function renderAddErrandModal({onChange}){
 	const t = useTranslation();
 	modal.open({
 		title: t('Errand_title'),
@@ -55,6 +55,7 @@ function renderAddErrandModal(){
 		data: {
 			onCreate() {
 				modal.close();
+				onChange()
 			},
 		},
 		confirmOnEnter: false,
@@ -160,7 +161,7 @@ export function ErrandPage() {
 
 	const onClick = useCallback((errand) => () => setModal(() => renderEditModal({ onCancel: cancelModal, erid: errand._id, onChange: onChange, key: 'modal-errand' })), []);
 
-	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal()),[]);
+	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal({onChange: onChange})),[]);
 
 	const goBack = () => {
 		window.history.back();
@@ -203,7 +204,7 @@ export function ErrandPage() {
 						</Page>
 					</Page>;
 	}
-	
+
 	return result;
 }
 
