@@ -21,8 +21,9 @@ import { Pager } from '../../../../../../../client/views/setupWizard/Pager';
 import { Step } from '../../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../../client/views/setupWizard/StepHeader';
-import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../../ui/client/lib/fileUpload';
+import { fileUploadToWorkingGroupRequestAnswer, filesValidation } from '../../../../../../ui/client/lib/fileUpload';
 import GenericTable, { Th } from '../../../../../../../client/components/GenericTable';
+import './reactTooltip.css';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -206,6 +207,11 @@ const FilterOptions = ({ onChange = () => {}, ...props }) => {
 	);
 };
 
+const preProcessingProtocolItems = (item) => {
+	const regExp = new RegExp('(<[^>]*>)*(&nbsp;)*', 'gi');
+	return item.replaceAll(regExp, '');
+};
+
 const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, onChange = () => {}, ...props }) => {
 	const t = useTranslation();
 	const replaceChar = (str) =>
@@ -218,13 +224,13 @@ const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, 
 	const options = useMemo(() => {
 		try {
 			const renderOption = (label) => {
-				const tooltipLabel = replaceChar(label);
-				const mainLabel = (label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
+				const tooltipLabel = preProcessingProtocolItems(replaceChar(label));
+				const mainLabel = preProcessingProtocolItems(label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
 				return <Box display='flex' flexDirection='row' alignItems='center'
 					data-for='itemT'
-					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='350px'>
+					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='450px'>
 					<Label>{ mainLabel }</Label>
-					<ReactTooltip id='itemT' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+					<ReactTooltip id='itemT' className='react-tooltip-class' multiline effect='solid' place='top'/>
 				</Box>;
 			};
 
@@ -290,15 +296,15 @@ const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, 
 				</Field>
 			</Button>
 			<PositionAnimated
-				width='350px'
+				width='450px'
 				visible={visible}
 				anchor={ref}
 				placement={'bottom-end'}
-				maxWidth='350px'
+				maxWidth='450px'
 			>
 				<Options
-					width='350px'
-					maxWidth='350px'
+					width='450px'
+					maxWidth='450px'
 					onSelect={handleSelection}
 					options={options}
 					cursor={cursor}/>
@@ -320,13 +326,13 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 	const options = useMemo(() => {
 		try {
 			const renderOption = (label) => {
-				const tooltipLabel = replaceChar(label);
-				const mainLabel = (label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
+				const tooltipLabel = preProcessingProtocolItems(replaceChar(label));
+				const mainLabel = preProcessingProtocolItems(label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
 				return <Box display='flex' flexDirection='row' alignItems='center'
 					data-for='itemT'
-					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='350px'>
+					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='450px'>
 					<Label>{ mainLabel }</Label>
-					<ReactTooltip id='itemT' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+					<ReactTooltip id='itemT' width='450px' maxWidth='450px' style={{ whiteSpace: 'normal' }}/>
 				</Box>;
 			};
 
@@ -395,15 +401,15 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 				</Field>
 			</Button>
 			<PositionAnimated
-				width='350px'
+				width='450px'
 				visible={visible}
 				anchor={ref}
 				placement={'bottom-end'}
-				maxWidth='350px'
+				maxWidth='450px'
 			>
 				<Options
-					width='350px'
-					maxWidth='350px'
+					width='450px'
+					maxWidth='450px'
 					onSelect={handleSelection}
 					options={options}
 					cursor={cursor}/>
@@ -421,6 +427,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
 
 	const [commiting, setComitting] = useState(false);
+	const [cache, setCache] = useState();
 	const [newData, setNewData] = useState({
 		numberId: { value: '', required: false },
 		protocol: { value: '', required: false },
@@ -437,6 +444,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const [protocolsFindData, setProtocolsFindData] = useState([]);
 	const [sectionOptionSelectedLabel, setSectionOptionSelectedLabel] = useState(t('Working_group_request_invite_select_sections'));
 	const [sectionItemOptionSelectedLabel, setSectionItemOptionSelectedLabel] = useState(t('Working_group_request_invite_select_sections_items'));
+	const [staticFileIndex, setStaticFileIndex] = useState(0);
 
 	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
 
@@ -444,9 +452,12 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const workingGroupRequestId = workingGroupRequest._id;
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
+	const documentsHelpTooltipLabel = useMemo(() => 'Загрузите не пустые файлы', []); 
+
 	const mails = useMemo(() => workingGroupRequest.mails, [workingGroupRequest]);
 
-	const isAnyMails = useMemo(() => workingGroupRequest?.mails?.length > 0 || false, [workingGroupRequest]);
+	const isAnyMails = useMemo(() => workingGroupRequest?.mails?.length > 1 || (mails?.length === 1 && mails[0]?._id !== 'noAnswer') || false, [workingGroupRequest]);
+	useMemo(() => console.log(mails));
 	const mailsOptions = useMemo(() => mails?.map((mail) => [mail._id, (mail.number ?? t('Working_group_request_invite_not_mail_chosen')) + (mail.ts ? ' от ' + formatDate(mail.ts) : '')] || [null, t('Working_group_request_invite_not_mail_chosen')]), [mails]);
 	const protocolsOptions = useMemo(() => protocolsData?.map((protocol, index) => [index, protocol.num ?? '']) || [], [protocolsData]);
 
@@ -456,6 +467,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		}
 		setProtocolsFindData(protocolsData ?? []);
 	}, [t, protocolsData]);
+
+	const onChange = useCallback(() => {
+		setCache(new Date());
+	}, [cache]);
 
 	const filterName = (name) => {
 		const regExp = new RegExp('(<[a-z]*[0-9]*>)*(</[a-z]*[0-9]*>)*', 'gi');
@@ -472,7 +487,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		const updateData = Object.assign({}, newData);
 
 		if (field === 'protocol' && val !== newData.protocol.value) {
-			const options = protocolsData[val]?.sections?.map((section, index) => [index, [section.num ?? '', ': ', section.name ? filterName(section.name) : ''].join('')]) || [];
+			const options = protocolsData[val]?.sections?.map((section, index) => [index, [section.num ?? '', ': ', section.name ? preProcessingProtocolItems(section.name) : ''].join('')]) || [];
 			setSectionOptions(options);
 			setSectionItemsOptions([]);
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
@@ -481,7 +496,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 		}
 		if (field === 'section' && val !== newData.section.value) {
-			const options = protocolsData[newData.protocol.value]?.sections[val]?.items?.map((item, index) => [index, [item.num ?? '', ': ', item.name ? filterName(item.name) : ''].join('')]) || [];
+			const options = protocolsData[newData.protocol.value]?.sections[val]?.items?.map((item, index) => [index, [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join('')]) || [];
 			setSectionItemsOptions(options);
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 			if (val === '') {
@@ -499,6 +514,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 	const handleChangeContext = (contextField) => () => {
 		if (context === '') {
+			setProtocolsFindData(protocolsData);
+			setFilterContext('');
 			setContext(contextField);
 		} else {
 			setContext('');
@@ -522,6 +539,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			return null;
 		}
 		const $input = $(document.createElement('input'));
+		let fileIndex = staticFileIndex;
 		$input.css('display', 'none');
 		$input.attr({
 			id: 'fileupload-input',
@@ -537,11 +555,14 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 				Object.defineProperty(file, 'type', {
 					value: mime.lookup(file.name),
 				});
+				fileIndex++;
 				return {
 					file,
 					name: file.name,
+					id: fileIndex,
 				};
 			});
+			setStaticFileIndex(fileIndex);
 
 			setAttachedFile(attachedFile.concat(filesToUpload));
 			$input.remove();
@@ -568,8 +589,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		const sectionItemIndex = newData.sectionItem.value;
 		const labelNotChosen = t('Not_chosen');
 		dataToSend.protocol = protocolData ? [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' ') : labelNotChosen;
-		dataToSend.section = sectionIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].num ?? '', ': ', protocolData.sections[sectionIndex].name ? filterName(protocolData.sections[sectionIndex].name) : ''].join('');
-		dataToSend.sectionItem = sectionItemIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].items[sectionItemIndex].num ?? '', ': ', protocolData.sections[sectionIndex].items[sectionItemIndex].name ? filterName(protocolData.sections[sectionIndex].items[sectionItemIndex].name) : ''].join('');
+		dataToSend.section = sectionIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].num ?? '', ': ', protocolData.sections[sectionIndex].name ? preProcessingProtocolItems(protocolData.sections[sectionIndex].name) : ''].join('');
+		dataToSend.sectionItem = sectionItemIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].items[sectionItemIndex].num ?? '', ': ', protocolData.sections[sectionIndex].items[sectionItemIndex].name ? preProcessingProtocolItems(protocolData.sections[sectionIndex].items[sectionItemIndex].name) : ''].join('');
 		dataToSend.commentary = newData.commentary.value.trim();
 		dataToSend.ts = new Date();
 		return Object.assign({}, contactInfoData, dataToSend);
@@ -583,14 +604,30 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 			const fileInfo = { name: attachedFile[0]?.name || '', total: attachedFile.length ?? 0 };
 			const workingGroupRequestAnswer = packNewData(fileInfo);
-			console.log(workingGroupRequestAnswer);
 			const mailId = newData.numberId.value.trim() !== '' ? newData.numberId.value : null;
-			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(workingGroupRequestId, mailId, workingGroupRequestAnswer);
+			let validationArray = [];
 
 			if (attachedFile.length > 0) {
-				await fileUploadToWorkingGroupRequestAnswer(attachedFile, { _id: workingGroupRequestId, mailId: newMailId === '' ? mailId : newMailId, answerId });
+				validationArray = await filesValidation(attachedFile);
+				if (validationArray.length > 0) {
+					const attachedFilesBuf = attachedFile;
+					validationArray.map((errFile) => attachedFilesBuf.map((file) => {
+						if (errFile.id === file.id) {
+							file.fail = true;
+							file.error = errFile.error;
+						}
+						return file;
+					}));
+					dispatchToastMessage({ type: 'error', message: t('Working_group_request_invite_file_upload_failed') });
+					setComitting(false);
+					setAttachedFile(attachedFilesBuf);
+					onChange();
+					return;
+				} else {
+					const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(workingGroupRequestId, mailId, workingGroupRequestAnswer);
+					await fileUploadToWorkingGroupRequestAnswer(attachedFile, { _id: workingGroupRequestId, mailId: newMailId === '' ? mailId : newMailId, answerId });
+				}
 			}
-
 			goToFinalStep();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
@@ -607,8 +644,16 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		}
 		setContext('');
 	};
+	
+	const ClearTooltip = () => {
+		return <Box display='flex' flexDirection='row' alignItems='center'
+			data-for='clearTooltip'
+			data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }} width='350px'>
+			<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
+		</Box>;
+	};
 
-	return <Step active={active} working={commiting} onSubmit={handleSubmit}>
+	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
@@ -623,7 +668,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_select_mail')}
 									{newData.numberId.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('numberId')(''); }} backgroundColor='transparent' borderColor='transparent' danger label={t('Clear')}>
+									&& <Button onClick={() => { handleChangeSelect('numberId')(''); }} backgroundColor='transparent' borderColor='transparent' danger
+									data-for='clearTooltip'
+									data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -645,7 +693,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 										setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
 										handleChangeSelect('protocol')('');
 										setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
-									}} backgroundColor='transparent' borderColor='transparent' danger>
+									}} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
+									data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -694,7 +744,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 										setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 										handleChangeSelect('section')('');
 										setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
-									}} backgroundColor='transparent' borderColor='transparent' danger>
+									}} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
+									data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -712,7 +764,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_invite_select_sections_items')}
 									{newData.sectionItem.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items')); }} backgroundColor='transparent' borderColor='transparent' danger>
+									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items')); }} backgroundColor='transparent' borderColor='transparent' danger
+									data-for='clearTooltip'
+									data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -732,15 +787,23 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 							</Field.Row>
 						</Field>
 						<Field mbe='x8'>
-							<Field.Label>{t('Documents')} <span style={ { color: 'red' } }>*</span></Field.Label>
-							<Field border='2px solid #cbced1' mb='5px' width='45%'>
+							<Field.Label>
+								{t('Documents')} 
+								<span style={ { color: 'red' } }>*</span>
+								<span> <Icon name='help' data-for='documentsHelpTooltip' data-tip={ documentsHelpTooltipLabel }/> <ReactTooltip id='documentsHelpTooltip' effect='solid' place='top'/></span>
+								</Field.Label>
+							<Field border='2px solid #cbced1' mb='5px' width='35%'>
 								<Button id={fileSourceInputId} fontScale='p1' onClick={fileUploadClick} minHeight='2.5rem' border='none' textAlign='left' backgroundColor='var(--color-dark-10)'>
-									{t('Add_files')}
+									{t('Working_group_request_invite_add_files')}
 								</Button>
 							</Field>
 							{attachedFile?.length > 0 && <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
 								<Margins inlineEnd='x4' blockEnd='x4'>
-									{attachedFile.map((file, index) => <Chip pi='x4' key={index} onClick={handleFileUploadChipClick(index)}>{file.name ?? ''}</Chip>)}
+									{attachedFile.map((file, index) => <Chip pi='x4' key={index} onClick={handleFileUploadChipClick(index)}
+									border={file.fail ? '2px solid red' : ''} data-for='fileErrorTooltip' data-tip={ file.error ?? '' } style={{ whiteSpace: 'normal' }}>
+										{file.name ?? ''}
+										<ReactTooltip id='fileErrorTooltip' effect='solid' place='top'/>
+									</Chip>)}
 								</Margins>
 							</Box>}
 						</Field>
