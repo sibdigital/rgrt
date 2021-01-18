@@ -79,8 +79,8 @@ export function WorkingGroupCompositions({
 	const onDeleteClick = (_id) => () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
 
 	const header = useMemo(() => [
-		mediaQuery && <Th key={'Working_group'} color='default'>
-			{t('Working_group')}
+		mediaQuery && <Th key={'Working_group_type'} color='default'>
+			{t('Working_group_type')}
 		</Th>,
 		<Th w='x40' key='edit'></Th>,
 		<Th w='x40' key='delete'></Th>,
