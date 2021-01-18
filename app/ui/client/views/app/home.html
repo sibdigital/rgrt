@@ -1,6 +1,9 @@
 <template name="home">
 	<section class="page-container page-home page-static content-background-color">
-		{{> header sectionName=title}}
+		<!-- <button class="js-button-back">
+			{{> icon icon="back" }}<h3 style="display: contents; font-size: 18px;"> {{title}}</h3>
+			{{> header sectionName=title}}
+		</button> -->
 <!--		<div class="content">-->
 <!--			{{{body}}}-->
 <!--		</div>-->
@@ -11,6 +14,14 @@
 </template>
 
 <template name="gridOfIcons">
+	<div style='margin-block-end: 20px;'>
+		{{#if notHome}}
+			<button class="js-button-back go-back-button" style="width: 56px; height: 45px; text-align: center;">
+				{{> icon icon="back" }}
+			</button>
+		{{/if}}
+		<p1 style="display: contents; font-size: 1.375rem;"> {{title}}</p1>
+	</div>
 	<ul class="cbp-ig-grid">
 		{{#each toolbarButtons}}
 			<li class="cbp-ig-grid__elem">
