@@ -54,7 +54,7 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 export function AddParticipant({ councilId, onChange, close, users, invitedUsers, setInvitedUsers, onNewParticipant, onCreateParticipantId }) {
 	let form = {};
 	if (councilId) {
-		form = <AddParticipantWithData councilId={councilId} onChange={onChange} close={close} users={users} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} onCreateParticipantId={onCreateParticipantId}/>;
+		form = <AddParticipantWithData councilId={councilId} onChange={onChange} close={close} users={users} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers} onNewParticipant={onNewParticipant} onCreateParticipantId={onCreateParticipantId}/>;
 	} else {
 		form = <AddParticipantWithoutData onChange={onChange} close={close} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} setInvitedUsers={setInvitedUsers} users={users} onCreateParticipantId={onCreateParticipantId}/>;
 	}
@@ -146,7 +146,7 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 	</>;
 }
 
-function AddParticipantWithData({ councilId, onChange, close, users, invitedUsers, onNewParticipant, onCreateParticipantId }) {
+function AddParticipantWithData({ councilId, onChange, close, users, invitedUsers, setInvitedUsers, onNewParticipant, onCreateParticipantId }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -155,19 +155,23 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 	const [countSelectedUsers, setCountSelectedUsers] = useState(0);
 	const [usersIdToAdd, setUsersIdToAdd] = useState([]);
 	const [findUsers, setFindUsers] = useState([]);
+
 	const addUsersToCouncil = useMethod('addUsersToCouncil');
 
-	const debouncedParams = useDebouncedValue(params, 500);
-	const debouncedSort = useDebouncedValue(sort, 500);
-	const query = useQuery(debouncedParams, debouncedSort);
+	// const debouncedParams = useDebouncedValue(params, 500);
+	// const debouncedSort = useDebouncedValue(sort, 500);
+	// const query = useQuery(debouncedParams, debouncedSort);
 
-	const data = useEndpointData('users.list', query) || { users: [] };
+	// const data = useEndpointData('users.list', query) || { users: [] };
+	console.log(users);
+	console.log(invitedUsers);
+
 
 	useEffect(() => {
-		if (data.users) {
-			setFindUsers(invitedUsers && invitedUsers.length > 0 ? data.users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers === user._id) < 0) : data.users);
+		if (users) {
+			setFindUsers(invitedUsers && invitedUsers.length > 0 ? users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers === user._id) < 0) : users);
 		}
-	}, [data, invitedUsers]);
+	}, [users, invitedUsers]);
 
 	const onAddUserCancelClick = () => {
 		close();
@@ -181,6 +185,7 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 		try {
 			if (usersIdToAdd.length > 0) {
 				await saveAction();
+				setInvitedUsers(invitedUsers ? invitedUsers.concat(usersIdToAdd) : usersIdToAdd);
 				setUsersIdToAdd([]);
 				dispatchToastMessage({ type: 'success', message: t('Participant_Added_Successfully') });
 			}
@@ -224,7 +229,7 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 				</Button>
 			</ButtonGroup>
 		</Field>}
-		{!onCreateParticipantId && <SearchByText setParams={ setParams } usersData={data.users} setUsersData={setFindUsers}/>}
+		{!onCreateParticipantId && <SearchByText setParams={ setParams } usersData={users} setUsersData={setFindUsers}/>}
 		{ findUsers && !findUsers.length && !onCreateParticipantId
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>

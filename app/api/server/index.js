@@ -45,5 +45,6 @@ import './v1/working-group-meetings';
 import './v1/upload-files';
 import './v1/protocols';
 import './v1/working-groups-requests';
+import './v1/persons';
 
 export { API, APIClass, defaultRateLimiterOptions } from './api';

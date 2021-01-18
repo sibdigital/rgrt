@@ -1,9 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal } from '@rocket.chat/fuselage';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal, Tabs, Table } from '@rocket.chat/fuselage';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
+import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -54,16 +56,42 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 	</Modal>;
 };
 
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1,	surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	query: JSON.stringify({
+		$or: [
+			{ 'emails.address': { $regex: '', $options: 'i' } },
+			{ username: { $regex: '', $options: 'i' } },
+			{ name: { $regex: '', $options: 'i' } },
+			{ surname: { $regex: '', $options: 'i' } },
+		],
+		$and: [
+			{ type: { $ne: 'bot' } },
+		],
+	}),
+	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, column, direction]);
+
 export function CouncilPage() {
-	console.log('council');
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const councilId = useRouteParameter('id');
 
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [context, setContext] = useState('participants');
+	const [invitedUsers, setInvitedUsers] = useState([]);
+	const [persons, setPersons] = useState([]);
 	const [cache, setCache] = useState();
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['surname', 'asc']);
 	const [users, setUsers] = useState([]);
+
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+	const usersQuery = useQuery(debouncedParams, debouncedSort);
 
 	const onChange = () => { console.log('onChange'); setCache(new Date()); };
 
@@ -73,8 +101,61 @@ export function CouncilPage() {
 
 	const data = useEndpointData('councils.findOne', query) || { result: [] };
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
+	const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
+	const invitedUsersData = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
+	// const personsData = useEndpointData('persons.list', useMemo(() => ({ }), []));
+	// const personsData = useEndpointData('persons.findOne', useMemo(() => ({ query: JSON.stringify({ _id: '"FK7b6iun9mAyyjit8"' }) }), []));
+	// useMemo(() => ({ query: JSON.stringify({ _id: { $in: data?.invitedPersons?.map((person) => person._id) } }) }
 
-	const invitedUsers = data.invitedUsers || [];
+	useEffect(() => {
+		console.log(data);
+		// console.log(personsData);
+		if (invitedUsersData.invitedUsers) {
+			setInvitedUsers(invitedUsersData.invitedUsers);
+		}
+		if (usersData.users) {
+			setUsers(usersData.users);
+		}
+		if (data.invitedPersons) {
+			setPersons(data.invitedPersons);
+		}
+	}, [invitedUsersData, usersData]);
+
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroups && workingGroups.workingGroups?.length > 0) {
+			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroups]);
+
+	return <Council persons={persons} councilId={councilId} data={data} users={users} setUsers={setUsers} onChange={onChange} workingGroupOptions={workingGroupOptions} invitedUsersData={invitedUsers}/>;
+}
+
+CouncilPage.displayName = 'CouncilPage';
+
+export default CouncilPage;
+
+function Council({ persons, councilId, data, users, setUsers, onChange, workingGroupOptions, invitedUsersData }) {
+	const t = useTranslation();
+	const formatDateAndTime = useFormatDateAndTime();
+	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
+	const [context, setContext] = useState('participants');
+	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
+	const [tab, setTab] = useState('info');
+
+	useEffect(() => {
+		if (invitedUsersData) {
+			setInvitedUsersIds(invitedUsersData.map((user) => user._id));
+		}
+	}, [invitedUsersData]);
+
+	const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+
+	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
 
 	const setModal = useSetModal();
 
@@ -130,6 +211,7 @@ export function CouncilPage() {
 		setContext('participants');
 		if (onCreateParticipantId) {
 			setOnCreateParticipantId(undefined);
+			location.reload()
 		}
 	};
 
@@ -150,13 +232,24 @@ export function CouncilPage() {
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
-	const workingGroupOptions = useMemo(() => {
-		const res = [[null, t('Not_chosen')]];
-		if (workingGroups && workingGroups.workingGroups?.length > 0) {
-			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
-		}
-		return res;
-	}, [workingGroups]);
+	const header = useMemo(() => [
+		<Th key={'File_name'} color='default'>
+			{ t('File_name') }
+		</Th>,
+		<Th w='x40' key='download'/>,
+	], [mediaQuery]);
+
+	const renderRow = (document) => {
+		const { _id, title } = document;
+		return <Table.Row tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
+					<Icon name='download'/>
+				</Button>
+			</Table.Cell>
+		</Table.Row>;
+	};
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -196,7 +289,12 @@ export function CouncilPage() {
 						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
 					</Field.Row>
 				</Field>
-				{context === 'participants' && <Field mbe='x8'>
+				<Tabs flexShrink={0} mbe='x8'>
+					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
+					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Persons')}</Tabs.Item>
+					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
+				</Tabs>
+				{tab === 'info' && context === 'participants' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
@@ -209,15 +307,48 @@ export function CouncilPage() {
 						</Button>
 					</Field.Row>
 				</Field>}
-				{context === 'participants' && <Participants councilId={councilId} onChange={onChange}/>}
-				{context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
-				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{tab === 'files' && <Field mbe='x8'>
+					<Field.Row marginInlineStart='auto'>
+						<Button marginInlineEnd='10px' small primary disabled aria-label={t('Add')}>
+							{t('Upload_file_question')}
+						</Button>
+					</Field.Row>
+				</Field>}
+				{tab === 'info' && context === 'participants' && <Participants councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
+				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
+				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
+				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{tab === 'files' && 
+					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
+				}
+				{tab === 'persons' && 
+					<PersonsTable persons={persons} />}
 			</Page.Content>
 		</Page>
 	</Page>;
 }
 
-CouncilPage.displayName = 'CouncilPage';
+function PersonsTable({ persons }) {
+	const t = useTranslation();
 
-export default CouncilPage;
+	const mediaQuery = useMediaQuery('(min-width: 768px)');
+	
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+
+	const header = useMemo(() => [
+		<Th key={'Council_Invited_Person'} color='default'>{ t('Council_Invited_Person') }</Th>,
+		<Th key={'Phone_number'} color='default'>{ t('Phone_number') }</Th>,
+		<Th key={'Email'} color='default'>{ t('Email') }</Th>,
+	], [mediaQuery]);
+
+	const renderRow = (person) => {
+		const { _id, surname, name, patronymic, phone, email } = person;
+		return <Table.Row key={_id} tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }}>{surname} {name} {patronymic}</Table.Cell>
+			<Table.Cell fontScale='p1' color='default'>{phone}</Table.Cell>
+			<Table.Cell fontScale='p1' color='default'>{email}</Table.Cell>
+		</Table.Row>;
+	};
+
+	return <GenericTable header={header} renderRow={renderRow} results={persons ?? []} total={persons?.length ?? 0} setParams={setParams} params={params}/>;
+}

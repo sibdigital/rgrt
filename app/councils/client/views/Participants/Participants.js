@@ -76,7 +76,7 @@ export function Participants({ councilId, onChange, context, invitedUsers, setIn
 	console.log('Participants');
 	let form = {};
 	if (councilId || context === undefined || context === '') {
-		form = <ParticipantsWithData councilId={councilId} onChange={onChange}/>;
+		form = <ParticipantsWithData councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers}/>;
 	}
 	if (context === 'new') {
 		form = <ParticipantsWithoutData onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers}/>;
@@ -94,39 +94,65 @@ function ParticipantsWithoutData({ onChange, invitedUsers, setInvitedUsers }) {
 	return <InvitedUsersTable invitedUsers={invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
 }
 
-function ParticipantsWithData({ councilId, onChange }) {
+function ParticipantsWithData({ councilId, onChange, invitedUsers, setInvitedUsers }) {
 	const t = useTranslation();
-	const [params, setParams] = useState({ _id: councilId, current: 0, itemsPerPage: 25 });
-	const [sort, setSort] = useState(['surname', 'asc']);
-	const [cache, setCache] = useState();
-
-	const debouncedParams = useDebouncedValue(params, 500);
-	const debouncedSort = useDebouncedValue(sort, 500);
-
-	const query = useQuery(debouncedParams, debouncedSort, cache);
-
-	const data = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
 
 	const deleteUserFromCouncil = useMethod('deleteUserFromCouncil');
 	const setModal = useSetModal();
 	const dispatchToastMessage = useToastMessageDispatch();
+	console.log(invitedUsers);
 
 	const onDeleteUserFromCouncilConfirm = useCallback(async (userId) => {
 		try {
 			await deleteUserFromCouncil(councilId, userId);
-			data.invitedUsers = data.invitedUsers.filter((invitedUser) => invitedUser !== userId);
+			const users = invitedUsers.filter((user) => user._id !== userId).map((user) => user._id);
+			setInvitedUsers(users);
 			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [deleteUserFromCouncil, dispatchToastMessage, onChange]);
+	}, [deleteUserFromCouncil, dispatchToastMessage, onChange, invitedUsers, setInvitedUsers]);
 
 	const onDel = (userId) => () => { onDeleteUserFromCouncilConfirm(userId); };
 
 	const onDeleteUserFromCouncilClick = (userId) => () => setModal(() => <DeleteWarningModal title={t('Council_user_delete_warning')} onDelete={onDel(userId)} onCancel={() => setModal(undefined)}/>);
 
-	return <InvitedUsersTable invitedUsers={data.invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
+	return <InvitedUsersTable invitedUsers={invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
 }
+
+// function ParticipantsWithData({ councilId, onChange }) {
+// 	const t = useTranslation();
+// 	const [params, setParams] = useState({ _id: councilId, current: 0, itemsPerPage: 25 });
+// 	const [sort, setSort] = useState(['surname', 'asc']);
+// 	const [cache, setCache] = useState();
+
+// 	const debouncedParams = useDebouncedValue(params, 500);
+// 	const debouncedSort = useDebouncedValue(sort, 500);
+
+// 	const query = useQuery(debouncedParams, debouncedSort, cache);
+
+// 	const data = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
+
+// 	const deleteUserFromCouncil = useMethod('deleteUserFromCouncil');
+// 	const setModal = useSetModal();
+// 	const dispatchToastMessage = useToastMessageDispatch();
+
+// 	const onDeleteUserFromCouncilConfirm = useCallback(async (userId) => {
+// 		try {
+// 			await deleteUserFromCouncil(councilId, userId);
+// 			data.invitedUsers = data.invitedUsers.filter((invitedUser) => invitedUser !== userId);
+// 			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
+// 		} catch (error) {
+// 			dispatchToastMessage({ type: 'error', message: error });
+// 		}
+// 	}, [deleteUserFromCouncil, dispatchToastMessage, onChange]);
+
+// 	const onDel = (userId) => () => { onDeleteUserFromCouncilConfirm(userId); };
+
+// 	const onDeleteUserFromCouncilClick = (userId) => () => setModal(() => <DeleteWarningModal title={t('Council_user_delete_warning')} onDelete={onDel(userId)} onCancel={() => setModal(undefined)}/>);
+
+// 	return <InvitedUsersTable invitedUsers={data.invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
+// }
 
 export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	const t = useTranslation();
@@ -139,11 +165,9 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	const header = useMemo(() => [
 		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
 		<Th key={'position'} color='default'>{t('Council_Organization_Position')}</Th>,
-		mediaQuery && <Th key={'contact'} color='default'>{t('Council_Contact_person')}</Th>,
 		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
 		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
 		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>,
-		<Th w='x40' key='edit'></Th>,
 		<Th w='x40' key='delete'></Th>,
 	], [mediaQuery]);
 
@@ -178,15 +202,9 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 		return <Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.contactPersonLastName} {iu.contactPersonFirstName} {iu.contactPersonPatronymicName}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{email}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}
-			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('Edit_User')} >
-					<Icon name='edit'/>
-				</Button>
-			</Table.Cell>
 			<Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('Delete')} onClick={onDelete(iu._id)}>
 					<Icon name='trash'/>

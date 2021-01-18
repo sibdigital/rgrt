@@ -47,7 +47,7 @@ class Councils extends Base {
 	addPersonToCouncil(_id, person) {
 		const data = this.findOne({ _id });
 		data._updatedAt = new Date();
-		data.invitedUsers = data.invitedUsers ? [...data.invitedUsers, person] : [person];
+		data.invitedPersons = data.invitedPersons ? [...data.invitedPersons, person] : [person];
 
 		return this.update({ _id }, { $set: { ...data } });
 	}
