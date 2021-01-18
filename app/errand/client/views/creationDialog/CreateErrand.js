@@ -170,8 +170,6 @@ Template.CreateErrand.events({
 		if (instance.data.onCreate) {
 			instance.data.onCreate(result);
 		}
-		FlowRouter.go('home');
-		FlowRouter.go('/errands/initiated_by_me');
 		// roomTypes.openRouteLink(result.t, result);
 	},
 });
