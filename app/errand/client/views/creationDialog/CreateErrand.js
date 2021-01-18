@@ -6,6 +6,7 @@ import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 import toastr from 'toastr';
 import moment from 'moment';
 import { Tracker } from 'meteor/tracker';
+import { FlowRouter } from "meteor/kadira:flow-router";
 
 // eslint-disable-next-line import/order
 import { t } from '../../../../utils/client';
@@ -137,7 +138,7 @@ Template.CreateErrand.events({
 
 		const chargedUsers = instance.selectedUsers.get();
 		const initiatedUsers = instance.initiatedByUsers.get();
-		
+
 		var message;
 		if(instance == null){
 			message = null;
@@ -152,8 +153,8 @@ Template.CreateErrand.events({
 			mid = "isAbsent"
 		} else {
 			var { rid, _id: mid } = message;
-		}	
-		
+		}
+
 		const initiated_by = initiatedUsers[0];
 		const charged_to = chargedUsers[0];
 		const expired_at = moment(instance.expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
@@ -169,6 +170,8 @@ Template.CreateErrand.events({
 		if (instance.data.onCreate) {
 			instance.data.onCreate(result);
 		}
+		FlowRouter.go('home');
+		FlowRouter.go('/errands/initiated_by_me');
 		// roomTypes.openRouteLink(result.t, result);
 	},
 });
