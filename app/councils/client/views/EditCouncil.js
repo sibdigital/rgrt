@@ -143,7 +143,7 @@ export default EditCouncilPage;
 function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users, invitedUsersData }) {
 	const t = useTranslation();
 
-	console.log(council);
+	// console.log(council);
 	const { _id, d: previousDate, desc: previousDescription } = council || {};
 	const previousInvitedUsers = useMemo(() => council.invitedUsers ? council.invitedUsers.slice() : [], [council.invitedUsers.slice()]);
 	const previousCouncil = council || {};

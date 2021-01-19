@@ -42,7 +42,7 @@ class DropdownTreeSelectContainer extends Component {
 	render() {
 		const { data, ...rest } = this.props;
 		return (
-			<DropdownTreeSelect data={this.state.data} className='date-picker' dropdownClassName='date-picker' {...rest} />
+			<DropdownTreeSelect data={this.state.data} dropdownClassName='date-picker' {...rest} />
 		);
 	}
 }
@@ -160,12 +160,12 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 		setEmail(emails);
 	};
 
-	return <>
+	return <Field style={{ overflowY: 'scroll' }}>
 		<Field mbe='x8'>
 			<Field.Label>{t('Email_receivers')} <span style={ { color: 'red' } }>*</span></Field.Label>
 			<Field>
 				<DropdownTreeSelectContainer
-					className='tree-select'
+					className='custom-tree-select'
 					data={recipients}
 					onChange={handleDropdownTreeSelectChange}
 					texts={
@@ -175,6 +175,14 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 						}
 					}
 				/>
+				{/* <DropdownTreeSelect data={recipients} className='tree-select custom-tree-select' dropdownClassName='date-picker' onChange={handleDropdownTreeSelectChange}
+					tagRemoveClassName='date-picker'  
+					texts={
+						{
+							placeholder: 'Поиск...',
+							noMatches: 'Не найдено совпадений',
+						}}
+				/> */}
 				<TextAreaInput backgroundColor={'var(--tertiary-background-color)'} row='1' style={{ whiteSpace: 'normal' }} flexGrow={1} value={email} readOnly placeholder={t('Email')}/>
 			</Field>
 		</Field>
@@ -218,7 +226,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 				{t('Send')}
 			</Button>
 		</ButtonGroup>
-	</>;
+	</Field>;
 }
 
 export default MailForm;

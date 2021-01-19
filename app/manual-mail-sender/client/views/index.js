@@ -161,25 +161,48 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 				}),
 			}];
 
-			const child = {
-				label,
-				value: 'Council',
-				isDefaultValue: true,
-				children: !invitedUsers ? [] : invitedUsers.map((invitedUser) => {
+			let isChild = false;
+
+			const getChildrens = (inviteds) => {
+				const res = [];
+				inviteds?.map((invitedUser) => {
 					const indexUser = users.findIndex((user) => user._id === invitedUser);
+
 					if (indexUser < 0) {
 						return;
 					}
+
+					isChild = true;
 					const value = users[indexUser];
+
+					if (!value) {
+						return;
+					}
+
 					emails += (value.emails ? value.emails[0].address : '') + ',';
-					return {
+					res.push({
 						label: [value.surname, value.name, value.patronymic].join(' '),
 						value: value.emails ? value.emails[0].address : '',
-					};
-				}),
-			};
+					});
+				});
 
-			recipients[0].children.push(child);
+				return res;
+			};
+			const child = invitedUsers ? {
+				label,
+				value: 'Council',
+				isDefaultValue: true,
+				children: !invitedUsers ? [] : getChildrens(invitedUsers)
+			} : null;
+
+			// console.log(child);
+			// console.log(invitedUsers);
+			// console.log(usersData);
+			
+			if (isChild) {
+				// console.log('nule');
+				recipients[0].children.push(child);
+			}
 			const mailSubject = [t('Council'), 'От', formatDateAndTime(councilData.d)].join(' ');
 
 			setDefaultEmails(emails);
@@ -188,7 +211,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData]);
+	}, [workingGroupsData, usersData, councilData]);
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
 }
@@ -224,7 +247,6 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 			const userToSendEmail = users.find((user) =>
 				(currentUser._id === errand.initiatedBy._id && user._id === errand.chargedToUser._id)
 				|| (currentUser._id === errand.chargedToUser._id && user._id === errand.initiatedBy._id)) || {};
-			const email = userToSendEmail.emails ? userToSendEmail.emails[0].address : '';
 
 			const recipients = [{
 				label: 'Все пользователи',
@@ -243,24 +265,30 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 				}),
 			}];
 
-			const child = {
-				label: t('Errand'),
-				value: 'Errand',
-				isDefaultValue: true,
-				children: [{
-					label: [userToSendEmail.surname, userToSendEmail.name, userToSendEmail.patronymic].join(' '),
-					value: userToSendEmail.emails ? userToSendEmail.emails[0].address : '',
-				}],
-			};
-			recipients[0].children.push(child);
-			setDefaultEmails(email);
-			const mailSubjectTitle = [t('Errand'), 'От', formatDateAndTime(errand.ts)].join(' ');
-			setMailSubject(mailSubjectTitle);
-			setMailBody(getErrandMailBody(errand));
+			if (userToSendEmail) {
+				const email = userToSendEmail.emails ? userToSendEmail.emails[0].address : '';
+				const name = [userToSendEmail.surname ?? '', userToSendEmail.name ?? '', userToSendEmail.patronymic ?? ''].join(' ');
+
+				const child = {
+					label: t('Errand'),
+					value: 'Errand',
+					isDefaultValue: true,
+					children: [{
+						label: name,
+						value: email,
+					}],
+				};
+
+				recipients[0].children.push(child);
+				setDefaultEmails(email);
+				const mailSubjectTitle = [t('Errand'), 'От', formatDateAndTime(errand.ts ?? new Date())].join(' ');
+				setMailSubject(mailSubjectTitle);
+				setMailBody(getErrandMailBody(errand));
+			}
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData]);
+	}, [workingGroupsData, usersData, errandData]);
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
 }

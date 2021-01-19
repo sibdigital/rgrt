@@ -163,8 +163,8 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 	// const query = useQuery(debouncedParams, debouncedSort);
 
 	// const data = useEndpointData('users.list', query) || { users: [] };
-	console.log(users);
-	console.log(invitedUsers);
+	// console.log(users);
+	// console.log(invitedUsers);
 
 
 	useEffect(() => {

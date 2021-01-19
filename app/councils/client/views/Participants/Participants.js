@@ -73,7 +73,6 @@ const SuccessModal = ({ onClose, ...props }) => {
 };
 
 export function Participants({ councilId, onChange, context, invitedUsers, setInvitedUsers }) {
-	console.log('Participants');
 	let form = {};
 	if (councilId || context === undefined || context === '') {
 		form = <ParticipantsWithData councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers}/>;
@@ -100,7 +99,6 @@ function ParticipantsWithData({ councilId, onChange, invitedUsers, setInvitedUse
 	const deleteUserFromCouncil = useMethod('deleteUserFromCouncil');
 	const setModal = useSetModal();
 	const dispatchToastMessage = useToastMessageDispatch();
-	console.log(invitedUsers);
 
 	const onDeleteUserFromCouncilConfirm = useCallback(async (userId) => {
 		try {

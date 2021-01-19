@@ -108,7 +108,6 @@ export function CouncilPage() {
 	// useMemo(() => ({ query: JSON.stringify({ _id: { $in: data?.invitedPersons?.map((person) => person._id) } }) }
 
 	useEffect(() => {
-		console.log(data);
 		// console.log(personsData);
 		if (invitedUsersData.invitedUsers) {
 			setInvitedUsers(invitedUsersData.invitedUsers);
