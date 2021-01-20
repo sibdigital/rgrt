@@ -47,7 +47,9 @@ export class Errands extends Base {
 			groupable: false,
 		};
 		record._id = this.insertOrUpsert(record);
-		Rooms.incErrandCountById(roomId, 1);
+		if(roomId != null){
+			Rooms.incErrandCountById(roomId, 1);
+		}
 		return record;
 	}
 

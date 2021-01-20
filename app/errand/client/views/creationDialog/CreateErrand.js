@@ -149,8 +149,8 @@ Template.CreateErrand.events({
 		const reply = instance.reply.get();
 
 		if(message == null) {
-			rid = "isAbsent"
-			mid = "isAbsent"
+			rid = null;
+			mid = null;
 		} else {
 			var { rid, _id: mid } = message;
 		}
@@ -175,11 +175,8 @@ Template.CreateErrand.events({
 });
 
 Template.CreateErrand.onRendered(function() {
-	if(this.data.message == null){
-		this.find('#usersInitiated').focus();
-	}else{
-		this.find('#usersCharged').focus();
-	}
+	this.find('#usersCharged').focus();
+
 	this.$('#expired_date').datepicker.dates['ru'] = {
 		days: ["Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресение"],
 		daysShort: ["Вос", "Пон", "Вто", "Сре", "Чет", "Пят", "Суб", "Вос"],
@@ -209,11 +206,9 @@ Template.CreateErrand.onCreated(function() {
 		var { message: msg } = this.data;
 		this.message = msg;
 		this.errandDescription = new ReactiveVar(suggestName(msg && msg.msg));
-		console.log(msg.u)
 	}else{
-		this.message = "isAbsent";
+		this.message = null;
 		this.errandDescription = new ReactiveVar("");
-		console.log(Meteor)
 	}
 	this.pmid = msg && msg._id;
 
@@ -236,6 +231,8 @@ Template.CreateErrand.onCreated(function() {
 	this.initiatedByUsers = new ReactiveVar([]);
 	if (msg) {
 		this.initiatedByUsers.get().unshift(msg.u);
+	} else {
+		this.initiatedByUsers.get().unshift(Meteor.user());
 	}
 
 	this.onSelectInitiatedUser = ({ item: user }) => {

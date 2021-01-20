@@ -178,9 +178,11 @@ export function ErrandPage() {
 									</Button>
 									<Label fontScale='h1'>{t(title)}</Label>
 								</Field>
-								<Button width={'25%'} primary small aria-label={t('New')} onClick={addErrand()}>
-									{t('Add')}
-								</Button>
+								<Field width={'6%'} display={'block'} marginBlock={'15px'}>
+									<Button className='go-back-button' onClick={addErrand()}>
+										<Icon name='plus'/>
+									</Button>
+								</Field>
 							</Page.Header>
 							<Page.Content>
 								<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;

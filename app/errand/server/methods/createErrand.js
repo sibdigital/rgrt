@@ -6,8 +6,6 @@ import { Errands, Rooms, Messages } from '../../../models/server';
 import { settings } from '../../../settings/server';
 
 const createErrandMessage = (rid, mid, dsc, expired_at, initiated_by, charged_to) => Errands.createWithRoomIdMessageIdDescriptionEndDateAndUsers(rid, mid, dsc, expired_at, initiated_by, charged_to);
-const createErrandWithoutMentionInMessage = (rid, mid, dsc, expired_at, initiated_by, charged_to) => 
-	Errands.createWithDescriptionAndDataAndUsers(rid, mid, dsc, expired_at, initiated_by,charged_to)
 
 const getRoom = (rid) => {
 	const room = Rooms.findOne(rid);
@@ -53,10 +51,10 @@ const create = ({ rid, mid, errandDescription, expired_at, initiated_by, charged
 		if (!p_room) {
 			throw new Meteor.Error('error-invalid-room', 'Invalid room', { method: 'ErrandCreation' });
 		}
-		var errand = createErrandMessage(rid, mid, errandDescription, expired_at, initiated_by, charged_to); //Создание поручения с привязкой к сообщению
-		mentionMessage(mid, errand._id); //Присваивание поручения к сообщению
+		var errand = createErrandMessage(rid, mid, errandDescription, expired_at, initiated_by, charged_to);
+		mentionMessage(mid, errand._id);
 	}else{
-		var errand = createErrandWithoutMentionInMessage(rid, mid, errandDescription,expired_at,initiated_by, charged_to) //Создание поручения без привязки к сообщению
+		var errand = createErrandMessage(rid, mid, errandDescription, expired_at, initiated_by, charged_to)
 	}
 
 	// Этот блок не позволяет согздавать много поручений на одном и том же сообщении
