@@ -53,14 +53,29 @@ API.v1.addRoute('councils.invitedUsers', { authRequired: true }, {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, fields, query } = this.parseJsonQuery();
 
-		const council = Promise.await(findCouncil(query._id));
+		const council = Promise.await(findCouncil(query.$and[1]._id));
+		// console.log(council);
+		// console.log('kek');
+		// console.log(query);
+		// console.log(query.$and);
+		// console.log(query.$and[1]._id);
 
-		const users = Users.find({ _id: { $in: council.invitedUsers } }, {
+		const users = Users.find({ _id: { $in: council.invitedUsers.map((user) => typeof user === typeof {} ? user._id : user ) } }, {
+		// const users = Users.find({ _id: { $in: council.invitedUsers } }, {
 			sort: sort || { username: 1 },
 			skip: offset,
 			limit: count,
 			fields,
-		}).fetch();
+		}).fetch().map((user) => { 
+			const iUser = council.invitedUsers.find((iUser) => (typeof iUser === typeof {} && iUser._id === user._id) || (typeof iUser === typeof '' && iUser === user._id));
+			if (!iUser) { return; }
+			if (!iUser.ts) {
+				user.ts = new Date('January 1, 2021 00:00:00');
+			} else {
+				user.ts = iUser.ts;
+			}
+			return user;
+		});
 
 		return API.v1.success({
 			invitedUsers: users,

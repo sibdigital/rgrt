@@ -61,7 +61,7 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 };
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
-const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+const useQuery = ({ itemsPerPage, current }, [column, direction], councilId) => useMemo(() => ({
 	fields: JSON.stringify({ name: 1, username: 1, emails: 1,	surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	query: JSON.stringify({
 		$or: [
@@ -72,12 +72,13 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 		],
 		$and: [
 			{ type: { $ne: 'bot' } },
+			{ _id: councilId }
 		],
 	}),
 	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
-}), [itemsPerPage, current, column, direction]);
+}), [itemsPerPage, current, councilId, column, direction]);
 
 export function EditCouncilPage() {
 	const t = useTranslation();
@@ -98,7 +99,7 @@ export function EditCouncilPage() {
 	const { data } = useEndpointDataExperimental('councils.findOne', query) || { result: [] };
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 	const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
-	const invitedUsersData = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
+	const invitedUsersData = useEndpointData('councils.invitedUsers', useQuery(debouncedParams, debouncedSort, councilId)) || { invitedUsers: [] };
 
 	const [cache, setCache] = useState();
 	const [invitedUsers, setInvitedUsers] = useState([]);
@@ -155,7 +156,27 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
 
-	const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+	// const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+
+	useEffect(() => {
+		setDate(new Date(previousDate) || '');
+		setDescription(previousDescription || '');
+		if (invitedUsersData) {
+			setInvitedUsersIds(invitedUsersData);
+		}
+	}, [previousDate, previousDescription, invitedUsersData]);
+
+	const invitedUsers = useMemo(() => users.filter((user) => {
+		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
+		if (!iUser) { return; }
+
+		if (!iUser.ts) {
+			user.ts = new Date('January 1, 2021 00:00:00');
+		} else {
+			user.ts = iUser.ts;
+		}
+		return user;
+	}), [invitedUsersIds, users]);
 
 	const setModal = useSetModal();
 
@@ -163,14 +184,6 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 	const deleteCouncil = useMethod('deleteCouncil');
 
 	const dispatchToastMessage = useToastMessageDispatch();
-
-	useEffect(() => {
-		setDate(new Date(previousDate) || '');
-		setDescription(previousDescription || '');
-		if (invitedUsersData) {
-			setInvitedUsersIds(invitedUsersData.map((user) => user._id));
-		}
-	}, [previousDate, previousDescription, previousCouncil, _id, invitedUsersData]);
 
 	const compare = (arr1, arr2) => arr1.length === arr2.length && arr1.every((v, i) => ( v === arr2[i]._id));
 
@@ -242,6 +255,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 		setContext('participants');
 		if (onCreateParticipantId) {
 			setOnCreateParticipantId(undefined);
+			location.reload();
 		}
 	};
 
@@ -356,7 +370,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 				{context === 'participants' && <Participants councilId={_id} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
 				{context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
-				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 			</Page.Content>
 		</Page>
 	</Page>;

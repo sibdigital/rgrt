@@ -73,7 +73,7 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 
 	useEffect(() => {
 		if (users) {
-			setFindUsers(users.filter((user) => invitedUsers.findIndex((invitedUser) => invitedUser === user._id) < 0));
+			setFindUsers(users.filter((user) => invitedUsers.findIndex((invitedUser) => invitedUser._id === user._id) < 0));
 		}
 	}, [users, invitedUsers]);
 
@@ -98,14 +98,14 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 
 	// if create new user
 	if (onCreateParticipantId && usersIdToAdd.length === 0) {
-		usersIdToAdd.push(onCreateParticipantId);
+		usersIdToAdd.push({ _id: onCreateParticipantId, ts: new Date() });
 		handleSave();
 	}
 
 	const onAddClick = (_id) => () => {
-		const index = usersIdToAdd.indexOf(_id);
+		const index = usersIdToAdd.findIndex((iUser) => iUser._id === _id);
 		if (index < 0) {
-			usersIdToAdd.push(_id);
+			usersIdToAdd.push({ _id, ts: new Date() });
 		} else {
 			usersIdToAdd.splice(index, 1);
 		}
@@ -168,8 +168,8 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 
 
 	useEffect(() => {
-		if (users) {
-			setFindUsers(invitedUsers && invitedUsers.length > 0 ? users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers === user._id) < 0) : users);
+		if (users && !onCreateParticipantId) {
+			setFindUsers(invitedUsers && invitedUsers.length > 0 ? users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers._id === user._id) < 0) : users);
 		}
 	}, [users, invitedUsers]);
 
@@ -199,14 +199,14 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 
 	// if create new user
 	if (onCreateParticipantId && usersIdToAdd.length === 0) {
-		usersIdToAdd.push(onCreateParticipantId);
+		usersIdToAdd.push({ _id: onCreateParticipantId, ts: new Date() });
 		handleSave();
 	}
 
 	const onAddClick = (_id) => () => {
-		const index = usersIdToAdd.indexOf(_id);
+		const index = usersIdToAdd.findIndex((iUser) => iUser._id === _id);
 		if (index < 0) {
-			usersIdToAdd.push(_id);
+			usersIdToAdd.push({ _id, ts: new Date() });
 		} else {
 			usersIdToAdd.splice(index, 1);
 		}
@@ -265,18 +265,9 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 	const styleTableRow = { wordWrap: 'break-word' };
 
-	const getBackgroundColor = (invitedUser) => {
-		const index = invitedUsers.findIndex((user) =>
-			user.name === invitedUser.name
-			&& user.surname === invitedUser.surname
-			&& user.patronymic === invitedUser.patronymic
-			&& user.username === invitedUser.username
-			&& user.organization === invitedUser.organization
-			&& user.position === invitedUser.position
-			&& user.phone === invitedUser.phone
-			&& user.emails === invitedUser.emails
-			&& user.ts === invitedUser.ts);
-		if (usersIdToAdd && usersIdToAdd.findIndex((userId) => invitedUser._id === userId) > -1) {
+	const getBackgroundColor = (invitedUserId) => {
+		const index = invitedUsers.findIndex((iUser) => iUser._id === invitedUserId);
+		if (usersIdToAdd && usersIdToAdd.findIndex((user) => invitedUserId === user._id) > -1) {
 			return 'var(--list-selected-element-background-color)';
 		}
 		if (index > 0 && index % 2 === 1) {
@@ -289,7 +280,7 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
 		const email = iu.emails ? iu.emails[0].address : '';
-		return <Table.Row key={iu._id} style={styleTableRow} onClick={handleAddUser(iu._id)} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
+		return <Table.Row key={iu._id} style={styleTableRow} onClick={handleAddUser(iu._id)} backgroundColor={getBackgroundColor(iu._id)} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.organization}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>}

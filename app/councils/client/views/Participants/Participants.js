@@ -75,7 +75,7 @@ const SuccessModal = ({ onClose, ...props }) => {
 export function Participants({ councilId, onChange, context, invitedUsers, setInvitedUsers }) {
 	let form = {};
 	if (councilId || context === undefined || context === '') {
-		form = <ParticipantsWithData councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers}/>;
+		form = <ParticipantsWithData councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsersIds={setInvitedUsers}/>;
 	}
 	if (context === 'new') {
 		form = <ParticipantsWithoutData onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers}/>;
@@ -93,7 +93,7 @@ function ParticipantsWithoutData({ onChange, invitedUsers, setInvitedUsers }) {
 	return <InvitedUsersTable invitedUsers={invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
 }
 
-function ParticipantsWithData({ councilId, onChange, invitedUsers, setInvitedUsers }) {
+function ParticipantsWithData({ councilId, onChange, invitedUsers, setInvitedUsersIds }) {
 	const t = useTranslation();
 
 	const deleteUserFromCouncil = useMethod('deleteUserFromCouncil');
@@ -103,13 +103,13 @@ function ParticipantsWithData({ councilId, onChange, invitedUsers, setInvitedUse
 	const onDeleteUserFromCouncilConfirm = useCallback(async (userId) => {
 		try {
 			await deleteUserFromCouncil(councilId, userId);
-			const users = invitedUsers.filter((user) => user._id !== userId).map((user) => user._id);
-			setInvitedUsers(users);
+			const users = invitedUsers.filter((user) => user._id !== userId);
+			setInvitedUsersIds(users);
 			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [deleteUserFromCouncil, dispatchToastMessage, onChange, invitedUsers, setInvitedUsers]);
+	}, [deleteUserFromCouncil, dispatchToastMessage, onChange, invitedUsers, setInvitedUsersIds]);
 
 	const onDel = (userId) => () => { onDeleteUserFromCouncilConfirm(userId); };
 

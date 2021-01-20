@@ -40,6 +40,25 @@ const useErrandQuery = (params, sort, _id) => useMemo(() => ({
 	}),
 }), [params, sort, _id]);
 
+const invitedUsersQuery = ({ itemsPerPage, current }, [column, direction], councilId) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	query: JSON.stringify({
+		$or: [
+			{ 'emails.address': { $regex: '', $options: 'i' } },
+			{ username: { $regex: '', $options: 'i' } },
+			{ name: { $regex: '', $options: 'i' } },
+			{ surname: { $regex: '', $options: 'i' } },
+		],
+		$and: [
+			{ type: { $ne: 'bot' } },
+			{ _id: councilId }
+		],
+	}),
+	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, councilId, column, direction]);
+
 const assignObjectPaths = (obj, stack) => {
 	const isArray = Array.isArray(obj);
 	Object.keys(obj).forEach((k) => {
@@ -130,7 +149,9 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const councilQuery = useCouncilQuery(debouncedParams, debouncedSort, id);
+
 	const councilData = useEndpointData('councils.findOne', councilQuery) || {};
+	const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, id)) || { invitedUsers: [] };
 
 	const [recipients, setRecipients] = useState([]);
 	const [defaultEmails, setDefaultEmails] = useState('');
@@ -140,7 +161,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 
 	useEffect(() => {
 		const users = usersData || [];
-		const invitedUsers = councilData ? councilData.invitedUsers : [];
+		const invitedUsers = invitedUsersData ? invitedUsersData.invitedUsers : [];
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (councilData) {
 			let emails = '';
@@ -166,7 +187,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			const getChildrens = (inviteds) => {
 				const res = [];
 				inviteds?.map((invitedUser) => {
-					const indexUser = users.findIndex((user) => user._id === invitedUser);
+					const indexUser = users.findIndex((user) => user._id === invitedUser._id);
 
 					if (indexUser < 0) {
 						return;
@@ -211,7 +232,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData, councilData]);
+	}, [workingGroupsData, usersData, councilData, invitedUsersData, formatDateAndTime]);
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
 }

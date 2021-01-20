@@ -16,6 +16,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { Participants } from './Participants/Participants';
 import { AddParticipant } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
+import { LeaderType } from 'docx';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -75,6 +76,25 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction]);
 
+const invitedUsersQuery = ({ itemsPerPage, current }, [column, direction], councilId) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	query: JSON.stringify({
+		$or: [
+			{ 'emails.address': { $regex: '', $options: 'i' } },
+			{ username: { $regex: '', $options: 'i' } },
+			{ name: { $regex: '', $options: 'i' } },
+			{ surname: { $regex: '', $options: 'i' } },
+		],
+		$and: [
+			{ type: { $ne: 'bot' } },
+			{ _id: councilId },
+		],
+	}),
+	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, councilId, column, direction]);
+
 export function CouncilPage() {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
@@ -102,13 +122,13 @@ export function CouncilPage() {
 	const data = useEndpointData('councils.findOne', query) || { result: [] };
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 	const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
-	const invitedUsersData = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
+	const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, councilId)) || { invitedUsers: [] };
 	// const personsData = useEndpointData('persons.list', useMemo(() => ({ }), []));
 	// const personsData = useEndpointData('persons.findOne', useMemo(() => ({ query: JSON.stringify({ _id: '"FK7b6iun9mAyyjit8"' }) }), []));
 	// useMemo(() => ({ query: JSON.stringify({ _id: { $in: data?.invitedPersons?.map((person) => person._id) } }) }
 
 	useEffect(() => {
-		// console.log(personsData);
+		console.log(invitedUsersData);
 		if (invitedUsersData.invitedUsers) {
 			setInvitedUsers(invitedUsersData.invitedUsers);
 		}
@@ -148,12 +168,39 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 
 	useEffect(() => {
 		if (invitedUsersData) {
-			setInvitedUsersIds(invitedUsersData.map((user) => user._id));
+			// console.log(data);
+			// setInvitedUsersIds(invitedUsersData.map((user) => user._id));
+			setInvitedUsersIds(invitedUsersData);
 		}
 	}, [invitedUsersData]);
 
-	const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+	// const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+	
+	const invitedUsers = useMemo(() => users.filter((user) => {
+		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
+		if (!iUser) { return; }
 
+		if (!iUser.ts) {
+			user.ts = new Date('January 1, 2021 00:00:00');
+		} else {
+			user.ts = iUser.ts;
+		}
+		return user;
+	}), [invitedUsersIds, users]);
+
+	// const invitedUsersbuf = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser._id === user._id) > -1).map((iUser) => { 
+	// 	const user = invitedUsersIds.find((user) => iUser._id === user._id); 
+	// 	console.log(user);
+	// 	if (!user || !user.ts) {
+	// 		iUser.ts = new Date('January 1, 2021 00:00:00');
+	// 	} else {
+	// 		iUser.ts = user.ts;
+	// 	}
+	// 	return iUser;
+	// 	// return { _id: user, ts: new Date('January 1, 2021 00:00:00') };
+	// }), [invitedUsersIds, users]);
+
+	// useMemo(() => console.log(data));
 	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
 
 	const setModal = useSetModal();
@@ -209,15 +256,17 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 	const onClose = () => {
 		setContext('participants');
 		if (onCreateParticipantId) {
+			// const user = { _id: onCreateParticipantId, ts: new Date() };
+			// setInvitedUsersIds(invitedUsersIds ? invitedUsersIds.concat(user) : user);
 			setOnCreateParticipantId(undefined);
-			location.reload()
+			location.reload();
 		}
 	};
 
 	const onCreateParticipantClick = useCallback((user) => () => {
 		setOnCreateParticipantId(user._id);
 		setContext('onCreateParticipant');
-	}, [onCreateParticipantId, context]);
+	}, [onCreateParticipantId]);
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
 		try {
@@ -316,7 +365,7 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				{tab === 'info' && context === 'participants' && <Participants councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
 				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
-				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 				{tab === 'files' && 
 					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
 				}

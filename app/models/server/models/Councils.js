@@ -40,7 +40,7 @@ class Councils extends Base {
 	removeUserFromCouncil(councilId, userId) {
 		const data = this.findOne({ _id: councilId });
 		if (data.invitedUsers) {
-			this.update({ _id: councilId }, { $pull: { invitedUsers: userId } });
+			this.update({ _id: councilId }, { $pull: { invitedUsers: { _id: userId } } });
 		}
 	}
 
