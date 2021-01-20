@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, TextAreaInput, TextInput, Modal, Label } from '@rocket.chat/fuselage';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
@@ -59,10 +60,37 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 	</Modal>;
 };
 
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+const useQuery = ({ itemsPerPage, current }, [column, direction], councilId) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1,	surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	query: JSON.stringify({
+		$or: [
+			{ 'emails.address': { $regex: '', $options: 'i' } },
+			{ username: { $regex: '', $options: 'i' } },
+			{ name: { $regex: '', $options: 'i' } },
+			{ surname: { $regex: '', $options: 'i' } },
+		],
+		$and: [
+			{ type: { $ne: 'bot' } },
+			{ _id: councilId }
+		],
+	}),
+	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, councilId, column, direction]);
+
 export function EditCouncilPage() {
 	const t = useTranslation();
 	const context = useRouteParameter('context');
 	const councilId = useRouteParameter('id');
+
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['surname', 'asc']);
+
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+	const usersQuery = useQuery(debouncedParams, debouncedSort);
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
@@ -70,7 +98,21 @@ export function EditCouncilPage() {
 
 	const { data } = useEndpointDataExperimental('councils.findOne', query) || { result: [] };
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
+	const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
+	const invitedUsersData = useEndpointData('councils.invitedUsers', useQuery(debouncedParams, debouncedSort, councilId)) || { invitedUsers: [] };
+
 	const [cache, setCache] = useState();
+	const [invitedUsers, setInvitedUsers] = useState([]);
+	const [users, setUsers] = useState([]);
+
+	useEffect(() => {
+		if (invitedUsersData.invitedUsers) {
+			setInvitedUsers(invitedUsersData.invitedUsers);
+		}
+		if (usersData.users) {
+			setUsers(usersData.users);
+		}
+	}, [invitedUsersData, usersData]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -92,16 +134,17 @@ export function EditCouncilPage() {
 		data.invitedUsers = [];
 	}
 
-	return <EditCouncilWithNewData council={data} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
+	return <EditCouncilWithNewData council={data} onChange={onChange} workingGroupOptions={workingGroupOptions} users={users} invitedUsersData={invitedUsers}/>;
 }
 
 EditCouncilPage.displayName = 'EditCouncilPage';
 
 export default EditCouncilPage;
 
-function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
+function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users, invitedUsersData }) {
 	const t = useTranslation();
 
+	// console.log(council);
 	const { _id, d: previousDate, desc: previousDescription } = council || {};
 	const previousInvitedUsers = useMemo(() => council.invitedUsers ? council.invitedUsers.slice() : [], [council.invitedUsers.slice()]);
 	const previousCouncil = council || {};
@@ -109,8 +152,32 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date(previousDate));
 	const [description, setDescription] = useState(previousDescription);
-	const [invitedUsers, setInvitedUsers] = useState(previousInvitedUsers);
+	// const [invitedUsers, setInvitedUsers] = useState(previousInvitedUsers);
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
+	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
+	const [tab, setTab] = useState('info');
+
+	// const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+
+	useEffect(() => {
+		setDate(new Date(previousDate) || '');
+		setDescription(previousDescription || '');
+		if (invitedUsersData) {
+			setInvitedUsersIds(invitedUsersData);
+		}
+	}, [previousDate, previousDescription, invitedUsersData]);
+
+	const invitedUsers = useMemo(() => users.filter((user) => {
+		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
+		if (!iUser) { return; }
+
+		if (!iUser.ts) {
+			user.ts = new Date('January 1, 2021 00:00:00');
+		} else {
+			user.ts = iUser.ts;
+		}
+		return user;
+	}), [invitedUsersIds, users]);
 
 	const setModal = useSetModal();
 
@@ -119,23 +186,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	useEffect(() => {
-		setDate(new Date(previousDate) || '');
-		setDescription(previousDescription || '');
-	}, [previousDate, previousDescription, previousCouncil, _id]);
-
-	const compare = (arr1, arr2) => { return arr1.length === arr2.length && arr1.every((v, i) => (
-		v.firstName === arr2[i].firstName
-		&& v.lastName === arr2[i].lastName
-		&& v.patronymic === arr2[i].patronymic
-		&& v.position === arr2[i].position
-		&& v.contactPersonFirstName === arr2[i].contactPersonFirstName
-		&& v.contactPersonLastName === arr2[i].contactPersonLastName
-		&& v.contactPersonPatronymicName === arr2[i].contactPersonPatronymicName
-		&& v.phone === arr2[i].phone
-		&& v.email === arr2[i].email
-		&& v.ts === arr2[i].ts));
-	};
+	const compare = (arr1, arr2) => arr1.length === arr2.length && arr1.every((v, i) => ( v === arr2[i]._id));
 
 	const goBack = () => {
 		window.history.back();
@@ -159,7 +210,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 	const resetData = () => {
 		setDate(new Date(previousDate));
 		setDescription(previousDescription);
-		setInvitedUsers(previousInvitedUsers);
+		setInvitedUsersIds(previousInvitedUsers);
 		onChange();
 	};
 
@@ -205,6 +256,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 		setContext('participants');
 		if (onCreateParticipantId) {
 			setOnCreateParticipantId(undefined);
+			location.reload();
 		}
 	};
 
@@ -219,7 +271,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 	}, [_id, dispatchToastMessage, insertOrUpdateCouncil, date, description, invitedUsers, previousDate, previousDescription, previousCouncil, t]);
 
 	const handleSaveCouncil = useCallback(async () => {
-		await saveAction(date, description, invitedUsers);
+		await saveAction(date, description, invitedUsers.map((user) => user._id));
 		dispatchToastMessage({ type: 'success', message: t('Council_edited') });
 		onChange();
 	}, [saveAction, onChange]);
@@ -263,6 +315,25 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 	const onDeleteParticipantClick = (invitedUser) => () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Participant_Warning')} onDelete={onDeleteParticipantConfirm(invitedUser)} onCancel={() => setModal(undefined)}/>);
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
+
+	const header = useMemo(() => [
+		<Th key={'File_name'} color='default'>
+			{ t('File_name') }
+		</Th>,
+		<Th w='x40' key='download'/>,
+	], [mediaQuery]);
+
+	const renderRow = (document) => {
+		const { _id, title } = document;
+		return <Table.Row tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
+					<Icon name='download'/>
+				</Button>
+			</Table.Cell>
+		</Table.Row>;
+	};
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -309,6 +380,22 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
+				<Field mbe='x8'>
+					<Field.Label>{t('Council_invite_link')}</Field.Label>
+					<Field.Row>
+						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
+					</Field.Row>
+				</Field>
+				<Field mbe='x8'>
+					<Field.Label>{t('Council_type')}</Field.Label>
+					<Field.Row>
+						<TextInput readOnly />
+					</Field.Row>
+				</Field>
+				<Tabs flexShrink={0} mbe='x8'>
+					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
+					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
+				</Tabs>
 				{context === 'participants' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(_id)} aria-label={t('Add')}>
@@ -316,10 +403,20 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions }) {
 						</Button>
 					</Field.Row>
 				</Field>}
-				{context === 'participants' && <Participants councilId={_id} onChange={onChange}/>}
-				{context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
-				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsers} onNewParticipant={onParticipantClick}/>}
+				{tab === 'files' && <Field mbe='x8'>
+					<Field.Row marginInlineStart='auto'>
+						<Button marginInlineEnd='10px' small primary disabled aria-label={t('Add')}>
+							{t('Upload_file_question')}
+						</Button>
+					</Field.Row>
+				</Field>}
+				{tab === 'info' && context === 'participants' && <Participants councilId={_id} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
+				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
+				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
+				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
+				{tab === 'files' && 
+					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
+				}
 			</Page.Content>
 		</Page>
 	</Page>;

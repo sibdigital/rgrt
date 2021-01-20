@@ -46,5 +46,15 @@ export function CreateParticipant({ goTo, close, workingGroupOptions, ...props }
 		</Field.Row>
 	</Field>, [close, t, handleSave]);
 
-	return <ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} append={append} {...props}/>;
+	const custAppend = useMemo(() => <Field mbe='x8'>
+		<Field.Row marginInlineStart='auto'>
+			<Button marginInlineEnd='10px' small primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+			<Button small primary onClick={close('participants')} mie='x4' danger>{t('Cancel')}</Button>
+		</Field.Row>
+	</Field>, [close, t, handleSave]);
+
+	return <>
+		{custAppend}
+		<ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} append={custAppend} {...props}/>
+	</>;
 }

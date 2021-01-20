@@ -52,7 +52,7 @@ Meteor.startup(function() {
 		{ _id: 'leave-c',                            roles: ['admin', 'user', 'bot', 'anonymous', 'app'] },
 		{ _id: 'leave-p',                            roles: ['admin', 'user', 'bot', 'anonymous', 'app'] },
 		{ _id: 'manage-assets',                      roles: ['admin'] },
-		{ _id: 'manage-councils',                    roles: ['admin', 'secretary'] },
+		{ _id: 'manage-councils',                    roles: ['admin', 'secretary', 'working-group-member', 'working-group-leader'] },
 		{ _id: 'manage-emoji',                       roles: ['admin'] },
 		{ _id: 'manage-user-status',                 roles: ['admin'] },
 		{ _id: 'manage-outgoing-integrations',       roles: ['admin'] },
@@ -63,7 +63,7 @@ Meteor.startup(function() {
 		{ _id: 'manage-protocols',					 roles: ['admin', 'secretary'] },
 		{ _id: 'manage-selected-settings', 	         roles: ['admin'] },
 		{ _id: 'manage-tags',			 			 roles: ['admin'] },
-		{ _id: 'manage-working-group',	 			 roles: ['admin', 'secretary'] },
+		{ _id: 'manage-working-group',	 			 roles: ['admin', 'secretary', 'working-group-member', 'working-group-leader'] },
 		{ _id: 'mention-all',                        roles: ['admin', 'owner', 'moderator', 'user'] },
 		{ _id: 'mention-here',                       roles: ['admin', 'owner', 'moderator', 'user'] },
 		{ _id: 'mute-user',                          roles: ['admin', 'owner', 'moderator'] },
@@ -124,6 +124,8 @@ Meteor.startup(function() {
 		{ _id: 'edit-livechat-room-customfields',    roles: ['livechat-manager', 'livechat-agent', 'admin'] },
 		{ _id: 'send-omnichannel-chat-transcript',   roles: ['livechat-manager', 'admin'] },
 		{ _id: 'mail-messages',                      roles: ['admin'] },
+		{ _id: 'handbooks-home-page',           	 roles: ['admin, secretary'] },
+		{ _id: 'administration-home-page',           roles: ['admin, secretary'] },
 	];
 
 	for (const permission of permissions) {
@@ -141,6 +143,8 @@ Meteor.startup(function() {
 		{ name: 'app',              scope: 'Users',         description: '' },
 		{ name: 'guest',            scope: 'Users',         description: '' },
 		{ name: 'anonymous',        scope: 'Users',         description: '' },
+		{ name: 'working-group-member', scope: 'Users',     description: '' },
+		{ name: 'working-group-leader', scope: 'Users',     description: '' },
 		{ name: 'livechat-agent',   scope: 'Users',         description: 'Livechat Agent' },
 		{ name: 'livechat-manager', scope: 'Users',         description: 'Livechat Manager' },
 	];

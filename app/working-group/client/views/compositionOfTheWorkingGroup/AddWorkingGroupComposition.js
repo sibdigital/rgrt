@@ -46,9 +46,9 @@ export function AddWorkingGroupComposition({ goToNew, close, onChange, ...props 
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
-			<Field.Label>{t('Working_group')}</Field.Label>
+			<Field.Label>{t('Working_group_type')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput size={'3'} value={title} onChange={(e) => setTitle(e.currentTarget.value)} placeholder={t('Working_group')} />
+				<TextAreaInput size={'3'} value={title} onChange={(e) => setTitle(e.currentTarget.value)} placeholder={t('Working_group_type')} />
 			</Field.Row>
 		</Field>
 		<Field>

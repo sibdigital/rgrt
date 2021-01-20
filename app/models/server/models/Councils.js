@@ -40,14 +40,14 @@ class Councils extends Base {
 	removeUserFromCouncil(councilId, userId) {
 		const data = this.findOne({ _id: councilId });
 		if (data.invitedUsers) {
-			this.update({ _id: councilId }, { $pull: { invitedUsers: userId } });
+			this.update({ _id: councilId }, { $pull: { invitedUsers: { _id: userId } } });
 		}
 	}
 
 	addPersonToCouncil(_id, person) {
 		const data = this.findOne({ _id });
 		data._updatedAt = new Date();
-		data.invitedUsers = data.invitedUsers ? [...data.invitedUsers, person] : [person];
+		data.invitedPersons = data.invitedPersons ? [...data.invitedPersons, person] : [person];
 
 		return this.update({ _id }, { $set: { ...data } });
 	}

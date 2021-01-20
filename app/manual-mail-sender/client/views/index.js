@@ -40,6 +40,25 @@ const useErrandQuery = (params, sort, _id) => useMemo(() => ({
 	}),
 }), [params, sort, _id]);
 
+const invitedUsersQuery = ({ itemsPerPage, current }, [column, direction], councilId) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	query: JSON.stringify({
+		$or: [
+			{ 'emails.address': { $regex: '', $options: 'i' } },
+			{ username: { $regex: '', $options: 'i' } },
+			{ name: { $regex: '', $options: 'i' } },
+			{ surname: { $regex: '', $options: 'i' } },
+		],
+		$and: [
+			{ type: { $ne: 'bot' } },
+			{ _id: councilId }
+		],
+	}),
+	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, councilId, column, direction]);
+
 const assignObjectPaths = (obj, stack) => {
 	const isArray = Array.isArray(obj);
 	Object.keys(obj).forEach((k) => {
@@ -130,7 +149,9 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const councilQuery = useCouncilQuery(debouncedParams, debouncedSort, id);
+
 	const councilData = useEndpointData('councils.findOne', councilQuery) || {};
+	const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, id)) || { invitedUsers: [] };
 
 	const [recipients, setRecipients] = useState([]);
 	const [defaultEmails, setDefaultEmails] = useState('');
@@ -140,7 +161,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 
 	useEffect(() => {
 		const users = usersData || [];
-		const invitedUsers = councilData ? councilData.invitedUsers : [];
+		const invitedUsers = invitedUsersData ? invitedUsersData.invitedUsers : [];
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (councilData) {
 			let emails = '';
@@ -161,25 +182,48 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 				}),
 			}];
 
-			const child = {
-				label,
-				value: 'Council',
-				isDefaultValue: true,
-				children: !invitedUsers ? [] : invitedUsers.map((invitedUser) => {
-					const indexUser = users.findIndex((user) => user._id === invitedUser);
+			let isChild = false;
+
+			const getChildrens = (inviteds) => {
+				const res = [];
+				inviteds?.map((invitedUser) => {
+					const indexUser = users.findIndex((user) => user._id === invitedUser._id);
+
 					if (indexUser < 0) {
 						return;
 					}
+
+					isChild = true;
 					const value = users[indexUser];
+
+					if (!value) {
+						return;
+					}
+
 					emails += (value.emails ? value.emails[0].address : '') + ',';
-					return {
+					res.push({
 						label: [value.surname, value.name, value.patronymic].join(' '),
 						value: value.emails ? value.emails[0].address : '',
-					};
-				}),
-			};
+					});
+				});
 
-			recipients[0].children.push(child);
+				return res;
+			};
+			const child = invitedUsers ? {
+				label,
+				value: 'Council',
+				isDefaultValue: true,
+				children: !invitedUsers ? [] : getChildrens(invitedUsers)
+			} : null;
+
+			// console.log(child);
+			// console.log(invitedUsers);
+			// console.log(usersData);
+			
+			if (isChild) {
+				// console.log('nule');
+				recipients[0].children.push(child);
+			}
 			const mailSubject = [t('Council'), 'От', formatDateAndTime(councilData.d)].join(' ');
 
 			setDefaultEmails(emails);
@@ -188,7 +232,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData]);
+	}, [workingGroupsData, usersData, councilData, invitedUsersData, formatDateAndTime]);
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
 }
@@ -224,7 +268,6 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 			const userToSendEmail = users.find((user) =>
 				(currentUser._id === errand.initiatedBy._id && user._id === errand.chargedToUser._id)
 				|| (currentUser._id === errand.chargedToUser._id && user._id === errand.initiatedBy._id)) || {};
-			const email = userToSendEmail.emails ? userToSendEmail.emails[0].address : '';
 
 			const recipients = [{
 				label: 'Все пользователи',
@@ -243,24 +286,30 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 				}),
 			}];
 
-			const child = {
-				label: t('Errand'),
-				value: 'Errand',
-				isDefaultValue: true,
-				children: [{
-					label: [userToSendEmail.surname, userToSendEmail.name, userToSendEmail.patronymic].join(' '),
-					value: userToSendEmail.emails ? userToSendEmail.emails[0].address : '',
-				}],
-			};
-			recipients[0].children.push(child);
-			setDefaultEmails(email);
-			const mailSubjectTitle = [t('Errand'), 'От', formatDateAndTime(errand.ts)].join(' ');
-			setMailSubject(mailSubjectTitle);
-			setMailBody(getErrandMailBody(errand));
+			if (userToSendEmail) {
+				const email = userToSendEmail.emails ? userToSendEmail.emails[0].address : '';
+				const name = [userToSendEmail.surname ?? '', userToSendEmail.name ?? '', userToSendEmail.patronymic ?? ''].join(' ');
+
+				const child = {
+					label: t('Errand'),
+					value: 'Errand',
+					isDefaultValue: true,
+					children: [{
+						label: name,
+						value: email,
+					}],
+				};
+
+				recipients[0].children.push(child);
+				setDefaultEmails(email);
+				const mailSubjectTitle = [t('Errand'), 'От', formatDateAndTime(errand.ts ?? new Date())].join(' ');
+				setMailSubject(mailSubjectTitle);
+				setMailBody(getErrandMailBody(errand));
+			}
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData]);
+	}, [workingGroupsData, usersData, errandData]);
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
 }

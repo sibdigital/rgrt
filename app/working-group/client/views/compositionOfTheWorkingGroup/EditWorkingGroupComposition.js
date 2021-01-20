@@ -91,9 +91,9 @@ function EditWorkingGroupWithData({ close, onChange, workingGroupComposition, ..
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
-			<Field.Label>{t('Title')}</Field.Label>
+			<Field.Label>{t('Working_group_type')}</Field.Label>
 			<Field.Row>
-				<TextInput value={title} onChange={(e) => setTitle(e.currentTarget.value)}/>
+				<TextInput value={title} onChange={(e) => setTitle(e.currentTarget.value)} placeholder={t('Working_group_type')}/>
 			</Field.Row>
 		</Field>
 		<Field>

@@ -425,19 +425,22 @@ export const fileUploadToWorkingGroupRequestAnswer = async (files, { _id, mailId
 		if (!fileUploadIsValidContentType(file.file.type)) {
 			modal.open({
 				title: t('FileUpload_MediaType_NotAccepted'),
-				text: file.file.type || `*.${ s.strRightBack(file.file.name, '.') }`,
+				text: file.file.name,
 				type: 'error',
-				timer: 3000,
+				timer: 20000,
 			});
+			uploadNextFile();
 			return;
 		}
 
 		if (file.file.size === 0) {
 			modal.open({
 				title: t('FileUpload_File_Empty'),
+				text: file.file.name,
 				type: 'error',
-				timer: 1000,
+				timer: 20000,
 			});
+			uploadNextFile();
 			return;
 		}
 
@@ -601,3 +604,37 @@ export const fileUpload = async (files, input, { rid, tmid }) => {
 
 	uploadNextFile();
 };
+
+export const filesValidation = async (files) => {
+	files = [].concat(files);
+	const validationArray = [];
+
+	const validateNextFile = () => {
+		const file = files.pop();
+		if (!file) {
+			modal.close();
+			return;
+		}
+		console.log(file);
+
+		if (!fileUploadIsValidContentType(file.file.type)) {
+			validationArray.push({ 
+				id: file.id,
+				error: t('FileUpload_MediaType_NotAccepted'),
+				fileName: file.name,
+			});
+		}
+
+		if (file.file.size === 0) {
+			validationArray.push({
+				id: file.id,
+				error: t('FileUpload_File_Empty'),
+				fileName: file.name,
+			});
+		}
+		validateNextFile();
+	};
+
+	validateNextFile();
+	return validationArray;
+}
