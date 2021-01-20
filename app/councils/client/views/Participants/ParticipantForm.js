@@ -92,7 +92,7 @@ export default function ParticipantForm({ formValues, formHandlers, workingGroup
 					</Field.Row>
 				</Field>, [t, email, handleEmail])}
 				{useMemo(() => <Field mbe='x8' width='98%'>
-					<Field.Label flexGrow={0}>{t('Working_group')}</Field.Label>
+					<Field.Label flexGrow={0}>{t('Participant_Create_Working_Group')}</Field.Label>
 					<Field.Row>
 						<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
 					</Field.Row>

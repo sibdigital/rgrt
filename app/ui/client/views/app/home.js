@@ -195,12 +195,10 @@ const toolbarButtons = () => [
 		name: t('Councils'),
 		icon: 'events',
 		context: 'home',
-		openContext: 'councils',
 		condition: () => hasPermission('manage-councils'),
-		// action: () => {
-		// 	menu.close();
-		// 	FlowRouter.go('councils');
-		// },
+		action: () => {
+			FlowRouter.go('councils');
+		},
 	},
 	{
 		name: t('Protocols'),
@@ -252,16 +250,16 @@ const toolbarButtons = () => [
 		openContext: 'handbooks',
 		// condition: () => hasPermission('handbooks-home-page'),
 	},
-	{
-		name: t('Counsel'),
-		icon: 'events',
-		context: 'councils',
-		condition: () => hasPermission('manage-councils'),
-		action: () => {
-			menu.close();
-			FlowRouter.go('councils');
-		},
-	},
+	// {
+	// 	name: t('Counsel'),
+	// 	icon: 'events',
+	// 	context: 'councils',
+	// 	condition: () => hasPermission('manage-councils'),
+	// 	action: () => {
+	// 		menu.close();
+	// 		FlowRouter.go('councils');
+	// 	},
+	// },
 	{
 		name: t('Working_group_meetings'),
 		icon: 'working_group_meetings',
@@ -308,6 +306,15 @@ const toolbarButtons = () => [
 		action: () => {
 			menu.close();
 			FlowRouter.go('composition-of-the-working-group');
+		},
+	},
+	{
+		name: t('Persons'),
+		icon: 'team',
+		context: 'handbooks',
+		condition: () => hasPermission('manage-persons'),
+		action: () => {
+			// FlowRouter.go('composition-of-the-working-group');
 		},
 	},
 	{

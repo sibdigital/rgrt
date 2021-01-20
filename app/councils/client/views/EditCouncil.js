@@ -155,6 +155,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 	// const [invitedUsers, setInvitedUsers] = useState(previousInvitedUsers);
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
+	const [tab, setTab] = useState('info');
 
 	// const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
 
@@ -315,6 +316,25 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
+	const header = useMemo(() => [
+		<Th key={'File_name'} color='default'>
+			{ t('File_name') }
+		</Th>,
+		<Th w='x40' key='download'/>,
+	], [mediaQuery]);
+
+	const renderRow = (document) => {
+		const { _id, title } = document;
+		return <Table.Row tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
+					<Icon name='download'/>
+				</Button>
+			</Table.Cell>
+		</Table.Row>;
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -360,6 +380,22 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
+				<Field mbe='x8'>
+					<Field.Label>{t('Council_invite_link')}</Field.Label>
+					<Field.Row>
+						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
+					</Field.Row>
+				</Field>
+				<Field mbe='x8'>
+					<Field.Label>{t('Council_type')}</Field.Label>
+					<Field.Row>
+						<TextInput readOnly />
+					</Field.Row>
+				</Field>
+				<Tabs flexShrink={0} mbe='x8'>
+					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
+					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
+				</Tabs>
 				{context === 'participants' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(_id)} aria-label={t('Add')}>
@@ -367,10 +403,20 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 						</Button>
 					</Field.Row>
 				</Field>}
-				{context === 'participants' && <Participants councilId={_id} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
-				{context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
-				{context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
+				{tab === 'files' && <Field mbe='x8'>
+					<Field.Row marginInlineStart='auto'>
+						<Button marginInlineEnd='10px' small primary disabled aria-label={t('Add')}>
+							{t('Upload_file_question')}
+						</Button>
+					</Field.Row>
+				</Field>}
+				{tab === 'info' && context === 'participants' && <Participants councilId={_id} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
+				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
+				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
+				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
+				{tab === 'files' && 
+					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
+				}
 			</Page.Content>
 		</Page>
 	</Page>;

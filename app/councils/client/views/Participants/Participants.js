@@ -162,7 +162,7 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 
 	const header = useMemo(() => [
 		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
-		<Th key={'position'} color='default'>{t('Council_Organization_Position')}</Th>,
+		// <Th key={'position'} color='default'>{t('Council_Organization_Position')}</Th>,
 		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
 		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
 		mediaQuery && <Th key={'createdAt'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>,
@@ -199,7 +199,7 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 		const email = iu.emails ? iu.emails[0].address : '';
 		return <Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
-			<Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>
+			{/* <Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell> */}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{email}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}

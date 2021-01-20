@@ -310,6 +310,9 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 
 				</Field>
 				<ButtonGroup>
+					<Button primary small aria-label={t('Agenda')}>
+						{t('Agenda')}
+					</Button>
 					<Button primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>
@@ -332,6 +335,12 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
+					<Field.Label>{t('Council_type')}</Field.Label>
+					<Field.Row>
+						<TextInput readOnly value={data.type ?? t('Council_type_meeting')}/>
+					</Field.Row>
+				</Field>
+				<Field mbe='x8'>
 					<Field.Label>{t('Council_invite_link')}</Field.Label>
 					<Field.Row>
 						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
@@ -339,7 +348,6 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				</Field>
 				<Tabs flexShrink={0} mbe='x8'>
 					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
-					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Persons')}</Tabs.Item>
 					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
 				</Tabs>
 				{tab === 'info' && context === 'participants' && <Field mbe='x8'>
@@ -369,8 +377,6 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				{tab === 'files' && 
 					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
 				}
-				{tab === 'persons' && 
-					<PersonsTable persons={persons} />}
 			</Page.Content>
 		</Page>
 	</Page>;
