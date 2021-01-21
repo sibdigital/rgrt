@@ -11,19 +11,19 @@ Meteor.methods({
 		}
 
 		if (!protocolId) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field ProtocolId is required', { method: 'insertOrUpdateSection', field: 'ProtocolId' });
+			throw new Meteor.Error('error-the-field-is-required', 'The field ProtocolId is required', { method: 'insertOrUpdateItem', field: 'ProtocolId' });
 		}
 
 		if (!sectionId) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field SectionId is required', { method: 'insertOrUpdateSection', field: 'SectionId' });
+			throw new Meteor.Error('error-the-field-is-required', 'The field SectionId is required', { method: 'insertOrUpdateItem', field: 'SectionId' });
 		}
 
 		if (!s.trim(item.num)) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field Number is required', { method: 'insertOrUpdateSection', field: 'Number' });
+			throw new Meteor.Error('error-the-field-is-required', 'The field Number is required', { method: 'insertOrUpdateItem', field: 'Number' });
 		}
 
 		if (!s.trim(item.name)) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field Name is required', { method: 'insertOrUpdateSection', field: 'Name' });
+			throw new Meteor.Error('error-the-field-is-required', 'The field Name is required', { method: 'insertOrUpdateItem', field: 'Name' });
 		}
 
 		if (!item._id) {
