@@ -3,7 +3,6 @@ import { findPersons, findPerson } from '../lib/persons';
 
 API.v1.addRoute('persons.list', { authRequired: true }, {
 	get() {
-		console.log('hatlist');
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
 

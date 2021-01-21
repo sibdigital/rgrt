@@ -1,7 +1,6 @@
 import { Persons } from '../../../models/server/raw';
 
 export async function findPersons({ query = {}, pagination: { offset, count, sort } }) {
-	console.log('hat');
 	const cursor = await Persons.find(query, {
 		sort: sort || { time: 1 },
 		skip: offset,

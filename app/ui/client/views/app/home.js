@@ -312,9 +312,9 @@ const toolbarButtons = () => [
 		name: t('Persons'),
 		icon: 'team',
 		context: 'handbooks',
-		condition: () => hasPermission('manage-persons'),
+		// condition: () => hasPermission('manage-persons'),
 		action: () => {
-			// FlowRouter.go('composition-of-the-working-group');
+			FlowRouter.go('persons');
 		},
 	},
 	{
