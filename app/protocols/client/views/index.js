@@ -76,7 +76,7 @@ export function ProtocolsPage() {
 	}, []);
 
 	const goBack = () => {
-		window.history.back();
+		FlowRouter.go('home')
 	};
 
 	return <Page flexDirection='row'>
@@ -88,9 +88,12 @@ export function ProtocolsPage() {
 					</Button>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
-				<Button small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
-					<Icon name='plus'/>
-				</Button>
+
+				<Field width={'6%'} display={'block'} marginBlock={'15px'}>
+					<Button className='go-back-button' onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+						<Icon name='plus'/>
+					</Button>
+				</Field>
 			</Page.Header>
 			<Page.Content>
 				<Protocols setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
