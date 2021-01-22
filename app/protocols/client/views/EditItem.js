@@ -1,4 +1,8 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import Chip from '@material-ui/core/Chip';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
 import {
 	Box,
 	Button,
@@ -17,6 +21,7 @@ import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
 
+import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
@@ -62,6 +67,9 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
+
+	const personsData = useEndpointData('persons.list', useMemo(() => ({ }), [])) || { persons: [] };
+
 	const item = protocol.sections.find(s => s._id === sectionId).items.find(i => i._id === itemId);
 
 	const { _id, num: previousNumber, name: previousName, responsible: previousResponsible, expireAt: previousExpireAt } = item || {};
@@ -69,8 +77,9 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
-	const [responsible, setResponsible] = useState('');
+	const [responsible, setResponsible] = useState({});
 	const [expireAt, setExpireAt] = useState('');
+	console.log(responsible)
 
 	useEffect(() => {
 		setNumber(previousNumber || '');
@@ -104,7 +113,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 		close();
 		onChange();
 	}, [saveAction, close, onChange]);
-	
+
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
 			<Field.Label>{t('Item_Number')}</Field.Label>
@@ -131,9 +140,24 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 		</Field>
 		<Field>
 			<Field.Label>{t('Item_Responsible')}</Field.Label>
-			<Field.Row>
-				<TextInput value={responsible} onChange={(e) => setResponsible(e.currentTarget.value)} placeholder={t('Item_Responsible')} />
-			</Field.Row>
+			<Autocomplete
+				multiple
+				id="size-small-outlined-multi"
+				size="small"
+				value={responsible}
+				options={personsData.persons}
+				getOptionLabel={(option) => option.name}
+				getOptionSelected={(option, value) => option.name === value.name} 
+				filterSelectedOptions
+				onChange={(event, value) => setResponsible(value)}
+				renderInput={(params) => (
+				<TextField
+					{...params}
+					variant="outlined"
+					placeholder={t('Item_Responsible')}
+				/>
+				)}
+			/>
 		</Field>
 		<Field>
 			<Field.Label>{t('Item_ExpireAt')}</Field.Label>
