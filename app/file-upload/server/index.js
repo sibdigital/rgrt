@@ -6,6 +6,7 @@ import './config/_configUploadStorage';
 import './methods/sendFileMessage';
 import './methods/getS3FileUrl';
 import './methods/sendFileWorkingGroupRequestAnswer';
+import './methods/sendFileCouncil';
 import './startup/settings';
 
 export {
