@@ -118,40 +118,6 @@ function ParticipantsWithData({ councilId, onChange, invitedUsers, setInvitedUse
 	return <InvitedUsersTable invitedUsers={invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
 }
 
-// function ParticipantsWithData({ councilId, onChange }) {
-// 	const t = useTranslation();
-// 	const [params, setParams] = useState({ _id: councilId, current: 0, itemsPerPage: 25 });
-// 	const [sort, setSort] = useState(['surname', 'asc']);
-// 	const [cache, setCache] = useState();
-
-// 	const debouncedParams = useDebouncedValue(params, 500);
-// 	const debouncedSort = useDebouncedValue(sort, 500);
-
-// 	const query = useQuery(debouncedParams, debouncedSort, cache);
-
-// 	const data = useEndpointData('councils.invitedUsers', query) || { invitedUsers: [] };
-
-// 	const deleteUserFromCouncil = useMethod('deleteUserFromCouncil');
-// 	const setModal = useSetModal();
-// 	const dispatchToastMessage = useToastMessageDispatch();
-
-// 	const onDeleteUserFromCouncilConfirm = useCallback(async (userId) => {
-// 		try {
-// 			await deleteUserFromCouncil(councilId, userId);
-// 			data.invitedUsers = data.invitedUsers.filter((invitedUser) => invitedUser !== userId);
-// 			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
-// 		} catch (error) {
-// 			dispatchToastMessage({ type: 'error', message: error });
-// 		}
-// 	}, [deleteUserFromCouncil, dispatchToastMessage, onChange]);
-
-// 	const onDel = (userId) => () => { onDeleteUserFromCouncilConfirm(userId); };
-
-// 	const onDeleteUserFromCouncilClick = (userId) => () => setModal(() => <DeleteWarningModal title={t('Council_user_delete_warning')} onDelete={onDel(userId)} onCancel={() => setModal(undefined)}/>);
-
-// 	return <InvitedUsersTable invitedUsers={data.invitedUsers} onDelete={onDeleteUserFromCouncilClick}/>;
-// }
-
 export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
@@ -212,4 +178,75 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	};
 
 	return <GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />;
+}
+
+export function Persons({ councilId, onChange, invitedPersons, setInvitedPersons }) {
+	const t = useTranslation();
+
+	const deletePersonFromCouncil = useMethod('deletePersonFromCouncil');
+	const setModal = useSetModal();
+	const dispatchToastMessage = useToastMessageDispatch();
+
+	const onDeletePersonFromCouncilConfirm = useCallback(async (personId) => {
+		try {
+			await deletePersonFromCouncil(councilId, personId);
+			const persons = invitedPersons.filter((user) => user._id !== personId);
+			setInvitedPersons(persons);
+			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	}, [deletePersonFromCouncil, dispatchToastMessage, onChange, invitedPersons, setInvitedPersons]);
+
+	const onDel = (personId) => () => { onDeletePersonFromCouncilConfirm(personId); };
+
+	const onDeletePersonFromCouncilClick = (personId) => () => setModal(() => <DeleteWarningModal title={t('Council_user_delete_warning')} onDelete={onDel(personId)} onCancel={() => setModal(undefined)}/>);
+
+	return <InvitedPersonsTable invitedPersons={invitedPersons} onDelete={onDeletePersonFromCouncilClick}/>;
+}
+
+function InvitedPersonsTable({ invitedPersons, onDelete }) {
+	const t = useTranslation();
+	const formatDateAndTime = useFormatDateAndTime();
+
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+
+	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	const header = useMemo(() => [
+		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
+		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
+		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
+		mediaQuery && <Th key={'Joined_at'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>,
+		<Th w='x40' key='delete'></Th>,
+	], [mediaQuery]);
+
+	const styleTableRow = { wordWrap: 'break-word' };
+	const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
+
+	const getBackgroundColor = (invitedPerson) => {
+		const index = invitedPersons.findIndex((user) => user._id === invitedPerson._id);
+		if (index > 0 && index % 2 === 1) {
+			return 'var(--color-lighter-blue)';
+		}
+
+		return '';
+	};
+
+	const renderRow = (invitedPerson) => {
+		const iu = invitedPerson;
+		return <Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedPerson)} tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.email}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}
+			<Table.Cell alignItems={'end'}>
+				<Button small aria-label={t('Delete')} onClick={onDelete(iu._id)}>
+					<Icon name='trash'/>
+				</Button>
+			</Table.Cell>
+		</Table.Row>;
+	};
+
+	return <GenericTable header={header} renderRow={renderRow} results={invitedPersons} total={invitedPersons.length} setParams={setParams} params={params} />;
 }

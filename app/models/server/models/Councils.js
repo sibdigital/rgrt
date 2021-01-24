@@ -52,12 +52,36 @@ class Councils extends Base {
 		return this.update({ _id }, { $set: { ...data } });
 	}
 
+	addPersonsToCouncil(_id, persons) {
+		const data = this.findOne({ _id });
+		data._updatedAt = new Date();
+		data.invitedPersons = data.invitedPersons ? data.invitedPersons.concat(persons) : persons;
+
+		return this.update({ _id }, { $set: { ...data } });
+	}
+
 	updatePersonCouncil(_id, person, index) {
 		const data = this.findOne({ _id });
 		data._updatedAt = new Date();
-		data.invitedUsers[index] = person;
+		data.invitedPersons[index] = person;
 
 		return this.update({ _id }, { $set: { ...data } });
+	}
+
+	removePersonFromCouncil(councilId, personId) {
+		const data = this.findOne({ _id: councilId });
+		if (data.invitedPersons) {
+			this.update({ _id: councilId }, { $pull: { invitedPersons: { _id: personId } } });
+		}
+	}
+
+	uploadFile(councilId, fileData) {
+		const data = this.findOne({ _id: councilId });
+		
+		data._updatedAt = new Date();
+		
+		data.documents = data.documents ? [...data.documents, fileData] : [fileData];
+		return this.update({ _id: councilId }, { $set: { ...data } });
 	}
 }
 

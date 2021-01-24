@@ -210,36 +210,27 @@ function NewParticipantStep({ step, title, active, council }) {
 		surname: '',
 		name: '',
 		patronymic: '',
-		// organization: '',
-		// position: '',
 		phone: '',
 		email: '',
-		// workingGroup: '',
 	});
 	const {
 		surname,
 		name,
 		patronymic,
-		// organization,
-		// position,
 		phone,
 		email,
-		// workingGroup,
 	} = values;
 
 	const {
 		handleSurname,
 		handleName,
 		handlePatronymic,
-		// handleOrganization,
-		// handlePosition,
 		handlePhone,
 		handleEmail,
-		// handleWorkingGroup,
 	} = handlers;
+
 	console.log('new part');
 	
-
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 	const insertOrUpdateCouncilPerson = useMethod('insertOrUpdateCouncilPerson');
 
@@ -262,11 +253,15 @@ function NewParticipantStep({ step, title, active, council }) {
 			const personId = await insertOrUpdatePerson(values);
 			console.log(personId);
 			if (personId) {
-				const person = values;
-				person._id = personId;
+				// const person = values;
+				const person = {
+					_id: personId,
+					ts: new Date()
+				}
+				// person._id = personId;
 				console.log(person);
-				await insertOrUpdateCouncilPerson(councilId, person);
-				return true;
+				await insertOrUpdateCouncilPerson(council, person);
+				goToFinalStep();
 			}
 			return false;
 		} catch(error) {

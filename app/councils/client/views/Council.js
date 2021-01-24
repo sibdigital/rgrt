@@ -1,22 +1,30 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal, Tabs, Table } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal, Tabs, Table, Select } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import ru from 'date-fns/locale/ru';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
-import { useRouteParameter } from '../../../../client/contexts/RouterContext';
+import { useRouteParameter, useCurrentRoute } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../settings/client';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
-import { Participants } from './Participants/Participants';
-import { AddParticipant } from './Participants/AddParticipant';
+import { fileUploadToCouncil, filesValidation } from '../../../ui/client/lib/fileUpload';
+import { mime } from '../../../utils/lib/mimeTypes';
+import { Participants, Persons } from './Participants/Participants';
+import { AddParticipant, AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
 import { LeaderType } from 'docx';
+
+registerLocale('ru', ru);
+
+require('react-datepicker/dist/react-datepicker.css');
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -95,15 +103,25 @@ const invitedUsersQuery = ({ itemsPerPage, current }, [column, direction], counc
 	...current && { offset: current },
 }), [itemsPerPage, current, councilId, column, direction]);
 
+const invitedPersonsQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, email: 1, surname: 1, patronymic: 1, phone: 1 }),
+	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, column, direction]);
+
 export function CouncilPage() {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const councilId = useRouteParameter('id');
+	const routeUrl = useCurrentRoute();
 
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [context, setContext] = useState('participants');
 	const [invitedUsers, setInvitedUsers] = useState([]);
+	const [files, setFiles] = useState([]);
 	const [persons, setPersons] = useState([]);
+	const [invitedPersons, setInvitedPersons] = useState([]);
 	const [cache, setCache] = useState();
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
@@ -112,33 +130,42 @@ export function CouncilPage() {
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 	const usersQuery = useQuery(debouncedParams, debouncedSort);
+	const personsQuery = invitedPersonsQuery(debouncedParams, debouncedSort);
 
-	const onChange = () => { console.log('onChange'); setCache(new Date()); };
+	const onChange = useCallback(() => { 
+		console.log('onChange'); 
+		setCache(new Date()); 
+	}, [cache] );
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
 	}), [councilId]);
 
-	const data = useEndpointData('councils.findOne', query) || { result: [] };
-	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-	const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
-	const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, councilId)) || { invitedUsers: [] };
-	// const personsData = useEndpointData('persons.list', useMemo(() => ({ }), []));
-	// const personsData = useEndpointData('persons.findOne', useMemo(() => ({ query: JSON.stringify({ _id: '"FK7b6iun9mAyyjit8"' }) }), []));
+	const data = useEndpointData('councils.findOne', query) || {  };
+	// const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
+	// const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
+	// const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, councilId)) || { invitedUsers: [] };
+	const workingGroups = { workingGroups: [] };
+	const usersData = { users: [] };
+	const invitedUsersData = { invitedUsers: [] };
+	const invitedPersonsData = useEndpointData('councils.invitedPersons', useMemo(() => ({ query: JSON.stringify({ _id: councilId }) }), [councilId])) || { persons: [] };
+	const personsData = useEndpointData('persons.list', personsQuery) || { persons: [] };
 	// useMemo(() => ({ query: JSON.stringify({ _id: { $in: data?.invitedPersons?.map((person) => person._id) } }) }
 
 	useEffect(() => {
-		console.log(invitedUsersData);
-		if (invitedUsersData.invitedUsers) {
-			setInvitedUsers(invitedUsersData.invitedUsers);
+		// console.log(data);
+		if (data.documents) {
+			setFiles(data.documents);
 		}
-		if (usersData.users) {
-			setUsers(usersData.users);
+		if (personsData.persons) {
+			setPersons(personsData.persons);
 		}
-		if (data.invitedPersons) {
-			setPersons(data.invitedPersons);
+		if (invitedPersonsData.persons) {
+			setInvitedPersons(invitedPersonsData.persons);
 		}
-	}, [invitedUsersData, usersData]);
+	}, [invitedPersonsData, personsData, data]);
+
+	const mode = useMemo(() => routeUrl[0].includes('council-edit') ? 'edit' : 'read', [routeUrl]);
 
 	const workingGroupOptions = useMemo(() => {
 		const res = [[null, t('Not_chosen')]];
@@ -148,33 +175,66 @@ export function CouncilPage() {
 		return res;
 	}, [workingGroups]);
 
-	return <Council persons={persons} councilId={councilId} data={data} users={users} setUsers={setUsers} onChange={onChange} workingGroupOptions={workingGroupOptions} invitedUsersData={invitedUsers}/>;
+	const councilTypeOptions = useMemo(() => {
+		const res = [[{ _id: null, title: 'Заседание' }, 'Заседание']];
+		return res;
+	}, []);
+
+	return <Council mode={mode} persons={persons} filesData={files} invitedPersonsData={invitedPersons} councilId={councilId} data={data} users={users} setUsers={setUsers} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} invitedUsersData={invitedUsers}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
 
 export default CouncilPage;
 
-function Council({ persons, councilId, data, users, setUsers, onChange, workingGroupOptions, invitedUsersData }) {
+function Council({ mode, persons, filesData, invitedPersonsData, councilId, data, users, setUsers, onChange, workingGroupOptions, councilTypeOptions, invitedUsersData }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
+	const { d: previousDate, desc: previousDescription, type: previousCouncilType } = data || {};
+	const previousCouncil = data || {};
+
+	const [date, setDate] = useState(new Date(previousDate));
+	const [description, setDescription] = useState(previousDescription);
+	const [councilType, setCouncilType] = useState(previousCouncilType);
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [context, setContext] = useState('participants');
 	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
-	const [tab, setTab] = useState('info');
+	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
+	const [attachedFiles, setAttachedFiles] = useState([]);
+	const [tab, setTab] = useState('persons');
 
 	useEffect(() => {
-		if (invitedUsersData) {
-			// console.log(data);
-			// setInvitedUsersIds(invitedUsersData.map((user) => user._id));
-			setInvitedUsersIds(invitedUsersData);
+		console.log(data);
+		if (mode === 'edit') {
+			setDate(new Date(previousDate) || '');
+			setDescription(previousDescription ?? '');
+			setCouncilType(previousCouncilType ?? '');
 		}
-	}, [invitedUsersData]);
+		if (invitedPersonsData) {
+			setInvitedPersonsIds(invitedPersonsData);
+		}
+		if (filesData) {
+			setAttachedFiles(filesData);
+		}
+	}, [invitedPersonsData, previousDate, previousDescription, previousCouncilType]);
 
-	// const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+	const inputStyles = useMemo(() => ({ whiteSpace: 'normal', border: mode === 'edit' ? '1px solid #4fb0fc' : '' }), [mode]);
+
+	const invitedPersons = useMemo(() => persons.filter((person) => {
+		const iPerson = invitedPersonsIds.find((iPerson) => iPerson._id === person._id);
+		if (!iPerson) { return; }
+
+		if (!iPerson.ts) {
+			person.ts = new Date('January 1, 2021 00:00:00');
+		} else {
+			person.ts = iPerson.ts;
+		}
+		return person;
+	}), [invitedPersonsIds, persons]);
+
 	
 	const invitedUsers = useMemo(() => users.filter((user) => {
 		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
@@ -188,19 +248,6 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 		return user;
 	}), [invitedUsersIds, users]);
 
-	// const invitedUsersbuf = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser._id === user._id) > -1).map((iUser) => { 
-	// 	const user = invitedUsersIds.find((user) => iUser._id === user._id); 
-	// 	console.log(user);
-	// 	if (!user || !user.ts) {
-	// 		iUser.ts = new Date('January 1, 2021 00:00:00');
-	// 	} else {
-	// 		iUser.ts = user.ts;
-	// 	}
-	// 	return iUser;
-	// 	// return { _id: user, ts: new Date('January 1, 2021 00:00:00') };
-	// }), [invitedUsersIds, users]);
-
-	// useMemo(() => console.log(data));
 	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
 
 	const setModal = useSetModal();
@@ -210,6 +257,8 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
+	
+	const address = settings.get('Site_Url') + 'i/' + data.inviteLink || '';
 
 	const downloadCouncilParticipants = (_id) => async (e) => {
 		e.preventDefault();
@@ -227,7 +276,77 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 		}
 	};
 
-	const address = settings.get('Site_Url') + 'i/' + data.inviteLink || '';
+	const fileUpload = async (files) => {
+		const validationArray = await filesValidation(files);
+		console.log(validationArray);
+		if (validationArray.length === 0) {
+			await fileUploadToCouncil(files, { _id: councilId });
+			setAttachedFiles(attachedFiles ? attachedFiles.concat(files) : files);
+			dispatchToastMessage({ type: 'success', message: 'success' });
+		} else {
+			validationArray.map((val) => dispatchToastMessage({ type: 'error', message: val.fileName + ' ' + val.error }));
+		}
+	}
+
+	const fileUploadClick = async () => {
+		if (!settings.get('FileUpload_Enabled')) {
+			console.log('!fileupload_enabled');
+			return null;
+		}
+		const $input = $(document.createElement('input'));
+		$input.css('display', 'none');
+		$input.attr({
+			id: 'fileupload-input',
+			type: 'file',
+			multiple: 'multiple',
+		});
+
+		$(document.body).append($input);
+
+		$input.one('change', async function(e) {
+			const filesToUpload = [...e.target.files].map((file) => {
+				Object.defineProperty(file, 'type', {
+					value: mime.lookup(file.name),
+				});
+				return {
+					file,
+					name: file.name,
+					title: file.name,
+				};
+			});
+
+			// fileUpload(filesToUpload);
+			const validationArray = await filesValidation(filesToUpload);
+			console.log(validationArray);
+			if (validationArray.length === 0) {
+				await fileUploadToCouncil(filesToUpload, { _id: councilId });
+				setAttachedFiles(attachedFiles ? attachedFiles.concat(filesToUpload) : filesToUpload);
+			} else {
+				validationArray.map((val) => dispatchToastMessage({ type: 'error', message: val.error }));
+			}
+
+			$input.remove();
+			onChange();
+		});
+		$input.click();
+
+		if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+			$input.click();
+		}
+		onChange();
+	};
+
+	const bufFileUploadClick = async () => {
+		console.log('here');
+		await fileUploadClick();
+		if (data.documents.length !== attachedFiles.length) {
+			const $input = $(document.createElement('fileupload-input'));
+			if ($input) {
+				$input.remove();
+			}
+			dispatchToastMessage({ type: 'success', message: 'success' });
+		}
+	};
 
 	const goBack = () => {
 		window.history.back();
@@ -255,18 +374,17 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 
 	const onClose = () => {
 		setContext('participants');
-		if (onCreateParticipantId) {
-			// const user = { _id: onCreateParticipantId, ts: new Date() };
-			// setInvitedUsersIds(invitedUsersIds ? invitedUsersIds.concat(user) : user);
-			setOnCreateParticipantId(undefined);
-			location.reload();
-		}
 	};
 
 	const onCreateParticipantClick = useCallback((user) => () => {
 		setOnCreateParticipantId(user._id);
 		setContext('onCreateParticipant');
 	}, [onCreateParticipantId]);
+
+	const onCreatePersonsClick = useCallback((person) => () => {
+		setContext('participants');
+		onChange();
+	}, [onChange]);
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
 		try {
@@ -292,7 +410,7 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 		return <Table.Row tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			<Table.Cell alignItems={'end'}>
-				<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
+				<Button small aria-label={t('download')}>
 					<Icon name='download'/>
 				</Button>
 			</Table.Cell>
@@ -325,19 +443,35 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				<Field mbe='x8'>
 					<Field.Label>{t('Date')}</Field.Label>
 					<Field.Row>
-						<TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data.d)}</TextInput>
+						{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data.d)}</TextInput>}
+						{mode === 'edit' && 
+							<DatePicker
+								dateFormat='dd.MM.yyyy HH:mm'
+								selected={date}
+								onChange={(newDate) => setDate(newDate)}
+								showTimeSelect
+								timeFormat='HH:mm'
+								timeIntervals={5}
+								timeCaption='Время'
+								customInput={<TextInput border='1px solid #4fb0fc' />}
+								locale='ru'
+								popperClassName='date-picker'/>
+						}
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ { whiteSpace: 'normal' } } value={data.desc} row='4' readOnly fontScale='p1'/>
+						<TextAreaInput style={ inputStyles } value={data.desc} onChange={(e) => setDescription(e.currentTarget.value)} row='4' readOnly={mode !== 'edit'} fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Council_type')}</Field.Label>
 					<Field.Row>
-						<TextInput readOnly value={data.type ?? t('Council_type_meeting')}/>
+						{mode !== 'edit' && <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
+						{mode === 'edit' && 
+							<Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Number')}/>
+						}
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
@@ -348,9 +482,10 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				</Field>
 				<Tabs flexShrink={0} mbe='x8'>
 					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
+					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>
 					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
 				</Tabs>
-				{tab === 'info' && context === 'participants' && <Field mbe='x8'>
+				{tab !== 'files' && context === 'participants' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
@@ -365,7 +500,7 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				</Field>}
 				{tab === 'files' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
-						<Button marginInlineEnd='10px' small primary disabled aria-label={t('Add')}>
+						<Button onClick={bufFileUploadClick} mie='10px' small primary aria-label={t('Add')}>
 							{t('Upload_file_question')}
 						</Button>
 					</Field.Row>
@@ -375,34 +510,18 @@ function Council({ persons, councilId, data, users, setUsers, onChange, workingG
 				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
 				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 				{tab === 'files' && 
-					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
+					<GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
+				}
+				{tab === 'persons' && context === 'participants' &&
+					<Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
+				}
+				{tab === 'persons' && context === 'addParticipants' &&
+					<AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
+				}
+				{tab === 'persons' && context === 'newParticipants' &&
+					<CreateParticipant councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
 				}
 			</Page.Content>
 		</Page>
 	</Page>;
-}
-
-function PersonsTable({ persons }) {
-	const t = useTranslation();
-
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
-	
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-
-	const header = useMemo(() => [
-		<Th key={'Council_Invited_Person'} color='default'>{ t('Council_Invited_Person') }</Th>,
-		<Th key={'Phone_number'} color='default'>{ t('Phone_number') }</Th>,
-		<Th key={'Email'} color='default'>{ t('Email') }</Th>,
-	], [mediaQuery]);
-
-	const renderRow = (person) => {
-		const { _id, surname, name, patronymic, phone, email } = person;
-		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }}>{surname} {name} {patronymic}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{phone}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{email}</Table.Cell>
-		</Table.Row>;
-	};
-
-	return <GenericTable header={header} renderRow={renderRow} results={persons ?? []} total={persons?.length ?? 0} setParams={setParams} params={params}/>;
 }

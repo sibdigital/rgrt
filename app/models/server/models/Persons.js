@@ -6,12 +6,19 @@ class Persons extends Base {
 		super('persons');
 	}
 
-	addToCouncil(councilId, personId) {
+	addToCouncil(council, personId) {
         const data = this.findOne({ _id: personId });
         data._updatedAt = new Date();
-        data.councils = data.councils ? [...data.councils, councilId] : [councilId];
+        data.councils = data.councils ? [...data.councils, council] : [council];
 
         return this.update({ _id: personId }, { $set: { ...data } });
+    }
+
+    removeFromCouncil(councilId, personId) {
+        const data = this.findOne({ _id: personId });
+        if (data.councils) {
+            return this.update({ _id: personId }, { $pull: { councils: { _id: councilId } } });
+        }
     }
 }
 

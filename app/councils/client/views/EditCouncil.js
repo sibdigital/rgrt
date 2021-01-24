@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { Box, Button, ButtonGroup, Field, Icon, TextAreaInput, TextInput, Modal, Label } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, Icon, TextAreaInput, TextInput, Modal, Label, Tabs } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -11,8 +11,9 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
-import { useRouteParameter } from '../../../../client/contexts/RouterContext';
+import { useRouteParameter, useCurrentRoute } from '../../../../client/contexts/RouterContext';
 import { validate, createCouncilData } from './lib';
+import { settings } from '../../../settings/client';
 import { AddParticipant } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
 import { Participants } from './Participants/Participants';
@@ -84,6 +85,7 @@ export function EditCouncilPage() {
 	const t = useTranslation();
 	const context = useRouteParameter('context');
 	const councilId = useRouteParameter('id');
+	const routeUrl = useCurrentRoute();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
@@ -144,7 +146,6 @@ export default EditCouncilPage;
 function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users, invitedUsersData }) {
 	const t = useTranslation();
 
-	// console.log(council);
 	const { _id, d: previousDate, desc: previousDescription } = council || {};
 	const previousInvitedUsers = useMemo(() => council.invitedUsers ? council.invitedUsers.slice() : [], [council.invitedUsers.slice()]);
 	const previousCouncil = council || {};
@@ -152,11 +153,11 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date(previousDate));
 	const [description, setDescription] = useState(previousDescription);
-	// const [invitedUsers, setInvitedUsers] = useState(previousInvitedUsers);
 	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
 	const [tab, setTab] = useState('info');
 
+	const address = settings.get('Site_Url') + 'i/' + council.inviteLink || '';
 	// const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
 
 	useEffect(() => {
@@ -316,24 +317,24 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
-	const header = useMemo(() => [
-		<Th key={'File_name'} color='default'>
-			{ t('File_name') }
-		</Th>,
-		<Th w='x40' key='download'/>,
-	], [mediaQuery]);
+	// const header = useMemo(() => [
+	// 	<Th key={'File_name'} color='default'>
+	// 		{ t('File_name') }
+	// 	</Th>,
+	// 	<Th w='x40' key='download'/>,
+	// ], [mediaQuery]);
 
-	const renderRow = (document) => {
-		const { _id, title } = document;
-		return <Table.Row tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
-			<Table.Cell alignItems={'end'}>
-				<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
-					<Icon name='download'/>
-				</Button>
-			</Table.Cell>
-		</Table.Row>;
-	};
+	// const renderRow = (document) => {
+	// 	const { _id, title } = document;
+	// 	return <Table.Row tabIndex={0} role='link' action>
+	// 		<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
+	// 		<Table.Cell alignItems={'end'}>
+	// 			<Button onClick={onDownloadClick(_id)} small aria-label={t('download')}>
+	// 				<Icon name='download'/>
+	// 			</Button>
+	// 		</Table.Cell>
+	// 	</Table.Row>;
+	// };
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -392,10 +393,10 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 						<TextInput readOnly />
 					</Field.Row>
 				</Field>
-				<Tabs flexShrink={0} mbe='x8'>
+				{/* <Tabs flexShrink={0} mbe='x8'>
 					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
 					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
-				</Tabs>
+				</Tabs> */}
 				{context === 'participants' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(_id)} aria-label={t('Add')}>
@@ -414,9 +415,9 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
 				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
-				{tab === 'files' && 
+				{/* {tab === 'files' && 
 					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
-				}
+				} */}
 			</Page.Content>
 		</Page>
 	</Page>;
