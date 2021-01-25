@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Field, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
 
+import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
@@ -13,14 +14,24 @@ import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import CKEditor from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { Autocomplete, createFilterOptions } from '@material-ui/lab';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import Chip from '@material-ui/core/Chip';
+
+function constructPersonFIO(person) {
+	return person.surname + " " + person.name.substr(0,1) + "." + person.patronymic.substr(0,1) + "."
+}
 
 export function AddItem({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
+	const personsData = useEndpointData('persons.list', useMemo(() => ({ }), [])) || { persons: [] };
+
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
-	const [responsible, setResponsible] = useState('');
+	const [responsible, setResponsible] = useState({});
 	const [expireAt, setExpireAt] = useState('');
 
 	const protocolId = useRouteParameter('id');
@@ -85,10 +96,31 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 			</Field.Row>
 		</Field>
 		<Field>
+		<Field>
 			<Field.Label>{t('Item_Responsible')}</Field.Label>
-			<Field.Row>
-				<TextInput value={responsible} onChange={(e) => setResponsible(e.currentTarget.value)} placeholder={t('Item_Responsible')} />
-			</Field.Row>
+			<Autocomplete
+				multiple
+				id="tags-standard"
+				options={personsData.persons}
+				forcePopupIcon={false}
+				getOptionLabel={(option) => constructPersonFIO(option)}
+				filterSelectedOptions
+				filterOptions={createFilterOptions({ limit: 10 })}
+				onChange={(event, value) => setResponsible(value)}
+				renderTags={(value, getTagProps) =>
+					value.map((option, index) => (
+					  	<Chip label={constructPersonFIO(option)} {...getTagProps({ index })} />
+					))
+				}
+				renderInput={(params) => (
+					<TextField
+						{...params}
+						variant="outlined"
+						placeholder={t('Item_Responsible')}
+					/>
+				)}
+			/>
+		</Field>
 		</Field>
 		<Field>
 			<Field.Label>{t('Item_ExpireAt')}</Field.Label>
