@@ -735,7 +735,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 							<Field.Label>{t('Documents')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field border='2px solid #cbced1' mb='5px' width='45%'>
 								<Button id={fileSourceInputId} fontScale='p1' onClick={fileUploadClick} minHeight='2.5rem' border='none' textAlign='left' backgroundColor='var(--color-dark-10)'>
-									{t('Add_files')}
+									{t('Pin_File')}
 								</Button>
 							</Field>
 							{attachedFile?.length > 0 && <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>

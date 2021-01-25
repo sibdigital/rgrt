@@ -27,6 +27,11 @@ import GenericTable, { Th } from '../../../../../../client/components/GenericTab
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
+const filterProtocolsName = (val) => {
+	const target = val?.replaceAll(new RegExp('<[^>]*>', 'gi'), ' ') || '';
+	return target;
+};
+
 const FilterByText = ({ protocolsData, setProtocolsData, ...props }) => {
 	const t = useTranslation();
 	const [text, setText] = useState('');
@@ -34,7 +39,6 @@ const FilterByText = ({ protocolsData, setProtocolsData, ...props }) => {
 
 	useEffect(() => {
 		const regExp = new RegExp('^'.concat(text), 'i');
-		console.log(protocolsData);
 		try {
 			setProtocolsData(protocolsData.filter((protocol) => (protocol.num && protocol.num.match(regExp))
 				|| text.length === 0));
@@ -56,18 +60,13 @@ const FilterByDateRange = ({ protocolsData, setProtocolsData, ...props }) => {
 	const [endDate, setEndDate] = useState('');
 
 	const handleStartDateChange = useCallback((selectedDate) => {
-		console.log(selectedDate);
 		setStartDate(selectedDate);
-		const date = new Date(endDate);
-		if (date.getTime() < new Date(startDate).getTime() || !endDate) {
-			setEndDate(new Date());
+		const date = new Date(endDate ?? new Date());
+		if (date.getTime() < new Date(selectedDate).getTime()) {
+			setEndDate(new Date(selectedDate));
 		}
 	}, [endDate]);
 	const handleEndDateChange = useCallback((selectedDate) => {
-		console.log(selectedDate);
-		console.log(startDate);
-		console.log(new Date(startDate).getTime());
-		console.log(new Date(startDate).getTime());
 		if (new Date(selectedDate).getTime() >= new Date(startDate).getTime()) {
 			setEndDate(selectedDate);
 		}
@@ -222,7 +221,7 @@ const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, 
 				const mainLabel = (label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
 				return <Box display='flex' flexDirection='row' alignItems='center'
 					data-for='itemT'
-					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='350px'>
+					data-tip={ filterProtocolsName(tooltipLabel) } style={{ whiteSpace: 'normal' }} width='350px'>
 					<Label>{ mainLabel }</Label>
 					<ReactTooltip id='itemT' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
 				</Box>;
@@ -313,7 +312,6 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 		[...str]?.map((ch, index) => ch).join('') || '';
 
 	const [sectionItem, setSectionItem] = useState(-1);
-	console.log(sectionItem);
 
 	useMemo(() => selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? setSectionItem(-1) : '', [selectedSectionItemLabel]);
 
@@ -324,7 +322,7 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 				const mainLabel = (label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
 				return <Box display='flex' flexDirection='row' alignItems='center'
 					data-for='itemT'
-					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='350px'>
+					data-tip={ filterProtocolsName(tooltipLabel) } style={{ whiteSpace: 'normal' }} width='350px'>
 					<Label>{ mainLabel }</Label>
 					<ReactTooltip id='itemT' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
 				</Box>;
@@ -356,9 +354,6 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 	}, [hide, reset]);
 
 	useEffect(() => {
-		console.log('SUDA SM');
-		console.log(sectionItem);
-		console.log(items[sectionItem]);
 		if (items.length > 0 && sectionItem > -1) {
 			onChange('sectionItem')(sectionItem);
 			let label = items[sectionItem][1] ?? '';
@@ -478,8 +473,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	};
 
 	const handleChangeSelect = (field) => (val) => {
-		console.log('handle change select');
-		console.log(field, val);
 		const updateData = Object.assign({}, newData);
 
 		if (field === 'protocol' && val !== newData.protocol.value) {
@@ -504,7 +497,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 		}
 		updateData[field] = { value: val, required: newData[field].required };
-		console.log(updateData);
 		setNewData(updateData);
 	};
 
@@ -513,12 +505,13 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			setContext(contextField);
 		} else {
 			setContext('');
+			setFilterContext('');
+			setProtocolsFindData(protocolsData);
 		}
 	};
 
 	const handleFilterContext = (filter) => () => {
 		if (filter !== filterContext) {
-			console.log(protocolsData);
 			setFilterContext(filter);
 		}
 	};
@@ -527,7 +520,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 	const fileUploadClick = async (e) => {
 		e.preventDefault();
-		console.log('fileUpload');
 		if (!settings.get('FileUpload_Enabled')) {
 			console.log('!fileUpload_enabled');
 			return null;
@@ -617,6 +609,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			handleChangeSelect(field)(index);
 		}
 		setContext('');
+		setFilterContext('');
+		setProtocolsFindData(protocolsData);
 	};
 
 	return <Step active={active} working={commiting} onSubmit={handleSubmit}>
@@ -634,7 +628,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_select_mail')}
 									{newData.numberId.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('numberId')(''); }} backgroundColor='transparent' borderColor='transparent' danger label={t('Clear')}>
+									&& <Button onClick={() => { handleChangeSelect('numberId')(''); }} backgroundColor='transparent' borderColor='transparent' danger
+										data-for='buttonTooltip'
+										data-tip={ t('Clear') }>
+										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -647,7 +644,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 						<Field>
 							<Field.Row height='40px'>
 								<Label>
-									{Working_group_request_invite_select_protocol}
+									{t('Working_group_request_invite_select_protocol')}
 									{newData.protocol.value !== ''
 									&& <Button onClick={() => {
 										handleChangeSelect('sectionItem')('');
@@ -656,7 +653,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 										setSectionOptionSelectedLabel(Working_group_request_invite_select_sections);
 										handleChangeSelect('protocol')('');
 										setProtocolSelectLabel(Working_group_request_invite_select_protocol);
-									}} backgroundColor='transparent' borderColor='transparent' danger>
+									}} backgroundColor='transparent' borderColor='transparent' danger
+									data-for='buttonTooltip'
+									data-tip={ t('Clear') }>
+										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -705,7 +705,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 										setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items);
 										handleChangeSelect('section')('');
 										setSectionOptionSelectedLabel(Working_group_request_invite_select_sections);
-									}} backgroundColor='transparent' borderColor='transparent' danger>
+									}} backgroundColor='transparent' borderColor='transparent' danger
+									data-for='buttonTooltip'
+									data-tip={ t('Clear') }>
+										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -723,7 +726,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{Working_group_request_invite_select_sections_items}
 									{newData.sectionItem.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items); }} backgroundColor='transparent' borderColor='transparent' danger>
+									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items); }} backgroundColor='transparent' borderColor='transparent' danger
+										data-for='buttonTooltip'
+										data-tip={ t('Clear') }>
+										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -746,7 +752,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 							<Field.Label>{t('Documents')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field border='2px solid #cbced1' mb='5px' width='45%'>
 								<Button id={fileSourceInputId} fontScale='p1' onClick={fileUploadClick} minHeight='2.5rem' border='none' textAlign='left' backgroundColor='var(--color-dark-10)'>
-									{t('Add_files')}
+									{t('Pin_File')}
 								</Button>
 							</Field>
 							{attachedFile?.length > 0 && <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
