@@ -104,7 +104,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 		close();
 		onChange();
 	}, [saveAction, close, onChange]);
-
+	
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
 			<Field.Label>{t('Item_Number')}</Field.Label>
@@ -121,7 +121,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 						language: 'ru',
 						toolbar: [ 'bold', 'italic', 'link' ]
 					} }
-					data={name}
+					data={previousName}
 					onChange={ (event, editor) => {
 						const data = editor.getData();
 						setName(data);

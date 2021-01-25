@@ -286,7 +286,7 @@ API.v1.addRoute('users.all', { authRequired: true }, {
 		}).fetch();
 
 		return API.v1.success({
-			users
+			items: users
 		});
 	},
 });

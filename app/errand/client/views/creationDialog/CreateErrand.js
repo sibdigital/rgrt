@@ -6,6 +6,7 @@ import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 import toastr from 'toastr';
 import moment from 'moment';
 import { Tracker } from 'meteor/tracker';
+import { FlowRouter } from "meteor/kadira:flow-router";
 
 // eslint-disable-next-line import/order
 import { t } from '../../../../utils/client';
@@ -137,21 +138,31 @@ Template.CreateErrand.events({
 
 		const chargedUsers = instance.selectedUsers.get();
 		const initiatedUsers = instance.initiatedByUsers.get();
-		const { message } = instance;
+
+		var message;
+		if(instance == null){
+			message = null;
+		} else {
+			message = instance.message;
+		}
 
 		const reply = instance.reply.get();
 
+		if(message == null) {
+			rid = null;
+			mid = null;
+		} else {
+			var { rid, _id: mid } = message;
+		}
 
-		const { rid, _id: mid } = message;
 		const initiated_by = initiatedUsers[0];
 		const charged_to = chargedUsers[0];
 		const expired_at = moment(instance.expiredDate.get(), moment.localeData().longDateFormat('L')).toDate();
 
-
-		if (!rid) {
-			const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
-			return toastr.error(errorText);
-		}
+		// if (!rid) {
+		// 	const errorText = TAPi18n.__('Invalid_room_name', `${ rid }...`);
+		// 	return toastr.error(errorText);
+		// }
 		const result = await call('createErrand', { rid, mid, errandDescription, expired_at, initiated_by, charged_to, reply });
 		// callback to enable tracking
 		callbacks.run('afterErrand', Meteor.user(), result);
@@ -165,6 +176,7 @@ Template.CreateErrand.events({
 
 Template.CreateErrand.onRendered(function() {
 	this.find('#usersCharged').focus();
+
 	this.$('#expired_date').datepicker.dates['ru'] = {
 		days: ["Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресение"],
 		daysShort: ["Вос", "Пон", "Вто", "Сре", "Чет", "Пят", "Суб", "Вос"],
@@ -190,13 +202,17 @@ Template.CreateErrand.onRendered(function() {
 const suggestName = (msg = '') => msg.substr(0, 140);
 
 Template.CreateErrand.onCreated(function() {
-	const { message: msg } = this.data;
-	this.message = msg;
-
-	this.errandDescription = new ReactiveVar(suggestName(msg && msg.msg));
-	this.expiredDate = new ReactiveVar(new Date());
-
+	if(this.data.message != null) {
+		var { message: msg } = this.data;
+		this.message = msg;
+		this.errandDescription = new ReactiveVar(suggestName(msg && msg.msg));
+	}else{
+		this.message = null;
+		this.errandDescription = new ReactiveVar("");
+	}
 	this.pmid = msg && msg._id;
+
+	this.expiredDate = new ReactiveVar(new Date());
 
 	this.reply = new ReactiveVar('');
 
@@ -212,10 +228,11 @@ Template.CreateErrand.onCreated(function() {
 		this.selectedUsers.set([]);
 	};
 
-
 	this.initiatedByUsers = new ReactiveVar([]);
 	if (msg) {
 		this.initiatedByUsers.get().unshift(msg.u);
+	} else {
+		this.initiatedByUsers.get().unshift(Meteor.user());
 	}
 
 	this.onSelectInitiatedUser = ({ item: user }) => {

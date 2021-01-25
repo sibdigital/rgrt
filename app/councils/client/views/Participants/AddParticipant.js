@@ -54,7 +54,7 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 export function AddParticipant({ councilId, onChange, close, users, invitedUsers, setInvitedUsers, onNewParticipant, onCreateParticipantId }) {
 	let form = {};
 	if (councilId) {
-		form = <AddParticipantWithData councilId={councilId} onChange={onChange} close={close} users={users} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} onCreateParticipantId={onCreateParticipantId}/>;
+		form = <AddParticipantWithData councilId={councilId} onChange={onChange} close={close} users={users} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsers} onNewParticipant={onNewParticipant} onCreateParticipantId={onCreateParticipantId}/>;
 	} else {
 		form = <AddParticipantWithoutData onChange={onChange} close={close} invitedUsers={invitedUsers} onNewParticipant={onNewParticipant} setInvitedUsers={setInvitedUsers} users={users} onCreateParticipantId={onCreateParticipantId}/>;
 	}
@@ -73,7 +73,7 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 
 	useEffect(() => {
 		if (users) {
-			setFindUsers(users.filter((user) => invitedUsers.findIndex((invitedUser) => invitedUser === user._id) < 0));
+			setFindUsers(users.filter((user) => invitedUsers.findIndex((invitedUser) => invitedUser._id === user._id) < 0));
 		}
 	}, [users, invitedUsers]);
 
@@ -98,14 +98,14 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 
 	// if create new user
 	if (onCreateParticipantId && usersIdToAdd.length === 0) {
-		usersIdToAdd.push(onCreateParticipantId);
+		usersIdToAdd.push({ _id: onCreateParticipantId, ts: new Date() });
 		handleSave();
 	}
 
 	const onAddClick = (_id) => () => {
-		const index = usersIdToAdd.indexOf(_id);
+		const index = usersIdToAdd.findIndex((iUser) => iUser._id === _id);
 		if (index < 0) {
-			usersIdToAdd.push(_id);
+			usersIdToAdd.push({ _id, ts: new Date() });
 		} else {
 			usersIdToAdd.splice(index, 1);
 		}
@@ -146,7 +146,7 @@ function AddParticipantWithoutData({ onChange, close, users, invitedUsers, setIn
 	</>;
 }
 
-function AddParticipantWithData({ councilId, onChange, close, users, invitedUsers, onNewParticipant, onCreateParticipantId }) {
+function AddParticipantWithData({ councilId, onChange, close, users, invitedUsers, setInvitedUsers, onNewParticipant, onCreateParticipantId }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -155,19 +155,23 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 	const [countSelectedUsers, setCountSelectedUsers] = useState(0);
 	const [usersIdToAdd, setUsersIdToAdd] = useState([]);
 	const [findUsers, setFindUsers] = useState([]);
+
 	const addUsersToCouncil = useMethod('addUsersToCouncil');
 
-	const debouncedParams = useDebouncedValue(params, 500);
-	const debouncedSort = useDebouncedValue(sort, 500);
-	const query = useQuery(debouncedParams, debouncedSort);
+	// const debouncedParams = useDebouncedValue(params, 500);
+	// const debouncedSort = useDebouncedValue(sort, 500);
+	// const query = useQuery(debouncedParams, debouncedSort);
 
-	const data = useEndpointData('users.list', query) || { users: [] };
+	// const data = useEndpointData('users.list', query) || { users: [] };
+	// console.log(users);
+	// console.log(invitedUsers);
+
 
 	useEffect(() => {
-		if (data.users) {
-			setFindUsers(invitedUsers && invitedUsers.length > 0 ? data.users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers === user._id) < 0) : data.users);
+		if (users && !onCreateParticipantId) {
+			setFindUsers(invitedUsers && invitedUsers.length > 0 ? users.filter((user) => invitedUsers.findIndex((invitedUsers) => invitedUsers._id === user._id) < 0) : users);
 		}
-	}, [data, invitedUsers]);
+	}, [users, invitedUsers]);
 
 	const onAddUserCancelClick = () => {
 		close();
@@ -181,6 +185,7 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 		try {
 			if (usersIdToAdd.length > 0) {
 				await saveAction();
+				setInvitedUsers(invitedUsers ? invitedUsers.concat(usersIdToAdd) : usersIdToAdd);
 				setUsersIdToAdd([]);
 				dispatchToastMessage({ type: 'success', message: t('Participant_Added_Successfully') });
 			}
@@ -194,14 +199,14 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 
 	// if create new user
 	if (onCreateParticipantId && usersIdToAdd.length === 0) {
-		usersIdToAdd.push(onCreateParticipantId);
+		usersIdToAdd.push({ _id: onCreateParticipantId, ts: new Date() });
 		handleSave();
 	}
 
 	const onAddClick = (_id) => () => {
-		const index = usersIdToAdd.indexOf(_id);
+		const index = usersIdToAdd.findIndex((iUser) => iUser._id === _id);
 		if (index < 0) {
-			usersIdToAdd.push(_id);
+			usersIdToAdd.push({ _id, ts: new Date() });
 		} else {
 			usersIdToAdd.splice(index, 1);
 		}
@@ -224,7 +229,7 @@ function AddParticipantWithData({ councilId, onChange, close, users, invitedUser
 				</Button>
 			</ButtonGroup>
 		</Field>}
-		{!onCreateParticipantId && <SearchByText setParams={ setParams } usersData={data.users} setUsersData={setFindUsers}/>}
+		{!onCreateParticipantId && <SearchByText setParams={ setParams } usersData={users} setUsersData={setFindUsers}/>}
 		{ findUsers && !findUsers.length && !onCreateParticipantId
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
@@ -260,18 +265,9 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
 	const styleTableRow = { wordWrap: 'break-word' };
 
-	const getBackgroundColor = (invitedUser) => {
-		const index = invitedUsers.findIndex((user) =>
-			user.name === invitedUser.name
-			&& user.surname === invitedUser.surname
-			&& user.patronymic === invitedUser.patronymic
-			&& user.username === invitedUser.username
-			&& user.organization === invitedUser.organization
-			&& user.position === invitedUser.position
-			&& user.phone === invitedUser.phone
-			&& user.emails === invitedUser.emails
-			&& user.ts === invitedUser.ts);
-		if (usersIdToAdd && usersIdToAdd.findIndex((userId) => invitedUser._id === userId) > -1) {
+	const getBackgroundColor = (invitedUserId) => {
+		const index = invitedUsers.findIndex((iUser) => iUser._id === invitedUserId);
+		if (usersIdToAdd && usersIdToAdd.findIndex((user) => invitedUserId === user._id) > -1) {
 			return 'var(--list-selected-element-background-color)';
 		}
 		if (index > 0 && index % 2 === 1) {
@@ -284,7 +280,7 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	const renderRow = (invitedUser) => {
 		const iu = invitedUser;
 		const email = iu.emails ? iu.emails[0].address : '';
-		return <Table.Row key={iu._id} style={styleTableRow} onClick={handleAddUser(iu._id)} backgroundColor={getBackgroundColor(invitedUser)} tabIndex={0} role='link' action>
+		return <Table.Row key={iu._id} style={styleTableRow} onClick={handleAddUser(iu._id)} backgroundColor={getBackgroundColor(iu._id)} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
 			<Table.Cell fontScale='p1' style={style} color='default'>{iu.organization}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.position}</Table.Cell>}
@@ -294,4 +290,134 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	};
 
 	return <GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />;
+}
+
+
+export function AddPerson({ councilId, onChange, close, persons, invitedPersons, setInvitedPersons, onNewParticipant }) {
+	const t = useTranslation();
+	const dispatchToastMessage = useToastMessageDispatch();
+
+	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['surname', 'asc']);
+	const [countSelectedPersons, setCountSelectedPersons] = useState(0);
+	const [personsIdToAdd, setPersonsIdToAdd] = useState([]);
+	const [findPersons, setFindPersons] = useState([]);
+
+	const addPersonsToCouncil = useMethod('addPersonsToCouncil');
+	const addCouncilToPersons = useMethod('addCouncilToPersons');
+
+	useEffect(() => {
+		if (persons) {
+			setFindPersons(invitedPersons && invitedPersons.length > 0 ? persons.filter((user) => invitedPersons.findIndex((invitedUsers) => invitedUsers._id === user._id) < 0) : persons);
+		}
+	}, [persons, invitedPersons]);
+
+	const onAddUserCancelClick = () => {
+		close();
+	};
+
+	const saveAction = useCallback(async () => {
+		await addPersonsToCouncil(councilId, personsIdToAdd);
+		await addCouncilToPersons(councilId, personsIdToAdd);
+	}, [addPersonsToCouncil, addCouncilToPersons]);
+
+	const handleSave = useCallback(async () => {
+		try {
+			if (personsIdToAdd.length > 0) {
+				await saveAction();
+				setInvitedPersons(invitedPersons ? invitedPersons.concat(personsIdToAdd) : personsIdToAdd);
+				setPersonsIdToAdd([]);
+				dispatchToastMessage({ type: 'success', message: t('Participant_Added_Successfully') });
+			}
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		} finally {
+			onChange();
+			close();
+		}
+	}, [dispatchToastMessage, saveAction, t]);
+
+	const onAddClick = (_id) => () => {
+		const index = personsIdToAdd.findIndex((iUser) => iUser._id === _id);
+		if (index < 0) {
+			personsIdToAdd.push({ _id, ts: new Date() });
+		} else {
+			personsIdToAdd.splice(index, 1);
+		}
+		setCountSelectedPersons(personsIdToAdd.length);
+		onChange();
+	};
+
+	return <>
+		{<Field mbe='x8'>
+			<Label fontScale='p1'>{t('Selected')}: {countSelectedPersons}</Label>
+			<ButtonGroup marginInlineStart='auto'>
+				<Button onClick={onNewParticipant('newParticipants')} small primary aria-label={ t('New') }>
+					{ t('Participant_Create') }
+				</Button>
+				<Button onClick={handleSave} small primary aria-label={t('Add')}>
+					{t('Add')}
+				</Button>
+				<Button onClick={onAddUserCancelClick} small primary aria-label={t('Cancel')}>
+					{t('Cancel')}
+				</Button>
+			</ButtonGroup>
+		</Field>}
+		{<SearchByText setParams={ setParams } usersData={persons} setUsersData={setFindPersons}/>}
+		{ findPersons && !findPersons.length
+			? <>
+				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
+					{ t('No_data_found') }
+				</Tile>
+				{ params.text !== '' && <Button
+					mbe='x8' primary aria-label={ t('New') } onClick={onNewParticipant('newParticipants')}>
+					{ t('Participant_Create') }
+				</Button> }
+			</>
+			: <>
+				<PersonsTable invitedPersons={ findPersons } personsIdToAdd={ personsIdToAdd } handleAddPerson={ onAddClick }/>
+			</>
+		}
+	</>;
+}
+
+function PersonsTable({ invitedPersons, personsIdToAdd, handleAddPerson }) {
+	const t = useTranslation();
+
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+
+	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	const header = useMemo(() => [
+		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
+		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
+		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
+	], [mediaQuery]);
+
+	const styleTableRow = { wordWrap: 'break-word' };
+	const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
+
+	const getBackgroundColor = (invitedPersonId) => {
+		const index = invitedPersons.findIndex((user) => user._id === invitedPersonId);
+
+		if (personsIdToAdd && personsIdToAdd.findIndex((person) => invitedPersonId === person._id) > -1) {
+			return 'var(--list-selected-element-background-color)';
+		}
+		if (index > 0 && index % 2 === 1) {
+			return 'var(--list-even-element-background-color)';
+		}
+
+		return 'var(--list-element-background-color)';
+	};
+
+	const renderRow = (invitedPerson) => {
+		const iu = invitedPerson;
+		return <Table.Row key={iu._id} style={styleTableRow} onClick={handleAddPerson(iu._id)} backgroundColor={getBackgroundColor(invitedPerson._id)} tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.email}</Table.Cell>}
+		</Table.Row>;
+	};
+
+	return <GenericTable header={header} renderRow={renderRow} results={invitedPersons} total={invitedPersons.length} setParams={setParams} params={params} />;
 }

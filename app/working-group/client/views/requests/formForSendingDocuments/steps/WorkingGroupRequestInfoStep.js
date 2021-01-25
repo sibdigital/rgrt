@@ -24,7 +24,7 @@ function WorkingGroupRequestInfoStep({ step, title, active }) {
 	};
 	console.log(workingGroupRequestState.data);
 
-	return <Step active={active} onSubmit={handleSubmit}>
+	return <Step active={active} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>

@@ -167,6 +167,17 @@
 
 .date-picker {
 	z-index: 1000 !important;
+	font-size: 20px !important;
+}
+.custom-tree-select {
+	.dropdown-content {
+		z-index: 1000 !important;
+	}
+	.tag-remove { 
+		font-size: 16px !important;
+		font-weight: 700 !important;
+		margin-inline-start: 2px !important;
+	}
 }
 
 @media (width <= 500px) {

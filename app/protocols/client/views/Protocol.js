@@ -80,7 +80,7 @@ export function ProtocolPage() {
 	const data = useEndpointData('protocols.findOne', query) || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
-	const title = t('Protocol').concat(' ').concat(data.num).concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d));
+	const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
 
 	const deleteSection = useMethod('deleteSection');
 	const deleteItem = useMethod('deleteItem');
@@ -270,7 +270,7 @@ export function ProtocolPage() {
 	}, [])
 
 	const goBack = () => {
-		window.history.back();
+		FlowRouter.go('/protocols')
 	};
 
 	const workingGroupOptions = useMemo(() => {

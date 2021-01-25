@@ -94,11 +94,18 @@ function EditErrand({ errand, onChange, onClose }) {
 		}),
 	}), [errand.rid]);
 
-	const users = useEndpointData('users.autocomplete.by_room', userQuery) || { items: [] };
+	let stringQuery = '';
+
+	if (errand.rid == null) {
+		stringQuery = 'users.all';
+	} else {
+		stringQuery = 'users.autocomplete.by_room';
+	}
+	const users = useEndpointData(stringQuery, userQuery) || { items: [] };
 	const curUser = _.findWhere(users.items, { _id: errand.chargedToUser._id });
 	!curUser && users.items.push(errand.chargedToUser);
 	const availableUsers = useMemo(() => users.items.map((item) => [item._id, item.username]), [users, users.items]);
-
+	
 	const onEmailSendClick = () => {
 		onClose();
 		FlowRouter.go(`/manual-mail-sender/errand/${ errand._id }`);

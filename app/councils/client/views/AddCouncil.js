@@ -82,8 +82,17 @@ function AddCouncilWithNewData({ users, setUsers, onChange, workingGroupOptions 
 	const [description, setDescription] = useState('');
 	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
 
-	// TODO: maybe
-	const invitedUsers = useMemo(() => users.filter((user) => invitedUsersIds.findIndex((iUser) => iUser === user._id) > -1), [invitedUsersIds, users]);
+	const invitedUsers = useMemo(() => users.filter((user) => {
+		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
+		if (!iUser) { return; }
+
+		if (!iUser.ts) {
+			user.ts = new Date('January 1, 2021 00:00:00');
+		} else {
+			user.ts = iUser.ts;
+		}
+		return user;
+	}), [invitedUsersIds, users]);
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
 
@@ -100,7 +109,7 @@ function AddCouncilWithNewData({ users, setUsers, onChange, workingGroupOptions 
 	};
 
 	const onCreateParticipantClick = useCallback((user) => () => {
-		setInvitedUsersIds(invitedUsersIds.concat(user._id));
+		setInvitedUsersIds(invitedUsersIds.concat({ _id: user._id, ts: new Date() }));
 		setUsers(users.concat(user));
 		onChange();
 		setContext('participants');

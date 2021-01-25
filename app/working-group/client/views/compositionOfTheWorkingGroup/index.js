@@ -77,7 +77,7 @@ export function CompositionOfTheWorkingGroupPage() {
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x8'>
-					<Field.Label>{t('Working_group_composition_count')}: {workingGroupCompositionCount}</Field.Label>
+					<Field.Label>{t('Working_group_composition_count')}: {workingGroupCompositionCount === -1 ? 0 : workingGroupCompositionCount}</Field.Label>
 				</Field>
 				<Field mbe='x8' display={'block'}>
 					<Button small primary onClick={handleHeaderButtonClick('new')} aria-label={t('Working_group_composition_add')}>
@@ -90,8 +90,8 @@ export function CompositionOfTheWorkingGroupPage() {
 		{ context
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'edit' && t('Working_group_edit') }
-				{ context === 'new' && t('Working_group_add') }
+				{ context === 'edit' && t('Working_group_type_edit') }
+				{ context === 'new' && t('Working_group_type_add') }
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
 			<VerticalBar.Content>
 				{context === 'edit' && <EditWorkingGroupComposition _id={id} close={close} onChange={onChange} cache={cache}/>}

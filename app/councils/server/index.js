@@ -4,4 +4,7 @@ import './methods/addPersonToCouncil';
 import './methods/updatePersonCouncil';
 import './methods/downloadCouncilParticipants';
 import './methods/addUserToCouncil';
+import './methods/deletePersonFromCouncil';
 import './methods/deleteUserFromCouncil';
+import './methods/insertOrUpdateCouncilPerson';
+import './methods/addCouncilToPersons';
