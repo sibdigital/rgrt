@@ -1,26 +1,43 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { ButtonGroup, Button, Field, Icon, Label, TextInput, TextAreaInput, Modal, Tabs, Table, Select } from '@rocket.chat/fuselage';
+import {
+	ButtonGroup,
+	Button,
+	Field,
+	Icon,
+	Label,
+	TextInput,
+	TextAreaInput,
+	Modal,
+	Tabs,
+	Table,
+	Select,
+	Box, Margins, Chip, Callout,
+} from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
+import { Meteor } from 'meteor/meteor';
+import ReactTooltip from 'react-tooltip';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useRouteParameter, useCurrentRoute } from '../../../../client/contexts/RouterContext';
-import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
+import { hasPermission } from '../../../authorization';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { settings } from '../../../settings/client';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { fileUploadToCouncil, filesValidation } from '../../../ui/client/lib/fileUpload';
 import { mime } from '../../../utils/lib/mimeTypes';
-import { Participants, Persons } from './Participants/Participants';
-import { AddParticipant, AddPerson } from './Participants/AddParticipant';
+import { Persons } from './Participants/Participants';
+import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
-import { LeaderType } from 'docx';
+import { createCouncilData, validate } from './lib';
 
 registerLocale('ru', ru);
 
@@ -65,45 +82,29 @@ const SuccessModal = ({ title, onClose, ...props }) => {
 	</Modal>;
 };
 
+const SuccessFileDeleteModal = ({ onClose, ...props }) => {
+	const t = useTranslation();
+	return <Modal {...props}>
+		<Modal.Header>
+			<Icon color='success' name='checkmark-circled' size={20}/>
+			<Modal.Title>{t('Deleted')}</Modal.Title>
+			<Modal.Close onClick={onClose}/>
+		</Modal.Header>
+		<Modal.Content fontScale='p1'>
+			{t('File_has_been_deleted')}
+		</Modal.Content>
+		<Modal.Footer>
+			<ButtonGroup align='end'>
+				<Button primary onClick={onClose}>{t('Ok')}</Button>
+			</ButtonGroup>
+		</Modal.Footer>
+	</Modal>;
+};
+
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
-const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	fields: JSON.stringify({ name: 1, username: 1, emails: 1,	surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
-	query: JSON.stringify({
-		$or: [
-			{ 'emails.address': { $regex: '', $options: 'i' } },
-			{ username: { $regex: '', $options: 'i' } },
-			{ name: { $regex: '', $options: 'i' } },
-			{ surname: { $regex: '', $options: 'i' } },
-		],
-		$and: [
-			{ type: { $ne: 'bot' } },
-		],
-	}),
-	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
-	...itemsPerPage && { count: itemsPerPage },
-	...current && { offset: current },
-}), [itemsPerPage, current, column, direction]);
 
-const invitedUsersQuery = ({ itemsPerPage, current }, [column, direction], councilId) => useMemo(() => ({
-	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
-	query: JSON.stringify({
-		$or: [
-			{ 'emails.address': { $regex: '', $options: 'i' } },
-			{ username: { $regex: '', $options: 'i' } },
-			{ name: { $regex: '', $options: 'i' } },
-			{ surname: { $regex: '', $options: 'i' } },
-		],
-		$and: [
-			{ type: { $ne: 'bot' } },
-			{ _id: councilId },
-		],
-	}),
-	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
-	...itemsPerPage && { count: itemsPerPage },
-	...current && { offset: current },
-}), [itemsPerPage, current, councilId, column, direction]);
-
-const invitedPersonsQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+const invitedPersonsQuery = ({ itemsPerPage, current }, [column, direction], isAllow) => useMemo(() => ({
+	isAllow,
 	fields: JSON.stringify({ name: 1, email: 1, surname: 1, patronymic: 1, phone: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
@@ -112,106 +113,121 @@ const invitedPersonsQuery = ({ itemsPerPage, current }, [column, direction]) => 
 
 export function CouncilPage() {
 	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
 	const councilId = useRouteParameter('id');
 	const routeUrl = useCurrentRoute();
+	const userId = Meteor.userId();
+	const isAllow = hasPermission(userId, 'edit-councils');
 
-	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
-	const [context, setContext] = useState('participants');
-	const [invitedUsers, setInvitedUsers] = useState([]);
 	const [files, setFiles] = useState([]);
 	const [persons, setPersons] = useState([]);
 	const [invitedPersons, setInvitedPersons] = useState([]);
 	const [cache, setCache] = useState();
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
-	const [users, setUsers] = useState([]);
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
-	const usersQuery = useQuery(debouncedParams, debouncedSort);
-	const personsQuery = invitedPersonsQuery(debouncedParams, debouncedSort);
+	const personsQuery = invitedPersonsQuery(debouncedParams, debouncedSort, isAllow);
 
-	const onChange = useCallback(() => { 
-		console.log('onChange'); 
-		setCache(new Date()); 
-	}, [cache] );
+	const onChange = useCallback(() => {
+		console.log('onChange');
+		setCache(new Date());
+	}, [cache]);
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
 	}), [councilId]);
 
-	const data = useEndpointData('councils.findOne', query) || {  };
-	// const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-	// const usersData = useEndpointData('users.list', usersQuery) || { users: [] };
-	// const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, councilId)) || { invitedUsers: [] };
-	const workingGroups = { workingGroups: [] };
-	const usersData = { users: [] };
-	const invitedUsersData = { invitedUsers: [] };
-	const invitedPersonsData = useEndpointData('councils.invitedPersons', useMemo(() => ({ query: JSON.stringify({ _id: councilId }) }), [councilId])) || { persons: [] };
-	const personsData = useEndpointData('persons.list', personsQuery) || { persons: [] };
-	// useMemo(() => ({ query: JSON.stringify({ _id: { $in: data?.invitedPersons?.map((person) => person._id) } }) }
+	const { data, state } = useEndpointDataExperimental('councils.findOne', query) || {};
+	const { data: invitedPersonsData, state: invitedPersonsDataState } = useEndpointDataExperimental('councils.invitedPersons', useMemo(() => ({ query: JSON.stringify({ _id: councilId }) }), [councilId])) || { persons: [] };
+	const { data: personsData, state: personsDataState } = useEndpointDataExperimental('persons.list', personsQuery) || { persons: [] };
+	const { data: currentUser, state: currentUserState } = useEndpointDataExperimental('users.getRoles', useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
+	const { data: currentPerson, state: currentPersonState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
+	// const workingGroups = { workingGroups: [] };
+	// const currentUser = {};
 
 	useEffect(() => {
-		// console.log(data);
-		if (data.documents) {
+		if (data && data.documents) {
 			setFiles(data.documents);
 		}
-		if (personsData.persons) {
+		if (personsData && personsData.persons) {
 			setPersons(personsData.persons);
 		}
-		if (invitedPersonsData.persons) {
+		if (invitedPersonsData && invitedPersonsData.persons) {
 			setInvitedPersons(invitedPersonsData.persons);
 		}
 	}, [invitedPersonsData, personsData, data]);
 
 	const mode = useMemo(() => routeUrl[0].includes('council-edit') ? 'edit' : 'read', [routeUrl]);
 
-	const workingGroupOptions = useMemo(() => {
-		const res = [[null, t('Not_chosen')]];
-		if (workingGroups && workingGroups.workingGroups?.length > 0) {
-			return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
-		}
-		return res;
-	}, [workingGroups]);
+	// const workingGroupOptions = useMemo(() => {
+	// 	const res = [[null, t('Not_chosen')]];
+	// 	if (workingGroups && workingGroups.workingGroups?.length > 0) {
+	// 		return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+	// 	}
+	// 	return res;
+	// }, [workingGroups]);
 
 	const councilTypeOptions = useMemo(() => {
-		const res = [[{ _id: null, title: 'Заседание' }, 'Заседание']];
+		const res = [
+			[{ _id: null, title: t('Council_type_meeting') }, t('Council_type_meeting')],
+			[{ _id: null, title: t('Council_type_conference') }, t('Council_type_conference')],
+		];
 		return res;
-	}, []);
+	}, [t]);
+	console.log(mode);
 
-	return <Council mode={mode} persons={persons} filesData={files} invitedPersonsData={invitedPersons} councilId={councilId} data={data} users={users} setUsers={setUsers} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} invitedUsersData={invitedUsers}/>;
+	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState].includes(ENDPOINT_STATES.LOADING)) {
+		console.log('loading');
+		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+	}
+
+	if (mode === 'edit' && !(currentUser?.roles?.includes('secretary') || currentUser?.roles?.includes('admin'))) {
+		console.log('not permision');
+		return <Callout m='x16' type='danger'>{t('Not_Permission')}</Callout>;
+	}
+
+	return <Council mode={mode} persons={persons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={[]} councilTypeOptions={councilTypeOptions}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
 
 export default CouncilPage;
 
-function Council({ mode, persons, filesData, invitedPersonsData, councilId, data, users, setUsers, onChange, workingGroupOptions, councilTypeOptions, invitedUsersData }) {
+function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, councilId, data, userRoles, onChange, workingGroupOptions, councilTypeOptions }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
-	const { d: previousDate, desc: previousDescription, type: previousCouncilType } = data || {};
-	const previousCouncil = data || {};
+	// const { d: previousDate, desc: previousDescription, type: previousCouncilType } = data || {};
+	// const previousCouncil = data || {};
 
-	const [date, setDate] = useState(new Date(previousDate));
-	const [description, setDescription] = useState(previousDescription);
-	const [councilType, setCouncilType] = useState(previousCouncilType);
+	const [date, setDate] = useState(new Date());
+	const [description, setDescription] = useState('');
+	const [councilType, setCouncilType] = useState('');
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [onCreateParticipantId, setOnCreateParticipantId] = useState();
 	const [context, setContext] = useState('participants');
-	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [attachedFiles, setAttachedFiles] = useState([]);
-	const [tab, setTab] = useState('persons');
+	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
+	const [tab, setTab] = useState('files');
+	const [staticFileIndex, setStaticFileIndex] = useState(0);
+	const [isSecretary, setIsSecretary] = useState(false);
+	const [isUserJoin, setIsUserJoin] = useState(false);
 
 	useEffect(() => {
+		if (userRoles.includes('secretary') || userRoles.includes('admin')) {
+			setIsSecretary(true);
+			setTab('persons');
+		}
+		if (currentPerson && data?.invitedPersons?.findIndex((person) => person._id === currentPerson._id) > -1) {
+			setIsUserJoin(true);
+		}
 		console.log(data);
-		if (mode === 'edit') {
-			setDate(new Date(previousDate) || '');
-			setDescription(previousDescription ?? '');
-			setCouncilType(previousCouncilType ?? '');
+		if (data) {
+			setDate(new Date(data.d));
+			setDescription(data.desc);
+			// setCouncilType(e ?? '');
 		}
 		if (invitedPersonsData) {
 			setInvitedPersonsIds(invitedPersonsData);
@@ -219,7 +235,26 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 		if (filesData) {
 			setAttachedFiles(filesData);
 		}
-	}, [invitedPersonsData, previousDate, previousDescription, previousCouncilType]);
+		console.log(date);
+		console.log(description);
+	}, [invitedPersonsData, filesData, userRoles, data, currentPerson]);
+
+	const setModal = useSetModal();
+
+	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
+
+	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
+	const deleteCouncil = useMethod('deleteCouncil');
+
+	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
+
+	const addPersonsToCouncil = useMethod('addPersonsToCouncil');
+	const addCouncilToPersons = useMethod('addCouncilToPersons');
+	const deletePersonFromCouncil = useMethod('deletePersonFromCouncil');
+
+	const dispatchToastMessage = useToastMessageDispatch();
+
+	const address = [settings.get('Site_Url'), 'i/', data?.inviteLink || ''].join('');
 
 	const inputStyles = useMemo(() => ({ whiteSpace: 'normal', border: mode === 'edit' ? '1px solid #4fb0fc' : '' }), [mode]);
 
@@ -235,30 +270,44 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 		return person;
 	}), [invitedPersonsIds, persons]);
 
-	
-	const invitedUsers = useMemo(() => users.filter((user) => {
-		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
-		if (!iUser) { return; }
+	const goBack = () => {
+		window.history.back();
+	};
 
-		if (!iUser.ts) {
-			user.ts = new Date('January 1, 2021 00:00:00');
-		} else {
-			user.ts = iUser.ts;
+	const goToCouncils = () => {
+		FlowRouter.go('councils');
+	};
+
+	const onEdit = (_id) => () => {
+		FlowRouter.go(`/council/edit/${ _id }`);
+		window.location.reload();
+	};
+
+	const saveCouncilAction = useCallback(async (date, description, invitedPersons) => {
+		const councilData = createCouncilData(date, description, { _id: councilId }, invitedPersons);
+		const validation = validate(councilData);
+		if (validation.length === 0) {
+			await insertOrUpdateCouncil(councilData);
+			FlowRouter.go(`/council/${ councilId }`);
+			window.location.reload();
 		}
-		return user;
-	}), [invitedUsersIds, users]);
+		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+	}, [councilId, dispatchToastMessage, insertOrUpdateCouncil, date, description, t]);
+
+	const handleSaveCouncil = useCallback(async () => {
+		await saveCouncilAction(date, description, invitedPersonsIds);
+		dispatchToastMessage({ type: 'success', message: t('Council_edited') });
+		onChange();
+	}, [saveCouncilAction, onChange]);
+
+	const handleFileUploadChipClick = (index) => () => {
+		setCurrentUploadedFiles(currentUploadedFiles.filter((file, _index) => _index !== index));
+	};
+
+	const hasUnsavedChanges = useMemo(() => new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description,
+		[date, description, data]);
 
 	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
-
-	const setModal = useSetModal();
-
-	const deleteCouncil = useMethod('deleteCouncil');
-
-	const dispatchToastMessage = useToastMessageDispatch();
-
-	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
-	
-	const address = settings.get('Site_Url') + 'i/' + data.inviteLink || '';
 
 	const downloadCouncilParticipants = (_id) => async (e) => {
 		e.preventDefault();
@@ -267,7 +316,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 			const url = window.URL.createObjectURL(new Blob([res]));
 			const link = document.createElement('a');
 			link.href = url;
-			const fileName = t('Council_Invited_Users_List') + ' ' + moment(new Date()).format('DD MMMM YYYY') + '.docx';
+			const fileName = [t('Council_Invited_Users_List'), ' ', moment(new Date()).format('DD MMMM YYYY'), '.docx'].join('');
 			link.setAttribute('download', fileName);
 			document.body.appendChild(link);
 			link.click();
@@ -276,23 +325,34 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 		}
 	};
 
-	const fileUpload = async (files) => {
-		const validationArray = await filesValidation(files);
-		console.log(validationArray);
-		if (validationArray.length === 0) {
-			await fileUploadToCouncil(files, { _id: councilId });
-			setAttachedFiles(attachedFiles ? attachedFiles.concat(files) : files);
-			dispatchToastMessage({ type: 'success', message: 'success' });
-		} else {
-			validationArray.map((val) => dispatchToastMessage({ type: 'error', message: val.fileName + ' ' + val.error }));
+	const onDownloadFileClick = (file) => async (e) => {
+		e.preventDefault();
+		try {
+			const filename = `${ file.title }`;
+			if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+				console.log('window navigator');
+				const blob = new Blob([decodeURIComponent(encodeURI(JSON.stringify(file)))], { type: file.type });
+				return navigator.msSaveOrOpenBlob(blob, filename);
+			}
+			const aElement = document.createElement('a');
+			aElement.download = filename;
+			aElement.href = `${ file.title_link }`;
+			aElement.target = '_blank';
+			document.body.appendChild(aElement);
+			aElement.click();
+			document.body.removeChild(aElement);
+		} catch (e) {
+			console.error('[index.js].downloadWorkingGroupRequestAnswerFile: ', e);
 		}
-	}
+	};
 
 	const fileUploadClick = async () => {
 		if (!settings.get('FileUpload_Enabled')) {
 			console.log('!fileupload_enabled');
 			return null;
 		}
+		setContext('uploadFiles');
+		let fileIndex = staticFileIndex;
 		const $input = $(document.createElement('input'));
 		$input.css('display', 'none');
 		$input.attr({
@@ -303,27 +363,30 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 
 		$(document.body).append($input);
 
-		$input.one('change', async function(e) {
+		$input.one('change', function(e) {
 			const filesToUpload = [...e.target.files].map((file) => {
 				Object.defineProperty(file, 'type', {
 					value: mime.lookup(file.name),
 				});
+				fileIndex++;
 				return {
 					file,
 					name: file.name,
 					title: file.name,
+					id: fileIndex,
+					ts: new Date(),
 				};
 			});
+			setStaticFileIndex(fileIndex);
+			setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
 
-			// fileUpload(filesToUpload);
-			const validationArray = await filesValidation(filesToUpload);
-			console.log(validationArray);
-			if (validationArray.length === 0) {
-				await fileUploadToCouncil(filesToUpload, { _id: councilId });
-				setAttachedFiles(attachedFiles ? attachedFiles.concat(filesToUpload) : filesToUpload);
-			} else {
-				validationArray.map((val) => dispatchToastMessage({ type: 'error', message: val.error }));
-			}
+			// const validationArray = await filesValidation(filesToUpload);
+			// console.log(validationArray);
+			// if (validationArray.length === 0) {
+			// 	setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
+			// } else {
+			// 	validationArray.map((val) => dispatchToastMessage({ type: 'error', message: val.error }));
+			// }
 
 			$input.remove();
 			onChange();
@@ -336,28 +399,55 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 		onChange();
 	};
 
-	const bufFileUploadClick = async () => {
-		console.log('here');
-		await fileUploadClick();
-		if (data.documents.length !== attachedFiles.length) {
-			const $input = $(document.createElement('fileupload-input'));
-			if ($input) {
-				$input.remove();
+	const fileUpload = async () => {
+		let validationArray = [];
+		console.log(currentUploadedFiles);
+		if (currentUploadedFiles.length > 0) {
+			validationArray = await filesValidation(currentUploadedFiles);
+			if (validationArray.length > 0) {
+				const attachedFilesBuf = currentUploadedFiles;
+				validationArray.map((errFile) => attachedFilesBuf.map((file) => {
+					if (errFile.id === file.id) {
+						file.fail = true;
+						file.error = errFile.error;
+					}
+					return file;
+				}));
+				dispatchToastMessage({ type: 'error', message: t('Working_group_request_invite_file_upload_failed') });
+				setAttachedFiles(attachedFilesBuf);
+				onChange();
+			} else {
+				await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
+				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
+				setCurrentUploadedFiles([]);
+				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
-			dispatchToastMessage({ type: 'success', message: 'success' });
 		}
 	};
 
-	const goBack = () => {
-		window.history.back();
+	const joinToCouncil = async () => {
+		try {
+			console.log('join');
+			if (!isUserJoin) {
+				await addCouncilToPersons(councilId, [currentPerson]);
+				await addPersonsToCouncil(councilId, [{ _id: currentPerson._id, ts: new Date() }]);
+				setIsUserJoin(true);
+				dispatchToastMessage({ type: 'error', message: t('Council_joined') });
+			} else {
+				await deletePersonFromCouncil(councilId, currentPerson._id);
+				setIsUserJoin(false);
+				dispatchToastMessage({ type: 'success', message: t('Council_declined_participation') });
+			}
+		} catch (error) {
+			console.log(error);
+			dispatchToastMessage({ type: 'error', message: error });
+		}
 	};
 
-	const goToCouncils = () => {
-		FlowRouter.go('councils');
-	};
-
-	const onEdit = (_id) => () => {
-		FlowRouter.go(`/council/edit/${ _id }`);
+	const resetData = () => {
+		setDate(new Date(data.d));
+		setDescription(data.desc);
+		onChange();
 	};
 
 	const onAddParticipantClick = (_id) => () => {
@@ -376,11 +466,6 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 		setContext('participants');
 	};
 
-	const onCreateParticipantClick = useCallback((user) => () => {
-		setOnCreateParticipantId(user._id);
-		setContext('onCreateParticipant');
-	}, [onCreateParticipantId]);
-
 	const onCreatePersonsClick = useCallback((person) => () => {
 		setContext('participants');
 		onChange();
@@ -398,22 +483,55 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
+	const onFileDeleteConfirm = (fileId) => async (e) => {
+		e.preventDefault();
+		try {
+			await deleteFileFromCouncil(councilId, fileId);
+			setAttachedFiles(attachedFiles.filter((file) => file._id !== fileId));
+			setModal(() => <SuccessFileDeleteModal onClose={() => { setModal(undefined); close(); onChange(); }}/>);
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+			onChange();
+		}
+	};
+
+	const openFileDeleteConfirm = (fileId) => setModal(() => <DeleteWarningModal onDelete={onFileDeleteConfirm(fileId)} onCancel={() => setModal(undefined)}/>);
+
+	const onDeleteFileConfirmDel = (fileId) => async (e) => {
+		e.preventDefault();
+		try {
+			openFileDeleteConfirm(fileId);
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	};
+
 	const header = useMemo(() => [
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
 		</Th>,
+		<Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
+			{ t('File_uploaded_uploadedAt') }
+		</Th>,
 		<Th w='x40' key='download'/>,
-	], [mediaQuery]);
+		isSecretary && <Th w='x40' key='delete'/>,
+	], [mediaQuery, isSecretary]);
 
 	const renderRow = (document) => {
-		const { _id, title } = document;
-		return <Table.Row tabIndex={0} role='link' action>
+		const { _id, title, ts } = document;
+		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
+			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
 			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('download')}>
+				<Button small aria-label={t('download')} onClick={onDownloadFileClick(document)}>
 					<Icon name='download'/>
 				</Button>
 			</Table.Cell>
+			{isSecretary && <Table.Cell alignItems={'end'}>
+				<Button small onClick={onDeleteFileConfirmDel(document._id)} aria-label={t('Delete')}>
+					<Icon name='trash'/>
+				</Button>
+			</Table.Cell>}
 		</Table.Row>;
 	};
 
@@ -427,25 +545,42 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 					<Label fontScale='h1'>{t('Council')}</Label>
 
 				</Field>
-				<ButtonGroup>
+				{ mode !== 'edit' && <ButtonGroup>
+					<Button primary small aria-label={t('Agenda')}>
+						{t('Agenda')}
+					</Button>
+					{!isSecretary && <Button danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
+						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
+					</Button>}
+					{isSecretary && <Button primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
+						{t('Delete')}
+					</Button>}
+					{isSecretary && <Button primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
+						{t('Edit')}
+					</Button>}
+				</ButtonGroup>}
+				{ mode === 'edit' && <ButtonGroup>
 					<Button primary small aria-label={t('Agenda')}>
 						{t('Agenda')}
 					</Button>
 					<Button primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>
-					<Button primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
-						{t('Edit')}
+					<Button primary small aria-label={t('Cancel')} disabled={!hasUnsavedChanges} onClick={resetData}>
+						{t('Cancel')}
 					</Button>
-				</ButtonGroup>
+					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveCouncil}>
+						{t('Save')}
+					</Button>
+				</ButtonGroup>}
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x8'>
 					<Field.Label>{t('Date')}</Field.Label>
 					<Field.Row>
-						{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data.d)}</TextInput>}
-						{mode === 'edit' && 
-							<DatePicker
+						{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
+						{mode === 'edit'
+							&& <DatePicker
 								dateFormat='dd.MM.yyyy HH:mm'
 								selected={date}
 								onChange={(newDate) => setDate(newDate)}
@@ -453,7 +588,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 								timeFormat='HH:mm'
 								timeIntervals={5}
 								timeCaption='Время'
-								customInput={<TextInput border='1px solid #4fb0fc' />}
+								customInput={<TextInput style={ inputStyles } />}
 								locale='ru'
 								popperClassName='date-picker'/>
 						}
@@ -462,30 +597,31 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ inputStyles } value={data.desc} onChange={(e) => setDescription(e.currentTarget.value)} row='4' readOnly={mode !== 'edit'} fontScale='p1'/>
+						<TextAreaInput style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} row='4' readOnly={mode !== 'edit'} fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Council_type')}</Field.Label>
 					<Field.Row>
-						{mode !== 'edit' && <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
-						{mode === 'edit' && 
-							<Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Number')}/>
+						{mode !== 'edit'
+							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
+						{mode === 'edit'
+							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Number')}/>
 						}
 					</Field.Row>
 				</Field>
-				<Field mbe='x8'>
+				{isSecretary && <Field mbe='x8'>
 					<Field.Label>{t('Council_invite_link')}</Field.Label>
 					<Field.Row>
 						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
 					</Field.Row>
-				</Field>
+				</Field>}
 				<Tabs flexShrink={0} mbe='x8'>
-					<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Council_Invited_Users')}</Tabs.Item>
-					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>
+					{isSecretary && <Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>}
 					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
 				</Tabs>
-				{tab !== 'files' && context === 'participants' && <Field mbe='x8'>
+				{tab !== 'files' && context === 'participants' && isSecretary
+				&& <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
@@ -498,28 +634,45 @@ function Council({ mode, persons, filesData, invitedPersonsData, councilId, data
 						</Button>
 					</Field.Row>
 				</Field>}
-				{tab === 'files' && <Field mbe='x8'>
+				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
-						<Button onClick={bufFileUploadClick} mie='10px' small primary aria-label={t('Add')}>
+						<Button onClick={fileUploadClick} mie='10px' small primary aria-label={t('Add')}>
 							{t('Upload_file_question')}
 						</Button>
 					</Field.Row>
 				</Field>}
-				{tab === 'info' && context === 'participants' && <Participants councilId={councilId} onChange={onChange} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
-				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={councilId} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
-				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
-				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={councilId} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
-				{tab === 'files' && 
-					<GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
+				{tab === 'persons' && context === 'participants' && isSecretary
+					&& <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
 				}
-				{tab === 'persons' && context === 'participants' &&
-					<Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
+				{tab === 'persons' && context === 'addParticipants' && isSecretary
+					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
 				}
-				{tab === 'persons' && context === 'addParticipants' &&
-					<AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
+				{tab === 'persons' && context === 'newParticipants' && isSecretary
+					&& <CreateParticipant councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
 				}
-				{tab === 'persons' && context === 'newParticipants' &&
-					<CreateParticipant councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
+				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
+					&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
+						<Margins inlineEnd='x4' blockEnd='x4'>
+							{currentUploadedFiles.map((file, index) =>
+								<Chip pi='x4' key={index} onClick={handleFileUploadChipClick(index)} border={file.fail ? '2px solid red' : ''} data-for='fileErrorTooltip' data-tip={ file.error ?? '' } style={{ whiteSpace: 'normal' }}>
+									{file.name ?? ''}
+									<ReactTooltip id='fileErrorTooltip' effect='solid' place='top'/>
+								</Chip>)}
+						</Margins>
+					</Box>
+				}
+				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
+					&& <Field mbe='x8'>
+						<Field.Row>
+							<Button onClick={fileUpload} mie='10px' small primary aria-label={t('Click_to_load')}>
+								{t('Click_to_load')}
+							</Button>
+							<Field.Label>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
+						</Field.Row>
+					</Field>
+				}
+				{tab === 'files'
+					&& <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
 				}
 			</Page.Content>
 		</Page>

@@ -77,11 +77,22 @@ class Councils extends Base {
 
 	uploadFile(councilId, fileData) {
 		const data = this.findOne({ _id: councilId });
-		
+
 		data._updatedAt = new Date();
-		
+
 		data.documents = data.documents ? [...data.documents, fileData] : [fileData];
 		return this.update({ _id: councilId }, { $set: { ...data } });
+	}
+
+	removeUploadedFile(councilId, fileId) {
+		const data = this.findOne({ _id: councilId });
+
+		data._updatedAt = new Date();
+
+		if (data.documents) {
+			return this.update({ _id: councilId }, { $pull: { documents: { _id: fileId } } });
+		}
+		// return this.update({ _id: councilId }, { $set: { ...data } });
 	}
 }
 

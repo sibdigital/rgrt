@@ -17,6 +17,9 @@ import { settings } from '../../../settings/client';
 import { AddParticipant } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
 import { Participants } from './Participants/Participants';
+import { hasPermission } from '/app/authorization';
+import { FormSkeleton } from '/client/admin/users/Skeleton';
+import { Meteor } from "meteor/meteor";
 
 registerLocale('ru', ru);
 
@@ -130,6 +133,10 @@ export function EditCouncilPage() {
 
 	if (!data) {
 		return <Box fontScale='h1' pb='x20'>{'error'}</Box>;
+	}
+
+	if (!hasPermission(Meteor.userId(), 'edit-councils')) {
+		return <Box fontScale='h1' pb='x20'>{'not allow edit'}</Box>;
 	}
 
 	if (!data.invitedUsers) {
@@ -415,7 +422,7 @@ function EditCouncilWithNewData({ council, onChange, workingGroupOptions, users,
 				{tab === 'info' && context === 'addParticipants' && <AddParticipant councilId={_id} onChange={onChange} close={onClose} users={users} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
 				{tab === 'info' && context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions}/>}
 				{tab === 'info' && context === 'onCreateParticipant' && <AddParticipant onCreateParticipantId={onCreateParticipantId} councilId={_id} onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} onNewParticipant={onParticipantClick}/>}
-				{/* {tab === 'files' && 
+				{/* {tab === 'files' &&
 					<GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>
 				} */}
 			</Page.Content>

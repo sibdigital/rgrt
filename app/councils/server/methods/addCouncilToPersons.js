@@ -1,7 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import s from 'underscore.string';
 
-import { hasPermission } from '../../../authorization';
 import { Persons } from '../../../models';
 
 Meteor.methods({
@@ -12,7 +10,7 @@ Meteor.methods({
 
 		if (!persons) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field persons is required', { method: 'addPersonToCouncil', field: 'persons' });
-        }
+		}
 
 		return persons?.map((person) => Persons.addToCouncil({ _id: councilId, ts: person.ts }, person._id));
 	},

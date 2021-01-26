@@ -1,9 +1,6 @@
 import { Meteor } from 'meteor/meteor';
-import s from 'underscore.string';
 
-import { hasPermission } from '../../../authorization';
-import { Councils } from '../../../models';
-import { Persons } from '../../../models';
+import { Councils, Persons } from '../../../models';
 
 Meteor.methods({
 	insertOrUpdateCouncilPerson(council, person) {
@@ -16,10 +13,10 @@ Meteor.methods({
 		}
 		const councilPerson = {
 			_id: council._id,
-			ts: person.ts
+			ts: person.ts,
 		};
 
-        Councils.addPersonToCouncil(council._id, person);
-        Persons.addToCouncil(councilPerson, person._id);
+		Councils.addPersonToCouncil(council._id, person);
+		Persons.addToCouncil(councilPerson, person._id);
 	},
 });

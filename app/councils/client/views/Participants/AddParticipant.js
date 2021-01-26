@@ -317,8 +317,10 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 	};
 
 	const saveAction = useCallback(async () => {
-		await addPersonsToCouncil(councilId, personsIdToAdd);
-		await addCouncilToPersons(councilId, personsIdToAdd);
+		if (councilId) {
+			await addPersonsToCouncil(councilId, personsIdToAdd);
+			await addCouncilToPersons(councilId, personsIdToAdd);
+		}
 	}, [addPersonsToCouncil, addCouncilToPersons]);
 
 	const handleSave = useCallback(async () => {

@@ -4,7 +4,7 @@ import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 import _ from 'underscore';
 import Busboy from 'busboy';
 
-import { Users, Subscriptions } from '../../../models/server';
+import { Users, Subscriptions, Persons } from '../../../models/server';
 import { hasPermission } from '../../../authorization';
 import { settings } from '../../../settings';
 import { getURL } from '../../../utils';
@@ -211,6 +211,53 @@ API.v1.addRoute('users.getPresence', { authRequired: true }, {
 		return API.v1.success({
 			presence: user.status,
 		});
+	},
+});
+
+API.v1.addRoute('users.getRoles', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+
+		const user = Users.findOneById(query._id, { fields: { roles: 1 }	});
+		// const user = Users.findOneById(this.userId, { fields: { roles: 1 } });
+
+		if (!user) {
+			return API.v1.failure('user not found');
+		}
+
+		return API.v1.success({
+			roles: user.roles,
+		});
+	},
+});
+
+API.v1.addRoute('users.getPerson', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+
+		const person = Persons.findOne(query, { fields: { _id: 1, userId: 1, surname: 1, name: 1, patronymic: 1, phone: 1, email: 1 } });
+		// console.log('getPerson');
+		// console.log(person);
+		// console.log(query);
+
+		if (!person) {
+			const user = Users.findOneById(query.userId, { fields: { surname: 1, name: 1, patronymic: 1, phone: 1, emails: 1 } });
+			const email = user?.emails[0]?.address ?? '';
+			// console.log(user);
+			const createPerson = {
+				surname: user.surname ?? '',
+				name: user.name ?? '',
+				patronymic: user.patronymic ?? '',
+				phone: user.phone ?? '',
+				email,
+				userId: query.userId,
+			};
+			// console.log('user end');
+			Persons.insert(createPerson);
+			return API.v1.success(Persons.findOne(query, { fields: { _id: 1, userId: 1, surname: 1, name: 1, patronymic: 1, phone: 1, email: 1 } }));
+		}
+
+		return API.v1.success(person);
 	},
 });
 

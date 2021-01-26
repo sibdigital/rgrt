@@ -180,7 +180,7 @@ export function InvitedUsersTable({ invitedUsers, onDelete }) {
 	return <GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />;
 }
 
-export function Persons({ councilId, onChange, invitedPersons, setInvitedPersons }) {
+export function Persons({ councilId, onChange, invitedPersons, setInvitedPersons, isSecretary }) {
 	const t = useTranslation();
 
 	const deletePersonFromCouncil = useMethod('deletePersonFromCouncil');
@@ -189,8 +189,10 @@ export function Persons({ councilId, onChange, invitedPersons, setInvitedPersons
 
 	const onDeletePersonFromCouncilConfirm = useCallback(async (personId) => {
 		try {
-			await deletePersonFromCouncil(councilId, personId);
-			const persons = invitedPersons.filter((user) => user._id !== personId);
+			if (councilId) {
+				await deletePersonFromCouncil(councilId, personId);
+			}
+			const persons = invitedPersons.filter((person) => person._id !== personId);
 			setInvitedPersons(persons);
 			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
 		} catch (error) {
@@ -218,7 +220,7 @@ function InvitedPersonsTable({ invitedPersons, onDelete }) {
 		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
 		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
 		mediaQuery && <Th key={'Joined_at'} style={{ width: '190px' }} color='default'>{t('Joined_at')}</Th>,
-		<Th w='x40' key='delete'></Th>,
+		<Th w='x40' key='delete'/>,
 	], [mediaQuery]);
 
 	const styleTableRow = { wordWrap: 'break-word' };

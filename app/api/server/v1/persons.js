@@ -6,6 +6,14 @@ API.v1.addRoute('persons.list', { authRequired: true }, {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
 
+		if (query.isAllow) {
+			API.v1.success({
+				persons: [],
+				count: 0,
+				offset: 0,
+				total: 0,
+			});
+		}
 		return API.v1.success(Promise.await(findPersons({
 			query,
 			pagination: {
@@ -23,28 +31,3 @@ API.v1.addRoute('persons.findOne', { authRequired: true }, {
 		return API.v1.success(Promise.await(findPerson(query._id)));
 	},
 });
-
-// API.v1.addRoute('persons.createParticipant', { authRequired: true }, {
-// 	post() {
-// 		console.log('users.createParticipant start');
-// 		console.log(this.bodyParams);
-// 		// check(this.bodyParams, {
-// 		// 	email: String,
-// 		// 	name: String,
-// 		// 	surname: String,
-// 		// 	patronymic: String,
-// 		// 	organization: Match.Maybe(String),
-// 		// 	position: Match.Maybe(String),
-// 		// 	phone: Match.Maybe(String),
-// 		// 	// workingGroup: Match.Maybe(String),
-// 		// });
-
-// 		const newUserId = saveParticipant(this.userId, this.bodyParams);
-
-// 		const { fields } = this.parseJsonQuery();
-
-// 		console.log(newUserId);
-// 		console.log('users.createParticipant end');
-// 		return API.v1.success({ user: Users.findOneById(newUserId, { fields }) });
-// 	},
-// });

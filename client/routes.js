@@ -140,7 +140,7 @@ FlowRouter.route('/council/add/:context?', {
 FlowRouter.route('/council/edit/:id/:context?', {
 	name: 'council-edit',
 	action: () => {
-		renderRouteComponent(() => import('../app/councils/client/views/EditCouncil'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/councils/client/views/Council'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');

@@ -151,10 +151,11 @@ export const uploadFileWithWorkingGroup = async (workingGroupMeetingId, { descri
 	}
 };
 
-export const uploadFileWithCouncil = async (councilId, { description, fileName, file }) => {
+export const uploadFileWithCouncil = async (councilId, { description, fileName, file, ts }) => {
 	const data = new FormData();
 	description	&& data.append('description', description);
-	data.append('file', file.file, fileName);
+	data.append('file', file, fileName);
+	data.append('ts', ts ?? new Date());
 
 	const uploads = Session.get('uploading') || [];
 
@@ -167,7 +168,7 @@ export const uploadFileWithCouncil = async (councilId, { description, fileName, 
 	uploads.push(upload);
 	Session.set('uploading', uploads);
 
-	const { xhr, promise, _id } = APIClient.upload(`v1/councils.upload/${ councilId }`, {}, data, {
+	const { xhr, promise } = APIClient.upload(`v1/councils.upload/${ councilId }`, {}, data, {
 		progress(progress) {
 			const uploads = Session.get('uploading') || [];
 
@@ -207,7 +208,7 @@ export const uploadFileWithCouncil = async (councilId, { description, fileName, 
 		await promise;
 		const uploads = Session.get('uploading') || [];
 		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
-		return { id: _id, description };
+		return { id: promise.responseJSON._id, description };
 	} catch (error) {
 		const uploads = Session.get('uploading') || [];
 		uploads.filter((u) => u.id === upload.id).forEach((u) => {
@@ -627,46 +628,19 @@ export const fileUploadToCouncil = async (files, { _id }) => {
 			return;
 		}
 
-		const fileExtension = getFileExtension(file.name);
-		file.name = getFileNameWithoutExtension(file.name);
-
-		showUploadPreview(file, async (file, preview) => modal.open({
-			title: t('Upload_file_question'),
-			text: await getUploadPreview(file, preview),
-			showCancelButton: true,
-			closeOnConfirm: false,
-			closeOnCancel: false,
-			confirmButtonText: t('Send'),
-			cancelButtonText: t('Cancel'),
-			html: true,
-			onRendered: () => $('#file-name').focus(),
-		}, async (isConfirm) => {
-			if (!isConfirm) {
-				return;
-			}
-
-			const fileName = (document.getElementById('file-name').value || file.name || file.file.name) + '.' + fileExtension;
-			const description = document.getElementById('file-description').value || undefined;
+		const upload = async () => {
 			const uploadedFile = await uploadFileWithCouncil(_id, {
-				description,
-				fileName,
-				file,
+				description: '',
+				fileName: file.name,
+				file: file.file,
+				ts: file.ts,
 			});
-			if (uploadedFile.id) {
-				ids.push(uploadedFile.id);
-			}
-		}));
-		uploadNextFile();
-
-		// const upload = async () => {
-		// 	await uploadFileWithWorkingGroupRequestAnswer(_id, mailId, answerId, {
-		// 		description: '',
-		// 		fileName: file.name,
-		// 		file: file.file,
-		// 	});
-		// 	uploadNextFile();
-		// };
-		// upload();
+			// if (uploadedFile.id) {
+			// 	ids.push(uploadedFile.id);
+			// }
+			uploadNextFile();
+		};
+		upload();
 	};
 
 	uploadNextFile();
@@ -761,10 +735,9 @@ export const filesValidation = async (files) => {
 			modal.close();
 			return;
 		}
-		console.log(file);
 
 		if (!fileUploadIsValidContentType(file.file.type)) {
-			validationArray.push({ 
+			validationArray.push({
 				id: file.id,
 				error: t('FileUpload_MediaType_NotAccepted'),
 				fileName: file.name,

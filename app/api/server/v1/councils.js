@@ -52,23 +52,43 @@ API.v1.addRoute('councils.findOne', { authRequired: true }, {
 
 API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 	get() {
-		if (!hasPermission(this.userId, 'view-c-room')) {
-			return API.v1.unauthorized();
+		if (!hasPermission(this.userId, 'edit-councils')) {
+			console.log('!haspermission');
+			return API.v1.success({
+				persons: [],
+				count: 0,
+				offset: 0,
+				total: 0,
+			});
 		}
 
 		const { offset, count } = this.getPaginationItems();
 		const { sort, fields, query } = this.parseJsonQuery();
 
 		const council = Promise.await(findCouncil(query._id));
+		if (!council) {
+			return API.v1.failure('The "council" is not found');
+		}
 
-		const persons = Persons.find({ _id: { $in: council.invitedPersons.map((user) => user._id ) } }, {
+		if (!council.invitedPersons) {
+			return API.v1.success({
+				persons: [],
+				count: 0,
+				offset,
+				total: 0,
+			});
+		}
+
+		const persons = Persons.find({ _id: { $in: council.invitedPersons.map((user) => user._id) || [] } }, {
 			sort: sort || { surname: 1, name: 1, patronymic: 1 },
 			skip: offset,
 			limit: count,
 			fields: { _id: 1, surname: 1, name: 1, patronymic: 1, phone: 1, email: 1 },
-		}).fetch().map((user) => { 
+		}).fetch().map((user) => {
 			const iUser = council.invitedPersons.find((iUser) => iUser._id === user._id);
-			if (!iUser) { return; }
+			if (!iUser) {
+				return;
+			}
 			if (!iUser.ts) {
 				user.ts = new Date('January 1, 2021 00:00:00');
 			} else {
@@ -76,6 +96,20 @@ API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 			}
 			return user;
 		});
+		// if (persons) {
+		// 	persons = persons.map((user) => {
+		// 		const iUser = council.invitedPersons.find((iUser) => iUser._id === user._id);
+		// 		if (!iUser) {
+		// 			return;
+		// 		}
+		// 		if (!iUser.ts) {
+		// 			user.ts = new Date('January 1, 2021 00:00:00');
+		// 		} else {
+		// 			user.ts = iUser.ts;
+		// 		}
+		// 		return user;
+		// 	});
+		// }
 
 		return API.v1.success({
 			persons,
@@ -103,7 +137,7 @@ API.v1.addRoute('councils.invitedUsers', { authRequired: true }, {
 			skip: offset,
 			limit: count,
 			fields,
-		}).fetch().map((user) => { 
+		}).fetch().map((user) => {
 			const iUser = council.invitedUsers.find((iUser) => (typeof iUser === typeof {} && iUser._id === user._id) || (typeof iUser === typeof '' && iUser === user._id));
 			if (!iUser) { return; }
 			if (!iUser.ts) {
@@ -172,7 +206,7 @@ API.v1.addRoute('councils.upload/:id', { authRequired: true }, {
 			name: file.filename,
 			size: file.fileBuffer.length,
 			type: file.mimetype,
-			workingGroupMeetingId: this.urlParams.id,
+			councilId: this.urlParams.id,
 			userId: this.userId,
 		};
 
@@ -181,6 +215,7 @@ API.v1.addRoute('councils.upload/:id', { authRequired: true }, {
 			const uploadedFile = fileStore.insertSync(details, file.fileBuffer);
 
 			uploadedFile.description = fields.description;
+			uploadedFile.ts = fields.ts;
 
 			Meteor.call('sendFileCouncil', this.urlParams.id, uploadedFile);
 

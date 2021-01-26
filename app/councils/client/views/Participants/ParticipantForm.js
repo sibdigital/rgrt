@@ -1,10 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
 	Field,
 	TextInput,
 	Icon,
 	Scrollable,
-	Select,
 } from '@rocket.chat/fuselage';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
@@ -29,17 +28,23 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 		handleEmail,
 	} = formHandlers;
 
-	return <Scrollable  { ...props }>
-			<Field mb='x16'>
-				{useMemo(() => <Field mb='x4' width='98%'>
+	return <Scrollable { ...props }>
+		<Field mb='x16'>
+			{useMemo(() => <Field.Row mb='x4' width='98%'>
+				<Field mb='x8' width='33%'>
 					<Field.Label>{t('Surname')}</Field.Label>
-					<Field.Row>
-						<TextInput width='32%' flexGrow={1} value={surname} onChange={handleSurname}/>
-						<TextInput width='32%' flexGrow={1} value={name} onChange={handleName}/>
-						<TextInput width='32%' flexGrow={1} value={patronymic} onChange={handlePatronymic}/>
-					</Field.Row>
-				</Field>, [t, surname, handleSurname, name, handleName, patronymic, handlePatronymic])}
-				{/* {useMemo(() => <Field mb='x4' width='98%'>
+					<TextInput mis='x8' flexGrow={1} value={surname} onChange={handleSurname}/>
+				</Field>
+				<Field mb='x8' width='33%'>
+					<Field.Label>{t('Name')}</Field.Label>
+					<TextInput mis='x8' flexGrow={1} value={name} onChange={handleName}/>
+				</Field>
+				<Field mb='x8' width='33%'>
+					<Field.Label>{t('Patronymic')}</Field.Label>
+					<TextInput mis='x8' flexGrow={1} value={patronymic} onChange={handlePatronymic}/>
+				</Field>
+			</Field.Row>, [t, surname, handleSurname, name, handleName, patronymic, handlePatronymic])}
+			{/* {useMemo(() => <Field mb='x4' width='98%'>
 					<Field.Label>{t('Name')}</Field.Label>
 					<Field.Row>
 						<TextInput flexGrow={1} value={name} onChange={handleName}/>
@@ -51,20 +56,23 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 						<TextInput flexGrow={1} value={patronymic} onChange={handlePatronymic}/>
 					</Field.Row>
 				</Field>, [t, patronymic, handlePatronymic])} */}
-				{useMemo(() => <Field mb='x4' width='98%'>
+			{useMemo(() => <Field.Row mb='x4' width='98%'>
+				<Field mb='x8' width='49%'>
 					<Field.Label>{t('Phone_number')}</Field.Label>
-					<Field.Row>
-						<TextInput width='49%' flexGrow={1} value={phone} onChange={handlePhone}/>
-						<TextInput width='49%' flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={handleEmail} addon={<Icon name='mail' size='x20'/>}/>
-					</Field.Row>
-				</Field>, [t, phone, handlePhone, email, handleEmail])}
-				{/* {useMemo(() => <Field mb='x4' width='98%'>
+					<TextInput mis='x8' flexGrow={1} value={phone} onChange={handlePhone}/>
+				</Field>
+				<Field mb='x8' width='49%'>
+					<Field.Label>{t('Email')}</Field.Label>
+					<TextInput mis='x8' flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={handleEmail} addon={<Icon name='mail' size='x20'/>}/>
+				</Field>
+			</Field.Row>, [t, phone, handlePhone, email, handleEmail])}
+			{/* {useMemo(() => <Field mb='x4' width='98%'>
 					<Field.Label>{t('Email')}</Field.Label>
 					<Field.Row>
 						<TextInput flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={handleEmail} addon={<Icon name='mail' size='x20'/>}/>
 					</Field.Row>
 				</Field>, [t, email, handleEmail])} */}
-			</Field>
-		</Scrollable>;
+		</Field>
+	</Scrollable>;
 	// </Field>;
 }

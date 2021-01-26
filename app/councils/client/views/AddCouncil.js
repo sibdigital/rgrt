@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Field,	TextAreaInput, Button, ButtonGroup, TextInput, Icon, Label } from '@rocket.chat/fuselage';
+import { Field, TextAreaInput, Button, ButtonGroup, TextInput, Icon, Label, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -9,9 +9,10 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validate, createCouncilData } from './lib';
-import { Participants } from './Participants/Participants';
-import { AddParticipant } from './Participants/AddParticipant';
+import { Persons } from './Participants/Participants';
+import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
 
 registerLocale('ru', ru);
@@ -36,28 +37,37 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 	...current && { offset: current },
 }), [text, itemsPerPage, current, column, direction]);
 
+const invitedPersonsQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	fields: JSON.stringify({ name: 1, email: 1, surname: 1, patronymic: 1, phone: 1 }),
+	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, column, direction]);
+
 export function AddCouncilPage() {
 	const t = useTranslation();
 	const [cache, setCache] = useState();
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
-	const [users, setUsers] = useState([]);
+	const [persons, setPersons] = useState([]);
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 	const query = useQuery(debouncedParams, debouncedSort);
+	const personsQuery = invitedPersonsQuery(debouncedParams, debouncedSort);
 
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-	const data = useEndpointData('users.list', query) || { users: [] };
+	// const data = useEndpointData('users.list', query) || { users: [] };
+	const { data: personsData, state: personsDataState } = useEndpointDataExperimental('persons.list', personsQuery) || { persons: [] };
 	useEffect(() => {
-		if (data.users) {
-			setUsers(data.users);
+		if (personsData && personsData.persons) {
+			setPersons(personsData.persons);
 		}
-	}, [data]);
+	}, [personsData]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
-	}, [data]);
+	}, []);
 
 	const workingGroupOptions = useMemo(() => {
 		const res = [[null, t('Not_chosen')]];
@@ -67,34 +77,41 @@ export function AddCouncilPage() {
 		return res;
 	}, [workingGroups]);
 
-	return <AddCouncilWithNewData users={users} setUsers={setUsers} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
+	if ([personsDataState].includes(ENDPOINT_STATES.LOADING)) {
+		console.log('loading');
+		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+	}
+
+	return <AddCouncilWithNewData persons={persons} setPersons={setPersons} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
 }
 
 AddCouncilPage.displayName = 'AddCouncilPage';
 
 export default AddCouncilPage;
 
-function AddCouncilWithNewData({ users, setUsers, onChange, workingGroupOptions }) {
+function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOptions }) {
 	const t = useTranslation();
 
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date());
 	const [description, setDescription] = useState('');
-	const [invitedUsersIds, setInvitedUsersIds] = useState([]);
+	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
+	// const [invitedUsersIds, setInvitedUsersIds] = useState([]);
 
-	const invitedUsers = useMemo(() => users.filter((user) => {
-		const iUser = invitedUsersIds.find((iUser) => iUser._id === user._id);
-		if (!iUser) { return; }
+	const invitedPersons = useMemo(() => persons.filter((person) => {
+		const iPerson = invitedPersonsIds.find((iPerson) => iPerson._id === person._id);
+		if (!iPerson) { return; }
 
-		if (!iUser.ts) {
-			user.ts = new Date('January 1, 2021 00:00:00');
+		if (!iPerson.ts) {
+			person.ts = new Date('January 1, 2021 00:00:00');
 		} else {
-			user.ts = iUser.ts;
+			person.ts = iPerson.ts;
 		}
-		return user;
-	}), [invitedUsersIds, users]);
+		return person;
+	}), [invitedPersonsIds, persons]);
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
+	const addCouncilToPersons = useMethod('addCouncilToPersons');
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -108,33 +125,32 @@ function AddCouncilWithNewData({ users, setUsers, onChange, workingGroupOptions 
 		setContext('addParticipants');
 	};
 
-	const onCreateParticipantClick = useCallback((user) => () => {
-		setInvitedUsersIds(invitedUsersIds.concat({ _id: user._id, ts: new Date() }));
-		setUsers(users.concat(user));
-		onChange();
-		setContext('participants');
-	}, [invitedUsersIds, context, users]);
-
 	const onParticipantClick = useCallback((context) => () => {
 		setContext(context);
 	}, [context]);
+
+	const onCreatePersonsClick = useCallback(() => () => {
+		setContext('participants');
+		onChange();
+	}, [onChange]);
 
 	const onClose = () => {
 		setContext('participants');
 	};
 
-	const saveAction = useCallback(async (date, description, invitedUsersIds) => {
-		const councilData = createCouncilData(date, description, null, invitedUsersIds);
+	const saveAction = useCallback(async (date, description, invitedPersonsIds) => {
+		const councilData = createCouncilData(date, description, null, invitedPersonsIds);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
-			const _id = await insertOrUpdateCouncil(councilData);
+			const council = await insertOrUpdateCouncil(councilData);
+			await addCouncilToPersons(council._id, invitedPersonsIds);
 			goBack();
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [insertOrUpdateCouncil, date, description, invitedUsersIds, t]);
+	}, [insertOrUpdateCouncil, date, description, invitedPersonsIds, t]);
 
 	const handleSaveCouncil = useCallback(async () => {
-		await saveAction(date, description, invitedUsersIds);
+		await saveAction(date, description, invitedPersonsIds);
 		dispatchToastMessage({ type: 'success', message: t('Council_edited') });
 		onChange();
 	}, [saveAction, onChange, dispatchToastMessage]);
@@ -185,9 +201,12 @@ function AddCouncilWithNewData({ users, setUsers, onChange, workingGroupOptions 
 						</Button>
 					</Field.Row>
 				</Field>}
-				{context === 'participants' && <Participants onChange={onChange} context={'new'} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}
-				{context === 'addParticipants' && <AddParticipant onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} users={users} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions} />}
+				{/*{context === 'participants' && <Participants onChange={onChange} context={'new'} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}*/}
+				{/*{context === 'addParticipants' && <AddParticipant onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} users={users} onNewParticipant={onParticipantClick}/>}*/}
+				{/*{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions} />}*/}
+				{context === 'participants' && <Persons councilId={null} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>}
+				{context === 'addParticipants' && <AddPerson councilId={null} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>}
+				{context === 'newParticipants' && <CreateParticipant councilId={null} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>}
 			</Page.Content>
 		</Page>
 	</Page>;

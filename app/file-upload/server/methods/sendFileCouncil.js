@@ -19,6 +19,7 @@ Meteor.methods({
 			title: file.name,
 			type: 'file',
 			description: file.description ?? '',
+			ts: file.ts,
 			title_link: fileUrl,
 			title_link_download: true,
 		};
