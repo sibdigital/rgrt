@@ -21,16 +21,12 @@ import { Pager } from '../../../../../../client/views/setupWizard/Pager';
 import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
-import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
+import { filesValidation, fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
 import GenericTable, { Th } from '../../../../../../client/components/GenericTable';
+import './reactTooltip.css';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
-
-const filterProtocolsName = (val) => {
-	const target = val?.replaceAll(new RegExp('<[^>]*>', 'gi'), ' ') || '';
-	return target;
-};
 
 const FilterByText = ({ protocolsData, setProtocolsData, ...props }) => {
 	const t = useTranslation();
@@ -39,6 +35,7 @@ const FilterByText = ({ protocolsData, setProtocolsData, ...props }) => {
 
 	useEffect(() => {
 		const regExp = new RegExp('^'.concat(text), 'i');
+		// console.log(protocolsData);
 		try {
 			setProtocolsData(protocolsData.filter((protocol) => (protocol.num && protocol.num.match(regExp))
 				|| text.length === 0));
@@ -60,13 +57,18 @@ const FilterByDateRange = ({ protocolsData, setProtocolsData, ...props }) => {
 	const [endDate, setEndDate] = useState('');
 
 	const handleStartDateChange = useCallback((selectedDate) => {
+		// console.log(selectedDate);
 		setStartDate(selectedDate);
-		const date = new Date(endDate ?? new Date());
-		if (date.getTime() < new Date(selectedDate).getTime()) {
-			setEndDate(new Date(selectedDate));
+		const date = new Date(endDate);
+		if (date.getTime() < new Date(startDate).getTime() || !endDate) {
+			setEndDate(new Date());
 		}
 	}, [endDate]);
 	const handleEndDateChange = useCallback((selectedDate) => {
+		// console.log(selectedDate);
+		// console.log(startDate);
+		// console.log(new Date(startDate).getTime());
+		// console.log(new Date(startDate).getTime());
 		if (new Date(selectedDate).getTime() >= new Date(startDate).getTime()) {
 			setEndDate(selectedDate);
 		}
@@ -156,7 +158,7 @@ const FilterOptions = ({ onChange = () => {}, ...props }) => {
 			} else if (filter === 'date') {
 				index = 1;
 			}
-			console.log(options[index]);
+			// console.log(options[index]);
 			setSelectedSectionLabel(options[index][1] ?? '');
 		}
 	}, [filter, setSelectedSectionLabel]);
@@ -205,6 +207,11 @@ const FilterOptions = ({ onChange = () => {}, ...props }) => {
 	);
 };
 
+const preProcessingProtocolItems = (item) => {
+	const regExp = new RegExp('(<[^>]*>)*(&nbsp;)*', 'gi');
+	return item.replaceAll(regExp, '');
+};
+
 const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, onChange = () => {}, ...props }) => {
 	const t = useTranslation();
 	const replaceChar = (str) =>
@@ -217,13 +224,13 @@ const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, 
 	const options = useMemo(() => {
 		try {
 			const renderOption = (label) => {
-				const tooltipLabel = replaceChar(label);
-				const mainLabel = (label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
+				const tooltipLabel = preProcessingProtocolItems(replaceChar(label));
+				const mainLabel = preProcessingProtocolItems(label?.length > 50 ? label?.slice(0, 50) + '...' : label) || '';
 				return <Box display='flex' flexDirection='row' alignItems='center'
 					data-for='itemT'
-					data-tip={ filterProtocolsName(tooltipLabel) } style={{ whiteSpace: 'normal' }} width='350px'>
+					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='450px'>
 					<Label>{ mainLabel }</Label>
-					<ReactTooltip id='itemT' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+					<ReactTooltip id='itemT' className='react-tooltip-class' multiline effect='solid' place='top'/>
 				</Box>;
 			};
 
@@ -256,7 +263,7 @@ const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, 
 		if (items.length > 0 && section > -1) {
 			onChange('section')(section);
 			let label = items[section][1] ?? '';
-			label = label.length > 35 ? label.slice(0, 35) + '...' : label;
+			label = label.length > 45 ? label.slice(0, 45) + '...' : label;
 			setSelectedSectionLabel(label);
 		}
 	}, [section, setSelectedSectionLabel]);
@@ -280,24 +287,24 @@ const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, 
 				borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
 				<Field display='flex' flexDirection='row'>
 					<Label width='90%'
-						color={ selectedSectionLabel === t('Working_group_request_invite_select_sections') ? '#9ea2a8' : ''}
-						fontScale='p1'
-						fontWeight={ selectedSectionLabel === t('Working_group_request_invite_select_sections') ? '400' : '500'}>
+						   color={ selectedSectionLabel === t('Working_group_request_invite_select_sections') ? '#9ea2a8' : ''}
+						   fontScale='p1'
+						   fontWeight={ selectedSectionLabel === t('Working_group_request_invite_select_sections') ? '400' : '500'}>
 						{selectedSectionLabel}
 					</Label>
 					<Box color='var(--rc-color-primary-dark)' borderColor='transparent' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
 				</Field>
 			</Button>
 			<PositionAnimated
-				width='350px'
+				width='450px'
 				visible={visible}
 				anchor={ref}
 				placement={'bottom-end'}
-				maxWidth='350px'
+				maxWidth='450px'
 			>
 				<Options
-					width='350px'
-					maxWidth='350px'
+					width='450px'
+					maxWidth='450px'
 					onSelect={handleSelection}
 					options={options}
 					cursor={cursor}/>
@@ -312,19 +319,20 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 		[...str]?.map((ch, index) => ch).join('') || '';
 
 	const [sectionItem, setSectionItem] = useState(-1);
+	// console.log(sectionItem);
 
 	useMemo(() => selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? setSectionItem(-1) : '', [selectedSectionItemLabel]);
 
 	const options = useMemo(() => {
 		try {
 			const renderOption = (label) => {
-				const tooltipLabel = replaceChar(label);
-				const mainLabel = (label?.length > 40 ? label?.slice(0, 40) + '...' : label) || '';
+				const tooltipLabel = preProcessingProtocolItems(replaceChar(label));
+				const mainLabel = preProcessingProtocolItems(label?.length > 50 ? label?.slice(0, 50) + '...' : label) || '';
 				return <Box display='flex' flexDirection='row' alignItems='center'
-					data-for='itemT'
-					data-tip={ filterProtocolsName(tooltipLabel) } style={{ whiteSpace: 'normal' }} width='350px'>
+							data-for='itemT'
+							data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='450px'>
 					<Label>{ mainLabel }</Label>
-					<ReactTooltip id='itemT' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+					<ReactTooltip id='itemT' className='react-tooltip-class' multiline effect='solid' place='top'/>
 				</Box>;
 			};
 
@@ -354,10 +362,13 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 	}, [hide, reset]);
 
 	useEffect(() => {
+		// console.log('SUDA SM');
+		// console.log(sectionItem);
+		// console.log(items[sectionItem]);
 		if (items.length > 0 && sectionItem > -1) {
 			onChange('sectionItem')(sectionItem);
 			let label = items[sectionItem][1] ?? '';
-			label = label.length > 35 ? label.slice(0, 35) + '...' : label;
+			label = label.length > 45 ? label.slice(0, 45) + '...' : label;
 			setSelectedSectionItemLabel(label);
 		}
 	}, [sectionItem, setSelectedSectionItemLabel]);
@@ -381,24 +392,24 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 				borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
 				<Field display='flex' flexDirection='row'>
 					<Label width='90%'
-						color={ selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? '#9ea2a8' : ''}
-						fontScale='p1'
-						fontWeight={ selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? '400' : '500'}>
+						   color={ selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? '#9ea2a8' : ''}
+						   fontScale='p1'
+						   fontWeight={ selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? '400' : '500'}>
 						{selectedSectionItemLabel}
 					</Label>
 					<Box color='var(--rc-color-primary-dark)' borderColor='transparent' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
 				</Field>
 			</Button>
 			<PositionAnimated
-				width='350px'
+				width='450px'
 				visible={visible}
 				anchor={ref}
 				placement={'bottom-end'}
-				maxWidth='350px'
+				maxWidth='450px'
 			>
 				<Options
-					width='350px'
-					maxWidth='350px'
+					width='450px'
+					maxWidth='450px'
 					onSelect={handleSelection}
 					options={options}
 					cursor={cursor}/>
@@ -409,13 +420,14 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 
 function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workingGroupRequest, protocolsData, contactInfoData }) {
 	console.log('WorkingGroupRequestAnswerStep');
-	console.log(protocolsData);
+	// console.log(protocolsData);
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
 
 	const [commiting, setComitting] = useState(false);
+	const [cache, setCache] = useState();
 	const [newData, setNewData] = useState({
 		numberId: { value: '', required: false },
 		protocol: { value: '', required: false },
@@ -428,10 +440,11 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const [sectionsItemsOptions, setSectionItemsOptions] = useState([]);
 	const [context, setContext] = useState('');
 	const [filterContext, setFilterContext] = useState('');
-	const [protocolsFindData, setProtocolsFindData] = useState([]);
 	const [protocolSelectLabel, setProtocolSelectLabel] = useState('');
-	const [sectionOptionSelectedLabel, setSectionOptionSelectedLabel] = useState('');
-	const [sectionItemOptionSelectedLabel, setSectionItemOptionSelectedLabel] = useState('');
+	const [protocolsFindData, setProtocolsFindData] = useState([]);
+	const [sectionOptionSelectedLabel, setSectionOptionSelectedLabel] = useState(t('Working_group_request_invite_select_sections'));
+	const [sectionItemOptionSelectedLabel, setSectionItemOptionSelectedLabel] = useState(t('Working_group_request_invite_select_sections_items'));
+	const [staticFileIndex, setStaticFileIndex] = useState(0);
 
 	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
 
@@ -439,29 +452,25 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const workingGroupRequestId = workingGroupRequest._id;
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
-	const mails = useMemo(() => workingGroupRequest.mails, [workingGroupRequest]);
-	const Working_group_request_invite_not_mail_chosen = useMemo(() => t('Working_group_request_invite_not_mail_chosen'), [t]);
-	const Working_group_request_invite_select_protocol = useMemo(() => t('Working_group_request_invite_select_protocol'), [t]);
-	const Working_group_request_invite_select_sections = useMemo(() => t('Working_group_request_invite_select_sections'), [t]);
-	const Working_group_request_invite_select_sections_items = useMemo(() => t('Working_group_request_invite_select_sections_items'), [t]);
+	const documentsHelpTooltipLabel = useMemo(() => 'Загрузите не пустые файлы', []);
 
-	const isAnyMails = useMemo(() => workingGroupRequest?.mails?.length > 0 || false, [workingGroupRequest]);
-	// const mailsOptions = useMemo(() => mails?.map((mail) => [mail._id, (mail.number ?? t('Working_group_request_invite_not_mail_chosen')) + (mail.ts ? ' от ' + formatDate(mail.ts) : '')] || [null, t('Working_group_request_invite_not_mail_chosen')]), [mails]);
-	const mailsOptions = useMemo(() => mails?.map((mail) => [mail._id, mail.number === null ? t('Working_group_request_mail_not_chosen_answer') : mail.number + (mail.ts ? ' от ' + formatDate(mail.ts) : '')] || [null, t('Working_group_request_mail_not_chosen_answer')]), [mails, t]);
+	const mails = useMemo(() => workingGroupRequest.mails, [workingGroupRequest]);
+
+	const isAnyMails = useMemo(() => workingGroupRequest?.mails?.length > 1 || (mails?.length === 1 && mails[0]?._id !== 'noAnswer') || false, [workingGroupRequest]);
+	// useMemo(() => console.log(mails));
+	const mailsOptions = useMemo(() => mails?.map((mail) => [mail._id, (mail.number ?? t('Working_group_request_invite_not_mail_chosen')) + (mail.ts ? ' от ' + formatDate(mail.ts) : '')] || [null, t('Working_group_request_invite_not_mail_chosen')]), [mails]);
 	const protocolsOptions = useMemo(() => protocolsData?.map((protocol, index) => [index, protocol.num ?? '']) || [], [protocolsData]);
 
 	useEffect(() => {
 		if (protocolSelectLabel === '') {
-			setProtocolSelectLabel(Working_group_request_invite_select_protocol);
-		}
-		if (sectionOptionSelectedLabel === '') {
-			setSectionOptionSelectedLabel(Working_group_request_invite_select_sections);
-		}
-		if (sectionItemOptionSelectedLabel === '') {
-			setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items);
+			setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
 		}
 		setProtocolsFindData(protocolsData ?? []);
-	}, [t, protocolsData, Working_group_request_invite_select_protocol, Working_group_request_invite_select_sections, Working_group_request_invite_select_sections_items]);
+	}, [t, protocolsData]);
+
+	const onChange = useCallback(() => {
+		setCache(new Date());
+	}, [cache]);
 
 	const filterName = (name) => {
 		const regExp = new RegExp('(<[a-z]*[0-9]*>)*(</[a-z]*[0-9]*>)*', 'gi');
@@ -473,45 +482,49 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	};
 
 	const handleChangeSelect = (field) => (val) => {
+		// console.log('handle change select');
+		// console.log(field, val);
 		const updateData = Object.assign({}, newData);
 
 		if (field === 'protocol' && val !== newData.protocol.value) {
-			const options = protocolsData[val]?.sections?.map((section, index) => [index, [section.num ?? '', ': ', section.name ? filterName(section.name) : ''].join('')]) || [];
+			const options = protocolsData[val]?.sections?.map((section, index) => [index, [section.num ?? '', ': ', section.name ? preProcessingProtocolItems(section.name) : ''].join('')]) || [];
 			setSectionOptions(options);
 			setSectionItemsOptions([]);
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 			updateData.section = { value: '', required: newData.section.required };
-			setSectionOptionSelectedLabel(Working_group_request_invite_select_sections);
-			setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items);
+			setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
+			setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 		}
 		if (field === 'section' && val !== newData.section.value) {
-			const options = protocolsData[newData.protocol.value]?.sections[val]?.items?.map((item, index) => [index, [item.num ?? '', ': ', item.name ? filterName(item.name) : ''].join('')]) || [];
+			const options = protocolsData[newData.protocol.value]?.sections[val]?.items?.map((item, index) => [index, [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join('')]) || [];
 			setSectionItemsOptions(options);
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 			if (val === '') {
 				updateData.section = { value: '', required: newData.section.required };
 			}
-			setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items);
+			setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 		}
 		if (field === 'sectionItem' && val === '') {
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 		}
 		updateData[field] = { value: val, required: newData[field].required };
+		// console.log(updateData);
 		setNewData(updateData);
 	};
 
 	const handleChangeContext = (contextField) => () => {
 		if (context === '') {
+			setProtocolsFindData(protocolsData);
+			setFilterContext('');
 			setContext(contextField);
 		} else {
 			setContext('');
-			setFilterContext('');
-			setProtocolsFindData(protocolsData);
 		}
 	};
 
 	const handleFilterContext = (filter) => () => {
 		if (filter !== filterContext) {
+			// console.log(protocolsData);
 			setFilterContext(filter);
 		}
 	};
@@ -520,11 +533,13 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 	const fileUploadClick = async (e) => {
 		e.preventDefault();
+		console.log('fileUpload');
 		if (!settings.get('FileUpload_Enabled')) {
 			console.log('!fileUpload_enabled');
 			return null;
 		}
 		const $input = $(document.createElement('input'));
+		let fileIndex = staticFileIndex;
 		$input.css('display', 'none');
 		$input.attr({
 			id: 'fileupload-input',
@@ -536,15 +551,18 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 		$input.one('change', async function(e) {
 			const filesToUpload = [...e.target.files].map((file) => {
-				console.log(file);
+				// console.log(file);
 				Object.defineProperty(file, 'type', {
 					value: mime.lookup(file.name),
 				});
+				fileIndex++;
 				return {
 					file,
 					name: file.name,
+					id: fileIndex,
 				};
 			});
+			setStaticFileIndex(fileIndex);
 
 			setAttachedFile(attachedFile.concat(filesToUpload));
 			$input.remove();
@@ -571,8 +589,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		const sectionItemIndex = newData.sectionItem.value;
 		const labelNotChosen = t('Not_chosen');
 		dataToSend.protocol = protocolData ? [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' ') : labelNotChosen;
-		dataToSend.section = sectionIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].num ?? '', ': ', protocolData.sections[sectionIndex].name ? filterName(protocolData.sections[sectionIndex].name) : ''].join('');
-		dataToSend.sectionItem = sectionItemIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].items[sectionItemIndex].num ?? '', ': ', protocolData.sections[sectionIndex].items[sectionItemIndex].name ? filterName(protocolData.sections[sectionIndex].items[sectionItemIndex].name) : ''].join('');
+		dataToSend.section = sectionIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].num ?? '', ': ', protocolData.sections[sectionIndex].name ? preProcessingProtocolItems(protocolData.sections[sectionIndex].name) : ''].join('');
+		dataToSend.sectionItem = sectionItemIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].items[sectionItemIndex].num ?? '', ': ', protocolData.sections[sectionIndex].items[sectionItemIndex].name ? preProcessingProtocolItems(protocolData.sections[sectionIndex].items[sectionItemIndex].name) : ''].join('');
 		dataToSend.commentary = newData.commentary.value.trim();
 		dataToSend.ts = new Date();
 		return Object.assign({}, contactInfoData, dataToSend);
@@ -586,14 +604,30 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 			const fileInfo = { name: attachedFile[0]?.name || '', total: attachedFile.length ?? 0 };
 			const workingGroupRequestAnswer = packNewData(fileInfo);
-			console.log(workingGroupRequestAnswer);
 			const mailId = newData.numberId.value.trim() !== '' ? newData.numberId.value : null;
-			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(workingGroupRequestId, mailId, workingGroupRequestAnswer);
+			let validationArray = [];
 
 			if (attachedFile.length > 0) {
-				await fileUploadToWorkingGroupRequestAnswer(attachedFile, { _id: workingGroupRequestId, mailId: newMailId === '' ? mailId : newMailId, answerId });
+				validationArray = await filesValidation(attachedFile);
+				if (validationArray.length > 0) {
+					const attachedFilesBuf = attachedFile;
+					validationArray.map((errFile) => attachedFilesBuf.map((file) => {
+						if (errFile.id === file.id) {
+							file.fail = true;
+							file.error = errFile.error;
+						}
+						return file;
+					}));
+					dispatchToastMessage({ type: 'error', message: t('Working_group_request_invite_file_upload_failed') });
+					setComitting(false);
+					setAttachedFile(attachedFilesBuf);
+					onChange();
+					return;
+				} else {
+					const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(workingGroupRequestId, mailId, workingGroupRequestAnswer);
+					await fileUploadToWorkingGroupRequestAnswer(attachedFile, { _id: workingGroupRequestId, mailId: newMailId === '' ? mailId : newMailId, answerId });
+				}
 			}
-
 			goToFinalStep();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
@@ -609,11 +643,17 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			handleChangeSelect(field)(index);
 		}
 		setContext('');
-		setFilterContext('');
-		setProtocolsFindData(protocolsData);
 	};
 
-	return <Step active={active} working={commiting} onSubmit={handleSubmit}>
+	const ClearTooltip = () => {
+		return <Box display='flex' flexDirection='row' alignItems='center'
+					data-for='clearTooltip'
+					data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }} width='350px'>
+			<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
+		</Box>;
+	};
+
+	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
@@ -629,16 +669,16 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 									{t('Working_group_request_select_mail')}
 									{newData.numberId.value !== ''
 									&& <Button onClick={() => { handleChangeSelect('numberId')(''); }} backgroundColor='transparent' borderColor='transparent' danger
-										data-for='buttonTooltip'
-										data-tip={ t('Clear') }>
-										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+											   data-for='clearTooltip'
+											   data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								{isAnyMails && <Select width='100%' options={mailsOptions} onChange={handleChangeSelect('numberId')} value={newData.numberId.value} placeholder={t('Number')}/>}
-								{!isAnyMails && <TextInput disabled readOnly value={Working_group_request_invite_not_mail_chosen}/>}
+								{isAnyMails && <Select options={mailsOptions} onChange={handleChangeSelect('numberId')} value={newData.numberId.value} placeholder={t('Number')}/>}
+								{!isAnyMails && <TextInput disabled readOnly value={t('Working_group_request_invite_not_mail_chosen')}/>}
 							</Field.Row>
 						</Field>
 						<Field>
@@ -648,15 +688,14 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 									{newData.protocol.value !== ''
 									&& <Button onClick={() => {
 										handleChangeSelect('sectionItem')('');
-										setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items);
+										setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 										handleChangeSelect('section')('');
-										setSectionOptionSelectedLabel(Working_group_request_invite_select_sections);
+										setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
 										handleChangeSelect('protocol')('');
-										setProtocolSelectLabel(Working_group_request_invite_select_protocol);
-									}} backgroundColor='transparent' borderColor='transparent' danger
-									data-for='buttonTooltip'
-									data-tip={ t('Clear') }>
-										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+										setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
+									}} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
+											   data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -664,18 +703,18 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 							<Field.Row>
 								{mediaQuery && <Button backgroundColor={protocolsData.length === 0 ? '#f2f3f5' : 'transparent'} disabled={protocolsData.length === 0} textAlign='left' onClick={handleChangeContext('protocolSelect')} fontScale='p1' display='inline-flex' flexGrow={1} borderWidth='0.125rem' borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
 									<Label width='100%' disabled={protocolsData.length === 0}
-										color={ protocolSelectLabel === Working_group_request_invite_select_protocol ? '#9ea2a8' : ''}
-										fontScale='p1'
-										fontWeight={ protocolSelectLabel === Working_group_request_invite_select_protocol ? '400' : '500'}>
+										   color={ protocolSelectLabel === t('Working_group_request_invite_select_protocol') ? '#9ea2a8' : ''}
+										   fontScale='p1'
+										   fontWeight={ protocolSelectLabel === t('Working_group_request_invite_select_protocol') ? '400' : '500'}>
 										{protocolsData.length === 0 ? t('Working_group_request_invite_not_protocol_chosen') : protocolSelectLabel}
 									</Label>
 									<Box color='var(--rc-color-primary-dark)' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
 								</Button>}
-								{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={Working_group_request_invite_select_protocol}/>}
+								{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}
 							</Field.Row>
-							<Field.Row>
+							<Field.Row maxHeight='500px'>
 								{context === 'protocolSelect'
-								&& mediaQuery && <Field mb='x4' maxHeight='450px'>
+								&& mediaQuery && <Field mb='x4'>
 									<Field.Row>
 										<Field.Label>{t('Search')}:</Field.Label>
 										<FilterOptions onChange={handleFilterContext}/>
@@ -698,17 +737,16 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 						<Field>
 							<Field.Row height='40px'>
 								<Label>
-									{Working_group_request_invite_select_sections}
+									{t('Working_group_request_invite_select_sections')}
 									{newData.section.value !== ''
 									&& <Button onClick={() => {
 										handleChangeSelect('sectionItem')('');
-										setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items);
+										setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 										handleChangeSelect('section')('');
-										setSectionOptionSelectedLabel(Working_group_request_invite_select_sections);
-									}} backgroundColor='transparent' borderColor='transparent' danger
-									data-for='buttonTooltip'
-									data-tip={ t('Clear') }>
-										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+										setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
+									}} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
+											   data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -724,12 +762,12 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 						<Field>
 							<Field.Row height='40px'>
 								<Label>
-									{Working_group_request_invite_select_sections_items}
+									{t('Working_group_request_invite_select_sections_items')}
 									{newData.sectionItem.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(Working_group_request_invite_select_sections_items); }} backgroundColor='transparent' borderColor='transparent' danger
-										data-for='buttonTooltip'
-										data-tip={ t('Clear') }>
-										<ReactTooltip id='buttonTooltip' width='350px' maxWidth='350px' style={{ whiteSpace: 'normal' }}/>
+									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items')); }} backgroundColor='transparent' borderColor='transparent' danger
+											   data-for='clearTooltip'
+											   data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
 										<Icon size={16} name='refresh'/>
 									</Button>}
 								</Label>
@@ -749,15 +787,23 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 							</Field.Row>
 						</Field>
 						<Field mbe='x8'>
-							<Field.Label>{t('Documents')} <span style={ { color: 'red' } }>*</span></Field.Label>
-							<Field border='2px solid #cbced1' mb='5px' width='45%'>
+							<Field.Label>
+								{t('Documents')}
+								<span style={ { color: 'red' } }>*</span>
+								<span> <Icon name='help' data-for='documentsHelpTooltip' data-tip={ documentsHelpTooltipLabel }/> <ReactTooltip id='documentsHelpTooltip' effect='solid' place='top'/></span>
+							</Field.Label>
+							<Field border='2px solid #cbced1' mb='5px' width='35%'>
 								<Button id={fileSourceInputId} fontScale='p1' onClick={fileUploadClick} minHeight='2.5rem' border='none' textAlign='left' backgroundColor='var(--color-dark-10)'>
-									{t('Pin_File')}
+									{t('Working_group_request_invite_add_files')}
 								</Button>
 							</Field>
 							{attachedFile?.length > 0 && <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
 								<Margins inlineEnd='x4' blockEnd='x4'>
-									{attachedFile.map((file, index) => <Chip pi='x4' key={index} onClick={handleFileUploadChipClick(index)}>{file.name ?? ''}</Chip>)}
+									{attachedFile.map((file, index) => <Chip pi='x4' key={index} onClick={handleFileUploadChipClick(index)}
+																			 border={file.fail ? '2px solid red' : ''} data-for='fileErrorTooltip' data-tip={ file.error ?? '' } style={{ whiteSpace: 'normal' }}>
+										{file.name ?? ''}
+										<ReactTooltip id='fileErrorTooltip' effect='solid' place='top'/>
+									</Chip>)}
 								</Margins>
 							</Box>}
 						</Field>
@@ -789,7 +835,7 @@ function ProtocolsTable({ protocolsData, onRowClick }) {
 	const renderProtocolRow = (protocol) => {
 		const { _id, d, num, place } = protocol;
 		return <Table.Row tabIndex={0} onClick={onRowClick('protocol', _id)} style={{ wordWrap: 'break-word' }} role='link' action>
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>№ {num}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{num}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{place}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDate(d)}</Table.Cell>}
 		</Table.Row>;
@@ -797,3 +843,4 @@ function ProtocolsTable({ protocolsData, onRowClick }) {
 
 	return <GenericTable header={headerProtocol} renderRow={renderProtocolRow} results={protocolsData} total={protocolsData.length} setParams={setParams} params={params} />;
 }
+

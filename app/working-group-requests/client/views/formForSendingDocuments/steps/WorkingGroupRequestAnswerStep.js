@@ -76,7 +76,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 		['Республика Бурятия', 'Республика Бурятия'],
 	], []);
 
-	return <Step active={active} working={commiting} onSubmit={handleSubmit}>
+	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
