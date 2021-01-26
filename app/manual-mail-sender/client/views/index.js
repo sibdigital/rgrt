@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { Button, Field, Label, Icon, Callout } from '@rocket.chat/fuselage';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+
 import '../../public/stylesheets/mail-sender.css';
 import Page from '../../../../client/components/basic/Page';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
-import { Button, Field, Label, Icon } from '@rocket.chat/fuselage';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useUser } from '../../../../client/contexts/UserContext';
@@ -26,6 +28,7 @@ const useQuery = (params, sort) => useMemo(() => ({
 
 const useWorkingGroupsQuery = (params, sort) => useMemo(() => ({
 	sort: JSON.stringify({ [sort[0]]: sortDir(sort[1]), titles: sort[0] === 'title' ? sortDir(sort[1]) : undefined }),
+	query: JSON.stringify({ type: { $ne: 'subject' } }),
 }), [params, sort]);
 
 const useCouncilQuery = (params, sort, _id) => useMemo(() => ({
@@ -51,7 +54,7 @@ const invitedUsersQuery = ({ itemsPerPage, current }, [column, direction], counc
 		],
 		$and: [
 			{ type: { $ne: 'bot' } },
-			{ _id: councilId }
+			{ _id: councilId },
 		],
 	}),
 	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
@@ -150,8 +153,9 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 	const formatDateAndTime = useFormatDateAndTime();
 	const councilQuery = useCouncilQuery(debouncedParams, debouncedSort, id);
 
-	const councilData = useEndpointData('councils.findOne', councilQuery) || {};
-	const invitedUsersData = useEndpointData('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, id)) || { invitedUsers: [] };
+	const { data: councilData, state: councilState } = useEndpointDataExperimental('councils.findOne', councilQuery) || {};
+	// const { data: invitedUsersData, state: invitedUsersState } = useEndpointDataExperimental('councils.invitedUsers', invitedUsersQuery(debouncedParams, debouncedSort, id)) || { invitedUsers: [] };
+	const { data: invitedPersonsData, state: invitedPersonsState } = useEndpointDataExperimental('councils.invitedPersons', useMemo(() => ({ query: JSON.stringify({ _id: id }) }), [id])) || { persons: [] };
 
 	const [recipients, setRecipients] = useState([]);
 	const [defaultEmails, setDefaultEmails] = useState('');
@@ -161,7 +165,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 
 	useEffect(() => {
 		const users = usersData || [];
-		const invitedUsers = invitedUsersData ? invitedUsersData.invitedUsers : [];
+		const invitedPersons = invitedPersonsData ? invitedPersonsData.persons : [];
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (councilData) {
 			let emails = '';
@@ -186,42 +190,35 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 
 			const getChildrens = (inviteds) => {
 				const res = [];
-				inviteds?.map((invitedUser) => {
-					const indexUser = users.findIndex((user) => user._id === invitedUser._id);
-
-					if (indexUser < 0) {
+				inviteds?.map((iPerson) => {
+					if (!iPerson.email) {
 						return;
 					}
-
 					isChild = true;
-					const value = users[indexUser];
-
-					if (!value) {
-						return;
-					}
-
-					emails += (value.emails ? value.emails[0].address : '') + ',';
+					emails += [iPerson.email, ','].join('');
 					res.push({
-						label: [value.surname, value.name, value.patronymic].join(' '),
-						value: value.emails ? value.emails[0].address : '',
+						label: [iPerson.surname ?? t('Surname'), iPerson.name ?? t('Name'), iPerson.patronymic ?? t('Patronymic')].join(' '),
+						value: iPerson.email ?? '',
 					});
+					return '';
 				});
 
 				return res;
 			};
-			const child = invitedUsers ? {
+
+			const child = invitedPersons ? {
 				label,
 				value: 'Council',
 				isDefaultValue: true,
-				children: !invitedUsers ? [] : getChildrens(invitedUsers)
+				children: !invitedPersons ? [] : getChildrens(invitedPersons),
 			} : null;
 
-			// console.log(child);
+			console.log(child);
 			// console.log(invitedUsers);
 			// console.log(usersData);
-			
+
 			if (isChild) {
-				// console.log('nule');
+				console.log('nule');
 				recipients[0].children.push(child);
 			}
 			const mailSubject = [t('Council'), 'От', formatDateAndTime(councilData.d)].join(' ');
@@ -232,7 +229,12 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData, councilData, invitedUsersData, formatDateAndTime]);
+	}, [workingGroupsData, usersData, councilData, invitedPersonsData, formatDateAndTime]);
+
+	if ([councilState, invitedPersonsState].includes(ENDPOINT_STATES.LOADING)) {
+		console.log('loading');
+		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+	}
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
 }
