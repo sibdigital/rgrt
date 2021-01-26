@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
@@ -5,8 +6,9 @@ import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { Councils } from './Councils';
-import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
+import { useRoute } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { hasPermission } from '../../../authorization';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -22,6 +24,8 @@ export function CouncilsPage() {
 	const t = useTranslation();
 
 	const routeName = 'councils';
+
+	const isAllow = hasPermission('edit-councils', Meteor.userId());
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d', 'desc']);
@@ -79,9 +83,9 @@ export function CouncilsPage() {
 					</Button>
 					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
-				<Button width='200px' primary small onClick={onAddClick} aria-label={t('Add')}>
+				{ isAllow && <Button width='200px' primary small onClick={onAddClick} aria-label={t('Add')}>
 					{ t('Add') }
-				</Button>
+				</Button>}
 			</Page.Header>
 			<Page.Content>
 				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>

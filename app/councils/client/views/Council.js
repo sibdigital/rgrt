@@ -280,7 +280,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 
 	const onEdit = (_id) => () => {
 		FlowRouter.go(`/council/edit/${ _id }`);
-		window.location.reload();
+		// window.location.reload();
 	};
 
 	const saveCouncilAction = useCallback(async (date, description, invitedPersons) => {
@@ -289,7 +289,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 		if (validation.length === 0) {
 			await insertOrUpdateCouncil(councilData);
 			FlowRouter.go(`/council/${ councilId }`);
-			window.location.reload();
+			// window.location.reload();
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	}, [councilId, dispatchToastMessage, insertOrUpdateCouncil, date, description, t]);
@@ -432,7 +432,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 				await addCouncilToPersons(councilId, [currentPerson]);
 				await addPersonsToCouncil(councilId, [{ _id: currentPerson._id, ts: new Date() }]);
 				setIsUserJoin(true);
-				dispatchToastMessage({ type: 'error', message: t('Council_joined') });
+				dispatchToastMessage({ type: 'succes', message: t('Council_joined') });
 			} else {
 				await deletePersonFromCouncil(councilId, currentPerson._id);
 				setIsUserJoin(false);
@@ -546,7 +546,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 
 				</Field>
 				{ mode !== 'edit' && <ButtonGroup>
-					<Button primary small aria-label={t('Agenda')}>
+					<Button primary small aria-label={t('Agenda')} disabled>
 						{t('Agenda')}
 					</Button>
 					{!isSecretary && <Button danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
@@ -560,7 +560,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 					</Button>}
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
-					<Button primary small aria-label={t('Agenda')}>
+					<Button primary small aria-label={t('Agenda')} disabled>
 						{t('Agenda')}
 					</Button>
 					<Button primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
@@ -605,9 +605,9 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 					<Field.Row>
 						{mode !== 'edit'
 							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
-						{mode === 'edit'
-							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Number')}/>
-						}
+						{/*{mode === 'edit'*/}
+						{/*	&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Number')}/>*/}
+						{/*}*/}
 					</Field.Row>
 				</Field>
 				{isSecretary && <Field mbe='x8'>

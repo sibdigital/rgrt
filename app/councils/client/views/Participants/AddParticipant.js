@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Field, Table, Label } from '@rocket.chat/fuselage';
-import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { useMethod } from '../../../../../client/contexts/ServerContext';

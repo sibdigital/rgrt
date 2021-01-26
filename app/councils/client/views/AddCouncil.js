@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Field, TextAreaInput, Button, ButtonGroup, TextInput, Icon, Label, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
@@ -5,6 +6,7 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
 import Page from '../../../../client/components/basic/Page';
+import { hasPermission } from '../../../authorization';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
@@ -80,6 +82,11 @@ export function AddCouncilPage() {
 	if ([personsDataState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
 		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+	}
+
+	if (!hasPermission('edit-councils', Meteor.userId())) {
+		console.log('not permision');
+		return <Callout m='x16' type='danger'>{t('Not_Permission')}</Callout>;
 	}
 
 	return <AddCouncilWithNewData persons={persons} setPersons={setPersons} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;

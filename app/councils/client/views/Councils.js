@@ -1,14 +1,16 @@
+import { Meteor } from 'meteor/meteor';
 import React, { useCallback, useMemo } from 'react';
 import { Box, Button, ButtonGroup, Icon, Modal, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import moment from 'moment';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import moment from 'moment';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { hasPermission } from '../../../authorization';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -63,6 +65,8 @@ export function Councils({
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const setModal = useSetModal();
+
+	const isAllow = hasPermission('edit-councils', Meteor.userId());
 
 	const deleteCouncil = useMethod('deleteCouncil');
 
@@ -122,15 +126,6 @@ export function Councils({
 		return t('To_be');
 	}
 
-	const header = useMemo(() => [
-		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }} color='default'>{t('Date')}</Th>,
-		<Th key={'desc'} color='default'>{t('Description')}</Th>,
-		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
-		<Th w='x40' key='edit'></Th>,
-		<Th w='x40' key='delete'></Th>,
-		<Th w='x40' key='download'></Th>,
-	], [sort, mediaQuery]);
-
 	const styleTr = { borderBottomWidth: '10px', borderBottomColor: 'var(--color-white)' };
 
 	const onDeleteCouncilConfirm = useCallback(async (_id) => {
@@ -146,22 +141,31 @@ export function Councils({
 
 	const onDeleteCouncilClick = (_id) => () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
 
+	const header = useMemo(() => [
+		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }} color='default'>{t('Date')}</Th>,
+		<Th key={'desc'} color='default'>{t('Description')}</Th>,
+		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
+		isAllow && <Th w='x40' key='edit'/>,
+		isAllow && <Th w='x40' key='delete'/>,
+		<Th w='x40' key='download'/>,
+	], [sort, mediaQuery]);
+
 	const renderRow = (council) => {
 		const { _id, d: date, desc, ts } = council;
 		return <Table.Row key={_id} tabIndex={0} role='link' action style={styleTr} backgroundColor={colorBackgroundCouncil(date)}>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(date)} {statusCouncil(date)}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}><Box withTruncatedText>{desc}</Box></Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(ts)}</Table.Cell>}
-			<Table.Cell alignItems={'end'}>
+			{ isAllow && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')} color={colorTextCouncil(date)}>
 					<Icon name='edit'/>
 				</Button>
-			</Table.Cell>
-			<Table.Cell alignItems={'end'}>
+			</Table.Cell>}
+			{ isAllow && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('Delete')} onClick={onDeleteCouncilClick(_id)} color={colorTextCouncil(date)}>
 					<Icon name='trash'/>
 				</Button>
-			</Table.Cell>
+			</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={downloadCouncilParticipants(_id)} aria-label={t('Download')} color={colorTextCouncil(date)}>
 					<Icon name='download'/>

@@ -1,10 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Icon, Tile, ButtonGroup, Modal, Table, Field } from '@rocket.chat/fuselage';
-import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { Button, Icon, ButtonGroup, Modal, Table } from '@rocket.chat/fuselage';
+import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { css } from '@rocket.chat/css-in-js';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
