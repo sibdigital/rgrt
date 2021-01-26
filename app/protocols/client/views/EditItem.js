@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import Chip from '@material-ui/core/Chip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Autocomplete, createFilterOptions } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import {
@@ -63,6 +63,10 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 	return <EditItemWithData protocol={data} sectionId={sectionId} itemId={_id} onChange={onChange} {...props}/>;
 }
 
+function constructPersonFIO(person) {
+	return person.surname + " " + person.name.substr(0,1) + "." + person.patronymic.substr(0,1) + "."
+}
+
 function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -79,7 +83,6 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 	const [name, setName] = useState('');
 	const [responsible, setResponsible] = useState({});
 	const [expireAt, setExpireAt] = useState('');
-	console.log(responsible)
 
 	useEffect(() => {
 		setNumber(previousNumber || '');
@@ -142,20 +145,26 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 			<Field.Label>{t('Item_Responsible')}</Field.Label>
 			<Autocomplete
 				multiple
-				id="size-small-outlined-multi"
-				size="small"
+				id="tags-standard"
 				value={responsible}
+				forcePopupIcon={false}
 				options={personsData.persons}
-				getOptionLabel={(option) => option.name}
-				getOptionSelected={(option, value) => option.name === value.name} 
+				getOptionLabel={(option) => constructPersonFIO(option)}
+				getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname}
+				filterOptions={createFilterOptions({ limit: 10 })}
 				filterSelectedOptions
 				onChange={(event, value) => setResponsible(value)}
+				renderTags={(value, getTagProps) =>
+					value.map((option, index) => (
+					  	<Chip label={constructPersonFIO(option)} {...getTagProps({ index })} />
+					))
+				}
 				renderInput={(params) => (
-				<TextField
-					{...params}
-					variant="outlined"
-					placeholder={t('Item_Responsible')}
-				/>
+					<TextField
+						{...params}
+						variant="outlined"
+						placeholder={t('Item_Responsible')}
+					/>
 				)}
 			/>
 		</Field>
