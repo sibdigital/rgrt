@@ -2,7 +2,7 @@ import { Persons } from '../../../models/server/raw';
 
 export async function findPersons({ query = {}, pagination: { offset, count, sort } }) {
 	const cursor = await Persons.find(query, {
-		sort: sort || { time: 1 },
+		sort: sort || { name: 1 },
 		skip: offset,
 		limit: count,
 	});

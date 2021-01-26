@@ -28,7 +28,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 			<Box is='span' pie='x8'>{item.num}.</Box>
 			<Box flexGrow={1}>
 				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: item.name }} align='justify'/>
-				{ item.responsible && <Box mbe='x4'>{t('Item_Responsible')}: {item.responsible}</Box> }
+				{ item.responsible && <Box mbe='x4'>{t('Item_Responsible')}: {(item.responsible.map((s) => s.name) + ",").slice(0, -1)}</Box> }
 				{ item.expireAt && <Box mbe='x4'>{t('Item_ExpireAt')}: {formatDate(item.expireAt)}</Box> }
 			</Box>
 			<Box pi='x4' style={{cursor: 'pointer'}} data-item={item._id} data-section={item.sectionId}
