@@ -88,6 +88,7 @@ const create = ({ prid, pmid, t_name, reply, users, user }) => {
 	const type = roomTypes.getConfig(p_room.t).getDiscussionType();
 	const discussion = createRoom(type, name, user.username, [...new Set(invitedUsers)], false, {
 		fname: t_name,
+		name: t_name,
 		description: message.msg, // TODO discussions remove
 		topic: p_room.name, // TODO discussions remove
 		prid,
