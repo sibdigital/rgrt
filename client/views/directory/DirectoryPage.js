@@ -7,6 +7,7 @@ import UserTab from './UserTab';
 import ChannelsTab from './ChannelsTab';
 import { useRoute, useRouteParameter } from '../../contexts/RouterContext';
 import { useSetting } from '../../contexts/SettingsContext';
+import { GoBackButton } from '../../../app/utils/client/views/GoBackButton';
 
 function DirectoryPage() {
 	const t = useTranslation();
@@ -26,16 +27,10 @@ function DirectoryPage() {
 		}
 	}, [directoryRoute, tab, federationEnabled, defaultTab]);
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	return <Page>
 		<Page.Header>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-				<Button className='go-back-button' onClick={goBack}>
-					<Icon name='back'/>
-				</Button>
+				<GoBackButton/>
 				<Label fontScale='h1'>{t('Directory')}</Label>
 			</Field>
 		</Page.Header>

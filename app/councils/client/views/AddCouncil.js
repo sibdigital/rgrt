@@ -12,6 +12,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { validate, createCouncilData } from './lib';
 import { Persons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
@@ -122,10 +123,6 @@ function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOpti
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	const hasUnsavedChanges = useMemo(() => description.trim() !== '', [description]);
 
 	const onAddParticipantClick = () => {
@@ -166,9 +163,7 @@ function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOpti
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Council_edit')}</Label>
 				</Field>
 				<ButtonGroup>

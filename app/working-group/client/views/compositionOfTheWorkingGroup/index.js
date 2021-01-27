@@ -6,6 +6,7 @@ import { useTranslation } from '../../../../../client/contexts/TranslationContex
 import { useRoute, useRouteParameter } from '../../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import VerticalBar from '../../../../../client/components/basic/VerticalBar';
+import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 
 import { WorkingGroupCompositions } from './WorkingGroupCompositions';
 import { AddWorkingGroupComposition } from './AddWorkingGroupComposition';
@@ -69,9 +70,7 @@ export function CompositionOfTheWorkingGroupPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Working_group_composition')}</Label>
 				</Field>
 			</Page.Header>

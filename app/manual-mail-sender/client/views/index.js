@@ -10,6 +10,7 @@ import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useUser } from '../../../../client/contexts/UserContext';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import MailForm from './MailForm';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
@@ -99,9 +100,7 @@ export function MailSenderPage() {
 	return <Page>
 		<Page.Header>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-				<Button className='go-back-button' onClick={goBack}>
-					<Icon name='back'/>
-				</Button>
+				<GoBackButton/>
 				<Label fontScale='h1'>{t('Send_email')}</Label>
 			</Field>
 		</Page.Header>

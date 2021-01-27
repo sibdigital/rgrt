@@ -8,6 +8,7 @@ import { GenericTable, Th } from '../../../../../client/components/GenericTable'
 import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
 import { useRouteParameter } from '../../../../../client/contexts/RouterContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
+import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 
 export function Answer({ answer, router, requestId }) {
 	const data = {
@@ -47,14 +48,6 @@ function AnswerWithData({ answer, files, router, requestId }) {
 	const handleTabClick = useCallback((tab) => () => router.push({ id: requestId, context: 'answer', tab }), [router]);
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
-
-	const goBack = () => {
-		window.history.back();
-	};
-	// const goBack = useCallback(() => {
-	// 	console.log('click');
-	// 	router.push({ id: requestId, context: 'answers' });
-	// }, [router]);
 
 	const onDownloadClick = (_id) => async (e) => {
 		e.preventDefault();
@@ -104,9 +97,7 @@ function AnswerWithData({ answer, files, router, requestId }) {
 	return <Page>
 		<Page.Header>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-				<Button className='go-back-button' onClick={goBack}>
-					<Icon name='back'/>
-				</Button>
+				<GoBackButton/>
 				<Label fontScale='h1'>{t('Working_group_received_answer')}</Label>
 			</Field>
 		</Page.Header>

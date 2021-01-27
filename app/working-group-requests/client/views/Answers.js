@@ -8,6 +8,7 @@ import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 export function Answers({ editData, mail, onClick, onChange }) {
 	const data = [];
@@ -39,10 +40,6 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 		}
 	};
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	const header = useMemo(() => [
 		<Th key={'Sender'} color='default'>
 			{ t('Sender') }
@@ -70,9 +67,7 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 	return <Page>
 		<Page.Header>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-				<Button className='go-back-button' onClick={goBack}>
-					<Icon name='back'/>
-				</Button>
+				<GoBackButton/>
 				<Label fontScale='h1'>{t('Working_group_received_mails')}</Label>
 			</Field>
 		</Page.Header>

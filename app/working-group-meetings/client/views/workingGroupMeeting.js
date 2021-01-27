@@ -14,6 +14,7 @@ import { settings } from '../../../settings/client';
 import { mime } from '../../../utils/lib/mimeTypes';
 import { fileUploadToWorkingGroup } from '../../../ui';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -234,9 +235,7 @@ export function WorkingGroupMeetingPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Working_group_meeting')}</Label>
 				</Field>
 			</Page.Header>

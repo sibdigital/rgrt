@@ -11,6 +11,7 @@ import { Answers } from './Answers';
 import { Answer } from './Answer';
 import { AddMail } from './AddMail';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 export function DocumentPage() {
 	const t = useTranslation();
@@ -88,9 +89,7 @@ export function DocumentPage() {
 		{(context !== 'answers' && context !== 'answer') && <Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>

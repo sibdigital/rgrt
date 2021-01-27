@@ -19,6 +19,7 @@ import { AddParticipant } from './participants/AddParticipant';
 import { CreateParticipant } from './participants/CreateParticipant';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -285,9 +286,7 @@ export function ProtocolPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
 				<ButtonGroup>

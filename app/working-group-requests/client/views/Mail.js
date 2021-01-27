@@ -10,6 +10,7 @@ import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 export function MailPage() {
 	const t = useTranslation();
@@ -131,9 +132,7 @@ export function MailPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Working_group_received_mails')}</Label>
 				</Field>
 			</Page.Header>

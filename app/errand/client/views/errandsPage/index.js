@@ -11,6 +11,7 @@ import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
 import { EditErrandContextBar } from './EditErrand';
 import { modal } from '../../../../ui-utils/client';
+import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
@@ -173,9 +174,7 @@ export function ErrandPage() {
 						<Page>
 							<Page.Header>
 								<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-									<Button className='go-back-button' onClick={goBack}>
-										<Icon name='back'/>
-									</Button>
+									<GoBackButton/>
 									<Label fontScale='h1'>{t(title)}</Label>
 								</Field>
 								<Field width={'6%'} display={'block'} marginBlock={'15px'}>
@@ -194,9 +193,7 @@ export function ErrandPage() {
 						<Page>
 							<Page.Header>
 								<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-									<Button className='go-back-button' onClick={goBack}>
-										<Icon name='back'/>
-									</Button>
+									<GoBackButton/>
 									<Label fontScale='h1'>{t(title)}</Label>
 								</Field>
 							</Page.Header>

@@ -10,6 +10,7 @@ import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { EditProtocol } from './EditProtocol';
 import { AddProtocol } from './AddProtocol';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -83,9 +84,7 @@ export function ProtocolsPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
 

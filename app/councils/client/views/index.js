@@ -9,6 +9,7 @@ import { Councils } from './Councils';
 import { useRoute } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { hasPermission } from '../../../authorization';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -70,17 +71,11 @@ export function CouncilsPage() {
 		setCache(new Date());
 	}, []);
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
 				{ isAllow && <Button width='200px' primary small onClick={onAddClick} aria-label={t('Add')}>

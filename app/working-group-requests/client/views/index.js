@@ -9,6 +9,7 @@ import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { Requests } from './requests';
 import { AddRequest } from './AddRequest';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -93,9 +94,7 @@ export function WorkingGroupRequestsPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>
 						{(context === undefined || context === 'requests') && t('Working_group_requests')}
 						{context === 'new' && t('Working_group_request_add')}

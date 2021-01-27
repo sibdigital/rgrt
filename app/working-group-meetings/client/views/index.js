@@ -8,6 +8,7 @@ import { WorkingGroupsMeetings } from './workingGroupMeetings';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { EditWorkingGroupMeeting } from './EditWorkingGroupMeeting';
 import { AddWorkingGroupMeeting } from './AddWorkingGroupMeeting';
 
@@ -81,9 +82,7 @@ export function WorkingGroupMeetingsPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Working_group_meetings')}</Label>
 				</Field>
 			</Page.Header>

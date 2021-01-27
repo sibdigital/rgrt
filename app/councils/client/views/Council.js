@@ -34,6 +34,7 @@ import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { fileUploadToCouncil, filesValidation } from '../../../ui/client/lib/fileUpload';
 import { mime } from '../../../utils/lib/mimeTypes';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { Persons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
@@ -268,11 +269,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 			person.ts = iPerson.ts;
 		}
 		return person;
-	}), [invitedPersonsIds, persons]);
-
-	const goBack = () => {
-		window.history.back();
-	};
+	}) || [], [invitedPersonsIds, persons]);
 
 	const goToCouncils = () => {
 		FlowRouter.go('councils');
@@ -539,10 +536,8 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
-					<Label fontScale='h1'>{t('Council')}</Label>
+					<GoBackButton/>
+					<Label fontScale='h1'>{t('Council')} {isLoading && t('Loading')}</Label>
 
 				</Field>
 				{ mode !== 'edit' && <ButtonGroup>

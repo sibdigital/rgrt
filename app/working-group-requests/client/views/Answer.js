@@ -21,6 +21,7 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 export function AnswerPage() {
 	const requestId = useRouteParameter('requestid');
@@ -75,14 +76,6 @@ function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
-	// const goBack = () => {
-	// 	FlowRouter.go(`/working-groups-request/${ requestId }/mail/${ mailId }`);
-	// };
-
-	const goBack = () => {
-		window.history.back();
-	};
-
 	const onDownloadClick = (file) => async (e) => {
 		e.preventDefault();
 		try {
@@ -125,9 +118,7 @@ function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 	return <Page>
 		<Page.Header>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-				<Button className='go-back-button' onClick={goBack}>
-					<Icon name='back'/>
-				</Button>
+				<GoBackButton/>
 				<Label fontScale='h1'>{t('Working_group_received_answer')}</Label>
 			</Field>
 		</Page.Header>

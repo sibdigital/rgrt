@@ -8,7 +8,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
-import { useMethod } from '../../../../client/contexts/ServerContext';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { Persons } from './Persons';
 import { EditPerson } from './EditPerson';
 
@@ -90,17 +90,11 @@ export function PersonsPage() {
 		setCache(new Date());
 	}, []);
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={goBack}>
-						<Icon name='back'/>
-					</Button>
+					<GoBackButton/>
 					<Label fontScale='h1'>{t('Persons')}</Label>
 				</Field>
 			</Page.Header>
