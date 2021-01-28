@@ -219,7 +219,7 @@ export class ChatMessages {
 		if (message.attachments && message.attachments[0].description) {
 			messageBoxState.set(this.input, message.attachments[0].description);
 		} else {
-			messageBoxState.set(this.input, msg);
+			messageBoxState.set(this.input, msg.substr(msg.indexOf(")") + 1));
 		}
 
 		const cursorPosition = isEditingTheNextOne ? 0 : -1;
