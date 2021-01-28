@@ -33,18 +33,24 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 	const handleSave = useCallback(async () => {
 		const personId = await insertOrUpdatePerson(values);
 		if (personId) {
-			const person = {
+			const person = values;
+			person._id = personId;
+
+			const personToAdd = {
 				_id: personId,
 				ts: new Date(),
 			};
+			console.log(person);
 			if (councilId) {
-				await insertOrUpdateCouncilPerson({ _id: councilId }, person);
+				await insertOrUpdateCouncilPerson({ _id: councilId }, personToAdd);
 			}
 			dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
-			const res = invitedPersons ? invitedPersons.concat(person) : [person];
+
+			const res = invitedPersons ? invitedPersons.concat(personToAdd) : [personToAdd];
 			setInvitedPersons(res);
-			onChange();
-			close();
+			// close();
+			goTo(person)();
+			// onChange();
 		}
 	}, [values, insertOrUpdatePerson, insertOrUpdateCouncilPerson, invitedPersons, onChange]);
 
