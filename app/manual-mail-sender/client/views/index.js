@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Button, Field, Label, Icon, Callout } from '@rocket.chat/fuselage';
+import { Field, Label, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import '../../public/stylesheets/mail-sender.css';
@@ -93,10 +93,6 @@ export function MailSenderPage() {
 
 	const workingGroupsData = useEndpointData('working-groups.list', workingGroupsQuery) || {};
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	return <Page>
 		<Page.Header>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
@@ -160,6 +156,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 	const [defaultEmails, setDefaultEmails] = useState('');
 	const [mailSubject, setMailSubject] = useState('');
 	const [mailBody, setMailBody] = useState('');
+	const [emailsArray, setEmailsArray] = useState([]);
 	const label = t('Council_participants');
 
 	useEffect(() => {
@@ -168,17 +165,26 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (councilData) {
 			let emails = '';
+			const emailsArr = [];
+			let staticIndex = 0;
 			const recipients = [{
 				label: 'Все пользователи',
 				value: 'all_users',
 				children: workingGroups.map((workingGroup) => {
+					const usersFilter = users.filter((user) => user.workingGroup === workingGroup.title && workingGroup.type !== 'subject');
 					return {
 						label: workingGroup.title,
 						value: workingGroup._id,
-						children: users.filter((user) => user.workingGroup === workingGroup.title && workingGroup.type !== 'subject').map((value) => {
+						children: usersFilter.map((value) => {
+							const email = value.emails ? value.emails[0].address : '';
+							if (email.length > 0) {
+								staticIndex++;
+								emailsArr.push({ index: staticIndex, value: email });
+							}
 							return {
 								label: [value.surname, value.name, value.patronymic].join(' '),
-								value: value.emails ? value.emails[0].address : '',
+								value: email,
+								index: staticIndex,
 							};
 						}),
 					};
@@ -195,9 +201,12 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 					}
 					isChild = true;
 					emails += [iPerson.email, ','].join('');
+					staticIndex++;
+					emailsArr.push({ index: staticIndex, value: iPerson.email });
 					res.push({
 						label: [iPerson.surname ?? t('Surname'), iPerson.name ?? t('Name'), iPerson.patronymic ?? t('Patronymic')].join(' '),
 						value: iPerson.email ?? '',
+						index: staticIndex,
 					});
 					return '';
 				});
@@ -222,6 +231,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			}
 			const mailSubject = [t('Council'), 'От', formatDateAndTime(councilData.d)].join(' ');
 
+			setEmailsArray(emailsArr);
 			setDefaultEmails(emails);
 			setMailSubject(mailSubject);
 			setMailBody(councilData.desc);
@@ -235,7 +245,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
 	}
 
-	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
+	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails} emailsArray={emailsArray}/>;
 }
 
 function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, debouncedSort, id }) {

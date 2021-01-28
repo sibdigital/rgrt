@@ -1308,6 +1308,7 @@
   "Email_changed_section": "Адрес электронной почты изменен",
   "Email_Footer_Description": "Вы можете использовать следующие подстановки: <br/><ul><li>[Site_Name] и [Site_URL] для имени приложения и его URL соответственно.</li></ul>",
   "Email_from": "От",
+  "Email_input": "Введите email",
   "Email_Notifications_Change_Disabled": "Ваш администратор Rocket.Chat отключил уведомления по электронной почте",
   "Email_Header_Description": "Вы можете использовать следующие подстановки: <br/><ul><li>[Site_Name] и [Site_URL] для имени приложения и его URL соответственно.</li></ul>",
   "Email_Notification_Mode": "Офлайн уведомления по Email",

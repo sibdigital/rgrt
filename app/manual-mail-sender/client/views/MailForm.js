@@ -1,25 +1,25 @@
-import { Box, Button, ButtonGroup, Chip, Field, InputBox, Margins, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
-import React, { Component, useMemo, useState, useEffect, useCallback } from 'react';
-import 'react-dropdown-tree-select/dist/styles.css'
-import '../../public/stylesheets/mail-sender.css'
+import { Box, Button, ButtonGroup, Chip, Field, InputBox, Margins, TextInput, Icon } from '@rocket.chat/fuselage';
+import { useUniqueId } from '@rocket.chat/fuselage-hooks';
+import React, { Component, useMemo, useState, useEffect } from 'react';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
 import DropdownTreeSelect from 'react-dropdown-tree-select';
 import isEqual from 'lodash.isequal';
+import 'react-dropdown-tree-select/dist/styles.css';
+import '../../public/stylesheets/mail-sender.css';
 
-import { useUniqueId } from '@rocket.chat/fuselage-hooks';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-
+import { isEmail } from '../../../utils';
 
 function packData(data, files) {
 	const dataToSend = {};
 	Object.keys(data).forEach((key) => {
 		dataToSend[key] = data[key].value.trim();
 	});
-	dataToSend['files'] = files;
+	dataToSend.files = files;
 	return dataToSend;
 }
 
@@ -47,56 +47,49 @@ class DropdownTreeSelectContainer extends Component {
 	}
 }
 
-const getEmails = (obj, path) => {
-	let emails = '';
-	obj.forEach((node) => {
-		if (!node.children && node.path.startsWith(path)) {
-			emails += node.value + ',';
-		}
-		if (node.children) {
-			emails += getEmails(node.children, path);
-		}
-	});
-	return emails;
-};
+function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArray }) {
+	const t = useTranslation();
+	const dispatchToastMessage = useToastMessageDispatch();
+	const fileSourceInputId = useUniqueId();
 
-function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 	const [newData, setNewData] = useState({
 		email: { value: '', required: true },
 		topic: { value: '', required: true },
 		message: { value: '<p>Здравствуйте, </p>', required: true },
 	});
+	const [chipEmails, setChipEmails] = useState([]);
+	const [handChipEmails, setHandChipEmails] = useState([]);
+	const [chipEmail, setChipEmail] = useState('');
 	const [email, setEmail] = useState('');
 	const [topic, setTopic] = useState('');
 	const [message, setMessage] = useState('');
-	const mailSubjectContext = mailSubject;
-	const mailBodyContext = mailBody;
-	const defaultEmailsContext = defaultEmails;
+	const [commiting, setComitting] = useState(false);
+	const [files, setFiles] = useState([]);
+	const [cache, setCache] = useState('');
 
-	const t = useTranslation();
+	const mailBodyContext = mailBody;
+	const mailSubjectContext = mailSubject;
+	const defaultEmailsContext = defaultEmails;
 
 	const sendEmail = useMethod('sendEmailManually');
 
-	const [commiting, setComitting] = useState(false);
-
-	const dispatchToastMessage = useToastMessageDispatch();
-
-	//const sendFromContext = useMemo(() => mailBodyContext !== undefined && mailBodyContext.length > 0 && mailSubjectContext !== undefined && mailSubjectContext.length > 0, [mailSubjectContext, mailBodyContext]);
-	//const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value.trim() === '' && current.required === true).length === 0, [JSON.stringify(newData)]);
 	const allFieldAreFilled = useMemo(() => email.trim() !== '' && topic.trim() !== '' && message.trim() !== '', [email, topic, message]);
 
-	const fileSourceInputId = useUniqueId();
-
-	const [files, setFiles] = useState([]);
+	const isValidInputEmail = useMemo(() => isEmail(chipEmail), [chipEmail]);
 
 	useEffect(() => {
 		if (mailBodyContext !== undefined && mailBodyContext.length > 0 && mailSubjectContext !== undefined && mailSubjectContext.length > 0) {
 			console.log('rerender');
+			setChipEmails(emailsArray);
 			setEmail(defaultEmailsContext ?? '');
 			setTopic(mailSubjectContext);
 			setMessage(mailBodyContext);
 		}
 	}, [mailSubjectContext, mailBodyContext, defaultEmailsContext]);
+
+	const onChange = () => {
+		setCache(new Date());
+	};
 
 	const handleImportFileChange = async (event) => {
 		event = event.originalEvent || event;
@@ -123,6 +116,21 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 		setFiles((files) => files.filter((_file) => _file !== file));
 	};
 
+	const handleEmailChipChange = (email) => {
+		setChipEmail(email);
+	};
+
+	const handleEmailChipClick = (email) => () => {
+		const emailToAdd = { value: email, hand: true };
+		setHandChipEmails(handChipEmails ? handChipEmails.concat(emailToAdd) : [emailToAdd]);
+		setChipEmail('');
+	};
+
+	const handleEmailsChipClick = (index) => () => {
+		setHandChipEmails(chipEmails.filter((chip, _index) => _index !== index));
+		onChange();
+	};
+
 	const handleSubmit = async () => {
 		setComitting(true);
 		try {
@@ -147,17 +155,31 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 	$('.main-content').removeClass('rc-old');
 
 	const handleTopicChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
-		//setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
 		setTopic(getValue(e));
 	};
 
 	const handleDropdownTreeSelectChange = (currentNode, selectedNodes) => {
-		let emails = '';
+		let emailsStr = '';
+		const emailsArray = [];
 		selectedNodes.forEach((item) => {
-			emails += getEmails(recipients, item.path);
+			const getEmails = (obj, path) => {
+				const emails = [];
+				obj.forEach((node) => {
+					if (!node.children && node.path.startsWith(path)) {
+						emailsStr += [node.value, ','].join('');
+						emailsArray.push({ value: [node.value, ','].join(''), index: node.index });
+					}
+					if (node.children) {
+						getEmails(node.children, path);
+					}
+				});
+				return emails;
+			};
+			getEmails(recipients, item.path);
 		});
-		//setNewData({ ...newData, email: { value: emails, required: newData.email.required } });
-		setEmail(emails);
+		setChipEmails(emailsArray);
+		setEmail(emailsStr);
+		onChange();
 	};
 
 	return <Field style={{ overflowY: 'scroll' }}>
@@ -175,15 +197,40 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 						}
 					}
 				/>
-				{/* <DropdownTreeSelect data={recipients} className='tree-select custom-tree-select' dropdownClassName='date-picker' onChange={handleDropdownTreeSelectChange}
-					tagRemoveClassName='date-picker'  
-					texts={
-						{
-							placeholder: 'Поиск...',
-							noMatches: 'Не найдено совпадений',
-						}}
-				/> */}
-				<TextAreaInput backgroundColor={'var(--tertiary-background-color)'} row='1' style={{ whiteSpace: 'normal' }} flexGrow={1} value={email} readOnly placeholder={t('Email')}/>
+				<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' backgroundColor={'var(--tertiary-background-color)'}>
+					<Margins inlineStart='x4' inlineEnd='x4' blockStart='x4' blockEnd='x4'>
+						{ chipEmails.map((chip, index) =>
+							<Chip pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }} border='1px solid' color='var(--rc-color-button-primary)'>
+								{chip.value ?? ''}
+							</Chip>)}
+						{ handChipEmails.map((chip, index) =>
+							<Chip pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }}
+								onClick={handleEmailsChipClick(index)} border='1px solid' color='var(--rc-color-button-primary-light)'>
+								{chip.value ?? ''}
+							</Chip>)}
+						<Field
+							maxHeight='30px' maxWidth='250px' display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start'
+							border='0px hidden transparent' borderRadius='0.6rem' alignItems='center'>
+							<TextInput
+								maxHeight='25px'
+								minHeight='20px'
+								value={chipEmail}
+								onChange={(e) => handleEmailChipChange(e.currentTarget.value)}
+								placeholder={t('Email_input')}
+								border='0px hidden transparent'
+								borderRadius='0.6rem'/>
+							<Button
+								backgroundColor='transparent'
+								borderColor='transparent'
+								disabled={!isValidInputEmail}
+								small
+								onClick={handleEmailChipClick(chipEmail)}>
+								{ isValidInputEmail && <Icon name='plus' size='x16' color={'green'}/>}
+								{ !isValidInputEmail && <Icon name='circle-cross' size='x16' color={'red'}/>}
+							</Button>
+						</Field>
+					</Margins>
+				</Box>
 			</Field>
 		</Field>
 		<Field mbe='x8'>
@@ -205,7 +252,6 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails }) {
 					onChange={ (event, editor) => {
 						const data = editor.getData();
 						setMessage(data);
-						//setNewData({ ...newData, message: { value: data, required: newData.message.required } });
 					} }
 				/>
 			</Field.Row>
