@@ -117,7 +117,7 @@ export function CouncilPage() {
 	const councilId = useRouteParameter('id');
 	const routeUrl = useCurrentRoute();
 	const userId = Meteor.userId();
-	const isAllow = hasPermission(userId, 'edit-councils');
+	const isAllow = hasPermission('edit-councils', userId);
 
 	const [files, setFiles] = useState([]);
 	const [persons, setPersons] = useState([]);
@@ -144,8 +144,6 @@ export function CouncilPage() {
 	const { data: personsData, state: personsDataState } = useEndpointDataExperimental('persons.list', personsQuery) || { persons: [] };
 	const { data: currentUser, state: currentUserState } = useEndpointDataExperimental('users.getRoles', useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
 	const { data: currentPerson, state: currentPersonState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
-	// const workingGroups = { workingGroups: [] };
-	// const currentUser = {};
 
 	useEffect(() => {
 		if (data && data.documents) {
@@ -183,12 +181,12 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
 	}
 
-	if (mode === 'edit' && !(currentUser?.roles?.includes('secretary') || currentUser?.roles?.includes('admin'))) {
-		console.log('not permision');
-		return <Callout m='x16' type='danger'>{t('Not_Permission')}</Callout>;
+	if (mode === 'edit' && !isAllow) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council mode={mode} persons={persons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={[]} councilTypeOptions={councilTypeOptions}/>;
+	return <Council isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={[]} councilTypeOptions={councilTypeOptions}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -246,6 +244,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
 	const deleteCouncil = useMethod('deleteCouncil');
+	const deleteCouncilFromPersons = useMethod('deleteCouncilFromPersons');
 
 	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
 
@@ -259,7 +258,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 
 	const inputStyles = useMemo(() => ({ whiteSpace: 'normal', border: mode === 'edit' ? '1px solid #4fb0fc' : '' }), [mode]);
 
-	const invitedPersons = useMemo(() => persons.filter((person) => {
+	const invitedPersons = useMemo(() => persons?.filter((person) => {
 		const iPerson = invitedPersonsIds.find((iPerson) => iPerson._id === person._id);
 		if (!iPerson) { return; }
 
@@ -277,7 +276,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 
 	const onEdit = (_id) => () => {
 		FlowRouter.go(`/council/edit/${ _id }`);
-		// window.location.reload();
+		FlowRouter.reload();
 	};
 
 	const saveCouncilAction = useCallback(async (date, description, invitedPersons) => {
@@ -286,7 +285,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 		if (validation.length === 0) {
 			await insertOrUpdateCouncil(councilData);
 			FlowRouter.go(`/council/${ councilId }`);
-			// window.location.reload();
+			FlowRouter.reload();
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	}, [councilId, dispatchToastMessage, insertOrUpdateCouncil, date, description, t]);
@@ -377,14 +376,6 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 			setStaticFileIndex(fileIndex);
 			setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
 
-			// const validationArray = await filesValidation(filesToUpload);
-			// console.log(validationArray);
-			// if (validationArray.length === 0) {
-			// 	setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
-			// } else {
-			// 	validationArray.map((val) => dispatchToastMessage({ type: 'error', message: val.error }));
-			// }
-
 			$input.remove();
 			onChange();
 		});
@@ -442,9 +433,11 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 	};
 
 	const resetData = () => {
-		setDate(new Date(data.d));
-		setDescription(data.desc);
-		onChange();
+		window.history.back();
+		// setDate(new Date(data.d));
+		// setDescription(data.desc);
+		// setCouncilType(data.type ?? '');
+		// onChange();
 	};
 
 	const onAddParticipantClick = (_id) => () => {
@@ -464,19 +457,24 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 	};
 
 	const onCreatePersonsClick = useCallback((person) => () => {
+		console.log('here');
+		// const res = invitedPersons ? invitedPersons.concat(person) : [person];
+		setPersons(persons ? persons.concat(person) : [person]);
+		// setInvitedPersonsIds(res);
 		setContext('participants');
 		onChange();
-	}, [onChange]);
+	}, [invitedPersons, persons, setPersons, onChange]);
 
 	const onDeleteCouncilConfirm = useCallback(async () => {
 		try {
 			await deleteCouncil(councilId);
+			await deleteCouncilFromPersons(councilId, invitedPersonsIds);
 			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); }}/>);
 			goToCouncils();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [deleteCouncil, dispatchToastMessage]);
+	}, [deleteCouncil, deleteCouncilFromPersons, invitedPersonsIds, dispatchToastMessage]);
 
 	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
@@ -608,7 +606,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 				{isSecretary && <Field mbe='x8'>
 					<Field.Label>{t('Council_invite_link')}</Field.Label>
 					<Field.Row>
-						<a href={address} is='span' fontScale='p1' target='_blank'>{address}</a>
+						<a href={address} is='span' target='_blank'>{address}</a>
 					</Field.Row>
 				</Field>}
 				<Tabs flexShrink={0} mbe='x8'>
@@ -631,8 +629,8 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
-						<Button onClick={fileUploadClick} mie='10px' small primary aria-label={t('Add')}>
-							{t('Upload_file_question')}
+						<Button disabled={isLoading} onClick={fileUploadClick} mie='10px' small primary aria-label={t('Upload_file')}>
+							{t('Upload_file')}
 						</Button>
 					</Field.Row>
 				</Field>}
@@ -640,7 +638,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 					&& <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
 				}
 				{tab === 'persons' && context === 'addParticipants' && isSecretary
-					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
+					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
 				}
 				{tab === 'persons' && context === 'newParticipants' && isSecretary
 					&& <CreateParticipant councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>

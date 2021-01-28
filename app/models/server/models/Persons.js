@@ -5,6 +5,11 @@ class Persons extends Base {
 		super('persons');
 	}
 
+	create(person) {
+		person.createdAt = new Date();
+		return this.insert(person);
+	}
+
 	addToCouncil(council, personId) {
 		const data = this.findOne({ _id: personId });
 		data._updatedAt = new Date();

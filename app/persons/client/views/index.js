@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Box, Label, Icon } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Label, Icon } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
-import moment from 'moment';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -15,7 +14,7 @@ import { EditPerson } from './EditPerson';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
+export const useQuery = ({ text, itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	// query: JSON.stringify({ workingGroup: { $regex: text || '', $options: 'i' } }),
 	// fields: JSON.stringify({ emails: 1, surname: 1, name: 1, patronymic: 1, position: 1, organization: 1, phone: 1, workingGroup: 1 }),
@@ -30,8 +29,8 @@ export function PersonsPage() {
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['_id']);
-    const [cache, setCache] = useState();
-    const [currentPerson, setCurrentPerson] = useState({});
+	const [cache, setCache] = useState();
+	const [currentPerson, setCurrentPerson] = useState({});
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
@@ -43,27 +42,27 @@ export function PersonsPage() {
 	const router = useRoute(routeName);
 
 	const context = useRouteParameter('context');
-    const id = useRouteParameter('id');
-    
-    useMemo(() => console.log(data), [data]);
+	const id = useRouteParameter('id');
 
-    const onCLick = useCallback((_id, person = null) => () => {
-        setCurrentPerson(person);
+	useMemo(() => console.log(data), [data]);
+
+	const onCLick = useCallback((_id, person = null) => () => {
+		setCurrentPerson(person);
 		router.push({
 			context: 'edit',
 			id: _id,
 		});
-    }, [router]);
+	}, [router]);
 
 	const onEditClick = useCallback((_id, person = null) => () => {
-        setCurrentPerson(person);
+		setCurrentPerson(person);
 		router.push({
 			context: 'edit',
 			id: _id,
 		});
-    }, [router]);
-    
-    const onAddClick = useCallback(() => () => {
+	}, [router]);
+
+	const onAddClick = useCallback(() => () => {
 		router.push({
 			context: 'new',
 		});
@@ -97,15 +96,13 @@ export function PersonsPage() {
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Persons')}</Label>
 				</Field>
+				<ButtonGroup>
+					<Button small primary onClick={onAddClick()} aria-label={t('Add')}>
+						{t('Add')}
+					</Button>
+				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field.Row>
-					<ButtonGroup>
-						<Button small primary onClick={onAddClick()} aria-label={t('Add')}>
-							{t('Add')}
-						</Button>
-					</ButtonGroup>
-				</Field.Row>
 				<Persons setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onCLick} onEditClick={onEditClick} sort={sort}/>
 			</Page.Content>
 		</Page>
@@ -118,7 +115,6 @@ export function PersonsPage() {
 			<VerticalBar.Content>
 				{context === 'edit' && <EditPerson _id={id} person={currentPerson} close={close} onChange={onChange} cache={cache}/>}
 				{context === 'new' && <EditPerson _id={null} persons={null} close={close} onChange={onChange} cache={cache}/>}
-                {/* _id, person, cache, onChange, */}
 			</VerticalBar.Content>
 		</VerticalBar>}
 	</Page>;
