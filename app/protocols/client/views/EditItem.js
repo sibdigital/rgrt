@@ -156,7 +156,8 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 				onChange={(event, value) => setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-					  	<Chip label={constructPersonFIO(option)} {...getTagProps({ index })} />
+						  <Chip  style={{backgroundColor:"#e0e0e0", margin:"3px", borderRadius:"16px", color:"#000000DE"}}
+						  		 label={constructPersonFIO(option)} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (
