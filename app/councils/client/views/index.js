@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';

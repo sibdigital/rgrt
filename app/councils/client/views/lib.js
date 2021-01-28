@@ -13,7 +13,7 @@ export function validate(councilData) {
 	return errors;
 }
 
-export function createCouncilData(date, description = '', previousData, invitedPersons) {
+export function createCouncilData(date, description = '', councilType, invitedPersons, previousData) {
 	const councilData = {
 	};
 
@@ -22,8 +22,25 @@ export function createCouncilData(date, description = '', previousData, invitedP
 	}
 	councilData.d = date;
 	councilData.desc = description;
+	councilData.type = councilType;
 	// councilData.invitedUsers = invitedUsers;
 	councilData.invitedPersons = invitedPersons;
 
 	return councilData;
 }
+
+export function downloadCouncilParticipantsForm({ res, fileName }) {
+	try {
+		// const res = await downloadCouncilParticipantsMethod({ _id, dateString: formatDateAndTime(data.d) });
+		const url = window.URL.createObjectURL(new Blob([res]));
+		const link = document.createElement('a');
+		link.href = url;
+		// const fileName = [t('Council_from') + ' ' + moment(new Date()).format('DD MMMM YYYY') + '.docx'].join('');
+		link.setAttribute('download', fileName);
+		document.body.appendChild(link);
+		link.click();
+	} catch (e) {
+		console.error('downloadCouncilParticipantsForm :', e);
+		console.log('downloadCouncilParticipantsForm :', e);
+	}
+};

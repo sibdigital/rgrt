@@ -11,6 +11,7 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { hasPermission } from '../../../authorization';
+import { downloadCouncilParticipantsForm } from './lib';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -76,55 +77,63 @@ export function Councils({
 
 	const downloadCouncilParticipantsMethod = useMethod('downloadCouncilParticipants');
 
-	const downloadCouncilParticipants = (_id) => async (e) => {
+	const downloadCouncilParticipants = (_id, type, date) => async (e) => {
 		e.preventDefault();
 		try {
 			const res = await downloadCouncilParticipantsMethod({ _id, dateString: formatDateAndTime(data.d) });
-			const url = window.URL.createObjectURL(new Blob([res]));
-			const link = document.createElement('a');
-			link.href = url;
-			const fileName = t('Council_from') + ' ' + moment(new Date()).format('DD MMMM YYYY') + '.docx';
-			link.setAttribute('download', fileName);
-			document.body.appendChild(link);
-			link.click();
+			const fileName = [type, ' ', moment(new Date(date)).format('DD MMMM YYYY'), '.docx'].join('');
+			if (res) {
+				downloadCouncilParticipantsForm({ res, fileName });
+			}
 		} catch (e) {
-			console.error('[index.js].downloadCouncilParticipants :', e);
+			console.error('[councils.js].downloadCouncilParticipants :', e);
 		}
+	};
+
+	const getDateStatus = (date) => {
+		const today = new Date();
+		const dt = new Date(date);
+		let result = 'to-be';
+		if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
+			result = 'today';
+		} else if (dt < today) {
+			result = 'held';
+		}
+		return result;
 	};
 
 	const colorBackgroundCouncil = (date) => {
-		const today = new Date();
-		const dt = new Date(date);
-		if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
-			return 'var(--rc-color-councils-background-today)';
-		} else if (dt < today) {
-			return 'var(--rc-color-councils-background-held)';
+		const status = getDateStatus(date);
+		let color = 'var(--rc-color-councils-background-to-be)';
+		if (status === 'today') {
+			color = 'var(--rc-color-councils-background-today)';
+		} else if (status === 'held') {
+			color = 'var(--rc-color-councils-background-held)';
 		}
-		return 'var(--rc-color-councils-background-to-be)';
+		return color;
 	};
 
 	const colorTextCouncil = (date) => {
-		const today = new Date();
-		const dt = new Date(date);
-		if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
-			return 'var(--rc-color-councils-text-color-today)';
-		} else if (dt < today) {
-			return 'var(--rc-color-councils-text-color-held)';
+		const status = getDateStatus(date);
+		let color = 'var(--rc-color-councils-background-to-be)';
+		if (status === 'today') {
+			color = 'var(--rc-color-councils-text-color-held)';
+		} else if (status === 'held') {
+			color = 'var(--rc-color-councils-text-color-to-be)';
 		}
-		return 'var(--rc-color-councils-text-color-to-be)';
+		return color;
 	};
 
 	const statusCouncil = (date) => {
-		const today = new Date();
-		const dt = new Date(date);
-
-		if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
-			return t('Today');
-		} else if (dt < today) {
-			return t('Held');
+		const status = getDateStatus(date);
+		let statusText = t('To_be');
+		if (status === 'today') {
+			statusText = t('Today');
+		} else if (status === 'held') {
+			statusText = t('Held');
 		}
-		return t('To_be');
-	}
+		return statusText;
+	};
 
 	const styleTr = { borderBottomWidth: '10px', borderBottomColor: 'var(--color-white)' };
 
@@ -144,18 +153,20 @@ export function Councils({
 	const header = useMemo(() => [
 		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }} color='default'>{t('Date')}</Th>,
 		<Th key={'desc'} color='default'>{t('Description')}</Th>,
-		mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
+		// mediaQuery && <Th key={'createdAt'} direction={sort[1]} active={sort[0] === 'createdAt'} onClick={onHeaderClick} sort='createdAt' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
+		mediaQuery && <Th key={'Council_type'} style={{ width: '190px' }} color='default'>{t('Council_type')}</Th>,
 		isAllow && <Th w='x40' key='edit'/>,
 		isAllow && <Th w='x40' key='delete'/>,
 		<Th w='x40' key='download'/>,
 	], [sort, mediaQuery]);
 
 	const renderRow = (council) => {
-		const { _id, d: date, desc, ts } = council;
+		const { _id, d: date, desc, type } = council;
 		return <Table.Row key={_id} tabIndex={0} role='link' action style={styleTr} backgroundColor={colorBackgroundCouncil(date)}>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(date)} {statusCouncil(date)}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}><Box withTruncatedText>{desc}</Box></Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(ts)}</Table.Cell>}
+			{/*{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{formatDateAndTime(ts)}</Table.Cell>}*/}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color={colorTextCouncil(date)}>{type?.title ?? ''}</Table.Cell>}
 			{ isAllow && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')} color={colorTextCouncil(date)}>
 					<Icon name='edit'/>
@@ -167,7 +178,7 @@ export function Councils({
 				</Button>
 			</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
-				<Button small onClick={downloadCouncilParticipants(_id)} aria-label={t('Download')} color={colorTextCouncil(date)}>
+				<Button small onClick={downloadCouncilParticipants(_id, type?.title ?? '', date)} aria-label={t('Download')} color={colorTextCouncil(date)}>
 					<Icon name='download'/>
 				</Button>
 			</Table.Cell>

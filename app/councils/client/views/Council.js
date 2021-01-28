@@ -38,7 +38,7 @@ import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { Persons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
-import { createCouncilData, validate } from './lib';
+import { createCouncilData, validate, downloadCouncilParticipantsForm } from './lib';
 
 registerLocale('ru', ru);
 
@@ -267,6 +267,12 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 		FlowRouter.go('councils');
 	};
 
+	const goToAgenda = () => {
+		// window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
+		// FlowRouter.go('agendas');
+		// FlowRouter.redirect('agendas');
+	};
+
 	const onEdit = (_id) => () => {
 		FlowRouter.go(`/council/edit/${ _id }`);
 		FlowRouter.reload();
@@ -311,15 +317,12 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 		e.preventDefault();
 		try {
 			const res = await downloadCouncilParticipantsMethod({ _id, dateString: formatDateAndTime(data.d) });
-			const url = window.URL.createObjectURL(new Blob([res]));
-			const link = document.createElement('a');
-			link.href = url;
-			const fileName = [t('Council_Invited_Users_List'), ' ', moment(new Date()).format('DD MMMM YYYY'), '.docx'].join('');
-			link.setAttribute('download', fileName);
-			document.body.appendChild(link);
-			link.click();
+			const fileName = [data.type?.title ?? '', ' ', moment(new Date(data.d)).format('DD MMMM YYYY'), '.docx'].join('');
+			if (res) {
+				downloadCouncilParticipantsForm({ res, fileName });
+			}
 		} catch (e) {
-			console.error('[index.js].downloadCouncilParticipants :', e);
+			console.error('[council.js].downloadCouncilParticipants :', e);
 		}
 	};
 
@@ -541,30 +544,30 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 
 				</Field>
 				{ mode !== 'edit' && <ButtonGroup>
-					<Button primary small aria-label={t('Agenda')} disabled>
+					{isSecretary && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{t('Agenda')}
-					</Button>
-					{!isSecretary && <Button danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
+					</Button>}
+					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
 					</Button>}
-					{isSecretary && <Button primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
+					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>}
-					{isSecretary && <Button primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
+					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
 						{t('Edit')}
 					</Button>}
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
-					<Button primary small aria-label={t('Agenda')} disabled>
+					<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{t('Agenda')}
 					</Button>
-					<Button primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
+					<Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>
-					<Button primary small aria-label={t('Cancel')} disabled={!hasUnsavedChanges} onClick={resetData}>
+					<Button primary small aria-label={t('Cancel')} disabled={isLoading} onClick={resetData}>
 						{t('Cancel')}
 					</Button>
-					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveCouncil}>
+					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>}
@@ -618,13 +621,13 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 				{tab !== 'files' && context === 'participants' && isSecretary
 				&& <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
-						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
+						<Button disabled={isLoading} marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
-						<Button marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
+						<Button disabled={isLoading} marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
 							{t('Send_email')}
 						</Button>
-						<Button small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+						<Button disabled={isLoading} small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
 							{t('Download_Council_Participant_List')}
 						</Button>
 					</Field.Row>

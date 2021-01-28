@@ -14,7 +14,7 @@ import {
 import moment from 'moment';
 
 import { hasPermission } from '../../../authorization';
-import { Councils, Users } from '../../../models';
+import { Councils, Persons } from '../../../models';
 
 Meteor.methods({
 	async downloadCouncilParticipants({ _id, dateString }) {
@@ -26,11 +26,12 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field _id is required', { method: 'downloadCouncilParticipants', field: '_id' });
 		}
 
-		const council = Councils.findOne({ _id });
-		const users = Users.find({ _id: { $in: council.invitedUsers } }) || [];
+		const council = await Councils.findOne({ _id });
+
+		const persons = Persons.find({ _id: { $in: council.invitedPersons.map((iPerson) => iPerson._id) } }) || [];
 
 		if (!council) {
-			throw new Meteor.Error('error-council-does-not-exists', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadCouncilParticipants', field: '_id' });
+			throw new Meteor.Error('error-the-field-is-required', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadCouncilParticipants', field: '_id' });
 		}
 
 		const doc = new Document();
@@ -49,22 +50,6 @@ Meteor.methods({
 					}),
 					new TableCell({
 						children: [new Paragraph({ text: 'Участник', bold: true, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						width: {
-							size: 19,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: 'Должность с указанием названия организации', bold: true, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						width: {
-							size: 19,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: 'Контактное лицо', bold: true, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						width: {
 							size: 19,
@@ -98,9 +83,15 @@ Meteor.methods({
 				],
 			}),
 		];
-		if (council.invitedUsers) {
-			usersRows = usersRows.concat(users.map((value, index) => {
-				const contactFace = value.contactPersonFirstName ? `${ value.contactPersonLastName } ${ value.contactPersonFirstName } ${ value.contactPersonPatronymicName }`.trim() : '-';
+		if (council.invitedPersons) {
+			const getTS = (_id) => {
+				const iPerson = council.invitedPersons.find((iPerson) => iPerson._id === _id);
+				if (!iPerson) {
+					return '';
+				}
+				return iPerson.ts;
+			};
+			usersRows = usersRows.concat(persons.map((value, index) => {
 				return new TableRow({
 					children: [
 						new TableCell({
@@ -122,25 +113,8 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ value.position ?? '' }`, alignment: AlignmentType.CENTER })],
-							verticalAlign: VerticalAlign.CENTER,
-							alignment: AlignmentType.CENTER,
-							width: {
-								size: 19,
-								type: WidthType.PERCENTAGE,
-							},
-						}),
-						new TableCell({
-							children: [new Paragraph({ text: contactFace, alignment: AlignmentType.CENTER })],
-							verticalAlign: VerticalAlign.CENTER,
-							alignment: AlignmentType.CENTER,
-							width: {
-								size: 19,
-								type: WidthType.PERCENTAGE,
-							},
-						}),
-						new TableCell({
-							children: [new Paragraph({ text: `${ value.emails ? value.emails[0].address : '' }`, alignment: AlignmentType.CENTER })],
+							// children: [new Paragraph({ text: `${ value.emails ? value.emails[0].address : '' }`, alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ value.email ?? '' }`, alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -158,7 +132,7 @@ Meteor.methods({
 							},
 						}),
 						new TableCell({
-							children: [new Paragraph({ text: `${ moment(new Date(value.ts)).format('DD MMMM YYYY, HH:mm') }`, alignment: AlignmentType.CENTER })],
+							children: [new Paragraph({ text: `${ moment(new Date(getTS(value._id))).format('DD MMMM YYYY, HH:mm') }`, alignment: AlignmentType.CENTER })],
 							verticalAlign: VerticalAlign.CENTER,
 							alignment: AlignmentType.CENTER,
 							width: {
@@ -189,7 +163,7 @@ Meteor.methods({
 				new Paragraph({
 					children: [
 						new TextRun({
-							text: 'Совещание',
+							text: council.type?.title ?? 'Совещание',
 						}),
 					],
 					heading: HeadingLevel.HEADING_1,
