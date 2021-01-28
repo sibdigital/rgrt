@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -77,14 +78,14 @@ export function ProtocolsPage() {
 	}, []);
 
 	const goBack = () => {
-		FlowRouter.go('home')
+		FlowRouter.go('home');
 	};
 
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<GoBackButton/>
+					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
 

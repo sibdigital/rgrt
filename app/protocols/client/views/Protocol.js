@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, Label, Modal } from '@rocket.chat/fuselage';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -271,7 +272,7 @@ export function ProtocolPage() {
 	}, [])
 
 	const goBack = () => {
-		FlowRouter.go('/protocols')
+		FlowRouter.go('/protocols');
 	};
 
 	const workingGroupOptions = useMemo(() => {
@@ -286,7 +287,7 @@ export function ProtocolPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<GoBackButton/>
+					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
 				<ButtonGroup>
