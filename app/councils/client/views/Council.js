@@ -167,18 +167,16 @@ export function CouncilPage() {
 	// 	return res;
 	// }, [workingGroups]);
 
-	const councilTypeOptions = useMemo(() => {
-		const res = [
-			[{ _id: null, title: t('Council_type_meeting') }, t('Council_type_meeting')],
-			[{ _id: null, title: t('Council_type_conference') }, t('Council_type_conference')],
-		];
-		return res;
-	}, [t]);
-	console.log(mode);
+	const councilTypeOptions = useMemo(() => [
+		[t('Council_type_meeting'), t('Council_type_meeting')],
+		[t('Council_type_conference'), t('Council_type_conference')],
+	], [t]);
 
+	let isLoading = true;
 	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+	} else {
+		isLoading = false;
 	}
 
 	if (mode === 'edit' && !isAllow) {
@@ -193,13 +191,10 @@ CouncilPage.displayName = 'CouncilPage';
 
 export default CouncilPage;
 
-function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, councilId, data, userRoles, onChange, workingGroupOptions, councilTypeOptions }) {
+function Council({ isLoading = true, mode, persons, setPersons, filesData, invitedPersonsData, currentPerson, councilId, data, userRoles, onChange, workingGroupOptions, councilTypeOptions }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
-
-	// const { d: previousDate, desc: previousDescription, type: previousCouncilType } = data || {};
-	// const previousCouncil = data || {};
 
 	const [date, setDate] = useState(new Date());
 	const [description, setDescription] = useState('');
@@ -215,6 +210,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 	const [isUserJoin, setIsUserJoin] = useState(false);
 
 	useEffect(() => {
+		if (isLoading) { return; }
 		if (userRoles.includes('secretary') || userRoles.includes('admin')) {
 			setIsSecretary(true);
 			setTab('persons');
@@ -222,11 +218,10 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 		if (currentPerson && data?.invitedPersons?.findIndex((person) => person._id === currentPerson._id) > -1) {
 			setIsUserJoin(true);
 		}
-		console.log(data);
 		if (data) {
 			setDate(new Date(data.d));
 			setDescription(data.desc);
-			// setCouncilType(e ?? '');
+			setCouncilType(data.type?.title ?? '');
 		}
 		if (invitedPersonsData) {
 			setInvitedPersonsIds(invitedPersonsData);
@@ -234,9 +229,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 		if (filesData) {
 			setAttachedFiles(filesData);
 		}
-		console.log(date);
-		console.log(description);
-	}, [invitedPersonsData, filesData, userRoles, data, currentPerson]);
+	}, [invitedPersonsData, filesData, userRoles, data, currentPerson, isLoading]);
 
 	const setModal = useSetModal();
 
@@ -279,8 +272,8 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 		FlowRouter.reload();
 	};
 
-	const saveCouncilAction = useCallback(async (date, description, invitedPersons) => {
-		const councilData = createCouncilData(date, description, { _id: councilId }, invitedPersons);
+	const saveCouncilAction = useCallback(async (date, description, councilType, invitedPersons) => {
+		const councilData = createCouncilData(date, description, councilType, invitedPersons, { _id: councilId });
 		const validation = validate(councilData);
 		if (validation.length === 0) {
 			await insertOrUpdateCouncil(councilData);
@@ -291,17 +284,26 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 	}, [councilId, dispatchToastMessage, insertOrUpdateCouncil, date, description, t]);
 
 	const handleSaveCouncil = useCallback(async () => {
-		await saveCouncilAction(date, description, invitedPersonsIds);
-		dispatchToastMessage({ type: 'success', message: t('Council_edited') });
-		onChange();
-	}, [saveCouncilAction, onChange]);
+		try {
+			await saveCouncilAction(date, description, {
+				_id: '',
+				title: councilType,
+			}, invitedPersonsIds);
+			dispatchToastMessage({ type: 'success', message: t('Council_edited') });
+		} catch (error) {
+			console.log(error);
+			dispatchToastMessage({ type: 'error', message: error });
+		} finally {
+			onChange();
+		}
+	}, [date, description, councilType, saveCouncilAction, onChange]);
 
 	const handleFileUploadChipClick = (index) => () => {
 		setCurrentUploadedFiles(currentUploadedFiles.filter((file, _index) => _index !== index));
 	};
 
-	const hasUnsavedChanges = useMemo(() => new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description,
-		[date, description, data]);
+	const hasUnsavedChanges = useMemo(() => isLoading ? false : new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description || (data.type?.title && data.type.title !== councilType),
+		[date, description, councilType, data]);
 
 	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
 
@@ -420,7 +422,7 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 				await addCouncilToPersons(councilId, [currentPerson]);
 				await addPersonsToCouncil(councilId, [{ _id: currentPerson._id, ts: new Date() }]);
 				setIsUserJoin(true);
-				dispatchToastMessage({ type: 'succes', message: t('Council_joined') });
+				dispatchToastMessage({ type: 'success', message: t('Council_joined') });
 			} else {
 				await deletePersonFromCouncil(councilId, currentPerson._id);
 				setIsUserJoin(false);
@@ -598,9 +600,9 @@ function Council({ mode, persons, filesData, invitedPersonsData, currentPerson, 
 					<Field.Row>
 						{mode !== 'edit'
 							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
-						{/*{mode === 'edit'*/}
-						{/*	&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Number')}/>*/}
-						{/*}*/}
+						{mode === 'edit'
+							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+						}
 					</Field.Row>
 				</Field>
 				{isSecretary && <Field mbe='x8'>

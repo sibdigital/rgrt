@@ -1,6 +1,16 @@
 import { Meteor } from 'meteor/meteor';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Field, TextAreaInput, Button, ButtonGroup, TextInput, Icon, Label, Callout } from '@rocket.chat/fuselage';
+import {
+	Field,
+	TextAreaInput,
+	Button,
+	ButtonGroup,
+	TextInput,
+	Icon,
+	Label,
+	Callout,
+	Tabs, Select,
+} from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -80,31 +90,37 @@ export function AddCouncilPage() {
 		return res;
 	}, [workingGroups]);
 
+	const councilTypeOptions = useMemo(() => [
+		[t('Council_type_meeting'), t('Council_type_meeting')],
+		[t('Council_type_conference'), t('Council_type_conference')],
+	], [t]);
+
 	if ([personsDataState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
 		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
 	}
 
 	if (!hasPermission('edit-councils', Meteor.userId())) {
-		console.log('not permision');
-		return <Callout m='x16' type='danger'>{t('Not_Permission')}</Callout>;
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <AddCouncilWithNewData persons={persons} setPersons={setPersons} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
+	return <AddCouncilWithNewData persons={persons} councilTypeOptions={councilTypeOptions} onChange={onChange} workingGroupOptions={workingGroupOptions}/>;
 }
 
 AddCouncilPage.displayName = 'AddCouncilPage';
 
 export default AddCouncilPage;
 
-function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOptions }) {
+function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingGroupOptions }) {
 	const t = useTranslation();
 
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date());
 	const [description, setDescription] = useState('');
+	const [councilType, setCouncilType] = useState('');
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
-	// const [invitedUsersIds, setInvitedUsersIds] = useState([]);
+	const [tab, setTab] = useState('persons');
 
 	const invitedPersons = useMemo(() => persons.filter((person) => {
 		const iPerson = invitedPersonsIds.find((iPerson) => iPerson._id === person._id);
@@ -125,6 +141,8 @@ function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOpti
 
 	const hasUnsavedChanges = useMemo(() => description.trim() !== '', [description]);
 
+	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
+
 	const onAddParticipantClick = () => {
 		setContext('addParticipants');
 	};
@@ -142,22 +160,76 @@ function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOpti
 		setContext('participants');
 	};
 
-	const saveAction = useCallback(async (date, description, invitedPersonsIds) => {
-		const councilData = createCouncilData(date, description, null, invitedPersonsIds);
+	// const fileUploadClick = async () => {
+	// 	if (!settings.get('FileUpload_Enabled')) {
+	// 		console.log('!fileupload_enabled');
+	// 		return null;
+	// 	}
+	// 	setContext('uploadFiles');
+	// 	let fileIndex = staticFileIndex;
+	// 	const $input = $(document.createElement('input'));
+	// 	$input.css('display', 'none');
+	// 	$input.attr({
+	// 		id: 'fileupload-input',
+	// 		type: 'file',
+	// 		multiple: 'multiple',
+	// 	});
+	//
+	// 	$(document.body).append($input);
+	//
+	// 	$input.one('change', function(e) {
+	// 		const filesToUpload = [...e.target.files].map((file) => {
+	// 			Object.defineProperty(file, 'type', {
+	// 				value: mime.lookup(file.name),
+	// 			});
+	// 			fileIndex++;
+	// 			return {
+	// 				file,
+	// 				name: file.name,
+	// 				title: file.name,
+	// 				id: fileIndex,
+	// 				ts: new Date(),
+	// 			};
+	// 		});
+	// 		setStaticFileIndex(fileIndex);
+	// 		setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
+	//
+	// 		$input.remove();
+	// 		onChange();
+	// 	});
+	// 	$input.click();
+	//
+	// 	if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+	// 		$input.click();
+	// 	}
+	// 	onChange();
+	// };
+
+	const saveAction = useCallback(async (date, description, councilType, invitedPersonsIds) => {
+		const councilData = createCouncilData(date, description, councilType, invitedPersonsIds, null);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
 			const council = await insertOrUpdateCouncil(councilData);
 			await addCouncilToPersons(council._id, invitedPersonsIds);
-			goBack();
+			window.history.back();
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [insertOrUpdateCouncil, date, description, invitedPersonsIds, t]);
+	}, [insertOrUpdateCouncil, addCouncilToPersons, t]);
 
 	const handleSaveCouncil = useCallback(async () => {
-		await saveAction(date, description, invitedPersonsIds);
-		dispatchToastMessage({ type: 'success', message: t('Council_edited') });
-		onChange();
-	}, [saveAction, onChange, dispatchToastMessage]);
+		try {
+			await saveAction(date, description, {
+				_id: '',
+				title: councilType,
+			}, invitedPersonsIds);
+			dispatchToastMessage({ type: 'success', message: t('Council_edited') });
+		} catch (error) {
+			console.log(error);
+			dispatchToastMessage({ type: 'error', message: error });
+		} finally {
+			onChange();
+		}
+	}, [date, description, councilType, invitedPersonsIds, saveAction, onChange, dispatchToastMessage]);
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -174,7 +246,7 @@ function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOpti
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x8'>
-					<Field.Label>{t('Date')} <span style={ { color: 'red' } }>{t('Editing')}</span></Field.Label>
+					<Field.Label>{t('Date')}</Field.Label>
 					<Field.Row>
 						<DatePicker
 							dateFormat='dd.MM.yyyy HH:mm'
@@ -191,21 +263,35 @@ function AddCouncilWithNewData({ persons, setPersons, onChange, workingGroupOpti
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
-					<Field.Label>{t('Description')} <span style={ { color: 'red' } }>{t('Editing')}</span></Field.Label>
+					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
 						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
-				{context === 'participants' && <Field mbe='x8'>
+				<Field mbe='x8'>
+					<Field.Label>{t('Council_type')}</Field.Label>
+					<Field.Row>
+						<Select style={ { whiteSpace: 'normal' } } border='1px solid #4fb0fc' options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+					</Field.Row>
+				</Field>
+				<Tabs flexShrink={0} mbe='x8'>
+					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>
+					{/*<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>*/}
+				</Tabs>
+				{context === 'participants' && tab === 'persons' && <Field mbe='x8'>
 					<Field.Row marginInlineStart='auto'>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
 					</Field.Row>
 				</Field>}
-				{/*{context === 'participants' && <Participants onChange={onChange} context={'new'} invitedUsers={invitedUsers} setInvitedUsers={setInvitedUsersIds}/>}*/}
-				{/*{context === 'addParticipants' && <AddParticipant onChange={onChange} close={onClose} invitedUsers={invitedUsersIds} setInvitedUsers={setInvitedUsersIds} users={users} onNewParticipant={onParticipantClick}/>}*/}
-				{/*{context === 'newParticipants' && <CreateParticipant goTo={onCreateParticipantClick} close={onParticipantClick} workingGroupOptions={workingGroupOptions} />}*/}
+				{/*{tab === 'files' && <Field mbe='x8'>*/}
+				{/*	<Field.Row marginInlineStart='auto'>*/}
+				{/*		<Button onClick={fileUploadClick} mie='10px' small primary aria-label={t('Add')}>*/}
+				{/*			{t('Upload_file_question')}*/}
+				{/*		</Button>*/}
+				{/*	</Field.Row>*/}
+				{/*</Field>}*/}
 				{context === 'participants' && <Persons councilId={null} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>}
 				{context === 'addParticipants' && <AddPerson councilId={null} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>}
 				{context === 'newParticipants' && <CreateParticipant councilId={null} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>}
