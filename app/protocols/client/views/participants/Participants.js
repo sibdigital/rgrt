@@ -117,8 +117,8 @@ function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 		display='flex'
 	>
 		<Box is='span' flexGrow={1}>
-			<Box>{user.surname} {user.name} {user.patronymic}</Box>
-			<Box color='hint'>{user.position}, {user.organization}</Box>
+			<Box fontSize={"16px"}>{user.surname} {user.name} {user.patronymic}</Box>
+			{/* <Box color='hint'>{user.position}, {user.organization}</Box> */}
 		</Box>
 		<Icon onClick={openConfirmDelete(user._id)} pi='x8' name='cross'/>
 	</Box>;

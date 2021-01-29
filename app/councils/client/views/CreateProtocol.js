@@ -20,7 +20,7 @@ export function CreateProtocol({council, close, ...props }) {
 	const [date, setDate] = useState(new Date(councilDate));
 	const [number, setNumber] = useState('');
     const [place, setPlace] = useState('');
-    const [participants, setParticipants] = useState(councilParticipants)
+    const [participants, setParticipants] = useState(councilParticipants.map(e => e._id))
 
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
@@ -49,7 +49,8 @@ export function CreateProtocol({council, close, ...props }) {
                 participants,
                 councilId
 			);
-			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
+            dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
+            close();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
