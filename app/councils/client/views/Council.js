@@ -308,7 +308,7 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 		setCurrentUploadedFiles(currentUploadedFiles.filter((file, _index) => _index !== index));
 	};
 
-	const hasUnsavedChanges = useMemo(() => isLoading ? false : new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description || (data.type?.title && data.type.title !== councilType),
+	const hasUnsavedChanges = useMemo(() => isLoading ? false : new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description || (!data.type && councilType !== '') || (data.type && data.type.title !== councilType),
 		[date, description, councilType, data]);
 
 	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
