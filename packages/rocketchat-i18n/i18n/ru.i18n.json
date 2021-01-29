@@ -2733,6 +2733,7 @@
   "Prometheus": "Prometheus",
   "Protocol": "Протокол",
   "Protocol_Add": "Добавить протокол",
+  "Protocol_Create": "Создать протокол",
   "Protocol_Added_Successfully": "Протокол успешно добавлен",
   "Protocol_Date": "Дата",
   "Protocol_Delete_Warning": "Удаление протокола не может быть отменено",

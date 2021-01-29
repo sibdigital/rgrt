@@ -24,6 +24,8 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { CreateProtocol } from './CreateProtocol';
 import { useRouteParameter, useCurrentRoute } from '../../../../client/contexts/RouterContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -201,6 +203,7 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 	const [councilType, setCouncilType] = useState('');
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [context, setContext] = useState('participants');
+	const [sidebarContext, setSidebarContext] = useState('');
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [attachedFiles, setAttachedFiles] = useState([]);
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
@@ -461,6 +464,10 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 		setContext('participants');
 	};
 
+	const onSidebarClose = () => {
+		setSidebarContext('');
+	}
+
 	const onCreatePersonsClick = useCallback((person) => () => {
 		console.log('here');
 		// const res = invitedPersons ? invitedPersons.concat(person) : [person];
@@ -506,6 +513,10 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 		}
 	};
 
+	const onCreateProtocolClick = async() => {
+		setSidebarContext('Create_Protocol');
+	}
+
 	const header = useMemo(() => [
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
@@ -536,7 +547,7 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 	};
 
 	return <Page flexDirection='row'>
-		<Page>
+		<Page>		
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
@@ -556,6 +567,9 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
 						{t('Edit')}
 					</Button>}
+					<Button primary small aria-label={t('Protocol_Create')} onClick={onCreateProtocolClick} >
+						{t("Protocol_Create")}
+					</Button>
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
 					<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
@@ -673,6 +687,14 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 					&& <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
 				}
 			</Page.Content>
-		</Page>
+		</Page>		
+		{sidebarContext === 'Create_Protocol'&& 
+		<VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+		<VerticalBar.Header>
+			{ t('Protocol_Create') }
+			<VerticalBar.Close onClick={onSidebarClose}/>
+		</VerticalBar.Header>
+		<CreateProtocol council={data} close={onSidebarClose}/>
+		</VerticalBar>}
 	</Page>;
 }
