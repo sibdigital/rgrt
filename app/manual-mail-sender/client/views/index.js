@@ -258,13 +258,6 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 
 	const { data: errandData, state: errandState } = useEndpointDataExperimental('errands.findOne', errandQuery);
 
-	const userQuery = useMemo(() => ({
-		query: JSON.stringify({ _id: errandData?.chargedToUser._id }),
-		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1, emails: 1 }),
-	}), [errandData]);
-
-	const { data: currentUserData, state: currentUserState } = useEndpointDataExperimental('users.getOne', userQuery);
-
 	const [recipients, setRecipients] = useState([]);
 	const [defaultEmails, setDefaultEmails] = useState('');
 	const [mailSubject, setMailSubject] = useState('');
@@ -287,7 +280,6 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 		const errand = errandData || {};
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (errandData) {
-			console.log(currentUserData);
 			const userToSendEmail = users.find((user) =>
 				(currentUser._id === errand.initiatedBy._id && user._id === errand.chargedToUser._id)
 				|| (currentUser._id === errand.chargedToUser._id && user._id === errand.initiatedBy._id)) || {};
@@ -336,7 +328,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 		}
 	}, [workingGroupsData, usersData, errandData]);
 
-	if ([errandState, currentUserState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([errandState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
 		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
 	}
