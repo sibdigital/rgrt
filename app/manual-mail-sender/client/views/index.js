@@ -103,7 +103,7 @@ export function MailSenderPage() {
 		<Page.Content>
 			{context === undefined && <MailSender workingGroupsData={workingGroupsData} usersData={data.users}/>}
 			{context === 'council' && <MailSenderWithCouncil workingGroupsData={workingGroupsData} usersData={data.users} debouncedParams={debouncedParams} debouncedSort={debouncedSort} id={id}/>}
-			{context === 'errand' && <MailSenderWithErrand workingGroupsData={workingGroupsData} usersData={data.users} debouncedParams={debouncedParams} debouncedSort={debouncedSort} id={id}/>}
+			{context === 'errand' && <MailSenderWithErrand workingGroupsData={workingGroupsData} usersData={data.items} debouncedParams={debouncedParams} debouncedSort={debouncedSort} id={id}/>}
 		</Page.Content>
 	</Page>;
 }
@@ -177,12 +177,13 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 						value: workingGroup._id,
 						children: usersFilter.map((value) => {
 							const email = value.emails ? value.emails[0].address : '';
+							const name = [value.surname ?? t('Surname'), value.name ?? t('Name'), value.patronymic ?? t('Patronymic')].join(' ');
 							if (email.length > 0) {
 								staticIndex++;
-								emailsArr.push({ index: staticIndex, value: email });
+								emailsArr.push({ index: staticIndex, value: email, tooltip: name });
 							}
 							return {
-								label: [value.surname, value.name, value.patronymic].join(' '),
+								label: name,
 								value: email,
 								index: staticIndex,
 							};
@@ -201,10 +202,11 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 					}
 					isChild = true;
 					emails += [iPerson.email, ','].join('');
+					const name = [iPerson.surname ?? t('Surname'), iPerson.name ?? t('Name'), iPerson.patronymic ?? t('Patronymic')].join(' ');
 					staticIndex++;
-					emailsArr.push({ index: staticIndex, value: iPerson.email });
+					emailsArr.push({ index: staticIndex, value: iPerson.email, tooltip: name });
 					res.push({
-						label: [iPerson.surname ?? t('Surname'), iPerson.name ?? t('Name'), iPerson.patronymic ?? t('Patronymic')].join(' '),
+						label: name,
 						value: iPerson.email ?? '',
 						index: staticIndex,
 					});
@@ -253,19 +255,28 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 	const formatDateAndTime = useFormatDateAndTime();
 	const currentUser = useUser();
 	const errandQuery = useErrandQuery(debouncedParams, debouncedSort, id);
-	const errandData = useEndpointData('errands.findOne', errandQuery) || {};
+
+	const { data: errandData, state: errandState } = useEndpointDataExperimental('errands.findOne', errandQuery);
+
+	const userQuery = useMemo(() => ({
+		query: JSON.stringify({ _id: errandData?.chargedToUser._id }),
+		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1, emails: 1 }),
+	}), [errandData]);
+
+	const { data: currentUserData, state: currentUserState } = useEndpointDataExperimental('users.getOne', userQuery);
 
 	const [recipients, setRecipients] = useState([]);
 	const [defaultEmails, setDefaultEmails] = useState('');
 	const [mailSubject, setMailSubject] = useState('');
 	const [mailBody, setMailBody] = useState('');
+	const [mailsArray, setMailsArray] = useState([]);
 
 	const getErrandMailBody = (errand) => {
 		let mailBody = '';
 
 		if (errand) {
-			mailBody += errand.desc + '<br><br>';
-			mailBody += t('Errand_Expired_date') + ': ' + formatDateAndTime(errand.expireAt);
+			mailBody += [errand.desc, '<br><br>'].join('');
+			mailBody += [t('Errand_Expired_date'), ': ', formatDateAndTime(errand.expireAt)].join('');
 		}
 
 		return mailBody;
@@ -276,6 +287,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 		const errand = errandData || {};
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (errandData) {
+			console.log(currentUserData);
 			const userToSendEmail = users.find((user) =>
 				(currentUser._id === errand.initiatedBy._id && user._id === errand.chargedToUser._id)
 				|| (currentUser._id === errand.chargedToUser._id && user._id === errand.initiatedBy._id)) || {};
@@ -311,9 +323,11 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 					}],
 				};
 
-				recipients[0].children.push(child);
-				setDefaultEmails(email);
 				const mailSubjectTitle = [t('Errand'), 'От', formatDateAndTime(errand.ts ?? new Date())].join(' ');
+				recipients[0].children.push(child);
+
+				setMailsArray([{ value: email, tooltip: name }]);
+				setDefaultEmails(email);
 				setMailSubject(mailSubjectTitle);
 				setMailBody(getErrandMailBody(errand));
 			}
@@ -322,5 +336,10 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 		}
 	}, [workingGroupsData, usersData, errandData]);
 
-	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails}/>;
+	if ([errandState, currentUserState].includes(ENDPOINT_STATES.LOADING)) {
+		console.log('loading');
+		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+	}
+
+	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails} emailsArray={mailsArray}/>;
 }

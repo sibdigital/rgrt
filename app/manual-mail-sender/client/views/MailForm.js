@@ -1,6 +1,7 @@
 import { Box, Button, ButtonGroup, Chip, Field, InputBox, Margins, TextInput, Icon } from '@rocket.chat/fuselage';
 import { useUniqueId } from '@rocket.chat/fuselage-hooks';
 import React, { Component, useMemo, useState, useEffect } from 'react';
+import ReactTooltip from 'react-tooltip';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
@@ -13,6 +14,8 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { isEmail } from '../../../utils';
+
+import '../../../working-group-requests/client/views/formForSendingDocuments/steps/reactTooltip.css';
 
 function packData(data, files) {
 	const dataToSend = {};
@@ -73,7 +76,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArra
 
 	const sendEmail = useMethod('sendEmailManually');
 
-	const allFieldAreFilled = useMemo(() => email.trim() !== '' && topic.trim() !== '' && message.trim() !== '', [email, topic, message]);
+	const allFieldAreFilled = useMemo(() => topic.trim() !== '' && message.trim() !== '' && (email.trim() !== '' || handChipEmails.length > 0), [email, topic, message, handChipEmails]);
 
 	const isValidInputEmail = useMemo(() => isEmail(chipEmail), [chipEmail]);
 
@@ -127,7 +130,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArra
 	};
 
 	const handleEmailsChipClick = (index) => () => {
-		setHandChipEmails(chipEmails.filter((chip, _index) => _index !== index));
+		setHandChipEmails(handChipEmails.filter((chip, _index) => _index !== index));
 		onChange();
 	};
 
@@ -167,7 +170,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArra
 				obj.forEach((node) => {
 					if (!node.children && node.path.startsWith(path)) {
 						emailsStr += [node.value, ','].join('');
-						emailsArray.push({ value: [node.value, ','].join(''), index: node.index });
+						emailsArray.push({ value: [node.value, ','].join(''), index: node.index, tooltip: node.label });
 					}
 					if (node.children) {
 						getEmails(node.children, path);
@@ -182,6 +185,7 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArra
 		onChange();
 	};
 
+	console.log(allFieldAreFilled);
 	return <Field style={{ overflowY: 'scroll' }}>
 		<Field mbe='x8'>
 			<Field.Label>{t('Email_receivers')} <span style={ { color: 'red' } }>*</span></Field.Label>
@@ -200,8 +204,10 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArra
 				<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' backgroundColor={'var(--tertiary-background-color)'}>
 					<Margins inlineStart='x4' inlineEnd='x4' blockStart='x4' blockEnd='x4'>
 						{ chipEmails.map((chip, index) =>
-							<Chip pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }} border='1px solid' color='var(--rc-color-button-primary)'>
+							<Chip pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }} border='1px solid' color='var(--rc-color-button-primary)'
+								data-for='chipEmailTooltip' data-tip={ chip.tooltip ?? '' } className='.react-tooltip-class'>
 								{chip.value ?? ''}
+								<ReactTooltip id='chipEmailTooltip' className='react-tooltip-class' effect='solid' place='top'/>
 							</Chip>)}
 						{ handChipEmails.map((chip, index) =>
 							<Chip pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }}
