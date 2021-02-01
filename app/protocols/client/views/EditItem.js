@@ -26,7 +26,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
-import { validateItemData, createItemData } from './lib';
+import { constructPersonFIO, validateItemData, createItemData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
@@ -63,10 +63,6 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 	return <EditItemWithData protocol={data} sectionId={sectionId} itemId={_id} onChange={onChange} {...props}/>;
 }
 
-function constructPersonFIO(person) {
-	return person.surname + " " + person.name.substr(0,1) + "." + person.patronymic.substr(0,1) + "."
-}
-
 function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -81,7 +77,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
-	const [responsible, setResponsible] = useState({});
+	const [responsible, setResponsible] = useState([]);
 	const [expireAt, setExpireAt] = useState('');
 
 	useEffect(() => {

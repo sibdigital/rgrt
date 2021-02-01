@@ -9,7 +9,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { validateItemData, createItemData } from './lib';
+import { constructPersonFIO, validateItemData, createItemData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import CKEditor from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -19,10 +19,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
 
-function constructPersonFIO(person) {
-	return person.surname + " " + person.name.substr(0,1) + "." + person.patronymic.substr(0,1) + "."
-}
-
 export function AddItem({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -31,7 +27,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
-	const [responsible, setResponsible] = useState({});
+	const [responsible, setResponsible] = useState([]);
 	const [expireAt, setExpireAt] = useState('');
 
 	const protocolId = useRouteParameter('id');

@@ -86,3 +86,7 @@ export function createItemData(number, name, responsible, expireAt = '', previou
 
 	return itemData;
 }
+
+export function constructPersonFIO(person) {
+	return person.surname + " " + person.name.substr(0,1) + "." + person.patronymic.substr(0,1) + "."
+}

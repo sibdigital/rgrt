@@ -3,6 +3,7 @@ import { Box, Icon } from '@rocket.chat/fuselage';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { css } from '@rocket.chat/css-in-js';
+import { constructPersonFIO} from './lib';
 
 const clickable = css`
 		cursor: pointer;
@@ -13,6 +14,11 @@ const clickable = css`
 			background: #F7F8FA;
 		}
 	`;
+
+const constructResponsible = (item) => {
+	let responsibleArr = item.responsible.map(person => _.last(item.responsible) != person ? constructPersonFIO(person) + ", " : constructPersonFIO(person));
+	return responsibleArr;
+}
 
 export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 	const t = useTranslation();
@@ -28,7 +34,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 			<Box is='span' pie='x8'>{item.num}.</Box>
 			<Box flexGrow={1}>
 				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: item.name }} align='justify'/>
-				{ item.responsible && <Box mbe='x4'>{t('Item_Responsible')}: {(item.responsible.map((s) => s.surname + " " + s.name.substr(0,1) + "." + s.patronymic.substr(0,1) + ".") + ",").slice(0, -1)}</Box> }
+				{ item.responsible.length != 0 && <Box mbe='x4'>{t('Item_Responsible')}: {constructResponsible(item)}</Box> }
 				{ item.expireAt && <Box mbe='x4'>{t('Item_ExpireAt')}: {formatDate(item.expireAt)}</Box> }
 			</Box>
 			<Box pi='x4' style={{cursor: 'pointer'}} data-item={item._id} data-section={item.sectionId}
