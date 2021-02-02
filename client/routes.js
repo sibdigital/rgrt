@@ -93,6 +93,26 @@ FlowRouter.route('/home', {
 	},
 });
 
+FlowRouter.route('/agendas', {
+	name: 'agendas',
+	action: () => {
+		renderRouteComponent(() => import('../app/agenda/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/agenda/:type/:id/:context?', {
+	name: 'agenda',
+	action: () => {
+		renderRouteComponent(() => import('../app/agenda/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/errands/:type?', {
 	name: 'errands',
 	action: () => {

@@ -46,6 +46,7 @@ import WorkingGroupMeetings from './models/WorkingGroupMeetings';
 import Protocols from './models/Protocols';
 import WorkingGroupsRequests from './models/WorkingGroupsRequests';
 import Persons from './models/Persons';
+import Agendas from './models/Agendas';
 
 export { AppsLogsModel } from './models/apps-logs-model';
 export { AppsPersistenceModel } from './models/apps-persistence-model';
@@ -103,5 +104,6 @@ export {
 	WorkingGroupMeetings,
 	Protocols,
 	WorkingGroupsRequests,
-	Persons
+	Persons,
+	Agendas,
 };

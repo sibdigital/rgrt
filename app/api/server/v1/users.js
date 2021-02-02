@@ -953,7 +953,7 @@ API.v1.addRoute('users.resetE2EKey', { authRequired: true, twoFactorRequired: tr
 
 API.v1.addRoute('users.getOne', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findUser(query._id)));
+		const { query, fields } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findUser(query._id, fields)));
 	},
 });

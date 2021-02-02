@@ -4,7 +4,7 @@ import { findPersons, findPerson } from '../lib/persons';
 API.v1.addRoute('persons.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, fields } = this.parseJsonQuery();
 
 		if (query.isAllow) {
 			API.v1.success({
@@ -14,8 +14,26 @@ API.v1.addRoute('persons.list', { authRequired: true }, {
 				total: 0,
 			});
 		}
+
 		return API.v1.success(Promise.await(findPersons({
 			query,
+			pagination: {
+				offset,
+				count,
+				sort,
+			},
+		})));
+	},
+});
+
+API.v1.addRoute('persons.listToAutoComplete', { authRequired: true }, {
+	get() {
+		const { offset, count } = this.getPaginationItems();
+		const { sort, query } = this.parseJsonQuery();
+
+		return API.v1.success(Promise.await(findPersons({
+			query,
+			fields: { surname: 1, name: 1, patronymic: 1 },
 			pagination: {
 				offset,
 				count,

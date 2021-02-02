@@ -122,3 +122,4 @@ import '../app/working-group-requests/server';
 import '../app/manual-mail-sender/server';
 import '../app/protocols/server';
 import '../app/persons/server';
+import '../app/agenda/server';
