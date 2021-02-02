@@ -162,49 +162,28 @@ export function ErrandPage() {
 
 	const onClick = useCallback((errand) => () => setModal(() => renderEditModal({ onCancel: cancelModal, erid: errand._id, onChange: onChange, key: 'modal-errand' })), []);
 
-	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal({onChange: onChange})),[]);
+	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal({ onChange: onChange })), []);
 
 	const goBack = () => {
 		window.history.back();
 	};
 
-	let result;
-	if(title === 'Errands_from_me') {
-		result = <Page flexDirection='row'>
-						<Page>
-							<Page.Header>
-								<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-									<GoBackButton/>
-									<Label fontScale='h1'>{t(title)}</Label>
-								</Field>
-								<Field width={'6%'} display={'block'} marginBlock={'15px'}>
-									<Button className='go-back-button' onClick={addErrand()}>
-										<Icon name='plus'/>
-									</Button>
-								</Field>
-							</Page.Header>
-							<Page.Content>
-								<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
-							</Page.Content>
-						</Page>
-					</Page>;
-	} else {
-		result = <Page flexDirection='row'>
-						<Page>
-							<Page.Header>
-								<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-									<GoBackButton/>
-									<Label fontScale='h1'>{t(title)}</Label>
-								</Field>
-							</Page.Header>
-							<Page.Content>
-								<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
-							</Page.Content>
-						</Page>
-					</Page>;
-	}
-
-	return result;
+	return <Page flexDirection='row'>
+				<Page>
+					<Page.Header>
+						<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+							<GoBackButton/>
+							<Label fontScale='h1'>{t(title)}</Label>
+						</Field>
+						{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={addErrand()} aria-label={t('Add')}>
+							{ t('Add') }
+						</Button> }
+					</Page.Header>
+					<Page.Content>
+						<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
+					</Page.Content>
+				</Page>
+			</Page>;
 }
 
 ErrandPage.displayName = 'ErrandsPage';
