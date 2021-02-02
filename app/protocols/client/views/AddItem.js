@@ -24,7 +24,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const personsData = useEndpointData('persons.list', useMemo(() => ({ }), [])) || { persons: [] };
+	const personsData = useEndpointData('persons.listToAutoComplete', useMemo(() => ({ }), [])) || { persons: [] };
 
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
