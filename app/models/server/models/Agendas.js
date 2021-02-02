@@ -15,8 +15,10 @@ class Agendas extends Base {
 	addSection(_id, sectionData) {
 		const sectionId = new ObjectID().toHexString();
 		sectionData._id = sectionId;
+
 		const data = this.findOne({ _id });
 		data._updatedAt = new Date();
+
 		data.sections = data.sections ? data.sections.concat(sectionData) : [sectionData];
 		this.update({ _id }, { $set: { ...data } });
 		return sectionId;

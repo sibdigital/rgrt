@@ -56,9 +56,11 @@ function Agenda({ agendaData, personsData }) {
 	const [sectionsData, setSectionsData] = useState([]);
 	const [sectionsDataView, setSectionsDataView] = useState({ sections: [] });
 	const [agendaId, setAgendaId] = useState('');
+	const [currentAgendaData, setCurrentAgendaData] = useState({});
 	const [currentSection, setCurrentSection] = useState({});
 
 	const onAgendaSectionInit = (sections) => {
+		setSectionsData(sections);
 		setSectionsDataView({
 			sections: sections?.map((section) => [
 				{
@@ -86,15 +88,14 @@ function Agenda({ agendaData, personsData }) {
 		setAgendaId(agenda._id ?? '');
 		setAgendaName(agenda.name);
 		setNumber(agenda.number);
-		setSectionsData(agenda.sections);
-		onAgendaSectionInit(agenda.sections ?? []);
 	};
 
 	useEffect(() => {
-		// console.log(agendaData);
 		if (agendaData && agendaData.success) {
 			onAgendaInit(agendaData);
+			onAgendaSectionInit(agendaData.sections ?? []);
 			setIsNew(false);
+			setCurrentAgendaData(agendaData);
 		} else {
 			setContext('new');
 		}
@@ -106,13 +107,15 @@ function Agenda({ agendaData, personsData }) {
 
 	const onEditAgendaDataClick = useCallback((agenda) => {
 		setIsNew(false);
+		console.log(agenda);
+		onAgendaInit(agenda);
+		setCurrentAgendaData(agenda);
 		onChange();
 	}, []);
 
 	const onEditSectionDataClick = useCallback((agenda, type = 'new') => {
 		setIsNew(false);
 		const arr = type !== 'new' ? sectionsData.map((section) => (section._id === agenda._id && agenda) || section) : sectionsData.concat(agenda);
-		setSectionsData(arr);
 		// console.log(arr);
 		onAgendaSectionInit(arr);
 		onChange();
@@ -197,7 +200,7 @@ function Agenda({ agendaData, personsData }) {
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'new' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} onChange={onChange}/>}
-			{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={agendaData} onChange={onChange}/>}
+			{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={currentAgendaData} onChange={onChange}/>}
 			{context === 'section-add' && <EditSection agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
 			{context === 'section-edit' && <EditSection data={currentSection} agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
 		</VerticalBar>}

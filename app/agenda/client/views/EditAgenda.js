@@ -38,8 +38,14 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 			if (councilId) {
 				agendaData.councilId = councilId;
 			}
+			if (data && data._id) {
+				agendaData._id = data._id;
+			}
+
 			const agenda = await insertOrUpdateAgenda(agendaData);
-			agendaData._id = agenda._id;
+			if (!agendaData._id) {
+				agendaData._id = agenda._id;
+			}
 			onEditDataClick(agendaData);
 			onChange();
 		}
