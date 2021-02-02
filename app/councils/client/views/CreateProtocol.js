@@ -1,26 +1,27 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
-registerLocale('ru', ru);
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { validateProtocolData, createProtocolData } from './lib';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { validateProtocolData, createProtocolData } from './lib';
 
-export function CreateProtocol({council, close, ...props }) {
+registerLocale('ru', ru);
 
+export function CreateProtocol({ council, close, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const { _id: councilId, d: councilDate, invitedPersons: councilParticipants} = council || {};
+	const { _id: councilId, d: councilDate } = council || {};
 	const [date, setDate] = useState(new Date(councilDate));
 	const [number, setNumber] = useState('');
-    const [place, setPlace] = useState('');
-    const [participants, setParticipants] = useState(councilParticipants.map(e => e._id))
+	const [place, setPlace] = useState('');
+
+	const participants = useMemo(() => council.invitedPersons?.map((e) => e._id), [council.invitedPersons]);
 
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
@@ -45,12 +46,12 @@ export function CreateProtocol({council, close, ...props }) {
 			const result = await saveAction(
 				date,
 				number,
-                place,
-                participants,
-                councilId
+				place,
+				participants,
+				councilId,
 			);
-            dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
-            close();
+			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
+			close();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -68,8 +69,8 @@ export function CreateProtocol({council, close, ...props }) {
 			<Field.Row>
 				<DatePicker
 					dateFormat='dd.MM.yyyy'
-                    selected={date}
-                    disabled={true}
+					selected={date}
+					disabled={true}
 					onChange={(newDate) => setDate(newDate)}
 					customInput={<TextInput />}
 					locale='ru'

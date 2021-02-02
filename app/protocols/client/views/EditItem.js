@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import Chip from '@material-ui/core/Chip';
 import { Autocomplete, createFilterOptions } from '@material-ui/lab';
-import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import {
 	Box,
@@ -15,8 +14,6 @@ import {
 } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
-registerLocale('ru', ru);
-
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
@@ -26,10 +23,12 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
-import { constructPersonFIO, validateItemData, createItemData } from './lib';
+import { validateItemData, createItemData } from './lib';
+import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
+registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
 export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props }) {
@@ -127,7 +126,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 					editor={ ClassicEditor }
 					config={ {
 						language: 'ru',
-						toolbar: [ 'bold', 'italic', 'link' ]
+						toolbar: ['bold', 'italic', 'link'],
 					} }
 					data={previousName}
 					onChange={ (event, editor) => {
@@ -141,7 +140,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 			<Field.Label>{t('Item_Responsible')}</Field.Label>
 			<Autocomplete
 				multiple
-				id="tags-standard"
+				id='tags-standard'
 				value={responsible}
 				forcePopupIcon={false}
 				options={personsData.persons}
@@ -152,14 +151,14 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 				onChange={(event, value) => setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-						  <Chip  style={{backgroundColor:"#e0e0e0", margin:"3px", borderRadius:"16px", color:"#000000DE"}}
-						  		 label={constructPersonFIO(option)} {...getTagProps({ index })} />
+						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
+							label={constructPersonFIO(option)} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (
 					<TextField
 						{...params}
-						variant="outlined"
+						variant='outlined'
 						placeholder={t('Item_Responsible')}
 					/>
 				)}

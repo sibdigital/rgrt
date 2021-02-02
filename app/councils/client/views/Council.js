@@ -478,7 +478,7 @@ function Council({
 
 	const onSidebarClose = () => {
 		setSidebarContext('');
-	}
+	};
 
 	const onCreatePersonsClick = useCallback((person) => () => {
 		console.log('here');
@@ -525,9 +525,9 @@ function Council({
 		}
 	};
 
-	const onCreateProtocolClick = async() => {
+	const onCreateProtocolClick = async () => {
 		setSidebarContext('Create_Protocol');
-	}
+	};
 
 	const header = useMemo(() => [
 		<Th key={'File_name'} color='default'>
@@ -559,7 +559,7 @@ function Council({
 	};
 
 	return <Page flexDirection='row'>
-		<Page>		
+		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
@@ -579,8 +579,8 @@ function Council({
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
 						{t('Edit')}
 					</Button>}
-					<Button primary small aria-label={t('Protocol_Create')} onClick={onCreateProtocolClick} >
-						{t("Protocol_Create")}
+					<Button disabled={isLoading} primary small aria-label={t('Protocol_Create')} onClick={onCreateProtocolClick} >
+						{t('Protocol_Create')}
 					</Button>
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
@@ -699,14 +699,14 @@ function Council({
 					&& <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
 				}
 			</Page.Content>
-		</Page>		
-		{sidebarContext === 'Create_Protocol'&& 
-		<VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
-		<VerticalBar.Header>
-			{ t('Protocol_Create') }
-			<VerticalBar.Close onClick={onSidebarClose}/>
-		</VerticalBar.Header>
-		<CreateProtocol council={data} close={onSidebarClose}/>
+		</Page>
+		{sidebarContext === 'Create_Protocol'
+		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+			<VerticalBar.Header>
+				{ t('Protocol_Create') }
+				<VerticalBar.Close onClick={onSidebarClose}/>
+			</VerticalBar.Header>
+			<CreateProtocol council={data} close={onSidebarClose}/>
 		</VerticalBar>}
 	</Page>;
 }

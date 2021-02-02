@@ -1,23 +1,24 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Field, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
+import CKEditor from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import TextField from '@material-ui/core/TextField';
+import Chip from '@material-ui/core/Chip';
+import { Autocomplete, createFilterOptions } from '@material-ui/lab';
 import ru from 'date-fns/locale/ru';
-registerLocale('ru', ru);
 
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { constructPersonFIO, validateItemData, createItemData } from './lib';
+import { validateItemData, createItemData } from './lib';
+import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import CKEditor from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
-import { Autocomplete, createFilterOptions } from '@material-ui/lab';
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Chip from '@material-ui/core/Chip';
+
+registerLocale('ru', ru);
 
 export function AddItem({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -57,7 +58,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				number,
 				name,
 				responsible,
-				expireAt
+				expireAt,
 			);
 			dispatchToastMessage({ type: 'success', message: t('Item_Added_Successfully') });
 			close();
@@ -81,7 +82,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 					editor={ ClassicEditor }
 					config={ {
 						language: 'ru',
-						toolbar: [ 'bold', 'italic', 'link' ]
+						toolbar: ['bold', 'italic', 'link'],
 					} }
 					data={name}
 					onChange={ (event, editor) => {
@@ -92,11 +93,10 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 			</Field.Row>
 		</Field>
 		<Field>
-		<Field>
 			<Field.Label>{t('Item_Responsible')}</Field.Label>
 			<Autocomplete
 				multiple
-				id="tags-standard"
+				id='tags-standard'
 				options={personsData.persons}
 				forcePopupIcon={false}
 				getOptionLabel={(option) => constructPersonFIO(option)}
@@ -105,19 +105,18 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				onChange={(event, value) => setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-						  <Chip style={{backgroundColor:"#e0e0e0", margin:"3px", borderRadius:"16px", color:"#000000DE"}} 
-						  		label={constructPersonFIO(option)} {...getTagProps({ index })} />
+						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
+							label={constructPersonFIO(option)} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (
 					<TextField
 						{...params}
-						variant="outlined"
+						variant='outlined'
 						placeholder={t('Item_Responsible')}
 					/>
 				)}
 			/>
-		</Field>
 		</Field>
 		<Field>
 			<Field.Label>{t('Item_ExpireAt')}</Field.Label>
