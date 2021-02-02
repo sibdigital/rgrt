@@ -191,7 +191,19 @@ CouncilPage.displayName = 'CouncilPage';
 
 export default CouncilPage;
 
-function Council({ isLoading = true, mode, persons, setPersons, filesData, invitedPersonsData, currentPerson, councilId, data, userRoles, onChange, workingGroupOptions, councilTypeOptions }) {
+function Council({
+	isLoading = true,
+	mode,
+	persons,
+	setPersons,
+	filesData,
+	invitedPersonsData,
+	currentPerson,
+	councilId,
+	data,
+	userRoles,
+	onChange,
+	councilTypeOptions }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
@@ -268,7 +280,7 @@ function Council({ isLoading = true, mode, persons, setPersons, filesData, invit
 	};
 
 	const goToAgenda = () => {
-		// window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
+		window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
 		// FlowRouter.go('agendas');
 		// FlowRouter.redirect('agendas');
 	};

@@ -17,8 +17,6 @@ Meteor.methods({
 			throw new Meteor.Error('Council_Error_Invalid_Council', 'Invalid council', { method: 'deleteCouncil' });
 		}
 
-		Councils.removeById(councilId);
-
-		return true;
+		return Councils.removeById(councilId);
 	},
 });
