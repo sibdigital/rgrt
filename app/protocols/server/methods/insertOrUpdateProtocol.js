@@ -36,6 +36,8 @@ Meteor.methods({
 				num: protocolData.num,
 				place: protocolData.place,
 				sections: [],
+				council: protocolData.councilId,
+				participants: protocolData.participants
 			};
 
 			const _id = Protocols.create(createProtocol);

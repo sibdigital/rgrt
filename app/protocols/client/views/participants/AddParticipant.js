@@ -74,11 +74,11 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 	const debouncedSort = useDebouncedValue(sort, 500);
 	const query = useQuery(debouncedParams, debouncedSort);
 
-	const data = useEndpointData('users.list', query) || { users: [] };
-
+	const data = useEndpointData('persons.list', query) || { persons: [] };
+	
 	useEffect(() => {
-		if (data.users) {
-			setFindUsers(data.users);
+		if (data.persons) {
+			setFindUsers(data.persons);
 		}
 	}, [data]);
 
@@ -104,12 +104,12 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 		onClick={handleSave(user._id)}
 		title={t('Participant_Add')}
 	>
-		<Box>{user.surname} {user.name} {user.patronymic}</Box>
-		<Box color='hint'>{user.position}, {user.organization}</Box>
+		<Box fontSize={"16px"}>{user.surname} {user.name} {user.patronymic}</Box>
+		{/* <Box color='hint'>{user.position}, {user.organization}</Box> */}
 	</Box>;
 
 	return <VerticalBar.ScrollableContent>
-		<SearchByText setParams={ setParams } usersData={data.users} setUsersData={setFindUsers}/>
+		<SearchByText setParams={ setParams } usersData={data.persons} setUsersData={setFindUsers}/>
 		{findUsers && !findUsers.length
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
