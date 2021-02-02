@@ -37,72 +37,14 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { fileUploadToCouncil, filesValidation } from '../../../ui/client/lib/fileUpload';
 import { mime } from '../../../utils/lib/mimeTypes';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { SuccessModal, WarningModal } from '../../../utils/client/index';
 import { Persons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
 import { createCouncilData, validate, downloadCouncilParticipantsForm } from './lib';
 
 registerLocale('ru', ru);
-
 require('react-datepicker/dist/react-datepicker.css');
-
-const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='danger' name='modal-warning' size={20}/>
-			<Modal.Title>{t('Are_you_sure')}</Modal.Title>
-			<Modal.Close onClick={onCancel}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{title}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button ghost onClick={onCancel}>{t('Cancel')}</Button>
-				<Button primary danger onClick={onDelete}>{t('Delete')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
-
-const SuccessModal = ({ title, onClose, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='success' name='checkmark-circled' size={20}/>
-			<Modal.Title>{t('Deleted')}</Modal.Title>
-			<Modal.Close onClick={onClose}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{title}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button primary onClick={onClose}>{t('Ok')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
-
-const SuccessFileDeleteModal = ({ onClose, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='success' name='checkmark-circled' size={20}/>
-			<Modal.Title>{t('Deleted')}</Modal.Title>
-			<Modal.Close onClick={onClose}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{t('File_has_been_deleted')}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button primary onClick={onClose}>{t('Ok')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -193,6 +135,7 @@ CouncilPage.displayName = 'CouncilPage';
 
 export default CouncilPage;
 
+// eslint-disable-next-line complexity
 function Council({
 	isLoading = true,
 	mode,
@@ -284,8 +227,10 @@ function Council({
 
 	const goToAgenda = () => {
 		window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
-		// FlowRouter.go('agendas');
-		// FlowRouter.redirect('agendas');
+	};
+
+	const goToProposalsForTheAgenda = () => {
+		window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
 	};
 
 	const onEdit = (_id) => () => {
@@ -493,28 +438,28 @@ function Council({
 		try {
 			await deleteCouncil(councilId);
 			await deleteCouncilFromPersons(councilId, invitedPersonsIds);
-			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); }}/>);
+			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('Delete')} onClose={() => { setModal(undefined); }}/>);
 			goToCouncils();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
 	}, [deleteCouncil, deleteCouncilFromPersons, invitedPersonsIds, dispatchToastMessage]);
 
-	const onDeleteCouncilClick = () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
+	const onDeleteCouncilClick = () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
-	const onFileDeleteConfirm = (fileId) => async (e) => {
-		e.preventDefault();
+	const onFileDeleteConfirm = async (fileId) => {
+		console.log(fileId);
 		try {
 			await deleteFileFromCouncil(councilId, fileId);
 			setAttachedFiles(attachedFiles.filter((file) => file._id !== fileId));
-			setModal(() => <SuccessFileDeleteModal onClose={() => { setModal(undefined); close(); onChange(); }}/>);
+			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('File_has_been_deleted')} onClose={() => { setModal(undefined); close(); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 			onChange();
 		}
 	};
 
-	const openFileDeleteConfirm = (fileId) => setModal(() => <DeleteWarningModal onDelete={onFileDeleteConfirm(fileId)} onCancel={() => setModal(undefined)}/>);
+	const openFileDeleteConfirm = (fileId) => setModal(() => <WarningModal title={t('Are_you_sure')} onDelete={() => onFileDeleteConfirm(fileId) } onCancel={() => setModal(undefined)}/>);
 
 	const onDeleteFileConfirmDel = (fileId) => async (e) => {
 		e.preventDefault();
@@ -569,6 +514,9 @@ function Council({
 				{ mode !== 'edit' && <ButtonGroup>
 					{isSecretary && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{t('Agenda')}
+					</Button>}
+					{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>
+						{t('Proposals_for_the_agenda')}
 					</Button>}
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
