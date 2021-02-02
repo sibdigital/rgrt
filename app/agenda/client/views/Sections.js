@@ -14,7 +14,7 @@ const clickable = css`
 export function Sections({ data, onSectionMenuClick }) {
 	const Item = (item) => <>
 		<Box
-			mis='x32'
+			mis='x40'
 			mbe='x4'
 			display='flex'
 			flexDirection='row'
@@ -25,7 +25,7 @@ export function Sections({ data, onSectionMenuClick }) {
 
 	const Section = (section) => <Box>
 		<Box
-			mis='x16'
+			mis='x24'
 			mbe='x16'
 			color='default'
 			display='flex'

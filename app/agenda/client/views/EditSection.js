@@ -12,6 +12,8 @@ import { constructPersonFIO } from '../../../utils/client/methods/constructPerso
 import { validateAgendaSection, createAgendaSection } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
+require('react-datepicker/dist/react-datepicker.css');
+
 export function EditSection({ agendaId = null, councilId, onEditDataClick, close, onChange, personsOptions, data = null, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
