@@ -44,37 +44,3 @@ export function downloadCouncilParticipantsForm({ res, fileName }) {
 		console.log('downloadCouncilParticipantsForm :', e);
 	}
 };
-
-export function createProtocolData(date, number, place = '', participants = [], councilId = '', previousData) {
-	const protocolData = {
-	};
-
-	if (previousData) {
-		protocolData._id = previousData._id;
-	}
-	protocolData.d = date;
-	protocolData.num = number;
-	protocolData.place = place;
-	protocolData.participants = participants;
-	protocolData.councilId = councilId;
-
-	return protocolData;
-}
-
-export function validateProtocolData(protocolData) {
-	const errors = [];
-
-	if (!protocolData.d) {
-		errors.push('Date');
-	}
-
-	if (!protocolData.num) {
-		errors.push('Number');
-	}
-
-	if (!protocolData.place) {
-		errors.push('Place');
-	}
-
-	return errors;
-}

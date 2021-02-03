@@ -103,11 +103,11 @@ export function ProtocolsPage() {
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'edit' && t('Protocol_Info') }
-				{ context === 'new' && t('Protocol_Add') }
+				{( context === 'new' || context === 'new-council-protocol' ) && t('Protocol_Add') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'edit' && <EditProtocol _id={id} close={close} onChange={onChange} cache={cache}/>}
-			{context === 'new' && <AddProtocol goToNew={onEditClick} close={close} onChange={onChange}/>}
+			{( context === 'new' || context === 'new-council-protocol' )  && <AddProtocol goToNew={onEditClick} close={close} onChange={onChange}/>}
 		</VerticalBar>}
 	</Page>;
 }

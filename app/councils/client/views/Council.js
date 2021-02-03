@@ -24,8 +24,6 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { CreateProtocol } from './CreateProtocol';
 import { useRouteParameter, useCurrentRoute } from '../../../../client/contexts/RouterContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -141,11 +139,13 @@ export function CouncilPage() {
 		query: JSON.stringify({ _id: councilId }),
 	}), [councilId]);
 
+	
 	const { data, state } = useEndpointDataExperimental('councils.findOne', query) || {};
 	const { data: invitedPersonsData, state: invitedPersonsDataState } = useEndpointDataExperimental('councils.invitedPersons', useMemo(() => ({ query: JSON.stringify({ _id: councilId }) }), [councilId])) || { persons: [] };
 	const { data: personsData, state: personsDataState } = useEndpointDataExperimental('persons.list', personsQuery) || { persons: [] };
 	const { data: currentUser, state: currentUserState } = useEndpointDataExperimental('users.getRoles', useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
 	const { data: currentPerson, state: currentPersonState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
+	const { data: protocolData, state: protocolsDataState} = useEndpointDataExperimental('protocols.findByCouncilId', query);
 
 	useEffect(() => {
 		if (data && data.documents) {
@@ -175,7 +175,7 @@ export function CouncilPage() {
 	], [t]);
 
 	let isLoading = true;
-	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState, protocolsDataState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
 	} else {
 		isLoading = false;
@@ -186,7 +186,7 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={[]} councilTypeOptions={councilTypeOptions}/>;
+	return <Council isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={[]} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -205,7 +205,8 @@ function Council({
 	data,
 	userRoles,
 	onChange,
-	councilTypeOptions }) {
+	councilTypeOptions, 
+	protocolData }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
@@ -215,7 +216,6 @@ function Council({
 	const [councilType, setCouncilType] = useState('');
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [context, setContext] = useState('participants');
-	const [sidebarContext, setSidebarContext] = useState('');
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [attachedFiles, setAttachedFiles] = useState([]);
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
@@ -476,10 +476,6 @@ function Council({
 		setContext('participants');
 	};
 
-	const onSidebarClose = () => {
-		setSidebarContext('');
-	};
-
 	const onCreatePersonsClick = useCallback((person) => () => {
 		console.log('here');
 		// const res = invitedPersons ? invitedPersons.concat(person) : [person];
@@ -525,9 +521,14 @@ function Council({
 		}
 	};
 
-	const onCreateProtocolClick = async () => {
-		setSidebarContext('Create_Protocol');
-	};
+	const onOpenCouncilProtocol = (protocolData, councilId) => () => {
+		if (protocolData.protocol.length !== 0) {
+			const protocolId = protocolData.protocol[0]._id;
+			FlowRouter.go(`/protocol/${ protocolId }`)
+		} else {
+			FlowRouter.go(`/protocols/new-council-protocol/${ councilId }`)
+		}
+	}
 
 	const header = useMemo(() => [
 		<Th key={'File_name'} color='default'>
@@ -579,8 +580,8 @@ function Council({
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
 						{t('Edit')}
 					</Button>}
-					<Button disabled={isLoading} primary small aria-label={t('Protocol_Create')} onClick={onCreateProtocolClick} >
-						{t('Protocol_Create')}
+					<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
+						{t('Protocol')}
 					</Button>
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
@@ -700,13 +701,5 @@ function Council({
 				}
 			</Page.Content>
 		</Page>
-		{sidebarContext === 'Create_Protocol'
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
-			<VerticalBar.Header>
-				{ t('Protocol_Create') }
-				<VerticalBar.Close onClick={onSidebarClose}/>
-			</VerticalBar.Header>
-			<CreateProtocol council={data} close={onSidebarClose}/>
-		</VerticalBar>}
 	</Page>;
 }

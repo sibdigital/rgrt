@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -7,6 +7,7 @@ registerLocale('ru', ru);
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validate, createProtocolData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
@@ -14,12 +15,30 @@ import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 require('react-datepicker/dist/react-datepicker.css');
 
 export function AddProtocol({ goToNew, close, onChange, ...props }) {
+
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const [date, setDate] = useState('');
 	const [number, setNumber] = useState('');
 	const [place, setPlace] = useState('');
+	const [participants, setParticipants] = useState([]);
+
+	const councilId = FlowRouter.getParam('id');
+
+	if (councilId) {
+		const query = useMemo(() => ({
+			query: JSON.stringify({ _id: councilId }),
+		}), [councilId]);
+	
+		const { data: invitedPersonsData } = useEndpointDataExperimental('councils.invitedPersons', query) || { persons: [] };
+		
+		useEffect(() => {
+			if (invitedPersonsData && invitedPersonsData.persons) {
+				setParticipants(invitedPersonsData.persons?.map((person) => person._id));
+			}
+		}, [invitedPersonsData]);
+	}
 
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
@@ -29,8 +48,8 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		}
 	};
 
-	const saveAction = useCallback(async (date, number, place) => {
-		const protocolData = createProtocolData(date, number, place);
+	const saveAction = useCallback(async (date, number, place, councilId, participants) => {
+		const protocolData = createProtocolData(date, number, place, councilId, participants);
 		const validation = validate(protocolData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateProtocol(protocolData);
@@ -44,7 +63,9 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 			const result = await saveAction(
 				date,
 				number,
-				place
+				place,
+				councilId,
+				participants
 			);
 			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
 			goToNew(result)();
@@ -52,7 +73,7 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [dispatchToastMessage, goToNew, date, number, place, onChange, saveAction, t]);
+	}, [dispatchToastMessage, goToNew, date, number, place, councilId, participants, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
