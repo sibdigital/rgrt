@@ -88,12 +88,9 @@ export function ProtocolsPage() {
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
-
-				<Field width={'6%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
-						<Icon name='plus'/>
-					</Button>
-				</Field>
+				<Button width='200px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+					{ t('Add') }
+				</Button>
 			</Page.Header>
 			<Page.Content>
 				<Protocols setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
@@ -103,11 +100,11 @@ export function ProtocolsPage() {
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'edit' && t('Protocol_Info') }
-				{ context === 'new' && t('Protocol_Add') }
+				{( context === 'new' || context === 'new-council-protocol' ) && t('Protocol_Add') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'edit' && <EditProtocol _id={id} close={close} onChange={onChange} cache={cache}/>}
-			{context === 'new' && <AddProtocol goToNew={onEditClick} close={close} onChange={onChange}/>}
+			{( context === 'new' || context === 'new-council-protocol' )  && <AddProtocol goToNew={onEditClick} close={close} onChange={onChange}/>}
 		</VerticalBar>}
 	</Page>;
 }

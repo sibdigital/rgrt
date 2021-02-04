@@ -20,6 +20,18 @@ export async function findProtocols({ query = {}, fields = {}, pagination: { off
 	};
 }
 
+export async function findProtocolByCouncilId(_id) {
+	const cursor = await Protocols.find({
+		councilId: _id
+	})
+
+	const protocol = await cursor.toArray();
+
+	return {
+		protocol
+	}
+}
+
 export async function findProtocol(_id) {
 	const cursor = await Protocols.findOne({ _id });
 	return cursor;

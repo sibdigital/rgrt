@@ -17,7 +17,7 @@ export function validate(protocolData) {
 	return errors;
 }
 
-export function createProtocolData(date, number, place = '', previousData) {
+export function createProtocolData(date, number, place = '', councilId = '', participants = [], previousData) {
 	const protocolData = {
 	};
 
@@ -27,6 +27,8 @@ export function createProtocolData(date, number, place = '', previousData) {
 	protocolData.d = date;
 	protocolData.num = number;
 	protocolData.place = place;
+	protocolData.councilId = councilId;
+	protocolData.participants = participants;
 
 	return protocolData;
 }
