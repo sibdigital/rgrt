@@ -19,6 +19,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const [editData, setEditData] = useState({
+		item: '',
+		initiatedBy: {},
 		issueConsideration: '',
 		date: new Date(),
 		speakers: [],
@@ -28,6 +30,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		if (data) {
 			// console.log(data);
 			setEditData({
+				item: data.item,
+				initiatedBy: data.initiatedBy,
 				issueConsideration: data.issueConsideration,
 				date: new Date(data.date),
 				speakers: data.speakers,
@@ -46,8 +50,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		setEditData({ ...editData, speakers: value });
 	};
 
-	const saveAction = useCallback(async (issueConsideration, date, speakers, previousData) => {
-		const agendaData = createAgendaSection({ issueConsideration, date, speakers, previousData });
+	const saveAction = useCallback(async (item, initiatedBy, issueConsideration, date, speakers, previousData) => {
+		const agendaData = createAgendaSection({ item, initiatedBy, issueConsideration, date, speakers, previousData });
 		const validation = validateAgendaSection(agendaData);
 		// console.log(agendaData);
 		if (validation.length === 0) {
@@ -67,6 +71,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 			// console.log(editData);
 			editData.speakers.forEach((speaker) => speaker.value && delete speaker.value);
 			await saveAction(
+				editData.item,
+				editData.initiatedBy,
 				editData.issueConsideration,
 				editData.date,
 				editData.speakers,
