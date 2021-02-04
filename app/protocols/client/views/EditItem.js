@@ -67,7 +67,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 	const dispatchToastMessage = useToastMessageDispatch();
 
 
-	const personsData = useEndpointData('persons.list', useMemo(() => ({ }), [])) || { persons: [] };
+	const personsData = useEndpointData('persons.listToAutoComplete', useMemo(() => ({ }), [])) || { persons: [] };
 
 	const item = protocol.sections.find(s => s._id === sectionId).items.find(i => i._id === itemId);
 

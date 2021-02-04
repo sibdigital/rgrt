@@ -3256,7 +3256,7 @@
   "Status": "Статус",
   "opened": "Новое",
   "inProgress": "В работе",
-  "solved": "Решено",
+  "solved": "Исполнено",
   "canceled": "Отменено",
   "closed": "Закрыто",
   "StatusMessage": "Статусное Сообщение",
