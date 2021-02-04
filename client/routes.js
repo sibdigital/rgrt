@@ -93,10 +93,10 @@ FlowRouter.route('/home', {
 	},
 });
 
-FlowRouter.route('/agendas', {
-	name: 'agendas',
+FlowRouter.route('/proposals_for_the_agenda/:type/:id', {
+	name: 'proposals_for_the_agenda',
 	action: () => {
-		renderRouteComponent(() => import('../app/agenda/client/views/index'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/agenda/client/views/ProposalsForTheAgenda'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
