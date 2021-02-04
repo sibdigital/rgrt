@@ -24,7 +24,7 @@ export async function findAgenda(_id) {
 	return cursor;
 }
 
-export async function findByCouncilId(councilId) {
-	const cursor = await Agendas.findOne({ councilId });
+export async function findByCouncilId(councilId, options = {}) {
+	const cursor = await Agendas.findOne({ councilId }, options);
 	return cursor;
 }

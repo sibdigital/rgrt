@@ -41,9 +41,64 @@ class Agendas extends Base {
 		return this.update({ _id: agendaId }, { $set: { ...data } });
 	}
 
+	addProposal(_id, proposal) {
+		const proposalId = new ObjectID().toHexString();
+		proposal._id = proposalId;
+
+		const data = this.findOne({ _id });
+		data._updatedAt = new Date();
+
+		data.proposals = data.proposals ? data.proposals.concat(proposal) : [proposal];
+		this.update({ _id }, { $set: { ...data } });
+		return proposalId;
+	}
+
+	updateProposal(_id, proposal) {
+		const data = this.findOne({ _id });
+
+		if (data.proposals) {
+			data.proposals = data.proposals.map((_proposal) => {
+				if (_proposal._id === proposal._id) {
+					return proposal;
+				}
+				return _proposal;
+			});
+		} else {
+			data.proposal = [proposal];
+		}
+		data._updatedAt = new Date();
+		return this.update({ _id }, { $set: { ...data } });
+	}
+
+	updateProposalStatus(_id, proposalId, status) {
+		const data = this.findOne({ _id });
+
+		if (data.proposals) {
+			data.proposals = data.proposals.map((proposal) => {
+				if (proposal._id === proposalId) {
+					proposal.status = status;
+					proposal.added = true;
+				}
+				return proposal;
+			});
+			data._updatedAt = new Date();
+			this.update({ _id }, { $set: { ...data } });
+		}
+	}
+
 	updateAgenda(_id, data) {
 		data._updatedAt = new Date();
 		return this.update({ _id }, { $set: { ...data } });
+	}
+
+	removeProposal(_id, proposalId) {
+		const data = this.findOne({ _id });
+
+		if (data.proposal) {
+			data.proposal = data.proposal.filter((proposal) => proposal._id !== proposalId);
+			data._updatedAt = new Date();
+			this.update({ _id }, { $set: { ...data } });
+		}
 	}
 }
 

@@ -35,3 +35,41 @@ API.v1.addRoute('agendas.findByCouncilId', { authRequired: true }, {
 		}
 	},
 });
+
+API.v1.addRoute('agendas.proposals', { authRequired: true }, {
+	get() {
+		const { query, fields } = this.parseJsonQuery();
+		const nonSelectableFields = Object.keys(API.v1.defaultFieldsToExclude);
+
+		Object.keys(fields).forEach((k) => {
+			if (nonSelectableFields.includes(k) || nonSelectableFields.includes(k.split(API.v1.fieldSeparator)[0])) {
+				delete fields[k];
+			}
+		});
+
+		const cursor = Promise.await(findByCouncilId(query.councilId, { fields }));
+
+		return API.v1.success(cursor);
+	},
+});
+
+API.v1.addRoute('agendas.proposalsByUser', { authRequired: true }, {
+	get() {
+		const { query, fields } = this.parseJsonQuery();
+		const nonSelectableFields = Object.keys(API.v1.defaultFieldsToExclude);
+
+		Object.keys(fields).forEach((k) => {
+			if (nonSelectableFields.includes(k) || nonSelectableFields.includes(k.split(API.v1.fieldSeparator)[0])) {
+				delete fields[k];
+			}
+		});
+
+		const cursor = Promise.await(findByCouncilId(query.councilId, { fields }));
+		const res = [];
+
+		if (cursor.proposals) {
+			cursor.proposals.forEach((proposal) => { proposal.initiatedBy._id === query.userId && res.push(proposal); });
+		}
+		return API.v1.success({ _id: cursor._id, proposals: res });
+	},
+});
