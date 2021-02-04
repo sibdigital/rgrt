@@ -230,7 +230,7 @@ function Council({
 	};
 
 	const goToProposalsForTheAgenda = () => {
-		window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
+		window.open([settings.get('Site_Url'), 'proposals_for_the_agenda/council/', councilId].join(''), '_blank');
 	};
 
 	const onEdit = (_id) => () => {
@@ -527,9 +527,9 @@ function Council({
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
 						{t('Edit')}
 					</Button>}
-					<Button disabled={isLoading} primary small aria-label={t('Protocol_Create')} onClick={onCreateProtocolClick} >
+					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol_Create')} onClick={onCreateProtocolClick} >
 						{t('Protocol_Create')}
-					</Button>
+					</Button>}
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
 					<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
