@@ -76,9 +76,9 @@ function MailForm({ recipients, mailSubject, mailBody, defaultEmails, emailsArra
 
 	const sendEmail = useMethod('sendEmailManually');
 
-	const allFieldAreFilled = useMemo(() => topic.trim() !== '' && message.trim() !== '' && (email.trim() !== '' || handChipEmails.length > 0), [email, topic, message, handChipEmails]);
-
 	const isValidInputEmail = useMemo(() => isEmail(chipEmail), [chipEmail]);
+
+	const allFieldAreFilled = useMemo(() => topic.trim() !== '' && message.trim() !== '' && (email.trim() !== '' || handChipEmails.length > 0 || isValidInputEmail), [email, topic, message, handChipEmails, isValidInputEmail]);
 
 	useEffect(() => {
 		if (mailBodyContext !== undefined && mailBodyContext.length > 0 && mailSubjectContext !== undefined && mailSubjectContext.length > 0) {
