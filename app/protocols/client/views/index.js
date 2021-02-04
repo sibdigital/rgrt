@@ -88,12 +88,9 @@ export function ProtocolsPage() {
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
-
-				<Field width={'6%'} display={'block'} marginBlock={'15px'}>
-					<Button className='go-back-button' onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
-						<Icon name='plus'/>
-					</Button>
-				</Field>
+				<Button width='200px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+					{ t('Add') }
+				</Button>
 			</Page.Header>
 			<Page.Content>
 				<Protocols setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
