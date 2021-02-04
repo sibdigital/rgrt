@@ -41,7 +41,7 @@ export function createAgenda({ number, name, previousData }) {
 	return agendaData;
 }
 
-export function createAgendaSection({ issueConsideration, date, speakers, previousData }) {
+export function createAgendaSection({ item, initiatedBy, issueConsideration, date, speakers, previousData }) {
 	const agendaData = {
 	};
 
@@ -49,9 +49,44 @@ export function createAgendaSection({ issueConsideration, date, speakers, previo
 		agendaData._id = previousData._id;
 	}
 
+	agendaData.item = item;
+	agendaData.initiatedBy = initiatedBy;
 	agendaData.issueConsideration = issueConsideration;
 	agendaData.date = date;
 	agendaData.speakers = speakers;
 
 	return agendaData;
+}
+
+export function validateProposalsForTheAgenda(proposalsData) {
+	const errors = [];
+
+	if (!proposalsData.initiatedBy) {
+		errors.push('initiatedBy');
+	}
+	if (!proposalsData.issueConsideration) {
+		errors.push('issueConsideration');
+	}
+	if (!proposalsData.date) {
+		errors.push('date');
+	}
+
+	return errors;
+}
+
+export function createProposalsForTheAgenda(item, initiatedBy, issueConsideration, date, status, previousData = null) {
+	const proposalsData = {
+	};
+
+	if (previousData && previousData._id) {
+		proposalsData._id = previousData._id;
+	}
+
+	proposalsData.item = item;
+	proposalsData.initiatedBy = initiatedBy;
+	proposalsData.issueConsideration = issueConsideration;
+	proposalsData.date = date;
+	proposalsData.status = status;
+
+	return proposalsData;
 }

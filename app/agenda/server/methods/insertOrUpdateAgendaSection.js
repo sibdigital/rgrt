@@ -20,6 +20,8 @@ Meteor.methods({
 		}
 
 		const agendaSection = {
+			item: sectionData.item,
+			initiatedBy: sectionData.initiatedBy,
 			ts: new Date(),
 			issueConsideration: sectionData.issueConsideration ?? '',
 			date: sectionData.date ?? '',
