@@ -86,7 +86,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		}
 	}, [dispatchToastMessage, close, onChange, t, editData, data]);
 
-	return <VerticalBar.ScrollableContent {...props}>
+	return <Field {...props}>
 		<Field>
 			<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>
 			<Field.Row>
@@ -144,5 +144,5 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
-	</VerticalBar.ScrollableContent>;
+	</Field>;
 }

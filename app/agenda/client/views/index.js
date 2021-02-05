@@ -244,7 +244,7 @@ function Agenda({ agendaData, personsData, userData }) {
 						<Sections data={sectionsDataView} onItemMenuClick={() => console.log('onItemMenuClick')} onSectionMenuClick={onSectionMenuClick}/>
 					</Box>
 				</Page.ScrollableContent>}
-				{ tab === 'proposals' && <Proposals onEditProposal={onEditProposal} userData={userData} proposalsListData={proposalsList} agendaId={agendaId} onAddProposal={onEditSectionDataClick}/>}
+				{ tab === 'proposals' && <Proposals mode={'secretary'} onEditProposal={onEditProposal} userData={userData} proposalsListData={proposalsList} agendaId={agendaId} onAddProposal={onEditSectionDataClick}/>}
 			</Page.Content>
 		</Page>
 		{ context
@@ -257,11 +257,13 @@ function Agenda({ agendaData, personsData, userData }) {
 				{ context === 'proposal_edit' && t('Proposal_for_the_agenda_edit')}
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
-			{context === 'new' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} onChange={onChange}/>}
-			{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={currentAgendaData} onChange={onChange}/>}
-			{context === 'section-add' && <EditSection agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
-			{context === 'section-edit' && <EditSection data={currentSection} agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
-			{context === 'proposal_edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaId} userData={userData}/>}
+			<VerticalBar.ScrollableContent>
+				{context === 'new' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} onChange={onChange}/>}
+				{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={currentAgendaData} onChange={onChange}/>}
+				{context === 'section-add' && <EditSection agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
+				{context === 'section-edit' && <EditSection data={currentSection} agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
+				{context === 'proposal_edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaId} userData={userData}/>}
+			</VerticalBar.ScrollableContent>
 		</VerticalBar>}
 	</Page>;
 }

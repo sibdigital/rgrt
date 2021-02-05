@@ -8,20 +8,16 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { EditProposalsForTheAgenda } from './EditProposalsForTheAgenda';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validateAgendaSection, createAgendaSection } from './lib';
 
-export function Proposals({ onEditProposal, agendaId, userData, proposalsListData, onAddProposal }) {
+export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddProposal, mode = '' }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const [cache, setCache] = useState(new Date());
-	const [context, setContext] = useState('');
-	const [currentProposal, setCurrentProposal] = useState({});
 	const [proposalsList, setProposalsList] = useState([]);
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 
@@ -40,17 +36,6 @@ export function Proposals({ onEditProposal, agendaId, userData, proposalsListDat
 	const onChange = useCallback(() => {
 		setCache(new Date());
 	}, [cache]);
-
-	const close = useCallback(() => {
-		setContext('');
-	}, []);
-
-	const onEditDataClick = useCallback((proposal, type = 'new') => {
-		const arr = type !== 'new' ? proposalsList.map((_proposal) => (_proposal._id === proposal._id && proposal) || _proposal) : proposalsList.concat(proposal);
-		setProposalsList(arr);
-		setContext('');
-		onChange();
-	}, [proposalsList]);
 
 	const onAddProposalClick = useCallback(async (proposal) => {
 		const agendaSection = createAgendaSection({
@@ -98,10 +83,6 @@ export function Proposals({ onEditProposal, agendaId, userData, proposalsListDat
 		}
 	}, []);
 
-	const handleNewProposalClick = useCallback(() => {
-		setContext('new');
-	}, []);
-
 	const header = useMemo(() => [
 		mediaQuery && <Th w='x150' key={'Proposal_for_the_agenda_item'} color='default'>
 			{ t('Proposal_for_the_agenda_item') }
@@ -136,7 +117,7 @@ export function Proposals({ onEditProposal, agendaId, userData, proposalsListDat
 					<Icon name='trash' size='x20'/>
 				</Button>
 			</Table.Cell>}
-			{ <Table.Cell alignItems={'end'}>
+			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>
 				<Button style={tableCellIconStyle} disabled={proposal.added} color={proposal.added ? '#e4e7ea' : 'green'} small aria-label={t('plus')} onClick={() => onAddProposalClick(proposal)}>
 					<Icon name='plus' size='x20'/>
 				</Button>
@@ -153,15 +134,5 @@ export function Proposals({ onEditProposal, agendaId, userData, proposalsListDat
 		<Field>
 			<GenericTable header={header} renderRow={renderRow} results={proposalsList} total={proposalsList.length} setParams={setParams} params={params}/>
 		</Field>
-		{ context
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
-			<VerticalBar.Header>
-				{ context === 'new' && t('Agenda_added') }
-				{ context === 'edit' && t('Agenda_edited') }
-				<VerticalBar.Close onClick={close}/>
-			</VerticalBar.Header>
-			{context === 'new' && <EditProposalsForTheAgenda onEditDataClick={onEditDataClick} close={close} agendaId={agendaId} userData={userData}/>}
-			{context === 'edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditDataClick} close={close} agendaId={agendaId} userData={userData}/>}
-		</VerticalBar>}
 	</Field>;
 }

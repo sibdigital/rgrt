@@ -4,22 +4,20 @@ import {
 	Button,
 	Label,
 	ButtonGroup,
-	Callout, Table, Icon,
+	Callout,
 } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
-import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { EditProposalsForTheAgenda } from './EditProposalsForTheAgenda';
+import { Proposals } from './Proposals';
 
 registerLocale('ru', ru);
 
@@ -62,14 +60,11 @@ export default ProposalsForTheAgendaPage;
 
 function ProposalsForTheAgenda({ userData, agendaData }) {
 	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const [cache, setCache] = useState(new Date());
 	const [context, setContext] = useState('');
 	const [currentProposal, setCurrentProposal] = useState({});
 	const [proposalsList, setProposalsList] = useState([]);
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 
 	useEffect(() => {
 		if (agendaData.proposals) {
@@ -92,49 +87,14 @@ function ProposalsForTheAgenda({ userData, agendaData }) {
 		onChange();
 	}, [proposalsList]);
 
-	const onProposalClick = useCallback((proposal) => {
-		setCurrentProposal(proposal);
-		setContext('edit');
-	}, []);
-
 	const handleNewProposalClick = useCallback(() => {
 		setContext('new');
 	}, []);
 
-	const header = useMemo(() => [
-		mediaQuery && <Th w='x150' key={'Proposal_for_the_agenda_item'} color='default'>
-			{ t('Proposal_for_the_agenda_item') }
-		</Th>,
-		mediaQuery && <Th w='x200' key={'Agenda_initiated_by'} color='default'>
-			{ t('Agenda_initiated_by') }
-		</Th>,
-		<Th w='x300' key={'Agenda_issue_consideration'} color='default'>
-			{ t('Agenda_issue_consideration') }
-		</Th>,
-		<Th w='x150' key={'Date'} color='default'>
-			{ t('Date') }
-		</Th>,
-		mediaQuery && <Th w='x200' key={'Status'} color='default'>
-			{ t('Status') }
-		</Th>,
-		<Th w='x40' key='delete'/>,
-	], [t]);
-
-	const renderRow = (proposal) => {
-		const { _id, item, issueConsideration, date, initiatedBy, status } = proposal;
-		return <Table.Row key={_id} tabIndex={0} role='link' action onClick={() => onProposalClick(proposal)}>
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{item ?? ''}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }}>{initiatedBy.value ?? ''}</Table.Cell>}
-			<Table.Cell fontScale='p1' color='default'>{issueConsideration}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(date ?? new Date())}</Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{status}</Table.Cell>}
-			{ <Table.Cell alignItems={'end'}>
-				<Button disabled={proposal.added} small aria-label={t('edit')} onClick={() => onProposalClick(proposal)}>
-					<Icon name='edit'/>
-				</Button>
-			</Table.Cell>}
-		</Table.Row>;
-	};
+	const onEditProposal = useCallback((proposal) => {
+		setCurrentProposal(proposal);
+		setContext('edit');
+	}, []);
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -150,7 +110,7 @@ function ProposalsForTheAgenda({ userData, agendaData }) {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<GenericTable header={header} renderRow={renderRow} results={proposalsList} total={proposalsList.length} setParams={setParams} params={params}/>
+				<Proposals mode={'user'} proposalsListData={proposalsList} agendaId={agendaData._id} onEditProposal={onEditProposal}/>
 			</Page.Content>
 		</Page>
 		{ context
