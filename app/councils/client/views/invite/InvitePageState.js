@@ -69,7 +69,7 @@ function InvitePageState() {
 		error,
 	]);
 
-	if (ENDPOINT_STATES.LOADING === state) {
+	if ([state].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box/>;
 	}
 

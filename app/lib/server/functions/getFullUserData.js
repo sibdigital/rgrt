@@ -85,12 +85,12 @@ const removePasswordInfo = (user) => {
 	return user;
 };
 
-export function getFullUserDataByIdOrUsername({ userId, filterId, filterUsername }) {
+export function getFullUserDataByIdOrUsername({ userId, filterId, filterUsername, customFields = null }) {
 	const caller = Users.findOneById(userId, { fields: { username: 1 } });
 	const myself = userId === filterId || filterUsername === caller.username;
 	const canViewAllInfo = myself || hasPermission(userId, 'view-full-other-user-info');
 
-	const fields = getFields(canViewAllInfo);
+	const fields = customFields || getFields(canViewAllInfo);
 
 	const options = {
 		fields,

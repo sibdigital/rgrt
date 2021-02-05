@@ -1,6 +1,6 @@
 import { Box, Margins, Scrollable, Tile } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useWipeInitialPageLoading } from '../../../../../client/hooks/useWipeInitialPageLoading';
@@ -11,12 +11,23 @@ import SideBar from './SideBar';
 import NewParticipantStep from './steps/NewParticipantStep';
 import ErrorInviteStep from './steps/ErrorInviteStep';
 import CouncilInfoStep from './steps/CouncilInfoStep';
+import ProposalForTheAgendaStep from './steps/ProposalForTheAgendaStep';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '/client/hooks/useEndpointDataExperimental';
 
 
 function InviteStepperPage({ currentStep = 1, council = {} }) {
 	useWipeInitialPageLoading();
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
+
+	const { data: agendaData, state: agendaState, error: agendaError } = useEndpointDataExperimental('agendas.findByCouncilId', useMemo(() => ({
+		query: JSON.stringify({ councilId: council._id ?? '' }),
+		fields: JSON.stringify({ _id: 1 }),
+	}), [council]));
+
+	if ([agendaState].includes(ENDPOINT_STATES.LOADING)) {
+		return <Box/>;
+	}
 
 	return <>
 		<ConnectionStatusAlert />
@@ -41,6 +52,10 @@ function InviteStepperPage({ currentStep = 1, council = {} }) {
 							step: 2,
 							title: t('Council_participant_info'),
 						},
+						{
+							step: 3,
+							title: t('qwe'),
+						},
 					]}
 					currentStep={currentStep}
 				/>
@@ -54,8 +69,9 @@ function InviteStepperPage({ currentStep = 1, council = {} }) {
 					<Scrollable>
 						<Margins all='x16'>
 							<Tile is='section' flexGrow={1} flexShrink={1}>
-								<CouncilInfoStep step={1} title={t('Council_info')} active={currentStep === 1}></CouncilInfoStep>
-								<NewParticipantStep step={2} title={t('Council_participant_info')} active={currentStep === 2} council={council}></NewParticipantStep>
+								<CouncilInfoStep step={1} title={t('Council_info')} active={currentStep === 1}/>
+								<NewParticipantStep step={2} title={t('Council_participant_info')} active={currentStep === 2} council={council}/>
+								<ProposalForTheAgendaStep step={3} title={t('qwe')} active={currentStep === 3} council={council}/>
 							</Tile>
 						</Margins>
 					</Scrollable>
