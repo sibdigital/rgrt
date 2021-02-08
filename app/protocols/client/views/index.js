@@ -88,9 +88,9 @@ export function ProtocolsPage() {
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
-				<Button width='200px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+				{ !context && <Button width='200px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					{ t('Add') }
-				</Button>
+				</Button>}
 			</Page.Header>
 			<Page.Content>
 				<Protocols setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
