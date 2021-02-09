@@ -14,11 +14,11 @@ export const SuccessModal = ({
 	return <Modal {...props}>
 		<Modal.Header>
 			<Icon color='success' name='checkmark-circled' size={headerIconSize}/>
-			<Modal.Title>{title}</Modal.Title>
+			<Modal.Title>{title ?? ''}</Modal.Title>
 			<Modal.Close onClick={onClose}/>
 		</Modal.Header>
 		<Modal.Content fontScale='p1'>
-			{contentText}
+			{contentText ?? ''}
 		</Modal.Content>
 		<Modal.Footer>
 			<ButtonGroup align='end'>
