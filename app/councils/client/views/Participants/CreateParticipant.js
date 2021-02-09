@@ -1,16 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, Field, Box } from '@rocket.chat/fuselage';
-import styled, { keyframes } from 'styled-components';
-import { slideInRight } from 'react-animations';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../../client/hooks/useForm';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { isEmail } from '../../../../utils/lib/isEmail.js';
+import { getAnimation } from '../../../../utils/client/index';
 import ParticipantForm from './ParticipantForm';
 
-const SlideAnimation = styled.div`animation: 0.25s ${ keyframes`${ slideInRight }` } linear`;
+const SlideAnimation = getAnimation({ type: 'slideInRight' });
 
 export function CreateParticipant({ goTo, close, onChange, councilId, invitedPersons, setInvitedPersons, workingGroupOptions, ...props }) {
 	const t = useTranslation();
