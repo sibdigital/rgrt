@@ -71,7 +71,7 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 			</Field.Row>, [t, phone, handlePhone, email, handleEmail])}
 			{useMemo(() => <Field.Row mb='x4' width='98%'>
 				<Field mb='x8'>
-					<Field.Label>{t('Working_group')}</Field.Label>
+					<Field.Label>{t('Group')}</Field.Label>
 					<Select mis='x8' flexGrow={1} onChange={handleGroup} value={group} options={workingGroupOptions} />
 				</Field>
 			</Field.Row>, [t, group, handleGroup])}

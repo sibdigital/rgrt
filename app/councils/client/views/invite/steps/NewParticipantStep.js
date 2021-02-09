@@ -68,18 +68,17 @@ function NewParticipantStep({ step, title, active, council, isAgenda, setUserDat
 
 	const handleSave = useCallback(async () => {
 		try {
-			console.log(values);
 			const personId = await insertOrUpdatePerson(values);
-			console.log(personId);
 			if (personId) {
 				const person = {
 					_id: personId,
 					ts: new Date(),
 				};
-				console.log(person);
+
 				await insertOrUpdateCouncilPerson(council, person);
-				dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
+
 				if (!isAgenda) {
+					dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
 					goToFinalStep();
 				} else {
 					setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));

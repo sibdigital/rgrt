@@ -547,12 +547,12 @@ function Council({
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
-					<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
-						{t('Agenda')}
-					</Button>
-					<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
-						{t('Protocol')}
-					</Button>
+					{/*<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>*/}
+					{/*	{t('Agenda')}*/}
+					{/*</Button>*/}
+					{/*<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>*/}
+					{/*	{t('Protocol')}*/}
+					{/*</Button>*/}
 				</ButtonGroup>}
 			</Page.Header>
 			<Page.Content>
