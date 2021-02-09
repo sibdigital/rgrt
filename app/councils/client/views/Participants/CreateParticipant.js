@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
-import { Button, Field } from '@rocket.chat/fuselage';
+import { Button, Field, Box } from '@rocket.chat/fuselage';
+import styled, { keyframes } from 'styled-components';
+import { slideInRight } from 'react-animations';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../../client/hooks/useForm';
@@ -8,7 +10,7 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { isEmail } from '../../../../utils/lib/isEmail.js';
 import ParticipantForm from './ParticipantForm';
 
-// const SlideAnimation = styled.div`animation: 0.25s ${ keyframes`${ slideInRight }` } linear`;
+const SlideAnimation = styled.div`animation: 0.25s ${ keyframes`${ slideInRight }` } linear`;
 
 export function CreateParticipant({ goTo, close, onChange, councilId, invitedPersons, setInvitedPersons, workingGroupOptions, ...props }) {
 	const t = useTranslation();
@@ -76,9 +78,8 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 		</Field.Row>
 	</Field>, [close, t, handleSave]);
 
-	return <>
+	return <SlideAnimation><Box>
 		{append}
 		<ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} {...props}/>
-	</>;
-	{/*</SlideAnimation>;*/}
+	</Box></SlideAnimation>;
 }
