@@ -8,6 +8,7 @@ import {
 } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
+import s from 'underscore.string';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -17,7 +18,7 @@ import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { constructPersonFullFIO } from '../../../utils/client/methods/constructPersonFIO';
+import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { Sections } from './Sections';
 import { EditSection } from './EditSection';
@@ -88,12 +89,12 @@ function Agenda({ agendaData, personsData, userData }) {
 			label: [t('Agenda_speakers'), ':'].join(''),
 			value: '',
 			items: section.speakers?.map((speaker) => {
-				speaker.value = constructPersonFullFIO(speaker);
+				speaker.value = constructPersonFIO(speaker);
 				return speaker;
 			}),
 		}];
 
-		if (section.initiatedBy) {
+		if (section.initiatedBy && section.initiatedBy.value && s.trim(section.initiatedBy.value) !== '') {
 			sections.unshift({
 				label: [t('Agenda_initiated_by'), ':'].join(''),
 				value: section.initiatedBy.value ?? '',
@@ -216,7 +217,7 @@ function Agenda({ agendaData, personsData, userData }) {
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Agenda')}</Label>
 				</Field>
-				{ tab === 'agenda' && <ButtonGroup>
+				{ context === '' && tab === 'agenda' && <ButtonGroup>
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>
 						{t('Agenda_add')}
 					</Button>}
@@ -252,8 +253,8 @@ function Agenda({ agendaData, personsData, userData }) {
 			<VerticalBar.Header>
 				{ context === 'new' && t('Agenda_added') }
 				{ context === 'edit' && t('Agenda_edited') }
-				{ context === 'section-add' && t('Agenda_added') }
-				{ context === 'section-edit' && t('Agenda_edited') }
+				{ context === 'section-add' && t('Agenda_item_added') }
+				{ context === 'section-edit' && t('Agenda_item_edited') }
 				{ context === 'proposal_edit' && t('Proposal_for_the_agenda_edit')}
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>

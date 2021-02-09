@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Field, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
+import { Field, Button, InputBox, ButtonGroup, TextInput, FieldGroup } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
@@ -10,7 +10,6 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { validateAgendaSection, createAgendaSection } from './lib';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -30,7 +29,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		if (data) {
 			// console.log(data);
 			setEditData({
-				item: data.item,
+				item: data.item ?? '',
 				initiatedBy: data.initiatedBy,
 				issueConsideration: data.issueConsideration,
 				date: new Date(data.date),
@@ -78,7 +77,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				editData.speakers,
 				data,
 			);
-			dispatchToastMessage({ type: 'success', message: !data ? t('Item_Added_Successfully') : t('Item_Edited_Successfully') });
+			dispatchToastMessage({ type: 'success', message: !data ? t('Agenda_item_added_successfully') : t('Agenda_item_edited_successfully') });
 			onChange();
 			close();
 		} catch (error) {
@@ -86,7 +85,13 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		}
 	}, [dispatchToastMessage, close, onChange, t, editData, data]);
 
-	return <Field {...props}>
+	return <FieldGroup {...props}>
+		<Field>
+			<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
+			<Field.Row>
+				<InputBox value={editData.item} onChange={handleChange('item')} placeholder={t('Proposal_for_the_agenda_item')} />
+			</Field.Row>
+		</Field>
 		<Field>
 			<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>
 			<Field.Row>
@@ -144,5 +149,5 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
-	</Field>;
+	</FieldGroup>;
 }

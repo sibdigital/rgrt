@@ -23,32 +23,40 @@ export function Sections({ data, onSectionMenuClick }) {
 		</Box>
 	</>;
 
+	const constructPerson = (arr) => {
+		let result = '';
+		// eslint-disable-next-line no-return-assign
+		arr?.forEach((item) => result += [item.value, ', '].join(''));
+		return result;
+	};
+
 	const Section = (section) => <Box>
-		<Box
-			mis='x24'
-			mbe='x16'
-			color='default'
-			display='flex'
-			flexDirection='row'
-			className={clickable}
-		>
-			<Box display='flex' flexDirection='row'>
-				<Box mie='x4'>{section.label}</Box>
-				<Box>{section.value}</Box>
-			</Box>
-		</Box>
 		<Box mbe='x8'>
-			{(
-				section.items
-					? section.items.map((props, index) =>
-						<Item
-							key={props._id || index}
-							first={index === 0}
-							last={index === section.items.length - 1}
-							sectionId={section._id}
-							{...props}/>)
-					: <></>
-			)}
+			<Box
+				mis='x24'
+				mbe='x16'
+				color='default'
+				display='flex'
+				flexDirection='row'
+				className={clickable}
+			>
+				<Box display='flex' flexDirection='row'>
+					<Box mie='x4'>{section.label}</Box>
+					<Box>{section.value}</Box>
+					{ section.items?.length !== 0 && <Box mbe='x4'>{constructPerson(section.items)}</Box> }
+				</Box>
+			</Box>
+			{/*{(*/}
+			{/*	section.items*/}
+			{/*		? section.items.map((props, index) =>*/}
+			{/*			<Item*/}
+			{/*				key={props._id || index}*/}
+			{/*				first={index === 0}*/}
+			{/*				last={index === section.items.length - 1}*/}
+			{/*				sectionId={section._id}*/}
+			{/*				{...props}/>)*/}
+			{/*		: <></>*/}
+			{/*)}*/}
 		</Box>
 	</Box>;
 	const SectionHeader = ({ section, index }) => <Box>

@@ -3,7 +3,7 @@ import {
 	Box,
 	Field,
 	Button,
-	ButtonGroup,
+	ButtonGroup, FieldGroup,
 	InputBox, TextInput,
 } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -11,23 +11,16 @@ import ru from 'date-fns/locale/ru';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { constructPersonFullFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { createProposalsForTheAgenda, validateProposalsForTheAgenda } from './lib';
-import { useUser } from '../../../../client/contexts/UserContext';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
 export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, agendaId, userData, data = null, ...props }) {
 	const t = useTranslation();
-	const id = useRouteParameter('id');
 	const dispatchToastMessage = useToastMessageDispatch();
-	const formatDateAndTime = useFormatDateAndTime();
-	const userId = useUser();
 
 	const [editData, setEditData] = useState({
 		item: '',
@@ -58,6 +51,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 					patronymic: userData.patronymic ?? '',
 					organization: userData.organization ?? '',
 					value: constructPersonFullFIO(userData),
+					type: userData.type ?? '',
 				},
 			});
 		}
@@ -105,54 +99,56 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 	}, [dispatchToastMessage, close, t, editData, data]);
 
 	return <Field {...props}>
-		<Field>
-			<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
-			<Field.Row>
-				<InputBox value={editData.item} onChange={(e) => handleEditDateChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Agenda_initiated_by')} <span style={ { color: 'red' } }>*</span></Field.Label>
-			<Field.Row>
-				<InputBox value={editData.initiatedBy.value} disabled readOnly placeholder={t('Agenda_initiated_by')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Agenda_issue_consideration')} <span style={ { color: 'red' } }>*</span></Field.Label>
-			<Field.Row>
-				<InputBox value={editData.issueConsideration} onChange={(e) => handleEditDateChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Date')} <span style={ { color: 'red' } }>*</span></Field.Label>
-			<Field.Row>
-				<DatePicker
-					dateFormat='dd.MM.yyyy HH:mm'
-					selected={editData.date}
-					onChange={(newDate) => handleEditDateChange('date', newDate)}
-					showTimeSelect
-					timeFormat='HH:mm'
-					timeIntervals={5}
-					timeCaption='Время'
-					customInput={<TextInput />}
-					locale='ru'
-					popperClassName='date-picker'/>
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Status')} <span style={ { color: 'red' } }>*</span></Field.Label>
-			<Field.Row>
-				<InputBox value={editData.status} disabled readOnly placeholder={t('Section_Name')} />
-			</Field.Row>
-		</Field>
-		{mode !== 'invite' && <Field>
-			<Field.Row>
-				<ButtonGroup stretch w='full'>
-					<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave}>{t('Save')}</Button>
-				</ButtonGroup>
-			</Field.Row>
-		</Field>}
+		<FieldGroup>
+			<Field>
+				<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
+				<Field.Row>
+					<InputBox value={editData.item} onChange={(e) => handleEditDateChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />
+				</Field.Row>
+			</Field>
+			{mode !== 'invite' && <Field>
+				<Field.Label>{t('Agenda_initiated_by')} <span style={ { color: 'red' } }>*</span></Field.Label>
+				<Field.Row>
+					<InputBox value={editData.initiatedBy.value} disabled readOnly placeholder={t('Agenda_initiated_by')} />
+				</Field.Row>
+			</Field>}
+			<Field>
+				<Field.Label>{t('Agenda_issue_consideration')} <span style={ { color: 'red' } }>*</span></Field.Label>
+				<Field.Row>
+					<InputBox value={editData.issueConsideration} onChange={(e) => handleEditDateChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
+				</Field.Row>
+			</Field>
+			<Field>
+				<Field.Label>{t('Date')} <span style={ { color: 'red' } }>*</span></Field.Label>
+				<Field.Row>
+					<DatePicker
+						dateFormat='dd.MM.yyyy HH:mm'
+						selected={editData.date}
+						onChange={(newDate) => handleEditDateChange('date', newDate)}
+						showTimeSelect
+						timeFormat='HH:mm'
+						timeIntervals={5}
+						timeCaption='Время'
+						customInput={<TextInput />}
+						locale='ru'
+						popperClassName='date-picker'/>
+				</Field.Row>
+			</Field>
+			{mode !== 'invite' && <Field>
+				<Field.Label>{t('Status')} <span style={ { color: 'red' } }>*</span></Field.Label>
+				<Field.Row>
+					<InputBox value={editData.status} disabled readOnly placeholder={t('Section_Name')} />
+				</Field.Row>
+			</Field>}
+			{mode !== 'invite' && <Field>
+				<Field.Row>
+					<ButtonGroup stretch w='full'>
+						<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
+						<Button primary onClick={handleSave}>{t('Save')}</Button>
+					</ButtonGroup>
+				</Field.Row>
+			</Field>}
+		</FieldGroup>
 	</Field>;
 }
 

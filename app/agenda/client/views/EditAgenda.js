@@ -1,12 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Field, Button, InputBox, ButtonGroup } from '@rocket.chat/fuselage';
+import { Field, Button, InputBox, ButtonGroup, FieldGroup } from '@rocket.chat/fuselage';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 import { validateAgenda, createAgenda } from './lib';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
 export function EditAgenda({ councilId, onEditDataClick, close, onChange, data = null, ...props }) {
 	const t = useTranslation();
@@ -63,7 +62,7 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 		}
 	}, [dispatchToastMessage, close, onChange, t, name, number, data]);
 
-	return <Field {...props}>
+	return <FieldGroup {...props}>
 		<Field>
 			<Field.Label>{t('Section_Name')}</Field.Label>
 			<Field.Row>
@@ -84,5 +83,5 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
-	</Field>;
+	</FieldGroup>;
 }
