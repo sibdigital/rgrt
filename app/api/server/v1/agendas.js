@@ -1,5 +1,6 @@
 import { API } from '../api';
 import { findAgendas, findAgenda, findByCouncilId } from '../lib/agendas';
+import { findOneCouncilByInviteLink } from '../lib/councils';
 
 API.v1.addRoute('agendas.list', { authRequired: true }, {
 	get() {
@@ -39,7 +40,30 @@ API.v1.addRoute('agendas.findByCouncilId', { authRequired: true }, {
 		if (cursor) {
 			return API.v1.success(cursor);
 		} else {
+			// return API.v1.success({ request: null });
 			return API.v1.failure('Повестка связанная с мероприятием не найдена');
+		}
+	},
+});
+
+API.v1.addRoute('agendas.findByCouncilInviteLink', { authRequired: false }, {
+	get() {
+		const { query, fields } = this.parseJsonQuery();
+		console.log(fields);
+		const fieldsAfterDelete = this.deleteDefaultFieldsToExclude(fields);
+		console.log(fieldsAfterDelete);
+
+		const council = Promise.await(findOneCouncilByInviteLink(query.inviteLink, { fields }));
+
+		if (!council && council._id) {
+			return API.v1.failure('Not Found');
+		}
+
+		const cursor = Promise.await(findByCouncilId(council._id, { fields }));
+		if (cursor) {
+			return API.v1.success(cursor);
+		} else {
+			return API.v1.success({ request: null });
 		}
 	},
 });

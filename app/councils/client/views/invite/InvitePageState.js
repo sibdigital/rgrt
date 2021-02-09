@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { Box, Skeleton, Scrollable, Margins, InputBox } from '@rocket.chat/fuselage';
+import { Box } from '@rocket.chat/fuselage';
 
 import { useRouteParameter, useRoute } from '../../../../../client/contexts/RouterContext';
 import InviteStepperPage from './InviteStepperPage';
@@ -49,6 +49,10 @@ function InvitePageState() {
 	}), [councilId]);
 
 	const { data, state, error } = useEndpointDataExperimental('councils.getOneByInviteLink', query);
+	const { data: agendaData, state: agendaState, error: agendaError } = useEndpointDataExperimental('agendas.findByCouncilInviteLink', useMemo(() => ({
+		query: JSON.stringify({ inviteLink: councilId }),
+		fields: JSON.stringify({ _id: 1 }),
+	}), [councilId]));
 
 	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => (currentStep !== 1 ? currentStep - 1 : currentStep)), []);
 	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
@@ -69,7 +73,7 @@ function InvitePageState() {
 		error,
 	]);
 
-	if ([state].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, agendaState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box/>;
 	}
 
@@ -82,13 +86,9 @@ function InvitePageState() {
 		}
 	}
 
-	if (ENDPOINT_STATES.LOADING === state) {
-		return <Box/>;
-	}
-
 
 	return <InvitePageContext.Provider value={value}>
-		<InviteStepperPage currentStep={currentStep} council={data}/>
+		<InviteStepperPage currentStep={currentStep} council={data} agendaId={agendaData._id ?? agendaData.request}/>
 	</InvitePageContext.Provider>;
 }
 

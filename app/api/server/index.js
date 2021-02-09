@@ -1,5 +1,6 @@
 import './settings';
 import './helpers/composeRoomWithLastMessage';
+import './helpers/deleteDefaultFieldsToExclude';
 import './helpers/deprecationWarning';
 import './helpers/getLoggedInUser';
 import './helpers/getPaginationItems';
