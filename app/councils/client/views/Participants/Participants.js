@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Icon, ButtonGroup, Modal, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
-import { css } from '@rocket.chat/css-in-js';
+import styled, { keyframes } from 'styled-components';
+import { slideInLeft } from 'react-animations';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
@@ -10,15 +11,7 @@ import { useSetModal } from '../../../../../client/contexts/ModalContext';
 import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 
-const clickable = css`
-		cursor: pointer;
-		// border-bottom: 2px solid #F2F3F5 !important;
-
-		&:hover,
-		&:focus {
-			background: #F7F8FA;
-		}
-	`;
+const SlideAnimation = styled.div`animation: 0.25s ${ keyframes`${ slideInLeft }` } linear`;
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -203,7 +196,7 @@ export function Persons({ councilId, onChange, invitedPersons, setInvitedPersons
 
 	const onDeletePersonFromCouncilClick = (personId) => () => setModal(() => <DeleteWarningModal title={t('Council_user_delete_warning')} onDelete={onDel(personId)} onCancel={() => setModal(undefined)}/>);
 
-	return <InvitedPersonsTable invitedPersons={invitedPersons} onDelete={onDeletePersonFromCouncilClick}/>;
+	return <SlideAnimation><InvitedPersonsTable invitedPersons={invitedPersons} onDelete={onDeletePersonFromCouncilClick}/></SlideAnimation>;
 }
 
 function InvitedPersonsTable({ invitedPersons, onDelete }) {

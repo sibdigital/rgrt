@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Field, Table, Label } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import styled, { keyframes } from 'styled-components';
+import { slideInRight } from 'react-animations';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
@@ -291,6 +293,7 @@ function UsersTable({ invitedUsers, usersIdToAdd, handleAddUser }) {
 	return <GenericTable header={header} renderRow={renderRow} results={invitedUsers} total={invitedUsers.length} setParams={setParams} params={params} />;
 }
 
+const SlideAnimation = styled.div`animation: 0.25s ${ keyframes`${ slideInRight }` } linear`;
 
 export function AddPerson({ councilId, onChange, close, persons, invitedPersons, setInvitedPersons, onNewParticipant }) {
 	const t = useTranslation();
@@ -349,8 +352,8 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 		onChange();
 	};
 
-	return <>
-		{<Field mbe='x8'>
+	return <SlideAnimation><Field>
+		{<Field mb='x8' display='flex' flexDirection='row' alignItems='center'>
 			<Label fontScale='p1'>{t('Selected')}: {countSelectedPersons}</Label>
 			<ButtonGroup marginInlineStart='auto'>
 				<Button onClick={onNewParticipant('newParticipants')} small primary aria-label={ t('New') }>
@@ -379,7 +382,7 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 				<PersonsTable invitedPersons={ findPersons } personsIdToAdd={ personsIdToAdd } handleAddPerson={ onAddClick }/>
 			</>
 		}
-	</>;
+	</Field></SlideAnimation>;
 }
 
 function PersonsTable({ invitedPersons, personsIdToAdd, handleAddPerson }) {
