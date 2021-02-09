@@ -87,7 +87,9 @@ export function CouncilPage() {
 	const { data: personsData, state: personsDataState } = useEndpointDataExperimental('persons.list', personsQuery) || { persons: [] };
 	const { data: currentUser, state: currentUserState } = useEndpointDataExperimental('users.getRoles', useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
 	const { data: currentPerson, state: currentPersonState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
-	const { data: protocolData, state: protocolsDataState} = useEndpointDataExperimental('protocols.findByCouncilId', query);
+	const { data: protocolData, state: protocolsDataState } = useEndpointDataExperimental('protocols.findByCouncilId', query);
+	const { data: workingGroupData, state: workingGroupState } = useEndpointDataExperimental('working-groups.list',
+		useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), []));
 
 	useEffect(() => {
 		if (data && data.documents) {
@@ -103,13 +105,13 @@ export function CouncilPage() {
 
 	const mode = useMemo(() => routeUrl[0].includes('council-edit') ? 'edit' : 'read', [routeUrl]);
 
-	// const workingGroupOptions = useMemo(() => {
-	// 	const res = [[null, t('Not_chosen')]];
-	// 	if (workingGroups && workingGroups.workingGroups?.length > 0) {
-	// 		return res.concat(workingGroups.workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
-	// 	}
-	// 	return res;
-	// }, [workingGroups]);
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroupData && workingGroupData.workingGroups?.length > 0) {
+			return res.concat(workingGroupData.workingGroups.map((workingGroup) => [workingGroup._id, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroupData]);
 
 	const councilTypeOptions = useMemo(() => [
 		[t('Council_type_meeting'), t('Council_type_meeting')],
@@ -117,7 +119,7 @@ export function CouncilPage() {
 	], [t]);
 
 	let isLoading = true;
-	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState, protocolsDataState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState, protocolsDataState, workingGroupState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
 	} else {
 		isLoading = false;
@@ -128,7 +130,7 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={[]} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
+	return <Council isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -149,7 +151,9 @@ function Council({
 	userRoles,
 	onChange,
 	councilTypeOptions,
-	protocolData }) {
+	protocolData,
+	workingGroupOptions,
+}) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
@@ -226,7 +230,8 @@ function Council({
 	};
 
 	const goToAgenda = () => {
-		window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
+		// window.open([settings.get('Site_Url'), 'agenda/council/', councilId].join(''), '_blank');
+		FlowRouter.go(`/agenda/council/${ councilId }`);
 	};
 
 	const goToProposalsForTheAgenda = () => {
@@ -473,7 +478,7 @@ function Council({
 		} else {
 			FlowRouter.go(`/protocols/new-council-protocol/${ councilId }`);
 		}
-	}
+	};
 
 	const header = useMemo(() => [
 		<Th key={'File_name'} color='default'>
@@ -513,6 +518,12 @@ function Council({
 
 				</Field>
 				{ mode !== 'edit' && <ButtonGroup>
+					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
+						{t('Edit')}
+					</Button>}
+					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
+						{t('Delete')}
+					</Button>}
 					{isSecretary && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{t('Agenda')}
 					</Button>}
@@ -522,20 +533,11 @@ function Council({
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
 					</Button>}
-					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
-						{t('Delete')}
-					</Button>}
-					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
-						{t('Edit')}
-					</Button>}
-					<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
+					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
 						{t('Protocol')}
-					</Button>
+					</Button>}
 				</ButtonGroup>}
 				{ mode === 'edit' && <ButtonGroup>
-					<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
-						{t('Agenda')}
-					</Button>
 					<Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>
@@ -545,42 +547,50 @@ function Council({
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
+					<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
+						{t('Agenda')}
+					</Button>
+					<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
+						{t('Protocol')}
+					</Button>
 				</ButtonGroup>}
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8'>
-					<Field.Label>{t('Date')}</Field.Label>
-					<Field.Row>
-						{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
-						{mode === 'edit'
-							&& <DatePicker
-								dateFormat='dd.MM.yyyy HH:mm'
-								selected={date}
-								onChange={(newDate) => setDate(newDate)}
-								showTimeSelect
-								timeFormat='HH:mm'
-								timeIntervals={5}
-								timeCaption='Время'
-								customInput={<TextInput style={ inputStyles } />}
-								locale='ru'
-								popperClassName='date-picker'/>
-						}
-					</Field.Row>
+				<Field mbe='x8' display='flex' flexDirection='row'>
+					<Field mis='x4' >
+						<Field.Label>{t('Council_type')}</Field.Label>
+						<Field.Row>
+							{mode !== 'edit'
+							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
+							{mode === 'edit'
+							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+							}
+						</Field.Row>
+					</Field>
+					<Field mis='x4'>
+						<Field.Label>{t('Date')}</Field.Label>
+						<Field.Row>
+							{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
+							{mode === 'edit'
+								&& <DatePicker
+									dateFormat='dd.MM.yyyy HH:mm'
+									selected={date}
+									onChange={(newDate) => setDate(newDate)}
+									showTimeSelect
+									timeFormat='HH:mm'
+									timeIntervals={5}
+									timeCaption='Время'
+									customInput={<TextInput style={ inputStyles } />}
+									locale='ru'
+									popperClassName='date-picker'/>
+							}
+						</Field.Row>
+					</Field>
 				</Field>
-				<Field mbe='x8'>
+				<Field mbe='x8' mis='x4'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
 						<TextAreaInput style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} row='4' readOnly={mode !== 'edit'} fontScale='p1'/>
-					</Field.Row>
-				</Field>
-				<Field mbe='x8'>
-					<Field.Label>{t('Council_type')}</Field.Label>
-					<Field.Row>
-						{mode !== 'edit'
-							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
-						{mode === 'edit'
-							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
-						}
 					</Field.Row>
 				</Field>
 				{isSecretary && <Field mbe='x8'>
@@ -621,7 +631,7 @@ function Council({
 					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
 				}
 				{tab === 'persons' && context === 'newParticipants' && isSecretary
-					&& <CreateParticipant councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
+					&& <CreateParticipant workingGroupOptions={workingGroupOptions} councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>

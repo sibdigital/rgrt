@@ -8,7 +8,9 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { isEmail } from '../../../../utils/lib/isEmail.js';
 import ParticipantForm from './ParticipantForm';
 
-export function CreateParticipant({ goTo, close, onChange, councilId, invitedPersons, setInvitedPersons, ...props }) {
+// const SlideAnimation = styled.div`animation: 0.25s ${ keyframes`${ slideInRight }` } linear`;
+
+export function CreateParticipant({ goTo, close, onChange, councilId, invitedPersons, setInvitedPersons, workingGroupOptions, ...props }) {
 	const t = useTranslation();
 
 	const {
@@ -21,6 +23,7 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 		patronymic: '',
 		phone: '',
 		email: '',
+		group: {},
 	});
 	console.log('createPartic');
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -30,8 +33,22 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 	const insertOrUpdateCouncilPerson = useMethod('insertOrUpdateCouncilPerson');
 
+	const constructPerson = (person) => {
+		const group = workingGroupOptions?.find((group) => group[0] === person.group) || ['', ''];
+		return {
+			surname: person.surname,
+			name: person.name,
+			patronymic: person.patronymic,
+			phone: person.phone,
+			email: person.email,
+			group: { _id: group[0], title: group[1] },
+		};
+	};
+
 	const handleSave = useCallback(async () => {
-		const personId = await insertOrUpdatePerson(values);
+		// const personId = '123';
+		console.log(constructPerson(values));
+		const personId = await insertOrUpdatePerson(constructPerson(values));
 		if (personId) {
 			const person = values;
 			person._id = personId;
@@ -48,9 +65,7 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 
 			const res = invitedPersons ? invitedPersons.concat(personToAdd) : [personToAdd];
 			setInvitedPersons(res);
-			// close();
 			goTo(person)();
-			// onChange();
 		}
 	}, [values, insertOrUpdatePerson, insertOrUpdateCouncilPerson, invitedPersons, onChange]);
 
@@ -63,6 +78,7 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 
 	return <>
 		{append}
-		<ParticipantForm formValues={values} formHandlers={handlers} {...props}/>
+		<ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} {...props}/>
 	</>;
+	{/*</SlideAnimation>;*/}
 }

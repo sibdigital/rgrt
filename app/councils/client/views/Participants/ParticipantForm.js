@@ -4,12 +4,13 @@ import {
 	TextInput,
 	Icon,
 	Scrollable,
+	Select,
 } from '@rocket.chat/fuselage';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { isEmail } from '../../../../utils/lib/isEmail.js';
 
-export default function ParticipantForm({ formValues, formHandlers, availableRoles, ...props }) {
+export default function ParticipantForm({ formValues, formHandlers, availableRoles, workingGroupOptions, ...props }) {
 	const t = useTranslation();
 
 	const {
@@ -18,6 +19,7 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 		patronymic,
 		phone,
 		email,
+		group,
 	} = formValues;
 
 	const {
@@ -26,6 +28,7 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 		handlePatronymic,
 		handlePhone,
 		handleEmail,
+		handleGroup,
 	} = formHandlers;
 
 	return <Scrollable { ...props }>
@@ -66,6 +69,12 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 					<TextInput mis='x8' flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={handleEmail} addon={<Icon name='mail' size='x20'/>}/>
 				</Field>
 			</Field.Row>, [t, phone, handlePhone, email, handleEmail])}
+			{useMemo(() => <Field.Row mb='x4' width='98%'>
+				<Field mb='x8'>
+					<Field.Label>{t('Working_group')}</Field.Label>
+					<Select mis='x8' flexGrow={1} onChange={handleGroup} value={group} options={workingGroupOptions} />
+				</Field>
+			</Field.Row>, [t, group, handleGroup])}
 			{/* {useMemo(() => <Field mb='x4' width='98%'>
 					<Field.Label>{t('Email')}</Field.Label>
 					<Field.Row>

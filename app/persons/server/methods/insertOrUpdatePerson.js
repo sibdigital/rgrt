@@ -37,6 +37,7 @@ Meteor.methods({
 				patronymic: person.patronymic,
 				phone: person.phone,
 				email: person.email,
+				group: person.group,
 			};
 
 			const _id = Persons.create(createPerson);
