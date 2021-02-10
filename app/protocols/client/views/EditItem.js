@@ -26,20 +26,27 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validateItemData, createItemData } from './lib';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { useUserId } from '../../../../client/contexts/UserContext';
+import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
 export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props }) {
+	const userId = useUserId();
+
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: protocolId }),
 	}), [protocolId, _id, cache]);
 
 	const { data, state, error } = useEndpointDataExperimental('protocols.findOne', query);
+	const { data: currentUser, state: currentUserState, error: currentUserError } = useEndpointDataExperimental('users.getRoles',
+		useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
 
-	if (state === ENDPOINT_STATES.LOADING) {
+	const isSecretary = useMemo(() => (currentUser?.roles?.includes('secretary') || currentUser?.roles?.includes('admin')) || false, [currentUser]);
+
+	if ([state, currentUserState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box pb='x20'>
 			<Skeleton mbs='x8'/>
 			<InputBox.Skeleton w='full'/>
@@ -56,16 +63,17 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 		</Box>;
 	}
 
-	if (error || !data) {
+	if (error || currentUserError || !data || !currentUser) {
 		return <Box fontScale='h1' pb='x20'>{error}</Box>;
 	}
 
-	return <EditItemWithData protocol={data} sectionId={sectionId} itemId={_id} onChange={onChange} {...props}/>;
+	return <EditItemWithData protocol={data} isSecretary={isSecretary} sectionId={sectionId} itemId={_id} onChange={onChange} {...props}/>;
 }
 
-function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...props }) {
+function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, itemId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const userId = useUserId();
 
 
 	const personsData = useEndpointData('persons.listToAutoComplete', useMemo(() => ({ }), [])) || { persons: [] };
@@ -96,6 +104,12 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 		[number, name, responsible, expireAt]);
 
 	const statusOptions = useMemo(() => [[1, t('opened')], [2, t('inProgress')], [3, t('solved')]], []);
+
+	const isStatusCanChange = useMemo(() => {
+		const res = previousResponsible.find((res) => res.userId === userId);
+		console.log(res);
+		return !!res;
+	}, [previousResponsible]);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -185,7 +199,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 				/>
 			</Field.Row>
 		</Field>
-		<Field>
+		{ (isSecretary || isStatusCanChange) && <Field>
 			<Field.Label>{t('Status')}</Field.Label>
 			<Field.Row>
 				<Select
@@ -196,7 +210,7 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 					value={status}
 					placeholder={t('Status')}/>
 			</Field.Row>
-		</Field>
+		</Field>}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
