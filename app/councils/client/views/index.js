@@ -17,6 +17,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	query: JSON.stringify({ desc: { $regex: text || '', $options: 'i' } }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	fields: JSON.stringify({ d: 1, desc: 1, type: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation

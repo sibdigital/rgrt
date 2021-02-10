@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 import React, { useCallback, useMemo } from 'react';
 import { Box, Button, ButtonGroup, Icon, Modal, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
@@ -11,6 +10,7 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 import { downloadCouncilParticipantsForm } from './lib';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
@@ -67,7 +67,7 @@ export function Councils({
 
 	const setModal = useSetModal();
 
-	const isAllow = hasPermission('edit-councils', Meteor.userId());
+	const isAllow = hasPermission('edit-councils', useUserId());
 
 	const deleteCouncil = useMethod('deleteCouncil');
 

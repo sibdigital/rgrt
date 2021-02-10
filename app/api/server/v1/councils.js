@@ -1,13 +1,11 @@
-import { Meteor } from "meteor/meteor";
+import { Meteor } from 'meteor/meteor';
+import Busboy from 'busboy';
 
 import { API } from '../api';
 import { findCouncils, findOneCouncil, findCouncil, findOneCouncilByInviteLink } from '../lib/councils';
 import { hasPermission } from '../../../authorization';
 import { FileUpload } from '../../../file-upload';
-import { Users } from '../../../models';
-import { Persons } from '../../../models';
-
-import Busboy from 'busboy';
+import { Users, Persons } from '../../../models';
 
 API.v1.addRoute('councils.list', { authRequired: true }, {
 	get() {
@@ -16,10 +14,12 @@ API.v1.addRoute('councils.list', { authRequired: true }, {
 		}
 
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, fields } = this.parseJsonQuery();
+		this.deleteDefaultFieldsToExclude(fields);
 
 		return API.v1.success(Promise.await(findCouncils({
 			query,
+			fields,
 			pagination: {
 				offset,
 				count,

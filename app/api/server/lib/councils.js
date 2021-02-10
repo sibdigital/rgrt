@@ -1,7 +1,8 @@
 import { Councils } from '../../../models/server/raw';
 
-export async function findCouncils({ query = {}, pagination: { offset, count, sort } }) {
+export async function findCouncils({ query = {}, fields = {}, pagination: { offset, count, sort } }) {
 	const cursor = await Councils.find(query, {
+		fields,
 		sort: sort || { time: 1 },
 		skip: offset,
 		limit: count,
