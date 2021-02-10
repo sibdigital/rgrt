@@ -170,6 +170,7 @@ function Council({
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [isSecretary, setIsSecretary] = useState(false);
 	const [isUserJoin, setIsUserJoin] = useState(false);
+	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
 
 	useEffect(() => {
 		if (isLoading) { return; }
@@ -235,7 +236,8 @@ function Council({
 	};
 
 	const goToProposalsForTheAgenda = () => {
-		window.open([settings.get('Site_Url'), 'proposals_for_the_agenda/council/', councilId].join(''), '_blank');
+		// window.open([settings.get('Site_Url'), 'proposals_for_the_agenda/council/', councilId].join(''), '_blank');
+		FlowRouter.go(`/proposals_for_the_agenda/council/${ councilId }`);
 	};
 
 	const onEdit = (_id) => () => {
@@ -276,7 +278,7 @@ function Council({
 	const hasUnsavedChanges = useMemo(() => isLoading ? false : new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description || (!data.type && councilType !== '') || (data.type && data.type.title !== councilType),
 		[date, description, councilType, data]);
 
-	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
+	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setCurrentMovedFiles({ downIndex: -1, upIndex: - 1 }); }, []);
 
 	const downloadCouncilParticipants = (_id) => async (e) => {
 		e.preventDefault();
@@ -480,6 +482,21 @@ function Council({
 		}
 	};
 
+	const moveFileUpOrDown = useCallback((type, index) => {
+		const arr = attachedFiles;
+		if ((index > 0 && type === 'up') || (index < attachedFiles.length - 1 && type === 'down')) {
+			if (type === 'up') {
+				setCurrentMovedFiles({ downIndex: index, upIndex: index - 1 });
+				[arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
+			} else {
+				setCurrentMovedFiles({ downIndex: index + 1, upIndex: index });
+				[arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+			}
+			setAttachedFiles(arr);
+			onChange();
+		}
+	}, [attachedFiles]);
+
 	const header = useMemo(() => [
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
@@ -489,13 +506,39 @@ function Council({
 		</Th>,
 		<Th w='x40' key='download'/>,
 		isSecretary && <Th w='x40' key='delete'/>,
+		isSecretary && <Th w='x40' key='moveUp'/>,
+		isSecretary && <Th w='x40' key='moveDown'/>,
 	], [mediaQuery, isSecretary]);
 
 	const renderRow = (document) => {
+		console.log(document);
 		const { _id, title, ts } = document;
-		return <Table.Row key={_id} tabIndex={0} role='link' action>
+
+		const getStyle = (index) => {
+			let style = {};
+			if (index === currentMovedFiles.upIndex) {
+				style = { animation: 'slideDown 0.3s linear' };
+			} else if (index === currentMovedFiles.downIndex) {
+				style = { animation: 'slideUp 0.3s linear' };
+			}
+			return style;
+		};
+
+		const style = getStyle(document.index);
+
+		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>
+					<Icon name='arrow-down'/>
+				</Button>
+			</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>
+					<Icon name='arrow-down'/>
+				</Button>
+			</Table.Cell>
 			<Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('download')} onClick={onDownloadFileClick(document)}>
 					<Icon name='download'/>
