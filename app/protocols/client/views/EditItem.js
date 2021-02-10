@@ -11,6 +11,7 @@ import {
 	Throbber,
 	InputBox,
 	TextInput,
+	Select,
 } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -71,19 +72,22 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 
 	const item = protocol.sections.find(s => s._id === sectionId).items.find(i => i._id === itemId);
 
-	const { _id, num: previousNumber, name: previousName, responsible: previousResponsible, expireAt: previousExpireAt } = item || {};
+	const { _id, num: previousNumber, name: previousName, responsible: previousResponsible, expireAt: previousExpireAt, status: previousStatus } = item || {};
 	const previousItem = item || {};
 
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
 	const [responsible, setResponsible] = useState([]);
 	const [expireAt, setExpireAt] = useState('');
+	const [status, setStatus] = useState(0);
 
 	useEffect(() => {
+		console.log(previousStatus);
 		setNumber(previousNumber || '');
 		setName(previousName || '');
 		setResponsible(previousResponsible || '');
 		setExpireAt(previousExpireAt ? new Date(previousExpireAt) : '');
+		setStatus(previousStatus?.state ?? 0);
 	}, [previousNumber, previousName, previousResponsible, previousExpireAt, _id]);
 
 	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
@@ -91,26 +95,31 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 	const hasUnsavedChanges = useMemo(() => previousNumber !== number || previousName !== name || previousResponsible !== responsible || previousExpireAt !== expireAt,
 		[number, name, responsible, expireAt]);
 
+	const statusOptions = useMemo(() => [[1, t('opened')], [2, t('inProgress')], [3, t('solved')]], []);
+
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
 			setNumber(value);
 		}
 	};
 
-	const saveAction = useCallback(async (number, name, responsible, expireAt) => {
-		const itemData = createItemData(number, name, responsible, expireAt, { previousNumber, previousName, _id });
+	const saveAction = useCallback(async (number, name, responsible, expireAt, status) => {
+		const itemData = createItemData(number, name, responsible, expireAt, status, { previousNumber, previousName, _id });
 		const validation = validateItemData(itemData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateItem(protocol._id, sectionId, itemData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [_id, dispatchToastMessage, insertOrUpdateItem, number, name, responsible, expireAt, previousNumber, previousName, previousResponsible, previousExpireAt, previousItem, t]);
+	}, [_id, dispatchToastMessage, insertOrUpdateItem, previousNumber, previousName, previousResponsible, previousExpireAt, previousItem, t]);
 
 	const handleSave = useCallback(async () => {
-		saveAction(number, name, responsible, expireAt);
+		console.log(statusOptions);
+		const findState = statusOptions.find((state) => state[0] === status);
+		console.log(findState);
+		await saveAction(number, name, responsible, expireAt, { state: findState[0] ?? 1, title: findState[1] ?? t('opened') });
 		close();
 		onChange();
-	}, [saveAction, close, onChange]);
+	}, [saveAction, close, onChange, number, name, responsible, expireAt, status]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
@@ -174,6 +183,18 @@ function EditItemWithData({ close, onChange, protocol, sectionId, itemId, ...pro
 					customInput={<TextInput />}
 					locale='ru'
 				/>
+			</Field.Row>
+		</Field>
+		<Field>
+			<Field.Label>{t('Status')}</Field.Label>
+			<Field.Row>
+				<Select
+					style={ { whiteSpace: 'normal' } }
+					// border='1px solid #4fb0fc'
+					options={statusOptions}
+					onChange={(val) => setStatus(val)}
+					value={status}
+					placeholder={t('Status')}/>
 			</Field.Row>
 		</Field>
 		<Field>
