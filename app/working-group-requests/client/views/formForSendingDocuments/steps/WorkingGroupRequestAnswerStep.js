@@ -1,5 +1,5 @@
 import { Box, Field, Margins, Select, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -8,10 +8,15 @@ import { Pager } from '../../../../../../client/views/setupWizard/Pager';
 import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
+import { constructPersonFullFIO } from '../../../../../utils/client/methods/constructPersonFIO';
+import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
+import { useMethod } from '/client/contexts/ServerContext';
 
+function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo, userInfo, fileDownloadInfo }) {
+	const { goToPreviousStep, goToNextStep, goToFinalStep } = useInvitePageContext();
 
-function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) {
-	const { goToPreviousStep, goToNextStep } = useInvitePageContext();
+	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
+
 	const [newData, setNewData] = useState({
 		sender: { value: '', required: true },
 		senderOrganization: { value: '', required: true },
@@ -19,6 +24,18 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 		email: { value: '', required: true },
 		unread: { value: true, required: true },
 	});
+
+	useEffect(() => {
+		console.log(fileDownloadInfo);
+		if (userInfo) {
+			setNewData({ ...newData,
+				sender: { value: 'Пользователь', required: newData.sender.required },
+				senderOrganization: { value: constructPersonFullFIO(userInfo), required: newData.senderOrganization.required },
+				phone: { value: userInfo.phone ?? '', required: newData.phone.required },
+				email: { value: userInfo.emails[0]?.address ?? '', required: newData.email.required },
+			});
+		}
+	}, [userInfo]);
 
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
@@ -43,7 +60,8 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 			}
 		});
 		dataToSend.ts = new Date();
-		return dataToSend;
+		return Object.assign({}, dataToSend, fileDownloadInfo.workingGroupRequestAnswer);
+		// return dataToSend;
 	};
 
 	const t = useTranslation();
@@ -58,11 +76,23 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		setContactInfo(packNewData(newData));
-		goToNextStep();
+		try {
+			// setContactInfo(packNewData(newData));
+			const dataToSave = packNewData();
+			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
+			await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {
+				_id: fileDownloadInfo.workingGroupRequestId,
+				mailId: newMailId === '' ? fileDownloadInfo.mailId : newMailId,
+				answerId,
+			});
+			goToFinalStep();
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 	const workingGroupOptions = useMemo(() => [
+		['Пользователь', 'Пользователь'],
 		['Член рабочей группы', 'Член рабочей группы'],
 		['Федеральный орган исполнительной власти', 'Федеральный орган исполнительной власти'],
 		['Субъект Российской Федерации', 'Субъект Российской Федерации'],
@@ -70,6 +100,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo }) 
 		['Иные участники', 'Иные участники'],
 		['Другое', 'Другое'],
 	], []);
+
 	const subjectsOptions = useMemo(() => [
 		['Алтайский край', 'Алтайский край'],
 		['Брянская область', 'Брянская область'],

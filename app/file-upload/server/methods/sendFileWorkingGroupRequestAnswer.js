@@ -5,7 +5,7 @@ import { Uploads, WorkingGroupsRequests } from '../../../models';
 import { FileUpload } from '../lib/FileUpload';
 
 Meteor.methods({
-	async sendFileWorkingGroupRequestAnswer(workingGroupRequestId, workingGroupRequestMailId, workingGroupRequestAnswerId, file) {
+	async sendFileWorkingGroupRequestAnswer(workingGroupRequestId, workingGroupRequestAnswerId, file) {
 		if (!Meteor.userId()) {
 			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'sendFileMessage' });
 		}
@@ -48,7 +48,7 @@ Meteor.methods({
 			attachment.video_size = file.size;
 		}
 
-		WorkingGroupsRequests.addWorkingGroupRequestAnswerFile(workingGroupRequestId, workingGroupRequestMailId, workingGroupRequestAnswerId, attachment);
+		WorkingGroupsRequests.addWorkingGroupRequestAnswerFile(workingGroupRequestId, workingGroupRequestAnswerId, attachment);
 		return attachment;
 	},
 });

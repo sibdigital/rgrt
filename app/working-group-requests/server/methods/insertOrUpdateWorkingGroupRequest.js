@@ -21,6 +21,7 @@ Meteor.methods({
 				ts: new Date(),
 				number: workingGroupRequestData.number,
 				desc: workingGroupRequestData.desc,
+				date: workingGroupRequestData.date,
 				inviteLink,
 			};
 

@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { Box } from '@rocket.chat/fuselage';
+import { Box, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import { useRouteParameter, useRoute } from '../../../../../client/contexts/RouterContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
+import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import InviteStepperPage from './InviteStepperPage';
+import { useUserId } from '/client/contexts/UserContext';
 
 export const finalStep = 'final';
 export const errorStep = 'error';
@@ -52,7 +54,9 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 }), [text, itemsPerPage, current, column, direction]);
 
 function InvitePageState() {
+	const t = useTranslation();
 	const [currentStep, setCurrentStep, workingGroupRequestId] = useStepRouting();
+	const userId = useUserId();
 
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['num']);
@@ -67,7 +71,11 @@ function InvitePageState() {
 	}), [workingGroupRequestId]);
 
 	const { data, state, error } = useEndpointDataExperimental('working-groups-requests.getOneByInviteLink', query);
-	const { data: protocolsData } = useEndpointDataExperimental('protocols.list.requestAnswer', protocolsQuery);
+	const { data: protocolsData, state: protocolsState } = useEndpointDataExperimental('protocols.list.requestAnswer', protocolsQuery);
+	const { data: userInfo, state: userState } = useEndpointDataExperimental('users.getOne', useMemo(() => ({
+		query: JSON.stringify({ _id: userId }),
+		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1, phone: 1, emails: 1 }),
+	}), []));
 
 	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => (currentStep !== 1 ? currentStep - 1 : currentStep)), []);
 	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
@@ -88,8 +96,9 @@ function InvitePageState() {
 		error,
 	]);
 
-	if (ENDPOINT_STATES.LOADING === state) {
-		return <Box/>;
+	if ([state, protocolsState, userState].includes(ENDPOINT_STATES.LOADING)) {
+		console.log('loading');
+		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
 	}
 
 	if (currentStep !== errorStep) {
@@ -102,13 +111,8 @@ function InvitePageState() {
 		}
 	}
 
-	if (ENDPOINT_STATES.LOADING === state) {
-		return <Box/>;
-	}
-
-
 	return <InvitePageContext.Provider value={value}>
-		<InviteStepperPage currentStep={currentStep} workingGroupRequest={data} protocolsData={protocolsData?.protocols || []}/>
+		<InviteStepperPage currentStep={currentStep} workingGroupRequest={data} protocolsData={protocolsData?.protocols || []} userInfo={userInfo}/>
 	</InvitePageContext.Provider>;
 }
 

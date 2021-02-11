@@ -17,7 +17,7 @@ function WorkingGroupRequestInfoStep({ step, title, active }) {
 	const formatDate = useFormatDate();
 	const number = useMemo(() => {
 		if (workingGroupRequestState.data) {
-			return 'От ' + formatDate(workingGroupRequestState.data.ts ?? new Date()) + ' № ' + workingGroupRequestState.data.number ?? ' ';
+			return 'От ' + formatDate(workingGroupRequestState.data.date ?? workingGroupRequestState.data.ts) + ' № ' + workingGroupRequestState.data.number ?? ' ';
 		}
 		return '';
 	}, [workingGroupRequestState]);

@@ -12,9 +12,11 @@ import { Answer } from './Answer';
 import { AddMail } from './AddMail';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 
 export function DocumentPage() {
 	const t = useTranslation();
+	const formatDateAndTime = useFormatDateAndTime();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [cache, setCache] = useState();
@@ -31,6 +33,7 @@ export function DocumentPage() {
 
 	const data = useEndpointData('working-groups-requests.findOne', query) || { mails: [] };
 	const mails = useMemo(() => data.mails ?? [], [data]);
+	const answers = useMemo(() => data.answers ?? [], [data]);
 
 	const address = [settings.get('Site_Url'), 'd/', data.inviteLink].join('') || '';
 
@@ -52,7 +55,7 @@ export function DocumentPage() {
 	const onMailClick = useCallback((curMail) => () => {
 		// setCurrentMail(curMail ?? {});
 		// router.push({ id: requestId, context: 'answers' });
-		FlowRouter.go(`/working-groups-request/${ requestId }/mail/${ curMail._id }`);
+		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ curMail._id }`);
 	}, []);
 
 	const onEditMailClick = useCallback((curMail) => () => {
@@ -81,10 +84,6 @@ export function DocumentPage() {
 		router.push({ id: requestId, context: 'answer', tab: 'info' });
 	}, [router, currentAnswer]);
 
-	const goBack = () => {
-		window.history.back();
-	};
-
 	return <Page flexDirection='row'>
 		{(context !== 'answers' && context !== 'answer') && <Page>
 			<Page.Header>
@@ -99,11 +98,19 @@ export function DocumentPage() {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8'>
-					<Field.Label>{t('Number')}</Field.Label>
-					<Field.Row>
-						<TextInput value={data.number} readOnly placeholder={t('Number')} fontScale='p1'/>
-					</Field.Row>
+				<Field mbe='x8' display='flex' flexDirection='row'>
+					<Field mie='x4'>
+						<Field.Label>{t('Number')}</Field.Label>
+						<Field.Row>
+							<TextInput value={data.number} readOnly placeholder={t('Number')} fontScale='p1'/>
+						</Field.Row>
+					</Field>
+					<Field mis='x4'>
+						<Field.Label>{t('Date')}</Field.Label>
+						<Field.Row>
+							<TextInput value={formatDateAndTime(new Date(data?.date ?? ''))} readOnly placeholder={t('Date')} fontScale='p1'/>
+						</Field.Row>
+					</Field>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
@@ -117,7 +124,8 @@ export function DocumentPage() {
 						<a href={address} is='span' target='_blank'>{address}</a>
 					</Field.Row>
 				</Field>
-				<Mails data={mails} onClick={onMailClick} onEditClick={onEditMailClick} params={params} setParams={setParams}/>
+				{/*<Mails data={mails} onClick={onMailClick} onEditClick={onEditMailClick} params={params} setParams={setParams}/>*/}
+				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>
 			</Page.Content>
 		</Page>}
 		{(context === 'add' || context === 'editMail')

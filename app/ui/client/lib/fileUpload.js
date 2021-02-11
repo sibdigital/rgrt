@@ -302,7 +302,7 @@ export const uploadFileWithWorkingGroupRequestAnswer = async (workingGroupReques
 	uploads.push(upload);
 	Session.set('uploading', uploads);
 
-	const { xhr, promise } = await APIClient.upload(`v1/working-groups-requests.upload/${ workingGroupRequestId }/${ mailId }/${ answerId }`, {}, data, {
+	const { xhr, promise } = await APIClient.upload(`v1/working-groups-requests.upload/${ workingGroupRequestId }/${ answerId }`, {}, data, {
 		progress(progress) {
 			const uploads = Session.get('uploading') || [];
 

@@ -57,55 +57,61 @@ class WorkingGroupsRequests extends Base {
 			answers: [answerData],
 		};
 
-		if (data.mails) {
-			let isAdded = false;
-			data.mails.forEach((mail) => {
-				if (mail._id === mailId) {
-					isAdded = true;
-					if (mail.answers) {
-						let internalNum = 0;
-						mail.answers.forEach((answer) => {
-							if (answer.inum > internalNum) {
-								internalNum = answer.inum;
-							}
-						});
-						internalNum++;
-						answerData.inum = internalNum;
-						mail.answers = [...mail.answers, answerData];
-					} else {
-						answerData.inum = 1;
-						mail.answers = [answerData];
-					}
-				}
-			});
-			if (!isAdded) {
-				data.mails = [...data.mails, newMailData];
-			}
+		// if (data.mails) {
+		// 	let isAdded = false;
+		// 	data.mails.forEach((mail) => {
+		// 		if (mail._id === mailId) {
+		// 			isAdded = true;
+		// 			if (mail.answers) {
+		// 				let internalNum = 0;
+		// 				mail.answers.forEach((answer) => {
+		// 					if (answer.inum > internalNum) {
+		// 						internalNum = answer.inum;
+		// 					}
+		// 				});
+		// 				internalNum++;
+		// 				answerData.inum = internalNum;
+		// 				mail.answers = [...mail.answers, answerData];
+		// 			} else {
+		// 				answerData.inum = 1;
+		// 				mail.answers = [answerData];
+		// 			}
+		// 		}
+		// 	});
+		// 	if (!isAdded) {
+		// 		data.mails = [...data.mails, newMailData];
+		// 	}
+		// } else {
+		// 	data.mails = [newMailData];
+		// }
+		if (data.answers) {
+			data.answers = [...data.answers, answerData];
 		} else {
-			data.mails = [newMailData];
+			data.answers = [answerData];
 		}
 
 		this.update({ _id: workingGroupRequestId }, { $set: { ...data } });
-		return { answerId: _id, mailId: newMailId };
+		// return { answerId: _id, mailId: newMailId };
+		return { answerId: _id, mailId: _id };
 	}
 
-	addWorkingGroupRequestAnswerFile(workingGroupRequestId, mailId, answerId, fileData) {
+	addWorkingGroupRequestAnswerFile(workingGroupRequestId, answerId, fileData) {
 		const data = this.findOne({ _id: workingGroupRequestId });
-		const indexMail = data.mails ? data.mails.findIndex((mail) => mail._id === mailId) : -1;
-		if (indexMail < 0) {
-			return;
-		}
+		// const indexMail = data.mails ? data.mails.findIndex((mail) => mail._id === mailId) : -1;
+		// if (indexMail < 0) {
+		// 	return;
+		// }
 
-		const indexAnswer = data.mails[indexMail].answers ? data.mails[indexMail].answers.findIndex((answer) => answer._id === answerId) : -1;
+		const indexAnswer = data.answers ? data.answers.findIndex((answer) => answer._id === answerId) : -1;
 		if (indexAnswer < 0) {
 			return;
 		}
 
 		data._updatedAt = new Date();
-		if (data.mails[indexMail].answers[indexAnswer].documents) {
-			data.mails[indexMail].answers[indexAnswer].documents.push(fileData);
+		if (data.answers[indexAnswer].documents) {
+			data.answers[indexAnswer].documents.push(fileData);
 		} else {
-			data.mails[indexMail].answers[indexAnswer].documents = [fileData];
+			data.answers[indexAnswer].documents = [fileData];
 		}
 		return this.update({ _id: workingGroupRequestId }, { $set: { ...data } });
 	}
@@ -129,20 +135,20 @@ class WorkingGroupsRequests extends Base {
 		}
 	}
 
-	readAnswer(_id, mailId, answerId) {
+	readAnswer(_id, answerId) {
 		const data = this.findOne({ _id });
-		const indexMail = data.mails ? data.mails.findIndex((mail) => mail._id === mailId) : -1;
-		if (indexMail < 0) {
-			return;
-		}
+		// const indexMail = data.mails ? data.mails.findIndex((mail) => mail._id === mailId) : -1;
+		// if (indexMail < 0) {
+		// 	return;
+		// }
 
-		const indexAnswer = data.mails[indexMail].answers ? data.mails[indexMail].answers.findIndex((answer) => answer._id === answerId) : -1;
+		const indexAnswer = data.answers ? data.answers.findIndex((answer) => answer._id === answerId) : -1;
 		if (indexAnswer < 0) {
 			return;
 		}
 
 		data._updatedAt = new Date();
-		data.mails[indexMail].answers[indexAnswer].unread = false;
+		data.answers[indexAnswer].unread = false;
 		return this.update({ _id }, { $set: { ...data } });
 	}
 

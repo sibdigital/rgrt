@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 
 import { API } from '../api';
 import { FileUpload } from '../../../file-upload';
-import { findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId } from '../lib/working-groups-requests';
+import { findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId } from '../lib/working-groups-requests';
 
 API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 	get() {
@@ -42,6 +42,13 @@ API.v1.addRoute('working-groups-requests.findAnswerOne', { authRequired: true },
 	},
 });
 
+API.v1.addRoute('working-groups-requests.findAnswerOneById', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findWorkingGroupRequestAnswerByAnswerId(query._id, query.answerId)));
+	},
+});
+
 API.v1.addRoute('working-groups-requests.getOneByInviteLink', { authRequired: false }, {
 	get() {
 		const { query } = this.parseJsonQuery();
@@ -76,7 +83,7 @@ const getFiles = Meteor.wrapAsync(({ request }, callback) => {
 	request.pipe(busboy);
 });
 
-API.v1.addRoute('working-groups-requests.upload/:id/:mailId/:answerId', { authRequired: false }, {
+API.v1.addRoute('working-groups-requests.upload/:id/:answerId', { authRequired: false }, {
 	post() {
 		const { files, fields } = getFiles({
 			request: this.request,
@@ -110,7 +117,7 @@ API.v1.addRoute('working-groups-requests.upload/:id/:mailId/:answerId', { authRe
 
 			uploadedFile.description = fields.description;
 
-			Meteor.call('sendFileWorkingGroupRequestAnswer', this.urlParams.id, this.urlParams.mailId, this.urlParams.answerId, uploadedFile);
+			Meteor.call('sendFileWorkingGroupRequestAnswer', this.urlParams.id, this.urlParams.answerId, uploadedFile);
 
 			return uploadedFile;
 		});
