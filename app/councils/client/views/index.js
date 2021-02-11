@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
@@ -11,10 +10,11 @@ import { useRoute } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { hasPermission } from '../../../authorization';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-export const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
+export const useQuery = ({ text, itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	query: JSON.stringify({ desc: { $regex: text || '', $options: 'i' } }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	fields: JSON.stringify({ d: 1, desc: 1, type: 1 }),
@@ -28,7 +28,7 @@ export function CouncilsPage() {
 
 	const routeName = 'councils';
 
-	const isAllow = hasPermission('edit-councils', Meteor.userId());
+	const isAllow = hasPermission('edit-councils', useUserId());
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d', 'desc']);

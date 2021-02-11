@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Button, ButtonGroup, Icon, Modal, Table } from '@rocket.chat/fuselage';
+import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
 
@@ -11,46 +11,8 @@ import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import { SuccessModal, WarningModal } from '../../../utils/index';
 import { downloadCouncilParticipantsForm } from './lib';
-
-const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='danger' name='modal-warning' size={20}/>
-			<Modal.Title>{t('Are_you_sure')}</Modal.Title>
-			<Modal.Close onClick={onCancel}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{title}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button ghost onClick={onCancel}>{t('Cancel')}</Button>
-				<Button primary danger onClick={onDelete}>{t('Delete')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
-
-const SuccessModal = ({ title, onClose, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='success' name='checkmark-circled' size={20}/>
-			<Modal.Title>{t('Deleted')}</Modal.Title>
-			<Modal.Close onClick={onClose}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{title}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button primary onClick={onClose}>{t('Ok')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
 
 export function Councils({
 	data,
@@ -140,7 +102,7 @@ export function Councils({
 	const onDeleteCouncilConfirm = useCallback(async (_id) => {
 		try {
 			await deleteCouncil(_id);
-			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
+			setModal(() => <SuccessModal title={'Delete'} contentText={t('Deleted')} onClose={() => { setModal(undefined); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -148,7 +110,7 @@ export function Councils({
 
 	const onDel = (_id) => () => { onDeleteCouncilConfirm(_id); };
 
-	const onDeleteCouncilClick = (_id) => () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
+	const onDeleteCouncilClick = (_id) => () => setModal(() => <WarningModal title={t('Council_Delete_Warning')} contentText={t('Are_you_sure')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
 
 	const header = useMemo(() => [
 		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }} color='default'>{t('Date')}</Th>,
