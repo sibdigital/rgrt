@@ -1,40 +1,60 @@
-.menu-bar {
+nav {
     position: relative;
-    overflow: hidden;
 }
 
-.menu-bar > menu {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-.menu-bar ul {
+nav .menu {
     position: relative;
     left: 50%;
     float: left;
 }
 
-.menu-bar ul li:first-child {
+nav .menu .menu-link:first-child {
     border-left: 2px solid #4e4a59;
 }
 
-.menu-bar ul li {
+nav .menu .menu-link {
     position: relative;
     left: -50%;
     border-right: 2px solid #4e4a59;
     float: left;
 }
 
-.menu-bar ul li a {
+nav .menu .menu-link .goToSection {
+    height: 70px;
+    max-width: 200px;
     display: block;
     color: white;
+    word-break: normal;
+    white-space: normal;
     text-align: center;
     padding: 16px 16px;
     text-decoration: none;
+    text-transform: uppercase;
 }
   
-.menu-bar ul li a:hover {
+nav .menu .menu-link:hover {
     background-color: #111;
+}
+
+nav .menu .menu-link a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav .menu .menu-link .submenu {
+    display: none; /* Прячем пункты выпадающего блока меню */
+    position: absolute;
+    background: #334; /* Задаем фон выпадающего блока меню */
+    z-index: 3;
+}
+    
+nav .menu .menu-link:hover .submenu {
+    display: block; /* Отображаем подменю при наведении мыши */
+}
+    
+nav .menu .menu-link .submenu .submenu-link {
+    display: block; /* Выстраиваем по вертикали пункты выпадающего меню */
 }
