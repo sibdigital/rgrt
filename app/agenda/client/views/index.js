@@ -82,6 +82,7 @@ function Agenda({ agendaData, personsData, userData }) {
 		const sections = [{
 			label: [t('Agenda_issue_consideration'), ':'].join(''),
 			value: section.issueConsideration ?? '',
+			renderDirection: 'column',
 		}, {
 			label: [t('Date'), ':'].join(''),
 			value: formatDateAndTime(new Date(section.date ?? '')),

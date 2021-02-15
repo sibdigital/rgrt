@@ -27,6 +27,9 @@ export function Sections({ data, onSectionMenuClick }) {
 		let result = '';
 		// eslint-disable-next-line no-return-assign
 		arr?.forEach((item) => result += [item.value, ', '].join(''));
+		if (arr?.length > 0) {
+			result = result.slice(0, -2);
+		}
 		return result;
 	};
 
@@ -40,9 +43,9 @@ export function Sections({ data, onSectionMenuClick }) {
 				flexDirection='row'
 				className={clickable}
 			>
-				<Box display='flex' flexDirection='row'>
+				<Box display='flex' flexDirection={ section.renderDirection ?? 'row' }>
 					<Box mie='x4'>{section.label}</Box>
-					<Box>{section.value}</Box>
+					<Box mbs={section.renderDirection && 'x8'} mis={section.renderDirection && 'x16'}>{section.value}</Box>
 					{ section.items?.length !== 0 && <Box mbe='x4'>{constructPerson(section.items)}</Box> }
 				</Box>
 			</Box>
