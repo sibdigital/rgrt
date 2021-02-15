@@ -13,7 +13,7 @@ import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
-export function AddRequest({ editData, onChange }) {
+export function AddRequest({ editData, onChange, onRequestChanged = null }) {
 	const data = {
 		_id: null,
 		number: '',
@@ -23,10 +23,10 @@ export function AddRequest({ editData, onChange }) {
 	};
 	console.log(editData);
 
-	return <AddRequestWithData request={editData ?? data} onChange={onChange}/>;
+	return <AddRequestWithData mode={'edit'} request={editData ?? data} onChange={onChange} onRequestChanged={onRequestChanged}/>;
 }
 
-function AddRequestWithData({ request, onChange, ...props }) {
+function AddRequestWithData({ mode, request, onChange, onRequestChanged, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -42,8 +42,8 @@ function AddRequestWithData({ request, onChange, ...props }) {
 		window.history.back();
 	};
 
-	const hasUnsavedChanges = useMemo(() => (description !== '' && number !== '') && (previousDescription !== description || previousNumber !== number),
-		[description, previousDescription, number, previousNumber]);
+	const hasUnsavedChanges = useMemo(() => (description !== '' && number !== '') && (previousDescription !== description || previousNumber !== number || new Date(previousDate).getTime() !== new Date(date).getTime()),
+		[description, previousDescription, number, previousNumber, date, previousDate]);
 
 	const resetData = () => {
 		setDescription(previousDescription);
@@ -81,6 +81,9 @@ function AddRequestWithData({ request, onChange, ...props }) {
 				message: t('Working_group_request_edited'),
 			});
 		}
+		if (onRequestChanged) {
+			onRequestChanged({ number, date, desc: description });
+		}
 		onChange();
 		goBack();
 	}, [saveAction, onChange, number, description, date]);
@@ -117,7 +120,7 @@ function AddRequestWithData({ request, onChange, ...props }) {
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
-					<Button primary small aria-label={t('Cancel')} disabled={!hasUnsavedChanges} onClick={resetData}>
+					<Button primary small aria-label={t('Cancel')} onClick={resetData}>
 						{t('Cancel')}
 					</Button>
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveRequest}>
