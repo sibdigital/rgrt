@@ -55,3 +55,15 @@ export async function findWorkingGroupRequestMailAnswerByAnswerId(requestId, mai
 	}
 	return {};
 }
+
+export async function findWorkingGroupRequestAnswerByAnswerId(requestId, answerId) {
+	const cursor = await WorkingGroupsRequests.findOne({ _id: requestId });
+	const answers = cursor.answers ?? [];
+
+	for (let i = 0; i < answers.length; i++) {
+		if (answers[i]._id === answerId) {
+			return answers[i];
+		}
+	}
+	return {};
+}

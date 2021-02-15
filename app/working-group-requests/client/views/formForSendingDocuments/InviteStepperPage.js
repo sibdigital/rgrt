@@ -13,11 +13,12 @@ import WorkingGroupRequestAnswerStep from './steps/WorkingGroupRequestAnswerStep
 import WorkingGroupRequestAnswerFileDownloadStep from './steps/WorkingGroupRequestAnswerFileDownloadStep';
 import WorkingGroupRequestInfoStep from './steps/WorkingGroupRequestInfoStep';
 
-function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocolsData = [] }) {
+function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocolsData = [], userInfo = null }) {
 	useWipeInitialPageLoading();
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
 	const [contactInfo, setContactInfo] = useState({});
+	const [info, setInfo] = useState({});
 
 	return <>
 		<ConnectionStatusAlert />
@@ -40,11 +41,11 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocol
 						},
 						{
 							step: 2,
-							title: t('Working_group_request_invite_contact_data'),
+							title: t('Working_group_request_invite_file_downloads'),
 						},
 						{
 							step: 3,
-							title: t('Working_group_request_invite_file_downloads'),
+							title: t('Working_group_request_invite_contact_data'),
 						},
 					]}
 					currentStep={currentStep}
@@ -60,8 +61,23 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocol
 						<Margins all='x16'>
 							<Tile is='section' flexGrow={1} flexShrink={1}>
 								<WorkingGroupRequestInfoStep step={1} title={t('Working_group_request_info')} active={currentStep === 1}/>
-								<WorkingGroupRequestAnswerStep step={2} title={t('Working_group_request_invite_contact_data')} active={currentStep === 2} setContactInfo={setContactInfo}/>
-								<WorkingGroupRequestAnswerFileDownloadStep step={3} title={t('Working_group_request_invite_file_downloads')} active={currentStep === 3} workingGroupRequest={workingGroupRequest} protocolsData={protocolsData} contactInfoData={contactInfo}/>
+								<WorkingGroupRequestAnswerFileDownloadStep
+									step={2}
+									title={t('Working_group_request_invite_file_downloads')}
+									active={currentStep === 2}
+									workingGroupRequest={workingGroupRequest}
+									protocolsData={protocolsData}
+									contactInfoData={contactInfo}
+									setInfo={setInfo}
+								/>
+								<WorkingGroupRequestAnswerStep
+									step={3}
+									title={t('Working_group_request_invite_contact_data')}
+									active={currentStep === 3}
+									setContactInfo={setContactInfo}
+									userInfo={userInfo}
+									fileDownloadInfo={info}
+								/>
 							</Tile>
 						</Margins>
 					</Scrollable>

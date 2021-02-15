@@ -23,7 +23,7 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const numberLabel = mail.number ? [t('Working_group_mail'), formatDate(mail.ts ?? ''), '№', mail.number ?? ''].join(' ') : t('Working_group_request_mail_not_chosen_answer');
-	const descriptionLabel = mail.number ? mail.description : t('Working_group_request_mail_not_chosen_answer');
+	const descriptionLabel = mail.number ? mail.desc : t('Working_group_request_mail_not_chosen_answer');
 
 	const readAnswer = useMethod('readAnswer');
 
@@ -34,7 +34,8 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 			const index = answers.findIndex((answer) => answer._id === answerEnter._id);
 			if (index > -1) {
 				answers[index].unread = false;
-				await readAnswer(requestId, mail._id, answerEnter._id);
+				// await readAnswer(requestId, mail._id, answerEnter._id);
+				await readAnswer(requestId, answerEnter._id);
 				onChange();
 			}
 		}
@@ -64,27 +65,29 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 		</Table.Row>;
 	};
 
-	return <Page>
-		<Page.Header>
-			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-				<GoBackButton/>
-				<Label fontScale='h1'>{t('Working_group_received_mails')}</Label>
-			</Field>
-		</Page.Header>
-		<Page.Content>
-			<Field mbe='x8'>
-				<Field.Label>{t('Number')}</Field.Label>
-				<Field.Row>
-					<TextInput readOnly placeholder={t('Number')} is='span' fontScale='p1'>{numberLabel}</TextInput>
-				</Field.Row>
-			</Field>
-			<Field mbe='x8'>
-				<Field.Label>{t('Description')}</Field.Label>
-				<Field.Row>
-					<TextAreaInput rows='3' value={descriptionLabel} readOnly placeholder={t('Description')} fontScale='p1'/>
-				</Field.Row>
-			</Field>
-			<GenericTable header={header} renderRow={renderRow} results={answers} onChange={onChange} total={answers.length} setParams={setParams} params={params} />
-		</Page.Content>
-	</Page>;
+	return <GenericTable header={header} renderRow={renderRow} results={answers} onChange={onChange} total={answers.length} setParams={setParams} params={params} />;
+
+	// return <Page>
+	// 	<Page.Header>
+	// 		<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+	// 			<GoBackButton/>
+	// 			<Label fontScale='h1'>{t('Working_group_received_mails')}</Label>
+	// 		</Field>
+	// 	</Page.Header>
+	// 	<Page.Content>
+	// 		<Field mbe='x8'>
+	// 			<Field.Label>{t('Number')}</Field.Label>
+	// 			<Field.Row>
+	// 				<TextInput readOnly placeholder={t('Number')} is='span' fontScale='p1'>{numberLabel}</TextInput>
+	// 			</Field.Row>
+	// 		</Field>
+	// 		<Field mbe='x8'>
+	// 			<Field.Label>{t('Description')}</Field.Label>
+	// 			<Field.Row>
+	// 				<TextAreaInput rows='3' value={descriptionLabel} readOnly placeholder={t('Description')} fontScale='p1'/>
+	// 			</Field.Row>
+	// 		</Field>
+	// 		<GenericTable header={header} renderRow={renderRow} results={answers} onChange={onChange} total={answers.length} setParams={setParams} params={params} />
+	// 	</Page.Content>
+	// </Page>;
 }

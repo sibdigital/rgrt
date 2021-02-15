@@ -287,6 +287,16 @@ FlowRouter.route('/working-groups-request/:requestid/mail/:mailid', {
 	}],
 });
 
+FlowRouter.route('/working-groups-request/:requestid/answer/:answerid', {
+	name: 'working-groups-request-answer',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/Answer'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/working-groups-request/:requestid/mail/:mailid/answer/:answerid', {
 	name: 'working-groups-request-answer',
 	action: () => {

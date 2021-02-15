@@ -32,7 +32,7 @@ export function AnswerPage() {
 		query: JSON.stringify({ _id: requestId, mailId, answerId }),
 	}), [mailId]);
 
-	const data = useEndpointData('working-groups-requests.findAnswerOne', query) || { documents: [] };
+	const data = useEndpointData('working-groups-requests.findAnswerOneById', query) || { documents: [] };
 
 	const filesQuery = useMemo(() => ({ query: JSON.stringify({ _id: data ? { $in: data.documents?.map((doc) => doc._id ?? '') } : {} }) }), [data]);
 

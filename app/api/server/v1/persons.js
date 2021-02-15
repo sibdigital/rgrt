@@ -33,7 +33,7 @@ API.v1.addRoute('persons.listToAutoComplete', { authRequired: true }, {
 
 		return API.v1.success(Promise.await(findPersons({
 			query,
-			fields: { surname: 1, name: 1, patronymic: 1 },
+			fields: { surname: 1, name: 1, patronymic: 1, userId: 1 },
 			pagination: {
 				offset,
 				count,
