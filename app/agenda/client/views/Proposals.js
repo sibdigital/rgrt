@@ -72,10 +72,12 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 	const onDeleteProposalClick = useCallback(async (proposalId) => {
 		try {
 			await deleteProposalToAgenda(agendaId, proposalId);
+			const res = proposalsList.filter((proposal) => proposal._id !== proposalId);
+			setProposalsList(res);
 		} catch (error) {
 			console.log(error);
 		}
-	}, [agendaId]);
+	}, [agendaId, proposalsList]);
 
 	const onProposalClick = useCallback((proposal) => {
 		if (!proposal.added) {

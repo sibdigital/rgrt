@@ -2,8 +2,9 @@ import {
 	Field,
 	Margins,
 	TextInput,
-	InputBox,
+	Box,
 	FieldGroup,
+	TextAreaInput,
 } from '@rocket.chat/fuselage';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import 'react-phone-input-2/lib/style.css';
@@ -30,7 +31,7 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 		initiatedBy: { _id: '', surname: '', name: '', patronymic: '', organization: '', value: '' },
 		issueConsideration: '',
 		date: new Date(),
-		status: t('Agenda_status_proposed'),
+		status: '',
 	});
 
 	useEffect(() => {
@@ -38,6 +39,7 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 		if (userData) {
 			setEditData({
 				...editData,
+				status: t('Agenda_status_proposed'),
 				initiatedBy: {
 					_id: userData._id ?? '',
 					surname: userData.surname ?? '',
@@ -48,8 +50,10 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 					type: userData.type ?? '',
 				},
 			});
+		} else {
+			setEditData({ ...editData, status: t('Agenda_status_proposed') });
 		}
-	}, [userData]);
+	}, [userData, t]);
 
 	const insertOrUpdateProposalsForTheAgenda = useMethod('insertOrUpdateProposalsForTheAgenda');
 
@@ -77,22 +81,6 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	}, [dispatchToastMessage, insertOrUpdateProposalsForTheAgenda, t]);
 
-	// const handleSave = useCallback(async () => {
-	// 	try {
-	// 		await saveAction(
-	// 			editData.item,
-	// 			editData.initiatedBy,
-	// 			editData.issueConsideration,
-	// 			editData.date,
-	// 			editData.status,
-	// 			null,
-	// 		);
-	// 		dispatchToastMessage({ type: 'success', message: t('Proposal_for_the_agenda_added_successfully') });
-	// 	} catch (error) {
-	// 		dispatchToastMessage({ type: 'error', message: error });
-	// 	}
-	// }, [dispatchToastMessage, close, t, editData]);
-
 	const handleSave = async (event) => {
 		event.preventDefault();
 		setComitting(true);
@@ -116,19 +104,19 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 
 	return <Step active={active} working={commiting} onSubmit={handleSave}>
 		<StepHeader number={step} title={title} />
-
+		<Box is='p' fontScale='s1' color='hint' mbe='x16'>{t('Proposal_for_the_agenda_invite_description')}</Box>
 		<Margins blockEnd='x32'>
 			<FieldGroup>
-				<Field>
-					<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
-					<Field.Row>
-						<InputBox value={editData.item} onChange={(e) => handleEditDataChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />
-					</Field.Row>
-				</Field>
+				{/*<Field>*/}
+				{/*	<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>*/}
+				{/*	<Field.Row>*/}
+				{/*		<InputBox value={editData.item} onChange={(e) => handleEditDataChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />*/}
+				{/*	</Field.Row>*/}
+				{/*</Field>*/}
 				<Field>
 					<Field.Label>{t('Agenda_issue_consideration')} <span style={ { color: 'red' } }>*</span></Field.Label>
 					<Field.Row>
-						<InputBox value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
+						<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
 					</Field.Row>
 				</Field>
 				<Field>
@@ -150,7 +138,7 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 			</FieldGroup>
 		</Margins>
 
-		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} onBackClickText={t('Cancel')}/>
+		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} onBackClickText={t('Skip')}/>
 	</Step>;
 }
 

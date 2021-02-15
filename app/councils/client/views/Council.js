@@ -570,11 +570,11 @@ function Council({
 					{isSecretary && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{t('Agenda')}
 					</Button>}
-					{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>
-						{t('Proposals_for_the_agenda')}
-					</Button>}
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
+					</Button>}
+					{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>
+						{t('Proposals_for_the_agenda')}
 					</Button>}
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
 						{t('Protocol')}

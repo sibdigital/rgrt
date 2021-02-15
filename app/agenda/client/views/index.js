@@ -143,7 +143,7 @@ function Agenda({ agendaData, personsData, userData }) {
 		}
 	}, [agendaData]);
 
-	const handleTabClick = useMemo(() => (tab) => () => setTab(tab), []);
+	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setContext(''); }, []);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -241,7 +241,7 @@ function Agenda({ agendaData, personsData, userData }) {
 							<Box is='span' fontScale='h1' alignSelf='center'>{agendaName}</Box>
 						</Box>
 						<Box mbe='x16' display='flex' flexDirection='column'>
-							<Box is='span' alignSelf='center'>{number}</Box>
+							<Box is='span' alignSelf='center'>№ {number}</Box>
 						</Box>
 						<Sections data={sectionsDataView} onItemMenuClick={() => console.log('onItemMenuClick')} onSectionMenuClick={onSectionMenuClick}/>
 					</Box>
@@ -256,7 +256,7 @@ function Agenda({ agendaData, personsData, userData }) {
 				{ context === 'edit' && t('Agenda_edited') }
 				{ context === 'section-add' && t('Agenda_item_added') }
 				{ context === 'section-edit' && t('Agenda_item_edited') }
-				{ context === 'proposal_edit' && t('Proposal_for_the_agenda_edit')}
+				{ context === 'proposal_edit' && t('Proposal_for_the_agenda_edited')}
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			<VerticalBar.ScrollableContent>
