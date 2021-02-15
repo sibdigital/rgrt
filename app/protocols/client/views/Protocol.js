@@ -90,7 +90,7 @@ export function ProtocolPage() {
 	const moveItem = useMethod('moveItem');
 
 	const onAddSectionClick = useCallback((context) => () => {
-		router.push({ id: protocolId, context: context });
+		router.push({ id: protocolId, context });
 	}, [router]);
 
 	const onEditSectionClick = useCallback((_id) => () => {
@@ -291,12 +291,12 @@ export function ProtocolPage() {
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
 				<ButtonGroup>
-					<Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('New')}>
+					{!context && <Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('New')}>
 						{t('Section_Add')}
-					</Button>
-					<Button mbe='x8' small primary onClick={onParticipantsClick('participants')} aria-label={t('Participants')}>
+					</Button>}
+					{!context && <Button mbe='x8' small primary onClick={onParticipantsClick('participants')} aria-label={t('Participants')}>
 						{t('Participants')}
-					</Button>
+					</Button>}
 				</ButtonGroup>
 			</Page.Header>
 			<Page.ScrollableContent>

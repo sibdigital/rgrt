@@ -43,10 +43,12 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 	const { data, state, error } = useEndpointDataExperimental('protocols.findOne', query);
 	const { data: currentUser, state: currentUserState, error: currentUserError } = useEndpointDataExperimental('users.getRoles',
 		useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
+	const { data: currentUserPerson, state: currentUserPersonState } = useEndpointDataExperimental('users.getPerson',
+		useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
 
 	const isSecretary = useMemo(() => (currentUser?.roles?.includes('secretary') || currentUser?.roles?.includes('admin')) || false, [currentUser]);
 
-	if ([state, currentUserState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, currentUserState, currentUserPersonState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box pb='x20'>
 			<Skeleton mbs='x8'/>
 			<InputBox.Skeleton w='full'/>
@@ -67,13 +69,12 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 		return <Box fontScale='h1' pb='x20'>{error}</Box>;
 	}
 
-	return <EditItemWithData protocol={data} isSecretary={isSecretary} sectionId={sectionId} itemId={_id} onChange={onChange} {...props}/>;
+	return <EditItemWithData protocol={data} isSecretary={isSecretary} sectionId={sectionId} itemId={_id} onChange={onChange} currentUserPersonId={currentUserPerson?._id ?? ''} {...props}/>;
 }
 
-function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, itemId, ...props }) {
+function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, itemId, currentUserPersonId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
-	const userId = useUserId();
 
 
 	const personsData = useEndpointData('persons.listToAutoComplete', useMemo(() => ({ }), [])) || { persons: [] };
@@ -100,16 +101,17 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 
 	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
 
-	const hasUnsavedChanges = useMemo(() => previousNumber !== number || previousName !== name || previousResponsible !== responsible || previousExpireAt !== expireAt,
-		[number, name, responsible, expireAt]);
+	const hasUnsavedChanges = useMemo(() =>
+		previousNumber !== number || previousName !== name || previousResponsible !== responsible
+		|| new Date(previousExpireAt).getTime() !== new Date(expireAt).getTime() || previousStatus?.state !== status,
+	[number, name, responsible, expireAt, status, previousNumber, previousName, previousResponsible, previousExpireAt, previousStatus]);
 
 	const statusOptions = useMemo(() => [[1, t('opened')], [2, t('inProgress')], [3, t('solved')]], []);
 
 	const isStatusCanChange = useMemo(() => {
-		const res = previousResponsible.find((res) => res.userId === userId);
-		console.log(res);
+		const res = previousResponsible.find((res) => res._id === currentUserPersonId);
 		return !!res;
-	}, [previousResponsible]);
+	}, [previousResponsible, currentUserPersonId]);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -139,13 +141,14 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 		<Field>
 			<Field.Label>{t('Item_Number')}</Field.Label>
 			<Field.Row>
-				<InputBox value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Item_Number')} />
+				<InputBox disabled={!isSecretary} value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Item_Number')} />
 			</Field.Row>
 		</Field>
 		<Field>
 			<Field.Label>{t('Item_Name')}</Field.Label>
-			<Field.Row>
+			<Field.Row style={!isSecretary && { cursor: 'not-allowed' }}>
 				<CKEditor
+					disabled={!isSecretary}
 					editor={ ClassicEditor }
 					config={ {
 						language: 'ru',
@@ -162,6 +165,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 		<Field>
 			<Field.Label>{t('Item_Responsible')}</Field.Label>
 			<Autocomplete
+				disabled={!isSecretary}
 				multiple
 				id='tags-standard'
 				value={responsible}
@@ -183,6 +187,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 						{...params}
 						variant='outlined'
 						placeholder={t('Item_Responsible')}
+						style={!isSecretary && { cursor: 'not-allowed !important' }}
 					/>
 				)}
 			/>
@@ -191,6 +196,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 			<Field.Label>{t('Item_ExpireAt')}</Field.Label>
 			<Field.Row>
 				<DatePicker
+					disabled={!isSecretary}
 					dateFormat='dd.MM.yyyy'
 					selected={expireAt}
 					onChange={(newDate) => setExpireAt(newDate)}
@@ -199,7 +205,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 				/>
 			</Field.Row>
 		</Field>
-		{ (isSecretary || isStatusCanChange) && <Field>
+		{ (isSecretary || isStatusCanChange) && previousResponsible?.length > 0 && <Field>
 			<Field.Label>{t('Status')}</Field.Label>
 			<Field.Row>
 				<Select

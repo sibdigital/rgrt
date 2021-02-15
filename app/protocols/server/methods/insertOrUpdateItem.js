@@ -6,9 +6,9 @@ import { Protocols } from '../../../models';
 
 Meteor.methods({
 	insertOrUpdateItem(protocolId, sectionId, item) {
-		if (!hasPermission(this.userId, 'manage-protocols')) {
-			throw new Meteor.Error('not_authorized');
-		}
+		// if (!hasPermission(this.userId, 'manage-protocols')) {
+		// 	throw new Meteor.Error('not_authorized');
+		// }
 
 		if (!protocolId) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field ProtocolId is required', { method: 'insertOrUpdateItem', field: 'ProtocolId' });
@@ -27,7 +27,7 @@ Meteor.methods({
 		}
 
 		if (!item._id) {
-			return Protocols.createItem(protocolId, sectionId, item)
+			return Protocols.createItem(protocolId, sectionId, item);
 		}
 
 		return Protocols.updateItem(protocolId, sectionId, item);
