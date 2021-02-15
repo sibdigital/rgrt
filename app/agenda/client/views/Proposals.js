@@ -10,12 +10,14 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useMethod } from '../../../../client/contexts/ServerContext';
+import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { validateAgendaSection, createAgendaSection } from './lib';
 
 export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddProposal, mode = '' }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
+	const mediaQuery = useMediaQuery('(min-width: 769px)');
+	const dispatchToastMessage = useToastMessageDispatch();
 
 	const [cache, setCache] = useState(new Date());
 	const [proposalsList, setProposalsList] = useState([]);
@@ -74,6 +76,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 			await deleteProposalToAgenda(agendaId, proposalId);
 			const res = proposalsList.filter((proposal) => proposal._id !== proposalId);
 			setProposalsList(res);
+			dispatchToastMessage({ type: 'success', message: t('Proposal_for_the_agenda_deleted') });
 		} catch (error) {
 			console.log(error);
 		}
@@ -101,9 +104,9 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 		mediaQuery && <Th w='x200' key={'Status'} color='default'>
 			{ t('Status') }
 		</Th>,
-		<Th w='x40' key='delete'/>,
-		<Th w='x40' key='plus'/>,
-		<Th w='x40' key='edit'/>,
+		<Th w='x35' key='delete'/>,
+		<Th w='x35' key='plus'/>,
+		<Th w='x35' key='edit'/>,
 	], [t, mediaQuery]);
 
 	const renderRow = (proposal) => {
@@ -116,17 +119,17 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{status}</Table.Cell>}
 			{ <Table.Cell alignItems={'end'}>
 				<Button style={tableCellIconStyle} color='red' small aria-label={t('trash')} onClick={() => onDeleteProposalClick(_id)}>
-					<Icon name='trash' size='x20'/>
+					<Icon name='trash' size='x16'/>
 				</Button>
 			</Table.Cell>}
 			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>
 				<Button style={tableCellIconStyle} disabled={proposal.added} color={proposal.added ? '#e4e7ea' : 'green'} small aria-label={t('plus')} onClick={() => onAddProposalClick(proposal)}>
-					<Icon name='plus' size='x20'/>
+					<Icon name='plus' size='x16'/>
 				</Button>
 			</Table.Cell>}
 			{ <Table.Cell alignItems={'end'}>
 				<Button style={tableCellIconStyle} disabled={proposal.added} small aria-label={t('edit')} onClick={() => onProposalClick(proposal)}>
-					<Icon name='edit' size='x20'/>
+					<Icon name='edit' size='x16'/>
 				</Button>
 			</Table.Cell>}
 		</Table.Row>;
