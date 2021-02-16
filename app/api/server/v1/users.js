@@ -234,14 +234,23 @@ API.v1.addRoute('users.getRoles', { authRequired: true }, {
 API.v1.addRoute('users.getPerson', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
+		const fields = {
+			userId: 1,
+			surname: 1,
+			name: 1,
+			patronymic: 1,
+			phone: 1,
+			email: 1,
+			organization: 1,
+		};
 
-		const person = Persons.findOne(query, { fields: { _id: 1, userId: 1, surname: 1, name: 1, patronymic: 1, phone: 1, email: 1 } });
+		const person = Persons.findOne(query, { fields });
 		// console.log('getPerson');
 		// console.log(person);
 		// console.log(query);
 
 		if (!person) {
-			const user = Users.findOneById(query.userId, { fields: { surname: 1, name: 1, patronymic: 1, phone: 1, emails: 1 } });
+			const user = Users.findOneById(query.userId, { fields });
 			const email = user?.emails[0]?.address ?? '';
 			// console.log(user);
 			const createPerson = {
@@ -250,11 +259,12 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 				patronymic: user.patronymic ?? '',
 				phone: user.phone ?? '',
 				email,
+				organization: user.organization ?? '',
 				userId: query.userId,
 			};
 			// console.log('user end');
 			Persons.insert(createPerson);
-			return API.v1.success(Persons.findOne(query, { fields: { _id: 1, userId: 1, surname: 1, name: 1, patronymic: 1, phone: 1, email: 1 } }));
+			return API.v1.success(Persons.findOne(query, { fields }));
 		}
 
 		return API.v1.success(person);

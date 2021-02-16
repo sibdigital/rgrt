@@ -176,3 +176,78 @@
 		opacity: 1;
 	}
 }
+
+.slideUp {
+	animation-name: slideUp;
+	animation-duration: 0.3s;
+}
+
+@keyframes slideUp {
+	from {
+		transform: translate3d(0, -100%, 0);
+
+		opacity: 0;
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+
+		opacity: 1;
+	}
+}
+
+.slideDown {
+	animation-name: slideDown;
+	animation-duration: 0.3s;
+}
+
+@keyframes slideDown {
+	from {
+		transform: translate3d(0, 100%, 0);
+
+		opacity: 0;
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+
+		opacity: 1;
+	}
+}
+
+.slideLeft {
+	transition: all 0.3s;
+	animation-name: slideLeft;
+	animation-duration: 0.3s;
+}
+
+@keyframes slideLeft {
+	from {
+		transform: translate3d(100%, 0, 0);
+
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+
+	}
+}
+
+.slideRight {
+	animation-name: slideRight;
+	animation-duration: 0.3s;
+}
+
+@keyframes slideRight {
+	from {
+		transform: translate3d(-100%, 0, 0);
+
+		opacity: 0;
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+
+		opacity: 1;
+	}
+}

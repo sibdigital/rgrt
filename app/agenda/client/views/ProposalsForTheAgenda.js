@@ -104,8 +104,8 @@ function ProposalsForTheAgenda({ userData, agendaData }) {
 					<Label fontScale='h1'>{t('Proposals_for_the_agenda')}</Label>
 				</Field>
 				<ButtonGroup>
-					{<Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={handleNewProposalClick}>
-						{t('Agenda_add')}
+					{context === '' && <Button mbe='x8' small primary aria-label={t('Proposal_for_the_agenda_add')} onClick={handleNewProposalClick}>
+						{t('Proposal_for_the_agenda_add')}
 					</Button>}
 				</ButtonGroup>
 			</Page.Header>
@@ -116,12 +116,14 @@ function ProposalsForTheAgenda({ userData, agendaData }) {
 		{ context
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'new' && t('Agenda_added') }
-				{ context === 'edit' && t('Agenda_edited') }
+				{ context === 'new' && t('Proposal_for_the_agenda_added') }
+				{ context === 'edit' && t('Proposal_for_the_agenda_edited') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
-			{context === 'new' && <EditProposalsForTheAgenda onEditDataClick={onEditDataClick} close={close} agendaId={agendaData._id} userData={userData}/>}
-			{context === 'edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditDataClick} close={close} agendaId={agendaData._id} userData={userData}/>}
+			<VerticalBar.ScrollableContent>
+				{context === 'new' && <EditProposalsForTheAgenda onEditDataClick={onEditDataClick} close={close} agendaId={agendaData._id} userData={userData}/>}
+				{context === 'edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditDataClick} close={close} agendaId={agendaData._id} userData={userData}/>}
+			</VerticalBar.ScrollableContent>
 		</VerticalBar>}
 	</Page>;
 }

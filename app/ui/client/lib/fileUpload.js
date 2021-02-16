@@ -151,11 +151,12 @@ export const uploadFileWithWorkingGroup = async (workingGroupMeetingId, { descri
 	}
 };
 
-export const uploadFileWithCouncil = async (councilId, { description, fileName, file, ts }) => {
+export const uploadFileWithCouncil = async (councilId, { description, fileName, file, ts, orderIndex }) => {
 	const data = new FormData();
 	description	&& data.append('description', description);
 	data.append('file', file, fileName);
 	data.append('ts', ts ?? new Date());
+	orderIndex	&& data.append('orderIndex', orderIndex);
 
 	const uploads = Session.get('uploading') || [];
 
@@ -302,7 +303,7 @@ export const uploadFileWithWorkingGroupRequestAnswer = async (workingGroupReques
 	uploads.push(upload);
 	Session.set('uploading', uploads);
 
-	const { xhr, promise } = await APIClient.upload(`v1/working-groups-requests.upload/${ workingGroupRequestId }/${ mailId }/${ answerId }`, {}, data, {
+	const { xhr, promise } = await APIClient.upload(`v1/working-groups-requests.upload/${ workingGroupRequestId }/${ answerId }`, {}, data, {
 		progress(progress) {
 			const uploads = Session.get('uploading') || [];
 
@@ -600,7 +601,7 @@ export const fileUploadToCouncil = async (files, { _id }) => {
 	const ids = [];
 
 	const uploadNextFile = () => {
-		const file = files.pop();
+		const file = files.shift();
 		if (!file) {
 			modal.close();
 			return;
@@ -631,6 +632,7 @@ export const fileUploadToCouncil = async (files, { _id }) => {
 		const upload = async () => {
 			const uploadedFile = await uploadFileWithCouncil(_id, {
 				description: '',
+				orderIndex: file.orderIndex,
 				fileName: file.name,
 				file: file.file,
 				ts: file.ts,

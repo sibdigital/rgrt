@@ -15,11 +15,11 @@ export const WarningModal = ({
 	return <Modal {...props}>
 		<Modal.Header>
 			<Icon color='danger' name='modal-warning' size={headerIconSize}/>
-			<Modal.Title>{title}</Modal.Title>
+			<Modal.Title>{title ?? ''}</Modal.Title>
 			<Modal.Close onClick={onCancel}/>
 		</Modal.Header>
 		<Modal.Content fontScale='p1'>
-			{contentText}
+			{contentText ?? ''}
 		</Modal.Content>
 		<Modal.Footer>
 			<ButtonGroup align='end'>

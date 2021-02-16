@@ -61,10 +61,14 @@ export function validateWorkingGroupRequestData(workingGroupRequestData) {
 		errors.push('desc');
 	}
 
+	if (!workingGroupRequestData.date) {
+		errors.push('date');
+	}
+
 	return errors;
 }
 
-export function createWorkingGroupRequestData(number, desc, previousData) {
+export function createWorkingGroupRequestData(number, desc, date, previousData) {
 	const workingGroupRequestData = {
 	};
 
@@ -74,6 +78,7 @@ export function createWorkingGroupRequestData(number, desc, previousData) {
 
 	workingGroupRequestData.number = number;
 	workingGroupRequestData.desc = desc;
+	workingGroupRequestData.date = date;
 
 	return workingGroupRequestData;
 }

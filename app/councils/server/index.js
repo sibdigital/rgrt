@@ -10,3 +10,4 @@ import './methods/insertOrUpdateCouncilPerson';
 import './methods/addCouncilToPersons';
 import './methods/deleteFileFromCouncil';
 import './methods/deleteCouncilFromPersons';
+import './methods/updateCouncilFilesOrder';

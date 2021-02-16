@@ -47,18 +47,6 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 					<TextInput mis='x8' flexGrow={1} value={patronymic} onChange={handlePatronymic}/>
 				</Field>
 			</Field.Row>, [t, surname, handleSurname, name, handleName, patronymic, handlePatronymic])}
-			{/* {useMemo(() => <Field mb='x4' width='98%'>
-					<Field.Label>{t('Name')}</Field.Label>
-					<Field.Row>
-						<TextInput flexGrow={1} value={name} onChange={handleName}/>
-					</Field.Row>
-				</Field>, [t, name, handleName])}
-				{useMemo(() => <Field mb='x4' width='98%'>
-					<Field.Label>{t('Patronymic')}</Field.Label>
-					<Field.Row>
-						<TextInput flexGrow={1} value={patronymic} onChange={handlePatronymic}/>
-					</Field.Row>
-				</Field>, [t, patronymic, handlePatronymic])} */}
 			{useMemo(() => <Field.Row mb='x4' width='98%'>
 				<Field mb='x8' width='49%'>
 					<Field.Label>{t('Phone_number')}</Field.Label>
@@ -74,14 +62,7 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 					<Field.Label>{t('Group')}</Field.Label>
 					<Select mis='x8' flexGrow={1} onChange={handleGroup} value={group} options={workingGroupOptions} />
 				</Field>
-			</Field.Row>, [t, group, handleGroup])}
-			{/* {useMemo(() => <Field mb='x4' width='98%'>
-					<Field.Label>{t('Email')}</Field.Label>
-					<Field.Row>
-						<TextInput flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={handleEmail} addon={<Icon name='mail' size='x20'/>}/>
-					</Field.Row>
-				</Field>, [t, email, handleEmail])} */}
+			</Field.Row>, [t, group, handleGroup, workingGroupOptions])}
 		</Field>
 	</Scrollable>;
-	// </Field>;
 }

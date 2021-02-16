@@ -17,7 +17,7 @@ export function validate(protocolData) {
 	return errors;
 }
 
-export function createProtocolData(date, number, place = '', councilId = '', participants = [], previousData) {
+export function createProtocolData(date, number, place = '', councilId = '', participants = [], previousData = null) {
 	const protocolData = {
 	};
 
@@ -74,12 +74,15 @@ export function validateItemData(itemData) {
 	return errors;
 }
 
-export function createItemData(number, name, responsible, expireAt = '', previousData) {
+export function createItemData(number, name, responsible, expireAt = '', status = null, previousData = null) {
 	const itemData = {
 	};
 
 	if (previousData) {
 		itemData._id = previousData._id;
+		itemData.status = status;
+	} else {
+		itemData.status = { state: 1, title: 'Новое' };
 	}
 	itemData.num = number;
 	itemData.name = name;

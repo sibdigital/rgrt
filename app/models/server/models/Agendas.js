@@ -94,8 +94,8 @@ class Agendas extends Base {
 	removeProposal(_id, proposalId) {
 		const data = this.findOne({ _id });
 
-		if (data.proposal) {
-			data.proposal = data.proposal.filter((proposal) => proposal._id !== proposalId);
+		if (data.proposals) {
+			data.proposals = data.proposals.filter((proposal) => proposal._id !== proposalId);
 			data._updatedAt = new Date();
 			this.update({ _id }, { $set: { ...data } });
 		}

@@ -2,7 +2,6 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Box, Tile, Field, TextAreaInput, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
-registerLocale('ru', ru);
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -12,6 +11,7 @@ import { validate, createProtocolData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 
+registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
 export function AddProtocol({ goToNew, close, onChange, ...props }) {
@@ -31,19 +31,19 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		const query = useMemo(() => ({
 			query: JSON.stringify({ _id: councilId }),
 		}), [councilId]);
-	
+
 		const {	data: council } = useEndpointDataExperimental('councils.findOne', query) || {};
 		const { data: invitedPersonsData } = useEndpointDataExperimental('councils.invitedPersons', query) || { persons: [] };
 		useEffect(() => {
-		 	if (council && council.d) {
+			if (council && council.d) {
 				setDate(new Date(council.d));
 			}
-			 
+
 			if (invitedPersonsData && invitedPersonsData.persons) {
 				setParticipants(invitedPersonsData.persons);
 			}
 
-			if(!isCouncilProtocol){
+			if (!isCouncilProtocol) {
 				setIsCouncilProtocol(true);
 			}
 		}, [council, invitedPersonsData]);
@@ -124,19 +124,19 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		{isCouncilProtocol && <Field>
 			<Field.Label>{t('Participants')}</Field.Label>
 			<Field.Row>
-			<Box mbe='x8' flexGrow={1}>
-				{participants && !participants.length
-					? <Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
-						{t('No_data_found')}
-					</Tile>
-					: <>
-						{participants
-							? participants.map((props, index) => <Participant key={props._id || index} { ...props}/>)
-							: <></>
-						}
-					</>
-				}
-			</Box>
+				<Box mbe='x8' flexGrow={1}>
+					{participants && !participants.length
+						? <Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
+							{t('No_data_found')}
+						</Tile>
+						: <>
+							{participants
+								? participants.map((props, index) => <Participant key={props._id || index} { ...props}/>)
+								: <></>
+							}
+						</>
+					}
+				</Box>
 			</Field.Row>
 		</Field>}
 		<Field>

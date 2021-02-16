@@ -1,8 +1,9 @@
-import { Meteor } from 'meteor/meteor';
 import React, { useCallback, useMemo } from 'react';
-import { Box, Button, ButtonGroup, Icon, Modal, Table } from '@rocket.chat/fuselage';
+import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
@@ -11,48 +12,14 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
+import { SuccessModal, WarningModal } from '../../../utils/index';
 import { downloadCouncilParticipantsForm } from './lib';
 
-const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='danger' name='modal-warning' size={20}/>
-			<Modal.Title>{t('Are_you_sure')}</Modal.Title>
-			<Modal.Close onClick={onCancel}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{title}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button ghost onClick={onCancel}>{t('Cancel')}</Button>
-				<Button primary danger onClick={onDelete}>{t('Delete')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
-
-const SuccessModal = ({ title, onClose, ...props }) => {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Icon color='success' name='checkmark-circled' size={20}/>
-			<Modal.Title>{t('Deleted')}</Modal.Title>
-			<Modal.Close onClick={onClose}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			{title}
-		</Modal.Content>
-		<Modal.Footer>
-			<ButtonGroup align='end'>
-				<Button primary onClick={onClose}>{t('Ok')}</Button>
-			</ButtonGroup>
-		</Modal.Footer>
-	</Modal>;
-};
+require('moment/locale/ru.js');
 
 export function Councils({
+	displayMode = 'table',
 	data,
 	sort,
 	onClick,
@@ -67,7 +34,7 @@ export function Councils({
 
 	const setModal = useSetModal();
 
-	const isAllow = hasPermission('edit-councils', Meteor.userId());
+	const isAllow = hasPermission('edit-councils', useUserId());
 
 	const deleteCouncil = useMethod('deleteCouncil');
 
@@ -115,11 +82,11 @@ export function Councils({
 
 	const colorTextCouncil = (date) => {
 		const status = getDateStatus(date);
-		let color = 'var(--rc-color-councils-background-to-be)';
+		let color = 'var(--rc-color-councils-text-color-to-be)';
 		if (status === 'today') {
-			color = 'var(--rc-color-councils-text-color-held)';
+			color = 'var(--rc-color-councils-text-color-today)';
 		} else if (status === 'held') {
-			color = 'var(--rc-color-councils-text-color-to-be)';
+			color = 'var(--rc-color-councils-text-color-held)';
 		}
 		return color;
 	};
@@ -140,7 +107,7 @@ export function Councils({
 	const onDeleteCouncilConfirm = useCallback(async (_id) => {
 		try {
 			await deleteCouncil(_id);
-			setModal(() => <SuccessModal title={'Delete'} onClose={() => { setModal(undefined); onChange(); }}/>);
+			setModal(() => <SuccessModal title={'Delete'} contentText={t('Deleted')} onClose={() => { setModal(undefined); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -148,7 +115,7 @@ export function Councils({
 
 	const onDel = (_id) => () => { onDeleteCouncilConfirm(_id); };
 
-	const onDeleteCouncilClick = (_id) => () => setModal(() => <DeleteWarningModal title={t('Council_Delete_Warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
+	const onDeleteCouncilClick = (_id) => () => setModal(() => <WarningModal title={t('Council_Delete_Warning')} contentText={t('Are_you_sure')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
 
 	const header = useMemo(() => [
 		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' style={{ width: '190px' }} color='default'>{t('Date')}</Th>,
@@ -185,5 +152,59 @@ export function Councils({
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data.councils} total={data.total} setParams={setParams} params={params} />;
+	return useMemo(() => {
+		switch (displayMode) {
+			case 'table':
+				return <GenericTable
+					header={ header } renderRow={ renderRow } results={ data.councils }
+					total={ data.total } setParams={ setParams } params={ params }/>;
+			case 'calendar':
+				return <CouncilsCalendar data={data} onClick={onClick} onChange={onChange}/>;
+			default:
+				return <Box/>;
+		}
+	}, [displayMode, data, header, renderRow, setParams, params]);
+}
+
+function CouncilsCalendar({
+	data,
+	onClick,
+	onChange,
+}) {
+	const t = useTranslation();
+	const localizer = momentLocalizer(moment);
+	const myEventsList = useMemo(() =>
+		data?.councils?.length > 0
+			? data.councils.map((council) => ({ _id: council._id, title: council.desc, start: new Date(council.d), end: new Date(council.d) }))
+			: []
+	, [data]);
+
+	// const som = Object.freeze({
+	// 	One: 1,
+	// 	Two: 2,
+	// });
+	// console.log(som);
+	// console.log(som.One);
+	const onSelect = useCallback((one) => {
+		// console.log(one);
+		onClick(one._id)();
+	}, [onClick]);
+
+	return <Box overflow='auto' height='700px'><Calendar
+		views={['month', 'week', 'day']}
+		culture={'ru'}
+		localizer={localizer}
+		events={myEventsList}
+		startAccessor='start'
+		endAccessor='end'
+		onSelectEvent={onSelect}
+		messages={{
+			today: t('Today'),
+			previous: t('Back'),
+			next: t('Next'),
+			month: t('Month'),
+			week: t('Week'),
+			day: t('Day'),
+		}}
+	/></Box>;
 }

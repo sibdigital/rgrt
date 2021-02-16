@@ -244,11 +244,6 @@
 	}
 }
 
-.animate-slide_right_to_left {
-	transition: all 2.6s !important;
-	animation: slideRightToLeft 2.6s linear !important;
-}
-
 @media (width > 500px) {
 	.preferences-page .container {
 		max-width: 649px;
@@ -269,19 +264,5 @@
 @keyframes ellipsis {
 	to {
 		width: 1.25em;
-	}
-}
-
-@keyframes slideRightToLeft {
-	0% {
-		left: 500px;
-	}
-
-	50% {
-		left: 250px;
-	}
-
-	100% {
-		left: 0;
 	}
 }

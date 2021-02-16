@@ -21,4 +21,6 @@ export { APIClient, mountArrayQueryParameters } from './lib/RestApiClient';
 export { canDeleteMessage } from './lib/canDeleteMessage';
 export { mime } from '../lib/mimeTypes';
 export { secondsToHHMMSS } from '../lib/timeConverter';
-export { SuccessModal, WarningModal } from './views/modals/index';
+export { SuccessModal } from './views/modals/SuccesModal';
+export { WarningModal } from './views/modals/WarningModal';
+export { getAnimation } from './animations/Animation';

@@ -25,6 +25,16 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 
+	const getStatusIcon = (statusState) => {
+		let color = 'red';
+		if (statusState === 2) {
+			color = 'yellow';
+		} else if (statusState === 3) {
+			color = 'green';
+		}
+		return color;
+	};
+
 	const Item = (item) => <>
 		<Box
 			mis='x24'
@@ -32,7 +42,10 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 			display='flex'
 			flexDirection='row'
 			className={clickable}>
-			<Box is='span' pie='x8'>{item.num}.</Box>
+			<Box display='flex' flexDirection='row' is='span' pie='x8'>
+				{ item.responsible.length !== 0 && <Box mie='x4' color={getStatusIcon(item.status?.state ?? 1)}><Icon name='circle'/></Box> }
+				<Box>{item.num}.</Box>
+			</Box>
 			<Box flexGrow={1}>
 				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: item.name }} align='justify'/>
 				{ item.responsible.length !== 0 && <Box mbe='x4'>{t('Item_Responsible')}: {constructResponsible(item)}</Box> }
