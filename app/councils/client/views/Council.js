@@ -171,6 +171,7 @@ function Council({
 	const [isSecretary, setIsSecretary] = useState(false);
 	const [isUserJoin, setIsUserJoin] = useState(false);
 	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
+	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
 
 	useEffect(() => {
 		if (isLoading) { return; }
@@ -190,13 +191,27 @@ function Council({
 			setInvitedPersonsIds(invitedPersonsData);
 		}
 		if (filesData) {
-			setAttachedFiles(filesData);
+			// setAttachedFiles(filesData);
+			let maxIndex = 0;
+			const filesArray = filesData.map((file, index) => {
+				if (file.orderIndex && file.orderIndex > maxIndex) {
+					maxIndex = file.orderIndex;
+				}
+				if (index > maxIndex) {
+					maxIndex = index;
+				}
+				file.orderIndex = file.orderIndex ?? index + 1;
+				return file;
+			});
+			setAttachedFiles(filesArray);
+			setMaxOrderFileIndex(maxIndex + 1);
 		}
 	}, [invitedPersonsData, filesData, userRoles, data, currentPerson, isLoading]);
 
 	const setModal = useSetModal();
 
 	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
+	const updateCouncilFilesOrder = useMethod('updateCouncilFilesOrder');
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
 	const deleteCouncil = useMethod('deleteCouncil');
@@ -337,13 +352,14 @@ function Council({
 		$(document.body).append($input);
 
 		$input.one('change', function(e) {
-			const filesToUpload = [...e.target.files].map((file) => {
+			const filesToUpload = [...e.target.files].map((file, orderIndex) => {
 				Object.defineProperty(file, 'type', {
 					value: mime.lookup(file.name),
 				});
 				fileIndex++;
 				return {
 					file,
+					orderIndex: orderIndex + maxOrderFileIndex,
 					name: file.name,
 					title: file.name,
 					id: fileIndex,
@@ -460,6 +476,7 @@ function Council({
 		try {
 			await deleteFileFromCouncil(councilId, fileId);
 			setAttachedFiles(attachedFiles.filter((file) => file._id !== fileId));
+			setMaxOrderFileIndex(attachedFiles.length);
 			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('File_has_been_deleted')} onClose={() => { setModal(undefined); close(); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
@@ -487,6 +504,18 @@ function Council({
 		}
 	};
 
+	const saveFilesOrder = useCallback(async () => {
+		try {
+			const filesArray = await updateCouncilFilesOrder(councilId, attachedFiles);
+			setAttachedFiles(filesArray);
+			setCurrentMovedFiles({ downIndex: -1, upIndex: -1 });
+			dispatchToastMessage({ type: 'success', message: 'Week' });
+		} catch (error) {
+			console.log(error);
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	}, [updateCouncilFilesOrder, councilId, attachedFiles]);
+
 	const moveFileUpOrDown = useCallback((type, index) => {
 		const arr = attachedFiles;
 		if ((index > 0 && type === 'up') || (index < attachedFiles.length - 1 && type === 'down')) {
@@ -503,21 +532,23 @@ function Council({
 	}, [attachedFiles]);
 
 	const header = useMemo(() => [
+		<Th w='x40' key={'Index'} color='default'>
+			{'№' }
+		</Th>,
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
 		</Th>,
 		<Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
 			{ t('File_uploaded_uploadedAt') }
 		</Th>,
-		// isSecretary && <Th w='x40' key='moveUp'/>,
-		// isSecretary && <Th w='x40' key='moveDown'/>,
+		isSecretary && <Th w='x40' key='moveUp'/>,
+		isSecretary && <Th w='x40' key='moveDown'/>,
 		<Th w='x40' key='download'/>,
 		isSecretary && <Th w='x40' key='delete'/>,
 	], [mediaQuery, isSecretary]);
 
 	const renderRow = (document) => {
-		// console.log(document);
-		const { _id, title, ts } = document;
+		const { _id, title, ts, orderIndex } = document;
 
 		const getStyle = (index) => {
 			let style = {};
@@ -532,18 +563,19 @@ function Council({
 		const style = getStyle(document.index);
 
 		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
+			<Table.Cell fontScale='p1' color='default'>{orderIndex ?? document.index}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
-			{/*{isSecretary && <Table.Cell alignItems={'end'}>*/}
-			{/*	<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>*/}
-			{/*		<Icon name='arrow-down'/>*/}
-			{/*	</Button>*/}
-			{/*</Table.Cell>}*/}
-			{/*{isSecretary && <Table.Cell alignItems={'end'}>*/}
-			{/*	<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>*/}
-			{/*		<Icon name='arrow-down'/>*/}
-			{/*	</Button>*/}
-			{/*</Table.Cell>}*/}
+			{isSecretary && <Table.Cell alignItems={'end'}>
+				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>
+					<Icon name='arrow-down'/>
+				</Button>
+			</Table.Cell>}
+			{isSecretary && <Table.Cell alignItems={'end'}>
+				<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>
+					<Icon name='arrow-down'/>
+				</Button>
+			</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('download')} onClick={onDownloadFileClick(document)}>
 					<Icon name='download'/>
@@ -666,11 +698,14 @@ function Council({
 					</Field.Row>
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
-					<Field.Row marginInlineStart='auto'>
-						<Button disabled={isLoading} onClick={fileUploadClick} mie='10px' small primary aria-label={t('Upload_file')}>
+					<ButtonGroup mis='auto' mie='x16'>
+						<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>
+							{t('Save_Order')}
+						</Button>
+						<Button disabled={isLoading} onClick={fileUploadClick} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
 						</Button>
-					</Field.Row>
+					</ButtonGroup>
 				</Field>}
 				{tab === 'persons' && context === 'participants' && isSecretary
 					&& <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>

@@ -216,6 +216,7 @@ API.v1.addRoute('councils.upload/:id', { authRequired: true }, {
 
 			uploadedFile.description = fields.description;
 			uploadedFile.ts = fields.ts;
+			uploadedFile.orderIndex = fields.orderIndex;
 
 			Meteor.call('sendFileCouncil', this.urlParams.id, uploadedFile);
 

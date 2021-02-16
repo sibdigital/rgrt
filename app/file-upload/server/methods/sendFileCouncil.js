@@ -16,6 +16,7 @@ Meteor.methods({
 
 		const attachment = {
 			_id: file._id,
+			orderIndex: parseInt(file.orderIndex),
 			title: file.name,
 			type: 'file',
 			description: file.description ?? '',
