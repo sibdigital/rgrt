@@ -2,6 +2,8 @@ import React, { useCallback, useMemo } from 'react';
 import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
@@ -14,7 +16,10 @@ import { useUserId } from '../../../../client/contexts/UserContext';
 import { SuccessModal, WarningModal } from '../../../utils/index';
 import { downloadCouncilParticipantsForm } from './lib';
 
+require('moment/locale/ru.js');
+
 export function Councils({
+	displayMode = 'table',
 	data,
 	sort,
 	onClick,
@@ -147,5 +152,59 @@ export function Councils({
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data.councils} total={data.total} setParams={setParams} params={params} />;
+	return useMemo(() => {
+		switch (displayMode) {
+			case 'table':
+				return <GenericTable
+					header={ header } renderRow={ renderRow } results={ data.councils }
+					total={ data.total } setParams={ setParams } params={ params }/>;
+			case 'calendar':
+				return <CouncilsCalendar data={data} onClick={onClick} onChange={onChange}/>;
+			default:
+				return <Box/>;
+		}
+	}, [displayMode, data, header, renderRow, setParams, params]);
+}
+
+function CouncilsCalendar({
+	data,
+	onClick,
+	onChange,
+}) {
+	const t = useTranslation();
+	const localizer = momentLocalizer(moment);
+	const myEventsList = useMemo(() =>
+		data?.councils?.length > 0
+			? data.councils.map((council) => ({ _id: council._id, title: council.desc, start: new Date(council.d), end: new Date(council.d) }))
+			: []
+	, [data]);
+
+	// const som = Object.freeze({
+	// 	One: 1,
+	// 	Two: 2,
+	// });
+	// console.log(som);
+	// console.log(som.One);
+	const onSelect = useCallback((one) => {
+		// console.log(one);
+		onClick(one._id)();
+	}, [onClick]);
+
+	return <Box overflow='auto' height='700px'><Calendar
+		views={['month', 'week', 'day']}
+		culture={'ru'}
+		localizer={localizer}
+		events={myEventsList}
+		startAccessor='start'
+		endAccessor='end'
+		onSelectEvent={onSelect}
+		messages={{
+			today: t('Today'),
+			previous: t('Back'),
+			next: t('Next'),
+			month: t('Month'),
+			week: t('Week'),
+			day: t('Day'),
+		}}
+	/></Box>;
 }

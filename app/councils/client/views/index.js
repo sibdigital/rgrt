@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
+import { Button, Field, Box, Label, Tabs, Select } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
@@ -33,6 +33,7 @@ export function CouncilsPage() {
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d', 'desc']);
 	const [cache, setCache] = useState();
+	const [displayMode, setDisplayMode] = useState('table');
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
@@ -73,6 +74,8 @@ export function CouncilsPage() {
 		setCache(new Date());
 	}, []);
 
+	const displayOptions = useMemo(() => [['table', t('Table')], ['calendar', t('Calendar')]], [t]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -85,7 +88,15 @@ export function CouncilsPage() {
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				<Councils setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
+				<Box display='flex' flexDirection='row' maxWidth='x250' alignItems='center' mbe='x16' flexShrink={0} alignSelf='end'>
+					<Label mi='x8'>{t('Display_format')}:</Label>
+					<Select value={displayMode} options={displayOptions} onChange={(val) => setDisplayMode(val)}/>
+				</Box>
+				{/*<Tabs flexShrink={0} mbe='x8'>*/}
+				{/*	<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>{t('Table')}</Tabs.Item>*/}
+				{/*	<Tabs.Item selected={displayMode === 'calendar'} onClick={() => setDisplayMode('calendar')}>{t('Calendar')}</Tabs.Item>*/}
+				{/*</Tabs>*/}
+				<Councils displayMode={displayMode} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
 	</Page>;
