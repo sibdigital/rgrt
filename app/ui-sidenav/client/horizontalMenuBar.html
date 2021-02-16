@@ -1,0 +1,18 @@
+
+<template name='menuBar'>
+    <nav class='menu-bar'>
+		<ul class='menu'>
+			{{#each menuItems}}
+				<li class="menu-link"><a class="goToSection">{{name}}</a>
+					{{#if subItems}}
+						<ul class="submenu">
+							{{#each subItems}}
+								<li class="submenu-link"><a>{{name}}</a></li>
+							{{/each}}
+						</ul>
+					{{/if}}
+				</li>
+			{{/each}}
+		</ul>
+    </nav>
+</template>

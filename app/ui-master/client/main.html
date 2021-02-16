@@ -33,6 +33,9 @@
 						{{else}}
 							{{> videoCall overlay=true}}
 							<div id="user-card-popover"></div>
+							<div>
+								{{> menuBar}}
+							</div>
 							<div id="rocket-chat" class="{{embeddedVersion}} menu-nav">
 								{{#unless removeSidenav}}
 									{{> sideNav }}
