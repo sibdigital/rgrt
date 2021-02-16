@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
 	Field,
@@ -160,58 +161,13 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 		setContext('participants');
 	};
 
-	// const fileUploadClick = async () => {
-	// 	if (!settings.get('FileUpload_Enabled')) {
-	// 		console.log('!fileupload_enabled');
-	// 		return null;
-	// 	}
-	// 	setContext('uploadFiles');
-	// 	let fileIndex = staticFileIndex;
-	// 	const $input = $(document.createElement('input'));
-	// 	$input.css('display', 'none');
-	// 	$input.attr({
-	// 		id: 'fileupload-input',
-	// 		type: 'file',
-	// 		multiple: 'multiple',
-	// 	});
-	//
-	// 	$(document.body).append($input);
-	//
-	// 	$input.one('change', function(e) {
-	// 		const filesToUpload = [...e.target.files].map((file) => {
-	// 			Object.defineProperty(file, 'type', {
-	// 				value: mime.lookup(file.name),
-	// 			});
-	// 			fileIndex++;
-	// 			return {
-	// 				file,
-	// 				name: file.name,
-	// 				title: file.name,
-	// 				id: fileIndex,
-	// 				ts: new Date(),
-	// 			};
-	// 		});
-	// 		setStaticFileIndex(fileIndex);
-	// 		setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
-	//
-	// 		$input.remove();
-	// 		onChange();
-	// 	});
-	// 	$input.click();
-	//
-	// 	if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
-	// 		$input.click();
-	// 	}
-	// 	onChange();
-	// };
-
 	const saveAction = useCallback(async (date, description, councilType, invitedPersonsIds) => {
 		const councilData = createCouncilData(date, description, councilType, invitedPersonsIds, null);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
 			const council = await insertOrUpdateCouncil(councilData);
 			await addCouncilToPersons(council._id, invitedPersonsIds);
-			window.history.back();
+			FlowRouter.go('councils');
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
 	}, [insertOrUpdateCouncil, addCouncilToPersons, t]);
@@ -294,7 +250,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 				{/*</Field>}*/}
 				{context === 'participants' && <Persons councilId={null} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>}
 				{context === 'addParticipants' && <AddPerson councilId={null} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>}
-				{context === 'newParticipants' && <CreateParticipant councilId={null} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>}
+				{context === 'newParticipants' && <CreateParticipant councilId={null} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} workingGroupOptions={workingGroupOptions}/>}
 			</Page.Content>
 		</Page>
 	</Page>;

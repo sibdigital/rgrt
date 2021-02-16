@@ -37,7 +37,7 @@ export function Persons({ councilId, onChange, invitedPersons, setInvitedPersons
 
 	const onDeletePersonFromCouncilClick = (personId) => () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Participant_Delete_Warning')} onDelete={onDel(personId)} onCancel={() => setModal(undefined)}/>);
 
-	return <SlideAnimation><InvitedPersonsTable invitedPersons={invitedPersons} onDelete={onDeletePersonFromCouncilClick}/></SlideAnimation>;
+	return <SlideAnimation style={{ overflow: 'hidden auto' }}><InvitedPersonsTable invitedPersons={invitedPersons} onDelete={onDeletePersonFromCouncilClick}/></SlideAnimation>;
 }
 
 function InvitedPersonsTable({ invitedPersons, onDelete }) {

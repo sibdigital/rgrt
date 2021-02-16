@@ -77,11 +77,11 @@ export function Councils({
 
 	const colorTextCouncil = (date) => {
 		const status = getDateStatus(date);
-		let color = 'var(--rc-color-councils-background-to-be)';
+		let color = 'var(--rc-color-councils-text-color-to-be)';
 		if (status === 'today') {
-			color = 'var(--rc-color-councils-text-color-held)';
+			color = 'var(--rc-color-councils-text-color-today)';
 		} else if (status === 'held') {
-			color = 'var(--rc-color-councils-text-color-to-be)';
+			color = 'var(--rc-color-councils-text-color-held)';
 		}
 		return color;
 	};

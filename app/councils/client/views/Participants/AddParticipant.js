@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Field, Table, Label } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Field, Table, Label, Scrollable } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
@@ -90,7 +90,7 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 		onChange();
 	};
 
-	return <SlideAnimation><Field>
+	return <Field overflowX='hidden'>
 		{<Field mb='x8' display='flex' flexDirection='row' alignItems='center'>
 			<Label fontScale='p1'>{t('Selected')}: {countSelectedPersons}</Label>
 			<ButtonGroup marginInlineStart='auto'>
@@ -116,11 +116,12 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 					{ t('Participant_Create') }
 				</Button> }
 			</>
-			: <>
+			: <SlideAnimation style={{ overflow: 'hidden auto' }}>
 				<PersonsTable invitedPersons={ findPersons } personsIdToAdd={ personsIdToAdd } handleAddPerson={ onAddClick }/>
-			</>
+			</SlideAnimation>
+
 		}
-	</Field></SlideAnimation>;
+	</Field>;
 }
 
 function PersonsTable({ invitedPersons, personsIdToAdd, handleAddPerson }) {
@@ -130,27 +131,29 @@ function PersonsTable({ invitedPersons, personsIdToAdd, handleAddPerson }) {
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
+	const style = { textOverflow: 'ellipsis' };
+
+	const styleTableRow = { wordWrap: 'break-word' };
+
+	const getBackgroundColor = (invitedPersonId) => {
+		const index = invitedPersons.findIndex((user) => user._id === invitedPersonId);
+		if (personsIdToAdd && personsIdToAdd.findIndex((person) => invitedPersonId === person._id) > -1) {
+			return 'var(--list-selected-element-background-color)';
+		}
+		if (index > 0 && index % 2 === 1) {
+
+			return 'var(--list-even-element-background-color)';
+		}
+
+		return 'var(--list-element-background-color)';
+
+	};
+
 	const header = useMemo(() => [
 		<Th key={'fio'} color='default'>{t('Council_participant')}</Th>,
 		mediaQuery && <Th key={'phone'} color='default'>{t('Phone_number')}</Th>,
 		mediaQuery && <Th key={'email'} color='default'>{t('Email')}</Th>,
 	], [mediaQuery]);
-
-	const styleTableRow = { wordWrap: 'break-word' };
-	const style = { textOverflow: 'ellipsis', overflow: 'hidden' };
-
-	const getBackgroundColor = (invitedPersonId) => {
-		const index = invitedPersons.findIndex((user) => user._id === invitedPersonId);
-
-		if (personsIdToAdd && personsIdToAdd.findIndex((person) => invitedPersonId === person._id) > -1) {
-			return 'var(--list-selected-element-background-color)';
-		}
-		if (index > 0 && index % 2 === 1) {
-			return 'var(--list-even-element-background-color)';
-		}
-
-		return 'var(--list-element-background-color)';
-	};
 
 	const renderRow = (invitedPerson) => {
 		const iu = invitedPerson;

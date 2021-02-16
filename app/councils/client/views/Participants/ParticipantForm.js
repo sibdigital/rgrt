@@ -62,7 +62,7 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 					<Field.Label>{t('Group')}</Field.Label>
 					<Select mis='x8' flexGrow={1} onChange={handleGroup} value={group} options={workingGroupOptions} />
 				</Field>
-			</Field.Row>, [t, group, handleGroup])}
+			</Field.Row>, [t, group, handleGroup, workingGroupOptions])}
 		</Field>
 	</Scrollable>;
 }

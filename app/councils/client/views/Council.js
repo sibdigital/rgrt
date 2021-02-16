@@ -278,7 +278,12 @@ function Council({
 	const hasUnsavedChanges = useMemo(() => isLoading ? false : new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description || (!data.type && councilType !== '') || (data.type && data.type.title !== councilType),
 		[date, description, councilType, data]);
 
-	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setCurrentMovedFiles({ downIndex: -1, upIndex: - 1 }); }, []);
+	const handleTabClick = useMemo(() => (tab) => () => {
+		setTab(tab);
+		tab === 'persons' && setContext('participants');
+		setCurrentMovedFiles({ downIndex: -1, upIndex: - 1 });
+		tab === 'files' && currentUploadedFiles.length > 0 && setContext('uploadFiles');
+	}, [currentUploadedFiles]);
 
 	const downloadCouncilParticipants = (_id) => async (e) => {
 		e.preventDefault();
@@ -504,14 +509,14 @@ function Council({
 		<Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
 			{ t('File_uploaded_uploadedAt') }
 		</Th>,
+		// isSecretary && <Th w='x40' key='moveUp'/>,
+		// isSecretary && <Th w='x40' key='moveDown'/>,
 		<Th w='x40' key='download'/>,
 		isSecretary && <Th w='x40' key='delete'/>,
-		isSecretary && <Th w='x40' key='moveUp'/>,
-		isSecretary && <Th w='x40' key='moveDown'/>,
 	], [mediaQuery, isSecretary]);
 
 	const renderRow = (document) => {
-		console.log(document);
+		// console.log(document);
 		const { _id, title, ts } = document;
 
 		const getStyle = (index) => {
@@ -529,16 +534,16 @@ function Council({
 		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
-			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>
-					<Icon name='arrow-down'/>
-				</Button>
-			</Table.Cell>
-			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>
-					<Icon name='arrow-down'/>
-				</Button>
-			</Table.Cell>
+			{/*{isSecretary && <Table.Cell alignItems={'end'}>*/}
+			{/*	<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>*/}
+			{/*		<Icon name='arrow-down'/>*/}
+			{/*	</Button>*/}
+			{/*</Table.Cell>}*/}
+			{/*{isSecretary && <Table.Cell alignItems={'end'}>*/}
+			{/*	<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>*/}
+			{/*		<Icon name='arrow-down'/>*/}
+			{/*	</Button>*/}
+			{/*</Table.Cell>}*/}
 			<Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('download')} onClick={onDownloadFileClick(document)}>
 					<Icon name='download'/>
