@@ -214,3 +214,40 @@
 		opacity: 1;
 	}
 }
+
+.slideLeft {
+	transition: all 0.3s;
+	animation-name: slideLeft;
+	animation-duration: 0.3s;
+}
+
+@keyframes slideLeft {
+	from {
+		transform: translate3d(100%, 0, 0);
+
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+
+	}
+}
+
+.slideRight {
+	animation-name: slideRight;
+	animation-duration: 0.3s;
+}
+
+@keyframes slideRight {
+	from {
+		transform: translate3d(-100%, 0, 0);
+
+		opacity: 0;
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+
+		opacity: 1;
+	}
+}
