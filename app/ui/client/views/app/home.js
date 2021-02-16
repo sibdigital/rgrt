@@ -4,24 +4,9 @@ import { ReactiveVar } from 'meteor/reactive-var';
 
 import { settings } from '../../../../settings';
 import { t } from '../../../../utils';
-import { AccountBox, menu, modal } from '../../../../ui-utils';
+import { AccountBox, menu } from '../../../../ui-utils';
+import { createInteractionActions } from '../../../../utils/client/views/createInteractionActions';
 import { hasAtLeastOnePermission, hasPermission } from '../../../../authorization';
-
-const cretateInteractionActions = (title, content) => (e) => {
-	modal.open({
-		title: t(title),
-		content,
-		data: {
-			onCreate() {
-				modal.close();
-			},
-		},
-		modifier: 'modal',
-		showConfirmButton: false,
-		showCancelButton: false,
-		confirmOnEnter: false,
-	});
-};
 
 const toolbarButtons = () => [
 	{
@@ -77,10 +62,10 @@ const toolbarButtons = () => [
 		openContext: 'interaction',
 	},
 	{
-		name: t('Handbooks'),
+		name: t('Council Commission \"Transport\"'),
 		icon: 'help',
 		context: 'home',
-		openContext: 'handbooks',
+		//openContext: 'handbooks',
 		// condition: () => hasPermission('handbooks-home-page'),
 	},
 	// {
@@ -106,7 +91,7 @@ const toolbarButtons = () => [
 	{
 		name: t('Directory'),
 		icon: 'discover',
-		context: 'handbooks',
+		context: 'interaction',
 		action: () => {
 			menu.close();
 			FlowRouter.go('directory');
@@ -125,7 +110,7 @@ const toolbarButtons = () => [
 	{
 		name: t('Working_group'),
 		icon: 'working_group',
-		context: 'handbooks',
+		context: 'administration',
 		action: () => {
 			menu.close();
 			FlowRouter.go('working-group');
@@ -134,7 +119,7 @@ const toolbarButtons = () => [
 	{
 		name: t('Working_group_composition'),
 		icon: 'team',
-		context: 'handbooks',
+		context: 'administration',
 		condition: () => hasPermission('manage-working-group'),
 		action: () => {
 			menu.close();
@@ -144,7 +129,7 @@ const toolbarButtons = () => [
 	{
 		name: t('Persons'),
 		icon: 'team',
-		context: 'handbooks',
+		context: 'administration',
 		// condition: () => hasPermission('manage-persons'),
 		action: () => {
 			FlowRouter.go('persons');
@@ -177,7 +162,7 @@ const toolbarButtons = () => [
 				// 	return;
 				// }
 			});
-			// return cretateInteractionActions('Create_A_New_Channel', 'createChannel')(e);
+			// return cetateInteractionActions('Create_A_New_Channel', 'createChannel')(e);
 		},
 	},
 	{
@@ -187,7 +172,7 @@ const toolbarButtons = () => [
 		condition: () => hasAtLeastOnePermission(['create-c', 'create-p', 'create-d', 'start-discussion', 'start-discussion-other-user']),
 		// hasPopup: true,
 		action: (e) => {
-			return cretateInteractionActions('Direct_Messages', 'CreateDirectMessage')(e);
+			return createInteractionActions('Direct_Messages', 'CreateDirectMessage')(e);
 		},
 	},
 	{
@@ -197,7 +182,7 @@ const toolbarButtons = () => [
 		condition: () => hasAtLeastOnePermission(['create-c', 'create-p', 'create-d', 'start-discussion', 'start-discussion-other-user']),
 		// hasPopup: true,
 		action: (e) => {
-			return cretateInteractionActions('Discussion_title', 'CreateDiscussion')(e);
+			return createInteractionActions('Discussion_title', 'CreateDiscussion')(e);
 		},
 	},
 	{

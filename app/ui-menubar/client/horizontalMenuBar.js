@@ -1,26 +1,10 @@
-
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
 
 import { t } from '../../utils';
-import { AccountBox, modal } from '../../ui-utils';
+import { AccountBox } from '../../ui-utils';
+import { createInteractionActions } from '../../utils/client/views/createInteractionActions';
 import { hasAtLeastOnePermission, hasPermission } from '../../authorization';
-
-const cretateInteractionActions = (title, content) => (e) => {
-	modal.open({
-		title: t(title),
-		content,
-		data: {
-			onCreate() {
-				modal.close();
-			},
-		},
-		modifier: 'modal',
-		showConfirmButton: false,
-		showCancelButton: false,
-		confirmOnEnter: false,
-	});
-};
 
 const menuItems = () => [
 	{
@@ -85,14 +69,14 @@ const menuItems = () => [
 			{
 				name: t('Create_new') + ' ' + t('Direct_Messages'),
 				action: (e) => {
-					return cretateInteractionActions('Direct_Messages', 'CreateDirectMessage')(e);
+					return createInteractionActions('Direct_Messages', 'CreateDirectMessage')(e);
 				},
 			},
 			{
 				name: t('Create_new') + ' ' + t('Discussion'),
 
 				action: (e) => {
-					return cretateInteractionActions('Discussion_title', 'CreateDiscussion')(e);
+					return createInteractionActions('Discussion_title', 'CreateDiscussion')(e);
 				},
 			},
 			{
@@ -104,7 +88,7 @@ const menuItems = () => [
 		]
 	}, 
 	{
-		name: 'Комиссия госсовета "Транспорт"',
+		name: t('Council Commission \"Transport\"'),
 		//subItems: []
 	},
 	{
@@ -204,5 +188,16 @@ Template.menuBar.events({
 	'click .submenu-link'(e, instance) {
 		console.log(this);
 		return this.action && this.action.apply(this, [e]);
+	},
+	'click .icon' (e, instance) {
+		let x = document.getElementById('main-menu')
+		console.log(x)
+
+		if (x.className	===	'menu')	{
+			x.className	+=	' responsive';
+		} else {
+			x.className	= 'menu';
+		}
+		
 	}
 })

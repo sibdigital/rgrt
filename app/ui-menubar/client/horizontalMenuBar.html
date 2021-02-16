@@ -1,7 +1,9 @@
-
 <template name='menuBar'>
     <nav class='menu-bar'>
-		<ul class='menu'>
+		<a href="javascript:void(0);" class='icon'>
+			<i class="icon-menu"></i>
+		</a>
+		<ul class='menu' id='main-menu'>
 			{{#each menuItems}}
 				<li class="menu-link"><a class="goToSection">{{name}}</a>
 					{{#if subItems}}

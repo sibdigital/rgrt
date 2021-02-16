@@ -21,7 +21,7 @@ nav .menu .menu-link {
 
 nav .menu .menu-link .goToSection {
     height: 70px;
-    max-width: 200px;
+    max-width: 195px;
     display: block;
     color: white;
     word-break: normal;
@@ -45,16 +45,82 @@ nav .menu .menu-link a {
 }
 
 nav .menu .menu-link .submenu {
-    display: none; /* Прячем пункты выпадающего блока меню */
+    display: none;
     position: absolute;
-    background: #334; /* Задаем фон выпадающего блока меню */
+    background: #2f343d;
     z-index: 3;
 }
     
 nav .menu .menu-link:hover .submenu {
-    display: block; /* Отображаем подменю при наведении мыши */
+    display: block; 
 }
     
 nav .menu .menu-link .submenu .submenu-link {
-    display: block; /* Выстраиваем по вертикали пункты выпадающего меню */
+    display: block;
+}
+
+.icon {
+    padding: 14px 16px;
+    height: 50px;
+    color: white;
+    display: none;
+}
+
+.icon:hover {
+    background-color: #111;
+}
+
+i:before {
+    font-size: 24px;
+}
+
+@media screen and (max-width: 1200px) {
+    .menu {
+        display: none;
+    }
+
+    .icon {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .menu.responsive {
+        position: absolute;
+        display: block;
+        z-index: 10000;
+        background-color: #2f343d;
+        left: 0%;
+        width: 100%;
+    }
+
+    .menu.responsive .menu-link .submenu {
+        position:relative;
+        width:100%;
+        z-index: 0;
+    }
+
+    .menu.responsive .menu-link {
+        float: none;
+        left: 0%;
+    }
+
+    .menu.responsive .menu-link,
+    .menu.responsive .menu-link:first-child {
+        border: none;
+    }
+
+    .menu.responsive .menu-link .goToSection {
+        max-width: 100%;
+    }
+
+    .menu.responsive .submenu-link:hover {
+        background-color: #111;
+    }
+}
+
+@media screen and (max-width: 1620px) {
+    nav .menu .menu-link .goToSection {
+        padding: 12px 12px;
+        height: 50px;
+    }
 }
