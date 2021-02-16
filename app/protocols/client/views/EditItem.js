@@ -91,13 +91,13 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 	const [status, setStatus] = useState(0);
 
 	useEffect(() => {
-		console.log(previousStatus);
+		// console.log(item);
 		setNumber(previousNumber || '');
-		setName(previousName || '');
+		setName(item.name ?? '');
 		setResponsible(previousResponsible || '');
-		setExpireAt(previousExpireAt ? new Date(previousExpireAt) : '');
+		setExpireAt(previousExpireAt && new Date(previousExpireAt));
 		setStatus(previousStatus?.state ?? 0);
-	}, [previousNumber, previousName, previousResponsible, previousExpireAt, _id]);
+	}, [previousNumber, previousName, previousResponsible, previousExpireAt, previousStatus, _id]);
 
 	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
 
@@ -109,7 +109,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 	const statusOptions = useMemo(() => [[1, t('opened')], [2, t('inProgress')], [3, t('solved')]], []);
 
 	const isStatusCanChange = useMemo(() => {
-		const res = previousResponsible.find((res) => res._id === currentUserPersonId);
+		const res = previousResponsible?.find((res) => res._id === currentUserPersonId);
 		return !!res;
 	}, [previousResponsible, currentUserPersonId]);
 
@@ -146,7 +146,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 		</Field>
 		<Field>
 			<Field.Label>{t('Item_Name')}</Field.Label>
-			<Field.Row style={!isSecretary && { cursor: 'not-allowed' }}>
+			<Field.Row style={!isSecretary ? { cursor: 'not-allowed' } : {}}>
 				<CKEditor
 					disabled={!isSecretary}
 					editor={ ClassicEditor }
@@ -187,7 +187,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 						{...params}
 						variant='outlined'
 						placeholder={t('Item_Responsible')}
-						style={!isSecretary && { cursor: 'not-allowed !important' }}
+						style={!isSecretary ? { cursor: 'not-allowed !important' } : {}}
 					/>
 				)}
 			/>
