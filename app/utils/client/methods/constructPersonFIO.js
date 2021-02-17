@@ -11,14 +11,14 @@
 	output: empty string if !person or person haven't surname, name, patronymic
 			string like surname.n.p.
 */
-export function constructPersonFIO(person) {
-	if (!person || typeof person !== 'object') {
-		return '';
+export function constructPersonFIO(responsible) {
+	if (!responsible || typeof responsible !== 'object') {
+		return responsible;
 	}
-	if (!person.surname && !person.name && !person.patronymic) {
-		return '';
+	if (!responsible.surname && !responsible.name && !responsible.patronymic) {
+		return responsible;
 	}
-	return [person.surname ?? '', ' ', person.name?.substr(0, 1) ?? '', '.', person.patronymic?.substr(0, 1) ?? '', '.'].join('');
+	return [responsible.surname ?? '', ' ', responsible.name?.substr(0, 1) ?? '', '.', responsible.patronymic?.substr(0, 1) ?? '', '.'].join('');
 }
 
 /*

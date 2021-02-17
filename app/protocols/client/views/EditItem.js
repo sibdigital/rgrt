@@ -172,9 +172,10 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 				forcePopupIcon={false}
 				options={personsData.persons}
 				getOptionLabel={(option) => constructPersonFIO(option)}
-				getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname}
+				//getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname}
 				filterOptions={createFilterOptions({ limit: 10 })}
 				filterSelectedOptions
+				freeSolo
 				onChange={(event, value) => setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
