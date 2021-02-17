@@ -22,6 +22,7 @@ Meteor.methods({
 				number: workingGroupRequestData.number,
 				desc: workingGroupRequestData.desc,
 				date: workingGroupRequestData.date,
+				protocolsItemId: workingGroupRequestData.protocolsItemId,
 				inviteLink,
 			};
 

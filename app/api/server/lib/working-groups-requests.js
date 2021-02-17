@@ -67,3 +67,13 @@ export async function findWorkingGroupRequestAnswerByAnswerId(requestId, answerI
 	}
 	return {};
 }
+
+export async function findWorkingGroupRequestByProtocolsItemId(_id) {
+	const cursor = await WorkingGroupsRequests.find()
+
+	const workingGroupsRequest = await cursor.toArray();
+	console.log(workingGroupsRequest)
+	return {
+		workingGroupsRequest
+	}
+}
