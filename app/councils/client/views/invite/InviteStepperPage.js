@@ -20,6 +20,7 @@ function InviteStepperPage({ currentStep = 1, council = {}, agendaId = null }) {
 
 	const [isAgenda, setIsAgenda] = useState(!!agendaId);
 	const [userData, setUserData] = useState(false);
+	const stepStyle = { width: '65%', maxWidth: '600px' };
 
 	console.log(agendaId);
 	console.log(isAgenda);
@@ -66,9 +67,9 @@ function InviteStepperPage({ currentStep = 1, council = {}, agendaId = null }) {
 					<Scrollable>
 						<Margins all='x16'>
 							<Tile is='section' flexGrow={1} flexShrink={1}>
-								<CouncilInfoStep step={1} title={t('Council_info')} active={currentStep === 1}/>
-								<NewParticipantStep step={2} title={t('Council_participant_info')} active={currentStep === 2} council={council} isAgenda={isAgenda} setUserDataClick={setUserDataClick}/>
-								<ProposalForTheAgendaStep step={3} title={t('Proposal_for_the_agenda')} active={currentStep === 3} council={council} userData={userData} agendaId={agendaId}/>
+								<CouncilInfoStep stepStyle={stepStyle} step={1} title={t('Council_info')} active={currentStep === 1}/>
+								<NewParticipantStep stepStyle={stepStyle} step={2} title={t('Council_participant_info')} active={currentStep === 2} council={council} isAgenda={isAgenda} setUserDataClick={setUserDataClick}/>
+								<ProposalForTheAgendaStep stepStyle={stepStyle} step={3} title={t('Proposal_for_the_agenda')} active={currentStep === 3} council={council} userData={userData} agendaId={agendaId}/>
 							</Tile>
 						</Margins>
 					</Scrollable>

@@ -15,7 +15,7 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { isEmail } from '../../../../../utils/lib/isEmail.js';
 
-function NewParticipantStep({ step, title, active, council, isAgenda, setUserDataClick }) {
+function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAgenda, setUserDataClick }) {
 	const t = useTranslation();
 	const { goToFinalStep, goToPreviousStep, goToNextStep } = useInvitePageContext();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -118,7 +118,7 @@ function NewParticipantStep({ step, title, active, council, isAgenda, setUserDat
 	// useMemo(() => Object.values(values).filter((current) => console.log(current)), [JSON.stringify(values)]);
 	// return <CreateParticipant formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} handleSubmit={handleSave} step={step} title={title} active={active} commiting={commiting} goBack={goToPreviousStep}/>;
 
-	return <Step active={active} working={commiting} onSubmit={handleSubmit}>
+	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
