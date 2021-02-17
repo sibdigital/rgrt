@@ -1,25 +1,25 @@
-nav {
+.menu-bar {
     position: relative;
 }
 
-nav .menu {
+.menu {
     position: relative;
     left: 50%;
     float: left;
 }
 
-nav .menu .menu-link:first-child {
+.menu .menu-link:first-child {
     border-left: 2px solid #4e4a59;
 }
 
-nav .menu .menu-link {
+.menu .menu-link {
     position: relative;
     left: -50%;
     border-right: 2px solid #4e4a59;
     float: left;
 }
 
-nav .menu .menu-link .goToSection {
+.menu .menu-link .goToSection {
     height: 70px;
     max-width: 195px;
     display: block;
@@ -32,11 +32,11 @@ nav .menu .menu-link .goToSection {
     text-transform: uppercase;
 }
   
-nav .menu .menu-link:hover {
+.menu .menu-link:hover {
     background-color: #111;
 }
 
-nav .menu .menu-link a {
+.menu .menu-link a {
     display: block;
     color: white;
     text-align: center;
@@ -44,18 +44,22 @@ nav .menu .menu-link a {
     text-decoration: none;
 }
 
-nav .menu .menu-link .submenu {
+.menu .menu-link .submenu {
     display: none;
     position: absolute;
-    background: #2f343d;
+    background-color: var(--sidebar-background);
     z-index: 3;
 }
-    
-nav .menu .menu-link:hover .submenu {
-    display: block; 
+
+.menu .menu-link:hover .submenu {
+    display: block;
 }
-    
-nav .menu .menu-link .submenu .submenu-link {
+
+.menu .menu-link:hover {
+    background-color: var(--rc-color-primary-darkest);
+}
+
+.menu .menu-link .submenu .submenu-link {
     display: block;
 }
 
@@ -66,8 +70,9 @@ nav .menu .menu-link .submenu .submenu-link {
     display: none;
 }
 
-.icon:hover {
-    background-color: #111;
+.icon:hover,
+.menu .submenu-link:hover {
+    background-color: var(--rc-color-primary-darkest);
 }
 
 i:before {
@@ -88,7 +93,7 @@ i:before {
         position: absolute;
         display: block;
         z-index: 10000;
-        background-color: #2f343d;
+        background-color: var(--sidebar-background);
         left: 0%;
         width: 100%;
     }
@@ -113,13 +118,14 @@ i:before {
         max-width: 100%;
     }
 
-    .menu.responsive .submenu-link:hover {
-        background-color: #111;
+    .menu.responsive .submenu-link:hover,
+    .menu.responsive .submenu-link::selection {
+        background-color: var(--rc-color-primary-darkest);
     }
 }
 
 @media screen and (max-width: 1620px) {
-    nav .menu .menu-link .goToSection {
+    .menu .menu-link .goToSection {
         padding: 12px 12px;
         height: 50px;
     }
