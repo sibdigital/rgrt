@@ -372,7 +372,6 @@ function Council({
 			$input.remove();
 			onChange();
 		});
-		setMaxOrderFileIndex(maxOrderFileIndex + fileIndex);
 		$input.click();
 
 		if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
@@ -401,6 +400,7 @@ function Council({
 			} else {
 				await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
+				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				setCurrentUploadedFiles([]);
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
