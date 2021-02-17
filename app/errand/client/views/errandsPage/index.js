@@ -47,7 +47,7 @@ function renderEditModal({ onCancel, erid, onChange, ...props }) {
 	</Modal>;
 }
 
-function renderAddErrandModal({onChange}){
+function renderAddErrandModal({ onChange }) {
 	const t = useTranslation();
 	modal.open({
 		title: t('Errand_title'),
@@ -56,7 +56,7 @@ function renderAddErrandModal({onChange}){
 		data: {
 			onCreate() {
 				modal.close();
-				onChange()
+				onChange();
 			},
 		},
 		confirmOnEnter: false,
@@ -66,14 +66,14 @@ function renderAddErrandModal({onChange}){
 }
 
 function Errands({
-						 type,
-						 data,
-						 sort,
-						 onClick,
-						 onHeaderClick,
-						 setParams,
-						 params,
-					 }) {
+	type,
+	data,
+	sort,
+	onClick,
+	onHeaderClick,
+	setParams,
+	params,
+}) {
 	const _t = useTranslation();
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
@@ -89,6 +89,55 @@ function Errands({
 
 	const formatDate = useFormatDate();
 	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
+		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' style={style} color='default'>
+			{item.initiatedBy.username}
+		</Table.Cell> }
+		{type === 'charged_to_me' || <Table.Cell fontScale='p1' style={style} color='default'>
+			{item.chargedToUser.username}
+		</Table.Cell> }
+		{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
+			{item.desc}
+		</Table.Cell> }
+		{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
+			{formatDate(item.ts)}
+		</Table.Cell>}
+		<Table.Cell fontScale='p1' style={style} color='default'>
+			{formatDate(item.expireAt)}
+		</Table.Cell>
+		<Table.Cell fontScale='p1' style={style} color='default'>
+			{_t(item.t)}
+		</Table.Cell>
+	</Table.Row>
+	, [mediaQuery]);
+
+	return <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={data.result} total={data.total} setParams={setParams} params={params} />;
+}
+
+function Requests({
+	type,
+	data,
+	sort,
+	onClick,
+	onHeaderClick,
+	setParams,
+	params,
+}) {
+	const _t = useTranslation();
+
+	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	const header = useMemo(() => [
+		type === 'initiated_by_me' || <Th key={'initiatedBy.username'} direction={sort[1]} active={sort[0] === 'initiatedBy.username'} onClick={onHeaderClick} sort='initiatedBy.username' color='default'>{_t('Errand_Initiated_by')}</Th>,
+		type === 'charged_to_me' || <Th key={'chargedToUser.username'} direction={sort[1]} active={sort[0] === 'chargedToUser.username'} onClick={onHeaderClick} sort='chargedToUser.username' color='default'>{_t('Errand_Charged_to')}</Th>,
+		mediaQuery && <Th key={'desc'} direction={sort[1]} active={sort[0] === 'desc'} onClick={onHeaderClick} sort='desc' color='default'>{_t('Description')}</Th>,
+		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '150px' }} color='default'>{_t('Started_At')}</Th>,
+		<Th key={'expireAt'} direction={sort[1]} active={sort[0] === 'expireAt'} onClick={onHeaderClick} sort='expireAt' style={{ width: '150px' }} color='default'>{_t('Errand_Expired_date')}</Th>,
+		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t' color='default'>{_t('Status')}</Th>,
+	].filter(Boolean), [type, sort, mediaQuery]);
+
+	const formatDate = useFormatDate();
+	const renderRow = useCallback((item) =>
+		<Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
 			{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' style={style} color='default'>
 				{item.initiatedBy.username}
 			</Table.Cell> }
@@ -108,9 +157,9 @@ function Errands({
 				{_t(item.t)}
 			</Table.Cell>
 		</Table.Row>
-		, [mediaQuery]);
+	, [mediaQuery]);
 
-	return <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={data.result} total={data.total} setParams={setParams} params={params} />;
+	return <GenericTable key='RequestsTable' header={header} renderRow={renderRow} results={data.result} total={data.total} setParams={setParams} params={params} />;
 }
 
 export function ErrandPage() {
@@ -128,7 +177,7 @@ export function ErrandPage() {
 	}
 
 	const [sort, setSort] = useState(['ts', 'asc']);
-	const [params, setParams] = useState({ type: type, current: 0, itemsPerPage: 100 });
+	const [params, setParams] = useState({ type, current: 0, itemsPerPage: 100 });
 	const [cache, setCache] = useState();
 	const setModal = useSetModal();
 
@@ -160,30 +209,27 @@ export function ErrandPage() {
 
 	const cancelModal = useCallback(() => setModal(undefined), []);
 
-	const onClick = useCallback((errand) => () => setModal(() => renderEditModal({ onCancel: cancelModal, erid: errand._id, onChange: onChange, key: 'modal-errand' })), []);
+	const onClick = useCallback((errand) => () => setModal(() => renderEditModal({ onCancel: cancelModal, erid: errand._id, onChange, key: 'modal-errand' })), []);
 
-	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal({ onChange: onChange })), []);
-
-	const goBack = () => {
-		window.history.back();
-	};
+	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal({ onChange })), []);
 
 	return <Page flexDirection='row'>
-				<Page>
-					<Page.Header>
-						<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-							<GoBackButton/>
-							<Label fontScale='h1'>{t(title)}</Label>
-						</Field>
-						{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={addErrand()} aria-label={t('Add')}>
-							{ t('Add') }
-						</Button> }
-					</Page.Header>
-					<Page.Content>
-						<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>;
-					</Page.Content>
-				</Page>
-			</Page>;
+		<Page>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<GoBackButton/>
+					<Label fontScale='h1'>{t(title)}</Label>
+				</Field>
+				{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={addErrand()} aria-label={t('Add')}>
+					{ t('Add') }
+				</Button> }
+			</Page.Header>
+			<Page.Content>
+				<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>
+				{/*<Requests type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>*/}
+			</Page.Content>
+		</Page>
+	</Page>;
 }
 
 ErrandPage.displayName = 'ErrandsPage';
