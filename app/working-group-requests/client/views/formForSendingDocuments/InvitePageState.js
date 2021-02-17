@@ -6,7 +6,7 @@ import { useRouteParameter, useRoute } from '../../../../../client/contexts/Rout
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import InviteStepperPage from './InviteStepperPage';
-import { useUserId } from '/client/contexts/UserContext';
+import { useUserId } from '../../../../../client/contexts/UserContext';
 
 export const finalStep = 'final';
 export const errorStep = 'error';
