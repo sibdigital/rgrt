@@ -15,6 +15,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 export const useQuery = ({ itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	query: JSON.stringify({ _id: { $regex: '', $options: 'i' } }),
+	sort: JSON.stringify({ ts: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction, cache]);

@@ -10,7 +10,7 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { constructPersonFullFIO } from '../../../../../utils/client/methods/constructPersonFIO';
 import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
-import { useMethod } from '/client/contexts/ServerContext';
+import { useMethod } from '../../../../../../client/contexts/ServerContext';
 
 function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo, userInfo, fileDownloadInfo }) {
 	const { goToPreviousStep, goToNextStep, goToFinalStep } = useInvitePageContext();

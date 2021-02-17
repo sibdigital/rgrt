@@ -21,10 +21,10 @@ import { Pager } from '../../../../../../client/views/setupWizard/Pager';
 import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
-import { filesValidation, fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
+import { filesValidation } from '../../../../../ui/client/lib/fileUpload';
 import GenericTable, { Th } from '../../../../../../client/components/GenericTable';
+import { useUserId } from '../../../../../../client/contexts/UserContext';
 import './reactTooltip.css';
-import { useUserId } from '/client/contexts/UserContext';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -786,7 +786,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 						<Field>
 							<Field.Label>{t('Commentary')}</Field.Label>
 							<Field.Row>
-								<TextAreaInput rows='3' style={{ whiteSpace: 'normal' }} value={newData.commentary.value} flexGrow={1} onChange={handleChange('commentary')} />
+								<TextAreaInput rows='6' style={{ whiteSpace: 'normal' }} value={newData.commentary.value} flexGrow={1} onChange={handleChange('commentary')} />
 							</Field.Row>
 						</Field>
 						<Field mbe='x8'>
