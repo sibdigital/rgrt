@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Label, Icon } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Label, Icon, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
@@ -10,6 +10,8 @@ import { Requests } from './requests';
 import { AddRequest } from './AddRequest';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -23,6 +25,7 @@ export const useQuery = ({ itemsPerPage, current }, [column, direction], cache) 
 export function WorkingGroupRequestsPage() {
 	const t = useTranslation();
 	const routeName = 'working-groups-requests';
+	const userId = useUserId();
 	console.log('working-groups-requests');
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
@@ -87,9 +90,10 @@ export function WorkingGroupRequestsPage() {
 		setCache(new Date());
 	}, []);
 
-	const goBack = () => {
-		window.history.back();
-	};
+	if (!hasPermission(userId, 'manage-working-group-requests')) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
 
 	return <Page flexDirection='row'>
 		<Page>

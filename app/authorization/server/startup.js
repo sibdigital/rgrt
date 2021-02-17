@@ -65,6 +65,7 @@ Meteor.startup(function() {
 		{ _id: 'manage-selected-settings', 	         roles: ['admin'] },
 		{ _id: 'manage-tags',			 			 roles: ['admin'] },
 		{ _id: 'manage-working-group',	 			 roles: ['admin', 'secretary', 'working-group-member', 'working-group-leader'] },
+		{ _id: 'manage-working-group-requests',	 	 roles: ['admin', 'secretary'] },
 		{ _id: 'mention-all',                        roles: ['admin', 'owner', 'moderator', 'user'] },
 		{ _id: 'mention-here',                       roles: ['admin', 'owner', 'moderator', 'user'] },
 		{ _id: 'mute-user',                          roles: ['admin', 'owner', 'moderator'] },

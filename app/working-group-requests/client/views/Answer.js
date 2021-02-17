@@ -9,7 +9,7 @@ import {
 	TextAreaInput,
 	Tabs,
 	Box,
-	Skeleton,
+	Skeleton, Callout,
 } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -22,8 +22,11 @@ import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterC
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 export function AnswerPage() {
+	const t = useTranslation();
 	const requestId = useRouteParameter('requestid');
 	const mailId = useRouteParameter('mailid');
 	const answerId = useRouteParameter('answerid');
@@ -39,6 +42,11 @@ export function AnswerPage() {
 	const { data: files, state, error } = useEndpointDataExperimental('upload-files.list', filesQuery);
 
 	useMemo(() => console.log(files), [files]);
+
+	if (!hasPermission(useUserId(), 'manage-working-group-requests')) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
 
 	if (state === ENDPOINT_STATES.LOADING) {
 		return <Box w='full' pb='x24'>
