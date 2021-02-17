@@ -43,7 +43,7 @@ export function AnswerPage() {
 
 	useMemo(() => console.log(files), [files]);
 
-	if (!hasPermission(useUserId(), 'manage-working-group-requests')) {
+	if (!hasPermission('manage-working-group-requests', useUserId())) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}

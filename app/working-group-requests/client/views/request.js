@@ -104,7 +104,7 @@ export function DocumentPage() {
 		router.push({ id: requestId, context: 'answer', tab: 'info' });
 	}, [router, currentAnswer]);
 
-	if (!hasPermission(useUserId(), 'manage-working-group-requests')) {
+	if (!hasPermission('manage-working-group-requests', useUserId())) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}

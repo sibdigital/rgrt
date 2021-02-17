@@ -90,7 +90,7 @@ export function WorkingGroupRequestsPage() {
 		setCache(new Date());
 	}, []);
 
-	if (!hasPermission(userId, 'manage-working-group-requests')) {
+	if (!hasPermission('manage-working-group-requests', userId)) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
