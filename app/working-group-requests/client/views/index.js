@@ -90,6 +90,10 @@ export function WorkingGroupRequestsPage() {
 		setCache(new Date());
 	}, []);
 
+	const goBack = () => {
+		FlowRouter.go('home');
+	};
+
 	if (!hasPermission('manage-working-group-requests', userId)) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
@@ -99,10 +103,10 @@ export function WorkingGroupRequestsPage() {
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<GoBackButton/>
+					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>
 						{(context === undefined || context === 'requests') && t('Working_group_requests')}
-						{context === 'new' && t('Working_group_request_add')}
+						{(context === 'new' || context === 'new-protocols-item-request') && t('Working_group_request_add')}
 						{context === 'edit' && t('Working_group_request_edit')}
 					</Label>
 				</Field>
@@ -117,14 +121,14 @@ export function WorkingGroupRequestsPage() {
 				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
 			</Page.Content>
 		</Page>
-		{(context === 'new' || context === 'edit')
+		{(context === 'new' || context === 'edit' || context === 'new-protocols-item-request')
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'new' && t('Add') }
+				{ (context === 'new' || context === 'new-protocols-item-request') && t('Add') }
 				{ context === 'edit' && t('Edit') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
-			{context === 'new' && <AddRequest onChange={onChange}/>}
+			{(context === 'new' || context === 'new-protocols-item-request') && <AddRequest onChange={onChange} docsdata={docsdata}/>}
 			{context === 'edit' && <AddRequest onChange={onChange} editData={currentRequestToEdit}/>}
 		</VerticalBar>}
 	</Page>;

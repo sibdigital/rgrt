@@ -104,6 +104,10 @@ export function DocumentPage() {
 		router.push({ id: requestId, context: 'answer', tab: 'info' });
 	}, [router, currentAnswer]);
 
+	const goBack = () => {
+		FlowRouter.go('working-groups-requests')
+	};
+
 	if (!hasPermission('manage-working-group-requests', useUserId())) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
@@ -113,7 +117,7 @@ export function DocumentPage() {
 		{(context !== 'answers' && context !== 'answer') && <Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<GoBackButton/>
+					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>
