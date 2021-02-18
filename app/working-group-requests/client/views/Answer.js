@@ -147,6 +147,7 @@ function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 function InfoData({ answer }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
+	const areaInputStyle = { whiteSpace: 'normal', wordBreak: 'break-word' };
 
 	return <Field display='flex' flexDirection='column' w='full' mbs='x8' mbe='x32' overflow='auto'>
 		<Field mbe='x8'>
@@ -182,19 +183,19 @@ function InfoData({ answer }) {
 		<Field mbe='x8'>
 			<Field.Label>{t('Working_group_request_invite_select_protocol')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='2' style={{ whiteSpace: 'normal' }} value={answer.protocol ?? ''} readOnly placeholder={t('Working_group_request_invite_select_protocol')} fontScale='p1'/>
+				<TextAreaInput rows='2' style={areaInputStyle} value={answer.protocol?.title ?? ''} readOnly placeholder={t('Working_group_request_invite_select_protocol')} fontScale='p1'/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Working_group_request_invite_select_sections')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='2' style={{ whiteSpace: 'normal' }} value={answer.section ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections')} fontScale='p1'/>
+				<TextAreaInput rows='2' style={areaInputStyle} value={answer.protocol?.section?.title ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections')} fontScale='p1'/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Working_group_request_invite_select_sections_items')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='2' style={{ whiteSpace: 'normal' }} value={answer.sectionItem ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections_items')} fontScale='p1'/>
+				<TextAreaInput rows='2' style={areaInputStyle} value={answer.protocol?.sectionItem?.title ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections_items')} fontScale='p1'/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
