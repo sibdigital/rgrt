@@ -70,6 +70,8 @@ import PersonsModel from '../models/Persons';
 import { PersonsRaw } from './PersonsRaw';
 import AgendasModel from '../models/Agendas';
 import { AgendasRaw } from './AgendasRaw';
+import ProtocolItemsPersonsResponsibleModel from '../models/ProtocolItemsPersonsResponsible';
+import { ProtocolItemsPersonsResponsibleRaw } from './ProtocolItemsPersonsResponsibleRaw';
 
 export const Permissions = new PermissionsRaw(PermissionsModel.model.rawCollection());
 export const Roles = new RolesRaw(RolesModel.model.rawCollection());
@@ -107,3 +109,4 @@ export const Protocols = new ProtocolsRaw(ProtocolsModel.model.rawCollection());
 export const WorkingGroupsRequests = new WorkingGroupsRequestsRaw(WorkingGroupsRequestsModel.model.rawCollection());
 export const Persons = new PersonsRaw(PersonsModel.model.rawCollection());
 export const Agendas = new AgendasRaw(AgendasModel.model.rawCollection());
+export const ProtocolItemsPersonsResponsible = new ProtocolItemsPersonsResponsibleRaw(ProtocolItemsPersonsResponsibleModel.model.rawCollection());
