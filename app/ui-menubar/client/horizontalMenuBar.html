@@ -5,7 +5,13 @@
 		</a>
 		<ul class='menu' id='main-menu'>
 			{{#each menuItems}}
-				<li class="menu-link"><a class="goToSection">{{name}}</a>
+				<li class="menu-link"><a class="goToSection">
+					{{#if icon}}
+						{{> icon block="sidebar__toolbar-button-icon" icon=icon }}
+					{{else}}
+						{{name}}
+					{{/if}}
+				</a>
 					{{#if subItems}}
 						<ul class="submenu">
 							{{#each subItems}}
