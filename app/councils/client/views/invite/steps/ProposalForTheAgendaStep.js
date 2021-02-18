@@ -20,7 +20,7 @@ import { createProposalsForTheAgenda, validateProposalsForTheAgenda } from '../.
 import { constructPersonFullFIO } from '../../../../../utils/client/methods/constructPersonFIO';
 import { useInvitePageContext } from '../InvitePageState';
 
-function ProposalForTheAgendaStep({ step, title, active, council, agendaId, userData }) {
+function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council, agendaId, userData }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const { goToFinalStep, goToPreviousStep } = useInvitePageContext();
@@ -102,7 +102,7 @@ function ProposalForTheAgendaStep({ step, title, active, council, agendaId, user
 
 	const allFieldAreFilled = useMemo(() => editData.issueConsideration !== '', [editData.issueConsideration]);
 
-	return <Step active={active} working={commiting} onSubmit={handleSave}>
+	return <Step active={active} working={commiting} onSubmit={handleSave} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 		<Box is='p' fontScale='s1' color='hint' mbe='x16'>{t('Proposal_for_the_agenda_invite_description')}</Box>
 		<Margins blockEnd='x32'>
