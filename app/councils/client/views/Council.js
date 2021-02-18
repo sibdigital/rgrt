@@ -400,6 +400,7 @@ function Council({
 			} else {
 				await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
+				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				setCurrentUploadedFiles([]);
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
@@ -475,8 +476,11 @@ function Council({
 		console.log(fileId);
 		try {
 			await deleteFileFromCouncil(councilId, fileId);
-			setAttachedFiles(attachedFiles.filter((file) => file._id !== fileId));
 			setMaxOrderFileIndex(attachedFiles.length);
+
+			const arr = await updateCouncilFilesOrder(councilId, attachedFiles.filter((file) => file._id !== fileId));
+			setAttachedFiles(arr);
+
 			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('File_has_been_deleted')} onClose={() => { setModal(undefined); close(); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
@@ -509,12 +513,12 @@ function Council({
 			const filesArray = await updateCouncilFilesOrder(councilId, attachedFiles);
 			setAttachedFiles(filesArray);
 			setCurrentMovedFiles({ downIndex: -1, upIndex: -1 });
-			dispatchToastMessage({ type: 'success', message: 'Week' });
+			dispatchToastMessage({ type: 'success', message: t('Save_Order_successfully') });
 		} catch (error) {
 			console.log(error);
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [updateCouncilFilesOrder, councilId, attachedFiles]);
+	}, [updateCouncilFilesOrder, councilId, attachedFiles, t]);
 
 	const moveFileUpOrDown = useCallback((type, index) => {
 		const arr = attachedFiles;

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Label, Icon } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Label, Icon, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
@@ -10,11 +10,14 @@ import { Requests } from './requests';
 import { AddRequest } from './AddRequest';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 export const useQuery = ({ itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	query: JSON.stringify({ _id: { $regex: '', $options: 'i' } }),
+	sort: JSON.stringify({ ts: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction, cache]);
@@ -22,6 +25,7 @@ export const useQuery = ({ itemsPerPage, current }, [column, direction], cache) 
 export function WorkingGroupRequestsPage() {
 	const t = useTranslation();
 	const routeName = 'working-groups-requests';
+	const userId = useUserId();
 	console.log('working-groups-requests');
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
@@ -87,17 +91,22 @@ export function WorkingGroupRequestsPage() {
 	}, []);
 
 	const goBack = () => {
-		window.history.back();
+		FlowRouter.go('home');
 	};
+
+	if (!hasPermission('manage-working-group-requests', userId)) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
 
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<GoBackButton/>
+					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>
 						{(context === undefined || context === 'requests') && t('Working_group_requests')}
-						{context === 'new' && t('Working_group_request_add')}
+						{(context === 'new' || context === 'new-protocols-item-request') && t('Working_group_request_add')}
 						{context === 'edit' && t('Working_group_request_edit')}
 					</Label>
 				</Field>
@@ -112,14 +121,14 @@ export function WorkingGroupRequestsPage() {
 				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
 			</Page.Content>
 		</Page>
-		{(context === 'new' || context === 'edit')
+		{(context === 'new' || context === 'edit' || context === 'new-protocols-item-request')
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
-				{ context === 'new' && t('Add') }
+				{ (context === 'new' || context === 'new-protocols-item-request') && t('Add') }
 				{ context === 'edit' && t('Edit') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
-			{context === 'new' && <AddRequest onChange={onChange}/>}
+			{(context === 'new' || context === 'new-protocols-item-request') && <AddRequest onChange={onChange} docsdata={docsdata}/>}
 			{context === 'edit' && <AddRequest onChange={onChange} editData={currentRequestToEdit}/>}
 		</VerticalBar>}
 	</Page>;

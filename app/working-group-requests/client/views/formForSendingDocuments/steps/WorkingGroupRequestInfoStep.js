@@ -43,7 +43,7 @@ function WorkingGroupRequestInfoStep({ step, title, active }) {
 				<Field>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput flexGrow={1} value={workingGroupRequestState.data.desc} readOnly style={ { whiteSpace: 'normal' } } fontScale='p1' rows='5'/>
+						<TextAreaInput flexGrow={1} value={workingGroupRequestState.data.desc} readOnly style={ { whiteSpace: 'normal', wordBreak: 'break-word' } } fontScale='p1' rows='8'/>
 					</Field.Row>
 				</Field>
 				{/*<Box display='flex' flexDirection='column'>*/}

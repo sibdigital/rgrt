@@ -74,7 +74,6 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocol
 									step={3}
 									title={t('Working_group_request_invite_contact_data')}
 									active={currentStep === 3}
-									setContactInfo={setContactInfo}
 									userInfo={userInfo}
 									fileDownloadInfo={info}
 								/>

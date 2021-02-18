@@ -3,15 +3,16 @@ import { Meteor } from 'meteor/meteor';
 
 import { API } from '../api';
 import { FileUpload } from '../../../file-upload';
-import { findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId } from '../lib/working-groups-requests';
+import { findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId, findWorkingGroupRequestByProtocolsItemId } from '../lib/working-groups-requests';
 
 API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		return API.v1.success(Promise.await(findWorkingGroupsRequests({
 			query,
+			fields: stockFields,
 			pagination: {
 				offset,
 				count,
@@ -123,4 +124,11 @@ API.v1.addRoute('working-groups-requests.upload/:id/:answerId', { authRequired: 
 		});
 		return API.v1.success({ _id: fileData._id });
 	},
+});
+
+API.v1.addRoute('working-groups-requests.findByProtocolsItemId', {authRequired: true}, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findWorkingGroupRequestByProtocolsItemId(query._id)))
+	}
 });

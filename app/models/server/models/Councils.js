@@ -89,7 +89,10 @@ class Councils extends Base {
 
 		data._updatedAt = new Date();
 
-		data.documents = filesData;
+		data.documents = filesData?.map((file, index) => {
+			file.orderIndex = index + 1;
+			return file;
+		});
 		return this.update({ _id: councilId }, { $set: { ...data } });
 	}
 

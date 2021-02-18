@@ -10,10 +10,10 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { constructPersonFullFIO } from '../../../../../utils/client/methods/constructPersonFIO';
 import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
-import { useMethod } from '/client/contexts/ServerContext';
+import { useMethod } from '../../../../../../client/contexts/ServerContext';
 
-function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo, userInfo, fileDownloadInfo }) {
-	const { goToPreviousStep, goToNextStep, goToFinalStep } = useInvitePageContext();
+function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDownloadInfo }) {
+	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
 
 	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
 
@@ -61,7 +61,6 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo, us
 		});
 		dataToSend.ts = new Date();
 		return Object.assign({}, dataToSend, fileDownloadInfo.workingGroupRequestAnswer);
-		// return dataToSend;
 	};
 
 	const t = useTranslation();
@@ -77,7 +76,6 @@ function WorkingGroupRequestAnswerStep({ step, title, active, setContactInfo, us
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		try {
-			// setContactInfo(packNewData(newData));
 			const dataToSave = packNewData();
 			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
 			await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {

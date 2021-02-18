@@ -47,6 +47,7 @@ import Protocols from './models/Protocols';
 import WorkingGroupsRequests from './models/WorkingGroupsRequests';
 import Persons from './models/Persons';
 import Agendas from './models/Agendas';
+import ProtocolItemsPersonsResponsible from './models/ProtocolItemsPersonsResponsible';
 
 export { AppsLogsModel } from './models/apps-logs-model';
 export { AppsPersistenceModel } from './models/apps-persistence-model';
@@ -106,4 +107,5 @@ export {
 	WorkingGroupsRequests,
 	Persons,
 	Agendas,
+	ProtocolItemsPersonsResponsible,
 };

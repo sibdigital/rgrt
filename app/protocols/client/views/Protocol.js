@@ -234,6 +234,11 @@ export function ProtocolPage() {
 		}
 	}, [moveItem, dispatchToastMessage, onChange]);
 
+	const openWorkingGroupRequest = (protocolsItemId) => () => {
+		FlowRouter.go(`/working-groups-requests/new-protocols-item-request/${ protocolsItemId }`);
+	};
+
+
 	const onItemMenuClick = useCallback((event) => {
 		const items = [
 			{
@@ -256,6 +261,10 @@ export function ProtocolPage() {
 				name: t('Item_Delete'),
 				action: openConfirmDeleteItem(event.currentTarget.dataset.section, event.currentTarget.dataset.item)
 			},
+			{
+				name: t('Working_group_request'),
+				action: openWorkingGroupRequest(event.currentTarget.dataset.item)
+			}
 		]
 		const config = {
 			columns: [

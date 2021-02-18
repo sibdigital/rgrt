@@ -1,5 +1,5 @@
 import { API } from '../api';
-import { findProtocols, findProtocol, findProtocolByCouncilId } from '../lib/protocols';
+import { findProtocols, findProtocol, findProtocolByCouncilId, findProtocolByItemId } from '../lib/protocols';
 import { hasPermission } from '../../../authorization';
 import { Persons } from '../../../models';
 
@@ -10,10 +10,11 @@ API.v1.addRoute('protocols.list', { authRequired: true }, {
 		// }
 
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		return API.v1.success(Promise.await(findProtocols({
 			query,
+			fields: stockFields,
 			pagination: {
 				offset,
 				count,
@@ -49,6 +50,13 @@ API.v1.addRoute('protocols.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findProtocol(query._id)));
+	},
+});
+
+API.v1.addRoute('protocols.findByItemId', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findProtocolByItemId(query._id)));
 	},
 });
 
