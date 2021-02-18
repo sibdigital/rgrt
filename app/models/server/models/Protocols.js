@@ -1,5 +1,6 @@
-import { Base } from './_Base';
 import { ObjectID } from 'bson';
+
+import { Base } from './_Base';
 
 class Protocols extends Base {
 	constructor() {
@@ -88,14 +89,13 @@ class Protocols extends Base {
 
 			data.sections.forEach((section) => {
 				if (section._id === sectionId) {
-
 					if (section.items) {
 						let internalNum = 0;
 						section.items.forEach((item) => {
 							if (item.inum > internalNum) {
 								internalNum = item.inum;
 							}
-						})
+						});
 						internalNum++;
 						item.inum = internalNum;
 						section.items = [...section.items, item];
@@ -103,14 +103,13 @@ class Protocols extends Base {
 						item.inum = 1;
 						section.items = [item];
 					}
-
 				}
 			});
 
-			this.update({ _id: protocolId }, { $set: { ...data } })
+			this.update({ _id: protocolId }, { $set: { ...data } });
+			return _id;
 		}
-
-		return _id;
+		return null;
 	}
 
 	removeItemById(protocolId, sectionId, _id) {

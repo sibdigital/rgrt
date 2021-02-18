@@ -589,14 +589,30 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 	const packNewData = () => {
 		const dataToSend = {};
-		const protocolData = protocolsData[newData.protocol.value];
-		const sectionIndex = newData.section.value;
-		const sectionItemIndex = newData.sectionItem.value;
 		const labelNotChosen = t('Not_chosen');
 		if (answerTypeContext === 'protocol') {
-			dataToSend.protocol = protocolData ? [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' ') : labelNotChosen;
-			dataToSend.section = sectionIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].num ?? '', ': ', protocolData.sections[sectionIndex].name ? preProcessingProtocolItems(protocolData.sections[sectionIndex].name) : ''].join('');
-			dataToSend.sectionItem = sectionItemIndex === '' ? labelNotChosen : [protocolData.sections[sectionIndex].items[sectionItemIndex].num ?? '', ': ', protocolData.sections[sectionIndex].items[sectionItemIndex].name ? preProcessingProtocolItems(protocolData.sections[sectionIndex].items[sectionItemIndex].name) : ''].join('');
+			const protocolData = protocolsData[newData.protocol.value];
+			const sectionData = protocolData.sections[newData.section.value];
+			const sectionItemData = sectionData.items[newData.sectionItem.value];
+			console.log(protocolData);
+			console.log(sectionData);
+			console.log(sectionItemData);
+			dataToSend.protocol = {
+				_id: protocolData._id,
+				title: [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' '),
+				section: {
+					_id: sectionData._id,
+					title: [sectionData.num ?? '', ': ', sectionData.name ? preProcessingProtocolItems(sectionData.name) : ''].join(''),
+				},
+				sectionItem: {
+					_id: sectionItemData._id,
+					title: [sectionItemData.num ?? '', ': ', sectionItemData.name ? preProcessingProtocolItems(sectionItemData.name) : ''].join(''),
+				},
+			};
+			dataToSend.protocolId = protocolData._id;
+			dataToSend.sectionId = sectionData._id;
+			dataToSend.sectionItemId = sectionItemData._id;
+			console.log(dataToSend);
 		} else {
 			dataToSend.protocol = labelNotChosen;
 			dataToSend.section = labelNotChosen;
@@ -636,8 +652,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 				} else {
 					setInfo({ workingGroupRequestId, mailId, workingGroupRequestAnswer, attachedFile });
 					goToNextStep();
-					// const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(workingGroupRequestId, mailId, workingGroupRequestAnswer);
-					// await fileUploadToWorkingGroupRequestAnswer(attachedFile, { _id: workingGroupRequestId, mailId: newMailId === '' ? mailId : newMailId, answerId });
 				}
 			}
 		} catch (error) {

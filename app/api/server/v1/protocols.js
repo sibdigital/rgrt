@@ -10,10 +10,11 @@ API.v1.addRoute('protocols.list', { authRequired: true }, {
 		// }
 
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		return API.v1.success(Promise.await(findProtocols({
 			query,
+			fields: stockFields,
 			pagination: {
 				offset,
 				count,

@@ -8,10 +8,11 @@ import { findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, fin
 API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		return API.v1.success(Promise.await(findWorkingGroupsRequests({
 			query,
+			fields: stockFields,
 			pagination: {
 				offset,
 				count,
