@@ -17,8 +17,8 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocol
 	useWipeInitialPageLoading();
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
-	const [contactInfo, setContactInfo] = useState({});
 	const [info, setInfo] = useState({});
+	const [workingGroupRequestData, setWorkingGroupRequestData] = useState(workingGroupRequest);
 
 	return <>
 		<ConnectionStatusAlert />
@@ -60,14 +60,18 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, protocol
 					<Scrollable>
 						<Margins all='x16'>
 							<Tile is='section' flexGrow={1} flexShrink={1}>
-								<WorkingGroupRequestInfoStep step={1} title={t('Working_group_request_info')} active={currentStep === 1}/>
+								<WorkingGroupRequestInfoStep
+									step={1}
+									title={t('Working_group_request_info')}
+									active={currentStep === 1}
+									setWorkingGroupRequestData={setWorkingGroupRequestData}
+								/>
 								<WorkingGroupRequestAnswerFileDownloadStep
 									step={2}
 									title={t('Working_group_request_invite_file_downloads')}
 									active={currentStep === 2}
-									workingGroupRequest={workingGroupRequest}
+									workingGroupRequest={workingGroupRequestData}
 									protocolsData={protocolsData}
-									contactInfoData={contactInfo}
 									setInfo={setInfo}
 								/>
 								<WorkingGroupRequestAnswerStep

@@ -487,7 +487,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	};
 
 	const handleChangeSelect = (field) => (val) => {
-		// console.log('handle change select');
+		console.log('handle change select');
 		// console.log(field, val);
 		const updateData = Object.assign({}, newData);
 
@@ -589,14 +589,12 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 	const packNewData = () => {
 		const dataToSend = {};
-		const labelNotChosen = t('Not_chosen');
+		dataToSend.answerType = answerTypeContext;
+
 		if (answerTypeContext === 'protocol') {
 			const protocolData = protocolsData[newData.protocol.value];
 			const sectionData = protocolData.sections[newData.section.value];
 			const sectionItemData = sectionData.items[newData.sectionItem.value];
-			console.log(protocolData);
-			console.log(sectionData);
-			console.log(sectionItemData);
 			dataToSend.protocol = {
 				_id: protocolData._id,
 				title: [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' '),
@@ -612,12 +610,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			dataToSend.protocolId = protocolData._id;
 			dataToSend.sectionId = sectionData._id;
 			dataToSend.sectionItemId = sectionItemData._id;
-			console.log(dataToSend);
-		} else {
-			dataToSend.protocol = labelNotChosen;
-			dataToSend.section = labelNotChosen;
-			dataToSend.sectionItem = labelNotChosen;
 		}
+
 		dataToSend.commentary = newData.commentary.value.trim();
 		dataToSend.ts = new Date();
 		return Object.assign({}, dataToSend);
