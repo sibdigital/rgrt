@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Field, Box, Label, Tabs, Select } from '@rocket.chat/fuselage';
+import { Button, Field, Box, Label, FieldGroup, Select, Tabs, Icon } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
@@ -74,28 +74,28 @@ export function CouncilsPage() {
 		setCache(new Date());
 	}, []);
 
-	const displayOptions = useMemo(() => [['table', t('Table')], ['calendar', t('Calendar')]], [t]);
-
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
-				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+			<Page.Header title=''>
+				<Field display='flex' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
-				{ isAllow && <Button width='200px' primary small onClick={onAddClick} aria-label={t('Add')}>
-					{ t('Add') }
-				</Button>}
+				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
+					<Tabs flexShrink={0} width='auto'>
+						<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>
+							<Icon name='list'/>
+						</Tabs.Item>
+						<Tabs.Item selected={displayMode === 'calendar'} onClick={() => setDisplayMode('calendar')}>
+							<Icon name='calendar'/>
+						</Tabs.Item>
+					</Tabs>
+					{ isAllow && <Button mbs='0' width='auto' pi='x16' primary small onClick={onAddClick} aria-label={t('Add')}>
+						<Icon name='plus' size={16} mie='x4'/>{ t('Add') }
+					</Button>}
+				</FieldGroup>
 			</Page.Header>
 			<Page.Content>
-				<Box display='flex' flexDirection='row' maxWidth='x250' alignItems='center' mbe='x16' flexShrink={0} alignSelf='end'>
-					<Label mi='x8'>{t('Display_format')}:</Label>
-					<Select value={displayMode} options={displayOptions} onChange={(val) => setDisplayMode(val)}/>
-				</Box>
-				{/*<Tabs flexShrink={0} mbe='x8'>*/}
-				{/*	<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>{t('Table')}</Tabs.Item>*/}
-				{/*	<Tabs.Item selected={displayMode === 'calendar'} onClick={() => setDisplayMode('calendar')}>{t('Calendar')}</Tabs.Item>*/}
-				{/*</Tabs>*/}
 				<Councils displayMode={displayMode} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
