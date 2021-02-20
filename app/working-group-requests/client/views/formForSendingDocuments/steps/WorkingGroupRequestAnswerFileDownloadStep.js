@@ -111,227 +111,40 @@ const FilterByDateRange = ({ protocolsData, setProtocolsData, ...props }) => {
 	</Box>;
 };
 
-const FilterOptions = ({ onChange = () => {}, ...props }) => {
-	const t = useTranslation();
-	const [filter, setFilter] = useState('');
-	const [selectedSectionLabel, setSelectedSectionLabel] = useState('');
-
-	const options = useMemo(() => {
-		try {
-			const renderOption = (label) => <Box display='flex' flexDirection='row' alignItems='center'>
-				<Label>{ label }</Label>
-			</Box>;
-
-			return [
-				['number', renderOption(t('По номеру'))],
-				['date', renderOption(t('По дате'))],
-			];
-		} catch (e) {
-			console.log(e);
-			return [];
-		}
-	}, [t]);
-
-	const [cursor, handleKeyDown, handleKeyUp, reset, [visible, hide, show]] = useCursor(-1, options, ([selected], [, hide]) => {
-		setFilter(selected);
-		reset();
-		hide();
-	});
-
-	const ref = useRef();
-	const onClick = useCallback(() => {
-		ref.current.focus() & show();
-		ref.current.classList.add('focus-visible');
-	}, [show]);
-
-	const handleSelection = useCallback(([selected]) => {
-		setFilter(selected);
-		reset();
-		hide();
-	}, [hide, reset]);
-
-	useEffect(() => {
-		if (filter !== '') {
-			onChange(filter)();
-			let index = -1;
-			if (filter === 'number') {
-				index = 0;
-			} else if (filter === 'date') {
-				index = 1;
-			}
-			// console.log(options[index]);
-			setSelectedSectionLabel(options[index][1] ?? '');
-		}
-	}, [filter, setSelectedSectionLabel]);
-
-	return (
-		<>
-			<Button
-				{...props}
-				height='40px'
-				maxHeight='40px'
-				display='flex'
-				flexGrow={3}
-				ref={ref}
-				ghost
-				textAlign='left'
-				onClick={onClick}
-				onBlur={hide}
-				onKeyUp={handleKeyUp}
-				onKeyDown={handleKeyDown}
-				fontScale='p1'
-				backgroundColor='transparent'
-				borderWidth='0.125rem'
-				borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
-				<Field display='flex' flexDirection='row'>
-					<Label width='auto' fontScale='p1'>
-						{selectedSectionLabel}
-					</Label>
-					<Box color='var(--rc-color-primary-dark)' borderColor='transparent' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
-				</Field>
-			</Button>
-			<PositionAnimated
-				width='350px'
-				visible={visible}
-				anchor={ref}
-				placement={'bottom-end'}
-				maxWidth='350px'
-			>
-				<Options
-					width='350px'
-					maxWidth='350px'
-					onSelect={handleSelection}
-					options={options}
-					cursor={cursor}/>
-			</PositionAnimated>
-		</>
-	);
-};
-
 const preProcessingProtocolItems = (item) => {
 	const regExp = new RegExp('(<[^>]*>)*(&nbsp;)*', 'gi');
 	return item.replaceAll(regExp, '');
 };
 
-const SectionOptions = ({ items, selectedSectionLabel, setSelectedSectionLabel, onChange = () => {}, ...props }) => {
-	const t = useTranslation();
-	const replaceChar = (str) =>
-		[...str]?.map((ch, index) => ch).join('') || '';
-
-	const [section, setSection] = useState();
-
-	useMemo(() => selectedSectionLabel === t('Working_group_request_invite_select_sections') ? setSection(-1) : '', [selectedSectionLabel]);
-
-	const options = useMemo(() => {
-		try {
-			const renderOption = (label) => {
-				const tooltipLabel = preProcessingProtocolItems(replaceChar(label));
-				const mainLabel = preProcessingProtocolItems(label?.length > 50 ? label?.slice(0, 50) + '...' : label) || '';
-				return <Box display='flex' flexDirection='row' alignItems='center'
-					data-for='itemT'
-					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='450px'>
-					<Label>{ mainLabel }</Label>
-					<ReactTooltip id='itemT' className='react-tooltip-class' multiline effect='solid' place='top'/>
-				</Box>;
-			};
-
-			return items?.map((item) => [item[0] ?? -1, renderOption(item[1] ?? '')]) || [];
-		} catch (e) {
-			console.log(e);
-			return [];
-		}
-	}, [t, items]);
-
-	const [cursor, handleKeyDown, handleKeyUp, reset, [visible, hide, show]] = useCursor(-1, options, ([selected], [, hide]) => {
-		setSection(selected);
-		reset();
-		hide();
-	});
-
-	const ref = useRef();
-	const onClick = useCallback(() => {
-		ref.current.focus() & show();
-		ref.current.classList.add('focus-visible');
-	}, [show]);
-
-	const handleSelection = useCallback(([selected]) => {
-		setSection(selected);
-		reset();
-		hide();
-	}, [hide, reset]);
-
-	useEffect(() => {
-		if (items.length > 0 && section > -1) {
-			onChange('section')(section);
-			let label = items[section][1] ?? '';
-			label = label.length > 45 ? label.slice(0, 45) + '...' : label;
-			setSelectedSectionLabel(label);
-		}
-	}, [section, setSelectedSectionLabel]);
-
-	return (
-		<>
-			<Button
-				{...props}
-				height='40px'
-				maxHeight='40px'
-				ref={ref}
-				ghost
-				textAlign='left'
-				alignItems='center'
-				onClick={onClick}
-				onBlur={hide}
-				onKeyUp={handleKeyUp}
-				onKeyDown={handleKeyDown}
-				fontScale='p1'
-				borderWidth='0.125rem'
-				borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
-				<Field display='flex' flexDirection='row'>
-					<Label width='90%'
-						   color={ selectedSectionLabel === t('Working_group_request_invite_select_sections') ? '#9ea2a8' : ''}
-						   fontScale='p1'
-						   fontWeight={ selectedSectionLabel === t('Working_group_request_invite_select_sections') ? '400' : '500'}>
-						{selectedSectionLabel}
-					</Label>
-					<Box color='var(--rc-color-primary-dark)' borderColor='transparent' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
-				</Field>
-			</Button>
-			<PositionAnimated
-				width='450px'
-				visible={visible}
-				anchor={ref}
-				placement={'bottom-end'}
-				maxWidth='450px'
-			>
-				<Options
-					width='450px'
-					maxWidth='450px'
-					onSelect={handleSelection}
-					options={options}
-					cursor={cursor}/>
-			</PositionAnimated>
-		</>
-	);
-};
-
-const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectionItemLabel, onChange = () => {}, ...props }) => {
+const CustomSelectOptions = ({ items, defaultSelectedLabel = '', onChange = () => {}, active = false, showLabelTooltip = true, ...props }) => {
 	const t = useTranslation();
 	const replaceChar = (str) =>
 		[...str]?.map((ch, index) => ch).join('') || '';
 
 	const [sectionItem, setSectionItem] = useState(-1);
-	// console.log(sectionItem);
+	const [selectedItemTooltipLabel, setSelectedItemTooltipLabel] = useState('');
+	const [selectedItemLabel, setSelectedItemLabel] = useState(defaultSelectedLabel);
+	const [isSelected, setIsSelected] = useState(false);
+	const defaultLabelLength = 45;
 
-	useMemo(() => selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? setSectionItem(-1) : '', [selectedSectionItemLabel]);
+	useMemo(() => selectedItemLabel === defaultSelectedLabel ? setSectionItem(-1) : '', [selectedItemLabel, defaultSelectedLabel]);
+
+	const constructShortLabel = (label) => {
+		if (label.length <= defaultLabelLength) {
+			return label;
+		}
+		return [label.slice(0, defaultLabelLength), '...'].join('');
+	};
 
 	const options = useMemo(() => {
 		try {
 			const renderOption = (label) => {
 				const tooltipLabel = preProcessingProtocolItems(replaceChar(label));
-				const mainLabel = preProcessingProtocolItems(label?.length > 50 ? label?.slice(0, 50) + '...' : label) || '';
-				return <Box display='flex' flexDirection='row' alignItems='center'
+				const mainLabel = preProcessingProtocolItems(constructShortLabel(label)) || '';
+				return <Box
+					display='flex' flexDirection='row' alignItems='center'
 					data-for='itemT'
-					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='450px'>
+					data-tip={ tooltipLabel } style={{ whiteSpace: 'normal' }} width='-moz-available'>
 					<Label>{ mainLabel }</Label>
 					<ReactTooltip id='itemT' className='react-tooltip-class' multiline effect='solid' place='top'/>
 				</Box>;
@@ -357,26 +170,43 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 	}, [show]);
 
 	const handleSelection = useCallback(([selected]) => {
+		console.log('HANDLE SELECT CUSTOM SELECT ' + defaultSelectedLabel);
 		setSectionItem(selected);
+		setIsSelected(true);
 		reset();
 		hide();
 	}, [hide, reset]);
 
 	useEffect(() => {
-		// console.log(sectionItem);
-		// console.log(items[sectionItem]);
-		if (items.length > 0 && sectionItem > -1) {
-			onChange('sectionItem')(sectionItem);
-			let label = items[sectionItem][1] ?? '';
-			label = label.length > 45 ? label.slice(0, 45) + '...' : label;
-			setSelectedSectionItemLabel(label);
+		console.log('USEEFFECT CUSTOM SELECT ' + defaultSelectedLabel);
+		console.log(items);
+		console.log(sectionItem);
+		console.log(active);
+		if (items.length === 0) {
+			setSectionItem(-1);
 		}
-	}, [sectionItem, setSelectedSectionItemLabel]);
+		if (items.length > 0 && sectionItem > -1) {
+			if (!isSelected) {
+				setSectionItem(-1);
+			} else {
+				onChange(sectionItem);
+			}
+			const label = constructShortLabel(items[sectionItem][1] ?? '');
+			setSelectedItemTooltipLabel(label);
+			setSelectedItemLabel(label);
+			setIsSelected(false);
+		}
+		if (!active) {
+			setSelectedItemLabel(defaultSelectedLabel);
+			setSelectedItemTooltipLabel('');
+		}
+	}, [items, sectionItem, setSelectedItemLabel, setSelectedItemTooltipLabel, active, isSelected]);
 
 	return (
 		<>
 			<Button
 				{...props}
+				width='-moz-available'
 				height='40px'
 				maxHeight='40px'
 				ref={ref}
@@ -389,26 +219,32 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 				onKeyDown={handleKeyDown}
 				fontScale='p1'
 				borderWidth='0.125rem'
-				borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
+				borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'
+				data-for='requestSelectTooltip'
+				data-tip={ selectedItemTooltipLabel } style={{ whiteSpace: 'normal' }}
+			>
+				<ReactTooltip id='requestSelectTooltip' className='react-tooltip-class' multiline effect='solid' place='top' disable={!showLabelTooltip}/>
 				<Field display='flex' flexDirection='row'>
-					<Label width='90%'
-						color={ selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? '#9ea2a8' : ''}
+					<Label
+						width='90%'
+						color={ selectedItemLabel === defaultSelectedLabel ? '#9ea2a8' : ''}
 						fontScale='p1'
-						fontWeight={ selectedSectionItemLabel === t('Working_group_request_invite_select_sections_items') ? '400' : '500'}>
-						{selectedSectionItemLabel}
+						fontWeight={ selectedItemLabel === defaultSelectedLabel ? '400' : '500'}
+					>
+						{selectedItemLabel}
 					</Label>
 					<Box color='var(--rc-color-primary-dark)' borderColor='transparent' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
 				</Field>
 			</Button>
 			<PositionAnimated
-				width='450px'
+				width='-moz-available'
 				visible={visible}
 				anchor={ref}
 				placement={'bottom-end'}
 				maxWidth='450px'
 			>
 				<Options
-					width='450px'
+					width='-moz-available'
 					maxWidth='450px'
 					onSelect={handleSelection}
 					options={options}
@@ -418,13 +254,22 @@ const SectionItemOptions = ({ items, selectedSectionItemLabel, setSelectedSectio
 	);
 };
 
-function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workingGroupRequest, protocolsData, contactInfoData, setInfo }) {
+const ClearButton = ({ onClick = () => {} }) => {
+	const t = useTranslation();
+	return <Button onClick={onClick} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
+		data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
+		<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
+		<Icon size={16} name='refresh'/>
+	</Button>;
+};
+
+function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workingGroupRequest, protocolsData, setInfo }) {
 	console.log('WorkingGroupRequestAnswerStep');
 	// console.log(protocolsData);
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const dispatchToastMessage = useToastMessageDispatch();
-	const { goToPreviousStep, goToNextStep, goToFinalStep } = useInvitePageContext();
+	const { goToPreviousStep, goToNextStep } = useInvitePageContext();
 
 	const [commiting, setComitting] = useState(false);
 	const [cache, setCache] = useState();
@@ -439,31 +284,21 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const [sectionsOptions, setSectionOptions] = useState([]);
 	const [sectionsItemsOptions, setSectionItemsOptions] = useState([]);
 	const [context, setContext] = useState('');
-	const [filterContext, setFilterContext] = useState('');
+	const [filterContext, setFilterContext] = useState(-1);
 	const [protocolSelectLabel, setProtocolSelectLabel] = useState('');
 	const [protocolsFindData, setProtocolsFindData] = useState([]);
-	const [sectionOptionSelectedLabel, setSectionOptionSelectedLabel] = useState(t('Working_group_request_invite_select_sections'));
-	const [sectionItemOptionSelectedLabel, setSectionItemOptionSelectedLabel] = useState(t('Working_group_request_invite_select_sections_items'));
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [answerMailLabel, setAnswerMailLabel] = useState(t('Working_group_request_invite_not_mail_chosen'));
-	const [answerTypeContext, setAnswerTypeContext] = useState('mail');
-
-	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
+	const [answerTypeContext, setAnswerTypeContext] = useState('protocol');
 
 	const fileSourceInputId = useUniqueId();
 	const workingGroupRequestId = workingGroupRequest._id;
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
-	const userId = useUserId();
-	console.log(userId);
 
 	const documentsHelpTooltipLabel = useMemo(() => 'Загрузите не пустые файлы', []);
-
-	const mails = useMemo(() => workingGroupRequest.mails, [workingGroupRequest]);
-
-	const isAnyMails = useMemo(() => workingGroupRequest?.mails?.length > 1 || (mails?.length === 1 && mails[0]?._id !== 'noAnswer') || false, [workingGroupRequest]);
-	// useMemo(() => console.log(mails));
-	const mailsOptions = useMemo(() => mails?.map((mail) => [mail._id, (mail.number ?? t('Working_group_request_invite_not_mail_chosen')) + (mail.ts ? ' от ' + formatDate(mail.ts) : '')] || [null, t('Working_group_request_invite_not_mail_chosen')]), [mails]);
 	const protocolsOptions = useMemo(() => protocolsData?.map((protocol, index) => [index, protocol.num ?? '']) || [], [protocolsData]);
+	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0 && attachedFile.length > 0, [newData, attachedFile]);
+	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_request_select_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
 
 	useEffect(() => {
 		if (protocolSelectLabel === '') {
@@ -477,16 +312,11 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		setCache(new Date());
 	}, [cache]);
 
-	const filterName = (name) => {
-		const regExp = new RegExp('(<[a-z]*[0-9]*>)*(</[a-z]*[0-9]*>)*', 'gi');
-		return name.replaceAll(regExp, '');
-	};
-
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
 	};
 
-	const handleChangeSelect = (field) => (val) => {
+	const handleChangeSelect = useCallback((field) => (val) => {
 		console.log('handle change select');
 		// console.log(field, val);
 		const updateData = Object.assign({}, newData);
@@ -497,25 +327,38 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			setSectionItemsOptions([]);
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 			updateData.section = { value: '', required: newData.section.required };
-			setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
-			setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
 		}
 		if (field === 'section' && val !== newData.section.value) {
 			const options = protocolsData[newData.protocol.value]?.sections[val]?.items?.map((item, index) => [index, [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join('')]) || [];
+			console.log(val);
+			console.log(options);
 			setSectionItemsOptions(options);
-			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
-			if (val === '') {
-				updateData.section = { value: '', required: newData.section.required };
-			}
-			setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
-		}
-		if (field === 'sectionItem' && val === '') {
 			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
 		}
 		updateData[field] = { value: val, required: newData[field].required };
 		// console.log(updateData);
 		setNewData(updateData);
-	};
+	}, [newData, protocolsData]);
+
+	const handleClearSelectItemsOptions = useCallback((isOptionsClear = false) => {
+		if (isOptionsClear) {
+			setSectionItemsOptions([]);
+		}
+		setNewData({ ...newData, sectionItem: { value: '', required: newData.sectionItem.required } });
+	}, [newData, setSectionItemsOptions]);
+
+	const handleClearSelectOptions = useCallback((isOptionsClear = false) => {
+		handleClearSelectItemsOptions(true);
+		if (isOptionsClear) {
+			setSectionOptions([]);
+		}
+		setNewData({ ...newData, section: { value: '', required: newData.section.required }, sectionItem: { value: '', required: newData.sectionItem.required } });
+	}, [newData, handleClearSelectItemsOptions]);
+
+	const handleClearProtocol = useCallback(() => {
+		handleClearSelectOptions(true);
+		setNewData({ ...newData, protocol: { value: '', required: newData.protocol.required }, section: { value: '', required: newData.section.required }, sectionItem: { value: '', required: newData.sectionItem.required } });
+	}, [newData, handleClearSelectOptions]);
 
 	const handleChangeContext = (contextField) => () => {
 		if (context === '') {
@@ -527,14 +370,13 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		}
 	};
 
-	const handleFilterContext = (filter) => () => {
+	const handleFilterContext = useCallback((filter) => {
+		console.log(filter);
 		if (filter !== filterContext) {
 			// console.log(protocolsData);
 			setFilterContext(filter);
 		}
-	};
-
-	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0 && attachedFile.length > 0, [newData, attachedFile]);
+	}, [filterContext]);
 
 	const fileUploadClick = async (e) => {
 		e.preventDefault();
@@ -664,7 +506,26 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		setContext('');
 	};
 
-	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_request_select_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], []);
+	const SectionsSelect = useMemo(() => <CustomSelectOptions
+		backgroundColor={sectionsOptions.length === 0 ? '#f2f3f5' : 'transparent' }
+		disabled={sectionsOptions.length === 0}
+		items={sectionsOptions}
+		defaultSelectedLabel={t('Working_group_request_invite_select_sections')}
+		onChange={handleChangeSelect('section')}
+		active={newData.section.value !== ''}
+	/>, [sectionsOptions, newData.section]);
+
+	const SectionItemsSelect = useMemo(() => <CustomSelectOptions
+		backgroundColor={sectionsItemsOptions.length === 0 ? '#f2f3f5' : 'transparent' }
+		disabled={sectionsItemsOptions.length === 0}
+		items={sectionsItemsOptions}
+		defaultSelectedLabel={t('Working_group_request_invite_select_sections_items')}
+		onChange={handleChangeSelect('sectionItem')}
+		active={newData.sectionItem.value !== ''}
+	/>, [sectionsItemsOptions, newData.sectionItem]);
+
+	console.log(sectionsItemsOptions);
+	console.log(newData);
 
 	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
@@ -689,17 +550,10 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_select_mail')}
 									{newData.numberId.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('numberId')(''); }} backgroundColor='transparent' borderColor='transparent' danger
-										data-for='clearTooltip'
-										data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
-										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
-										<Icon size={16} name='refresh'/>
-									</Button>}
+									&& <ClearButton onClick={() => handleChangeSelect('numberId')('')}/>}
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								{/*{isAnyMails && <Select options={mailsOptions} onChange={handleChangeSelect('numberId')} value={newData.numberId.value} placeholder={t('Number')}/>}*/}
-								{/*{!isAnyMails && <TextInput disabled readOnly value={t('Working_group_request_invite_not_mail_chosen')}/>}*/}
 								<TextInput disabled readOnly value={answerMailLabel}/>
 							</Field.Row>
 						</Field>}
@@ -708,18 +562,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_invite_select_protocol')}
 									{newData.protocol.value !== ''
-									&& <Button onClick={() => {
-										handleChangeSelect('sectionItem')('');
-										setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
-										handleChangeSelect('section')('');
-										setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
-										handleChangeSelect('protocol')('');
-										setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
-									}} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
-									data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
-										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
-										<Icon size={16} name='refresh'/>
-									</Button>}
+									&& <ClearButton onClick={() => { handleClearProtocol(); setProtocolSelectLabel(t('Working_group_request_invite_select_protocol')); }}/>}
 								</Label>
 							</Field.Row>
 							<Field.Row>
@@ -739,11 +582,11 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								{context === 'protocolSelect'
 								&& mediaQuery && <Field mb='x4'>
 									<Field.Row>
-										<Field.Label>{t('Search')}:</Field.Label>
-										<FilterOptions onChange={handleFilterContext}/>
+										<Field.Label alignSelf='center' mie='x16'>{t('Search')}:</Field.Label>
+										<CustomSelectOptions items={ [[0, 'По номеру'], [1, 'По дате']] } onChange={handleFilterContext} active backgroundColor='#ffffff' showLabelTooltip={false}/>
 									</Field.Row>
-									{filterContext === 'date' && <FilterByDateRange protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}
-									{filterContext === 'number' && <FilterByText protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}
+									{filterContext === 1 && <FilterByDateRange protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}
+									{filterContext === 0 && <FilterByText protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}
 									{ protocolsFindData && !protocolsFindData.length
 										? <>
 											<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
@@ -762,34 +605,22 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_invite_select_sections')}
 									{newData.section.value !== ''
-									&& <Button onClick={() => {
-										handleChangeSelect('sectionItem')('');
-										setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items'));
-										handleChangeSelect('section')('');
-										setSectionOptionSelectedLabel(t('Working_group_request_invite_select_sections'));
-									}} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
-									data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
-										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
-										<Icon size={16} name='refresh'/>
-									</Button>}
+										&& <ClearButton onClick={handleClearSelectOptions}/>
+									}
 								</Label>
 							</Field.Row>
-							<SectionOptions backgroundColor={sectionsOptions.length === 0 ? '#f2f3f5' : 'transparent' } disabled={(sectionsOptions.length === 0)} items={sectionsOptions} selectedSectionLabel={sectionOptionSelectedLabel} setSelectedSectionLabel={setSectionOptionSelectedLabel} onChange={handleChangeSelect}/>
+							{ SectionsSelect }
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_sections_items')}
 									{newData.sectionItem.value !== ''
-									&& <Button onClick={() => { handleChangeSelect('sectionItem')(''); setSectionItemOptionSelectedLabel(t('Working_group_request_invite_select_sections_items')); }} backgroundColor='transparent' borderColor='transparent' danger
-										data-for='clearTooltip'
-										data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
-										<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
-										<Icon size={16} name='refresh'/>
-									</Button>}
+										&& <ClearButton onClick={() => handleClearSelectItemsOptions(false)}/>
+									}
 								</Label>
 							</Field.Row>
-							<SectionItemOptions backgroundColor={sectionsItemsOptions.length === 0 ? '#f2f3f5' : 'transparent' } disabled={(sectionsItemsOptions.length === 0)} items={sectionsItemsOptions} selectedSectionItemLabel={sectionItemOptionSelectedLabel} setSelectedSectionItemLabel={setSectionItemOptionSelectedLabel} onChange={handleChangeSelect}/>
+							{ SectionItemsSelect }
 						</Field>}
 						<Field>
 							<Field.Label>{t('Commentary')}</Field.Label>
