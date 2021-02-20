@@ -314,8 +314,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		try {
 			setCommitting(false);
 
-			const fileInfo = { name: attachedFile[0]?.name || '', total: attachedFile.length ?? 0 };
-			const workingGroupRequestAnswer = packNewData(fileInfo);
+			const workingGroupRequestAnswer = packNewData();
 			const mailId = newData.numberId.value.trim() !== '' ? newData.numberId.value : null;
 			let validationArray = [];
 

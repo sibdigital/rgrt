@@ -15,7 +15,6 @@ import {
 } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
-import { Meteor } from 'meteor/meteor';
 import ReactTooltip from 'react-tooltip';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -39,6 +38,8 @@ import { SuccessModal, WarningModal } from '../../../utils/client/index';
 import { Persons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
+import { downLoadFile } from '../../../utils/client/methods/downloadFile';
+import { useUserId } from '../../../../client/contexts/UserContext';
 import { createCouncilData, validate, downloadCouncilParticipantsForm } from './lib';
 
 registerLocale('ru', ru);
@@ -58,7 +59,7 @@ export function CouncilPage() {
 	const t = useTranslation();
 	const councilId = useRouteParameter('id');
 	const routeUrl = useCurrentRoute();
-	const userId = Meteor.userId();
+	const userId = useUserId();
 	const isAllow = hasPermission('edit-councils', userId);
 
 	const [files, setFiles] = useState([]);
@@ -314,24 +315,8 @@ function Council({
 	};
 
 	const onDownloadFileClick = (file) => async (e) => {
-		e.preventDefault();
-		try {
-			const filename = `${ file.title }`;
-			if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-				console.log('window navigator');
-				const blob = new Blob([decodeURIComponent(encodeURI(JSON.stringify(file)))], { type: file.type });
-				return navigator.msSaveOrOpenBlob(blob, filename);
-			}
-			const aElement = document.createElement('a');
-			aElement.download = filename;
-			aElement.href = `${ file.title_link }`;
-			aElement.target = '_blank';
-			document.body.appendChild(aElement);
-			aElement.click();
-			document.body.removeChild(aElement);
-		} catch (e) {
-			console.error('[index.js].downloadWorkingGroupRequestAnswerFile: ', e);
-		}
+		console.log('onDownloadFileClick');
+		await downLoadFile(file)(e);
 	};
 
 	const fileUploadClick = async () => {
