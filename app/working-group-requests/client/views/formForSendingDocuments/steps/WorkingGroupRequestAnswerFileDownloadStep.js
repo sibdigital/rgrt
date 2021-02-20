@@ -13,7 +13,6 @@ import ReactTooltip from 'react-tooltip';
 
 import { settings } from '../../../../../settings';
 import { mime } from '../../../../../utils/lib/mimeTypes';
-import { useMethod } from '../../../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../../../client/hooks/useFormatDate';
@@ -23,7 +22,7 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { filesValidation } from '../../../../../ui/client/lib/fileUpload';
 import GenericTable, { Th } from '../../../../../../client/components/GenericTable';
-import { useUserId } from '../../../../../../client/contexts/UserContext';
+import { ClearButton } from '../../../../../utils/client/views/ClearButton';
 import './reactTooltip.css';
 
 registerLocale('ru', ru);
@@ -254,15 +253,6 @@ const CustomSelectOptions = ({ items, defaultSelectedLabel = '', onChange = () =
 	);
 };
 
-const ClearButton = ({ onClick = () => {} }) => {
-	const t = useTranslation();
-	return <Button onClick={onClick} backgroundColor='transparent' borderColor='transparent' danger data-for='clearTooltip'
-		data-tip={ t('Clear') } style={{ whiteSpace: 'normal' }}>
-		<ReactTooltip id='clearTooltip' effect='solid' place='top'/>
-		<Icon size={16} name='refresh'/>
-	</Button>;
-};
-
 function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workingGroupRequest, protocolsData, setInfo }) {
 	console.log('WorkingGroupRequestAnswerStep');
 	// console.log(protocolsData);
@@ -271,8 +261,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const dispatchToastMessage = useToastMessageDispatch();
 	const { goToPreviousStep, goToNextStep } = useInvitePageContext();
 
-	const [commiting, setComitting] = useState(false);
-	const [cache, setCache] = useState();
+	const [committing, setCommitting] = useState(false);
+	const [cache, setCache] = useState(new Date());
 	const [newData, setNewData] = useState({
 		numberId: { value: '', required: false },
 		protocol: { value: '', required: false },
@@ -360,15 +350,15 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		setNewData({ ...newData, protocol: { value: '', required: newData.protocol.required }, section: { value: '', required: newData.section.required }, sectionItem: { value: '', required: newData.sectionItem.required } });
 	}, [newData, handleClearSelectOptions]);
 
-	const handleChangeContext = (contextField) => () => {
+	const handleChangeContext = useCallback((contextField) => () => {
 		if (context === '') {
 			setProtocolsFindData(protocolsData);
-			setFilterContext('');
+			setFilterContext(-1);
 			setContext(contextField);
 		} else {
 			setContext('');
 		}
-	};
+	}, [context]);
 
 	const handleFilterContext = useCallback((filter) => {
 		console.log(filter);
@@ -461,9 +451,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		setComitting(true);
+		setCommitting(true);
 		try {
-			setComitting(false);
+			setCommitting(false);
 
 			const fileInfo = { name: attachedFile[0]?.name || '', total: attachedFile.length ?? 0 };
 			const workingGroupRequestAnswer = packNewData(fileInfo);
@@ -482,7 +472,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 						return file;
 					}));
 					dispatchToastMessage({ type: 'error', message: t('Working_group_request_invite_file_upload_failed') });
-					setComitting(false);
+					setCommitting(false);
 					setAttachedFile(attachedFilesBuf);
 					onChange();
 				} else {
@@ -492,7 +482,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			}
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
-			setComitting(false);
+			setCommitting(false);
 		}
 	};
 
@@ -513,7 +503,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		defaultSelectedLabel={t('Working_group_request_invite_select_sections')}
 		onChange={handleChangeSelect('section')}
 		active={newData.section.value !== ''}
-	/>, [sectionsOptions, newData.section]);
+	/>, [sectionsOptions, newData.section, t]);
 
 	const SectionItemsSelect = useMemo(() => <CustomSelectOptions
 		backgroundColor={sectionsItemsOptions.length === 0 ? '#f2f3f5' : 'transparent' }
@@ -522,12 +512,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		defaultSelectedLabel={t('Working_group_request_invite_select_sections_items')}
 		onChange={handleChangeSelect('sectionItem')}
 		active={newData.sectionItem.value !== ''}
-	/>, [sectionsItemsOptions, newData.sectionItem]);
+	/>, [sectionsItemsOptions, newData.sectionItem, t]);
 
-	console.log(sectionsItemsOptions);
-	console.log(newData);
-
-	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
+	return <Step active={active} working={committing} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
@@ -542,15 +529,13 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Field.Label>{t('Type')}</Field.Label>
 							</Field.Row>
 							<Field.Row>
-								<Select options={typeAnswerOptions} onChange={(val)=> setAnswerTypeContext(val)} value={answerTypeContext} placeholder={t('Type')}/>
+								<Select options={typeAnswerOptions} onChange={(val) => setAnswerTypeContext(val)} value={answerTypeContext} placeholder={t('Type')}/>
 							</Field.Row>
 						</Field>
 						{answerTypeContext === 'mail' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_select_mail')}
-									{newData.numberId.value !== ''
-									&& <ClearButton onClick={() => handleChangeSelect('numberId')('')}/>}
 								</Label>
 							</Field.Row>
 							<Field.Row>
@@ -605,7 +590,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								<Label>
 									{t('Working_group_request_invite_select_sections')}
 									{newData.section.value !== ''
-										&& <ClearButton onClick={handleClearSelectOptions}/>
+										&& <ClearButton onClick={() => handleClearSelectOptions(false)}/>
 									}
 								</Label>
 							</Field.Row>
@@ -655,7 +640,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 			</Box>
 		</Margins>
 
-		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} />
+		<Pager disabled={committing} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} />
 	</Step>;
 }
 
