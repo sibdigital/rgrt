@@ -42,6 +42,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 				status: data.status ?? t('Agenda_status_proposed'),
 			});
 		} else {
+			console.log({ userData });
 			setEditData({
 				...editData,
 				initiatedBy: {
@@ -50,7 +51,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 					name: userData.name ?? '',
 					patronymic: userData.patronymic ?? '',
 					organization: userData.organization ?? '',
-					value: [constructPersonFullFIO(userData), ` (${ userData.organization ?? '' })`].join(''),
+					value: [constructPersonFullFIO(userData), `, ${ userData.organization ?? '' }`].join(''),
 					type: userData.type ?? '',
 				},
 			});
