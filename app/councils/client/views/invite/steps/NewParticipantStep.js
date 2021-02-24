@@ -77,13 +77,17 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 
 				await insertOrUpdateCouncilPerson(council, person);
 
-				if (!isAgenda) {
-					dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
-					goToFinalStep();
-				} else {
-					setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));
-					goToNextStep();
-				}
+				dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
+
+				setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));
+				goToNextStep();
+
+				// if (!isAgenda) {
+				// 	goToFinalStep();
+				// } else {
+				// 	setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));
+				// 	goToNextStep();
+				// }
 			}
 			return false;
 		} catch (error) {
@@ -181,6 +185,8 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 						</Field>, [t, workingGroup, handleWorkingGroup])} */}
 					</Margins>
 				</Box>
+
+				<Box is='p' fontScale='s1' color='hint' mb='x16'>{t('Council_Invite_Contact_Info_Warning')}</Box>
 			</Box>
 		</Margins>
 
