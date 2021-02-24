@@ -26,7 +26,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validateItemData, createItemData } from './lib';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
-import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 
@@ -114,8 +114,8 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 	}, [previousResponsible, currentUserPersonId]);
 
 	const filterNumber = (value) => {
-		if (checkNumberWithDot(value, number) !== null || value === '') {
-			setNumber(value);
+		if (checkRomanNumber(value.toUpperCase()) !== null) {
+			setNumber(value.toUpperCase());
 		}
 	};
 
@@ -172,7 +172,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 				forcePopupIcon={false}
 				options={personsData.persons}
 				getOptionLabel={(option) => constructPersonFIO(option)}
-				getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname}
+				getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname }
 				filterOptions={createFilterOptions({ limit: 10 })}
 				filterSelectedOptions
 				onChange={(event, value) => setResponsible(value)}

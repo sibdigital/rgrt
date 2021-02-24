@@ -18,7 +18,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -69,8 +69,8 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
 
 	const filterNumber = (value) => {
-		if (checkNumberWithDot(value, number) !== null || value === '') {
-			setNumber(value);
+		if (checkRomanNumber(value.toUpperCase()) !== null) {
+			setNumber(value.toUpperCase());
 		}
 	};
 
