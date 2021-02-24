@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, ButtonGroup, Field, Icon, Label, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup, Callout, Field, Icon, Label, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 
 import { settings } from '../../../settings/client';
 import Page from '../../../../client/components/basic/Page';
@@ -14,6 +14,8 @@ import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { AddRequest } from './AddRequest';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 export function DocumentPage() {
 	const t = useTranslation();
@@ -102,11 +104,20 @@ export function DocumentPage() {
 		router.push({ id: requestId, context: 'answer', tab: 'info' });
 	}, [router, currentAnswer]);
 
+	const goBack = () => {
+		FlowRouter.go('working-groups-requests')
+	};
+
+	if (!hasPermission('manage-working-group-requests', useUserId())) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
+
 	return <Page flexDirection='row'>
 		{(context !== 'answers' && context !== 'answer') && <Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-					<GoBackButton/>
+					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>

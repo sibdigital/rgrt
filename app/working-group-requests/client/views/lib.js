@@ -68,7 +68,7 @@ export function validateWorkingGroupRequestData(workingGroupRequestData) {
 	return errors;
 }
 
-export function createWorkingGroupRequestData(number, desc, date, previousData) {
+export function createWorkingGroupRequestData(number, desc, date, previousData, protocolsItemId) {
 	const workingGroupRequestData = {
 	};
 
@@ -79,6 +79,7 @@ export function createWorkingGroupRequestData(number, desc, date, previousData) 
 	workingGroupRequestData.number = number;
 	workingGroupRequestData.desc = desc;
 	workingGroupRequestData.date = date;
+	workingGroupRequestData.protocolsItemId = protocolsItemId;
 
 	return workingGroupRequestData;
 }
@@ -113,3 +114,9 @@ export function createWorkingGroupRequestMessageData(description, number, previo
 
 	return workingGroupRequestData;
 }
+
+// delete html tags
+export const preProcessingProtocolItems = (item) => {
+	const regExp = new RegExp('(<[^>]*>)*(&nbsp;)*', 'gi');
+	return item.replaceAll(regExp, '');
+};

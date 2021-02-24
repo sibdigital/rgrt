@@ -9,7 +9,7 @@ import {
 	TextAreaInput,
 	Tabs,
 	Box,
-	Skeleton,
+	Skeleton, Callout,
 } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -22,8 +22,11 @@ import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterC
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 export function AnswerPage() {
+	const t = useTranslation();
 	const requestId = useRouteParameter('requestid');
 	const mailId = useRouteParameter('mailid');
 	const answerId = useRouteParameter('answerid');
@@ -39,6 +42,11 @@ export function AnswerPage() {
 	const { data: files, state, error } = useEndpointDataExperimental('upload-files.list', filesQuery);
 
 	useMemo(() => console.log(files), [files]);
+
+	if (!hasPermission('manage-working-group-requests', useUserId())) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
 
 	if (state === ENDPOINT_STATES.LOADING) {
 		return <Box w='full' pb='x24'>
@@ -139,6 +147,7 @@ function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 function InfoData({ answer }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
+	const areaInputStyle = { whiteSpace: 'normal', wordBreak: 'break-word' };
 
 	return <Field display='flex' flexDirection='column' w='full' mbs='x8' mbe='x32' overflow='auto'>
 		<Field mbe='x8'>
@@ -156,13 +165,13 @@ function InfoData({ answer }) {
 		<Field mbe='x8'>
 			<Field.Label>{t('Phone_number')}</Field.Label>
 			<Field.Row>
-				<TextInput readOnly placeholder={t('Phone_number')} is='span' fontScale='p1'>{answer.phone ?? ''}</TextInput>
+				<TextInput readOnly placeholder={t('Phone_number')} is='span' fontScale='p1'>{answer.sender?.phone ?? ''}</TextInput>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Email')}</Field.Label>
 			<Field.Row>
-				<TextInput readOnly placeholder={t('Email')} is='span' fontScale='p1'>{answer.email ?? ''}</TextInput>
+				<TextInput readOnly placeholder={t('Email')} is='span' fontScale='p1'>{answer.sender?.email ?? ''}</TextInput>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
@@ -174,19 +183,19 @@ function InfoData({ answer }) {
 		<Field mbe='x8'>
 			<Field.Label>{t('Working_group_request_invite_select_protocol')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='2' style={{ whiteSpace: 'normal' }} value={answer.protocol ?? ''} readOnly placeholder={t('Working_group_request_invite_select_protocol')} fontScale='p1'/>
+				<TextAreaInput rows='2' style={areaInputStyle} value={answer.protocol?.title ?? ''} readOnly placeholder={t('Working_group_request_invite_select_protocol')} fontScale='p1'/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Working_group_request_invite_select_sections')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='2' style={{ whiteSpace: 'normal' }} value={answer.section ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections')} fontScale='p1'/>
+				<TextAreaInput rows='2' style={areaInputStyle} value={answer.protocol?.section?.title ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections')} fontScale='p1'/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Working_group_request_invite_select_sections_items')}</Field.Label>
 			<Field.Row>
-				<TextAreaInput rows='2' style={{ whiteSpace: 'normal' }} value={answer.sectionItem ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections_items')} fontScale='p1'/>
+				<TextAreaInput rows='2' style={areaInputStyle} value={answer.protocol?.sectionItem?.title ?? ''} readOnly placeholder={t('Working_group_request_invite_select_sections_items')} fontScale='p1'/>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>

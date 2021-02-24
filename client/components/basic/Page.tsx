@@ -44,6 +44,8 @@ const PageHeader: FC<PageHeaderProps> = ({ children = undefined, title, ...props
 		setSidebarOpen((isSidebarOpen) => !isSidebarOpen);
 	};
 
+	const titleStyle = title === '' ? { display: 'none' } : {};
+
 	return <Box borderBlockEndWidth='x2' borderBlockEndColor={border ? 'neutral-200' : 'transparent'}>
 		<Box
 			marginBlock='x16'
@@ -62,7 +64,7 @@ const PageHeader: FC<PageHeaderProps> = ({ children = undefined, title, ...props
 				marginInlineEnd='x8'
 				onClick={handleBurgerMenuButtonClick}
 			/>}
-			<Box is='h1' fontScale='h1' flexGrow={1}>{title}</Box>
+			<Box is='h1' fontScale='h1' flexGrow={1} style={titleStyle}>{title}</Box>
 			{children}
 		</Box>
 	</Box>;

@@ -101,6 +101,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				forcePopupIcon={false}
 				getOptionLabel={(option) => constructPersonFIO(option)}
 				filterSelectedOptions
+				freeSolo
 				filterOptions={createFilterOptions({ limit: 10 })}
 				onChange={(event, value) => setResponsible(value)}
 				renderTags={(value, getTagProps) =>

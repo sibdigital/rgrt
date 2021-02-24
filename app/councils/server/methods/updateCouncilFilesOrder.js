@@ -21,7 +21,7 @@ Meteor.methods({
 			file.orderIndex = index + 1;
 			return file;
 		});
-		console.log(arrToSave);
+
 		Councils.updateFilesOrder(councilId, arrToSave);
 		return arrToSave;
 	},

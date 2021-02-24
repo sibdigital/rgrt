@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 
 import { hasPermission } from '../../../authorization';
-import { Protocols } from '../../../models';
+import { Protocols, ProtocolItemsPersonsResponsible } from '../../../models';
 
 Meteor.methods({
 	deleteItem(protocolId, sectionId, _id) {
@@ -18,6 +18,7 @@ Meteor.methods({
 		}
 
 		Protocols.removeItemById(protocolId, sectionId, _id);
+		ProtocolItemsPersonsResponsible.removeByItemId(_id);
 
 		return true;
 	},

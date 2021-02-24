@@ -8,7 +8,7 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { useFormatDateAndTime } from '../../../../../../client/hooks/useFormatDateAndTime';
 
-function CouncilInfoStep({ step, title, active }) {
+function CouncilInfoStep({ stepStyle = {}, step, title, active }) {
 	const { goToNextStep, councilState } = useInvitePageContext();
 	const t = useTranslation();
 	const handleSubmit = async (event) => {
@@ -18,7 +18,7 @@ function CouncilInfoStep({ step, title, active }) {
 
 	const formatDateAndTime = useFormatDateAndTime();
 
-	return <Step active={active} onSubmit={handleSubmit}>
+	return <Step active={active} onSubmit={handleSubmit} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>

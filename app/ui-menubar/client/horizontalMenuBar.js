@@ -8,6 +8,13 @@ import { hasAtLeastOnePermission, hasPermission } from '../../authorization';
 
 const menuItems = () => [
 	{
+		name: t('Home'),
+		icon: 'home',
+		action: () => {
+			FlowRouter.go('/');
+		},
+	},
+	{
 		name: t('Councils'),
 		action: () => {
 			FlowRouter.go('councils');
@@ -21,6 +28,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Working_group_requests'),
+		condition: () => hasPermission('manage-working-group-requests'),
 		action: () => {
 			FlowRouter.go('working-groups-requests');
 		},
@@ -63,7 +71,6 @@ const menuItems = () => [
 						showCancelButton: false,
 						confirmOnEnter: false,
 					}, () => {});
-					
 				},
 			},
 			{
@@ -85,8 +92,8 @@ const menuItems = () => [
 					FlowRouter.go('directory');
 				},
 			},
-		]
-	}, 
+		],
+	},
 	{
 		name: t('Council Commission \"Transport\"'),
 		//subItems: []
@@ -198,6 +205,5 @@ Template.menuBar.events({
 		} else {
 			x.className	= 'menu';
 		}
-		
-	}
-})
+	},
+});

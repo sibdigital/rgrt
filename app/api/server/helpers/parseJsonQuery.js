@@ -16,9 +16,11 @@ API.helperMethods.set('parseJsonQuery', function _parseJsonQuery() {
 	}
 
 	let fields;
+	let stockFields;
 	if (this.queryParams.fields) {
 		try {
 			fields = JSON.parse(this.queryParams.fields);
+			stockFields = JSON.parse(this.queryParams.fields);
 		} catch (e) {
 			this.logger.warn(`Invalid fields parameter provided "${ this.queryParams.fields }":`, e);
 			throw new Meteor.Error('error-invalid-fields', `Invalid fields parameter provided: "${ this.queryParams.fields }"`, { helperMethod: 'parseJsonQuery' });
@@ -81,6 +83,7 @@ API.helperMethods.set('parseJsonQuery', function _parseJsonQuery() {
 	return {
 		sort,
 		fields,
+		stockFields,
 		query,
 	};
 });

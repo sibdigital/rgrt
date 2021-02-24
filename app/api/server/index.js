@@ -48,5 +48,6 @@ import './v1/protocols';
 import './v1/working-groups-requests';
 import './v1/persons';
 import './v1/agendas';
+import './v1/protocolItemsPersonsResponsible';
 
 export { API, APIClass, defaultRateLimiterOptions } from './api';

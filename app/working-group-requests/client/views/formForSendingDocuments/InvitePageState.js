@@ -6,7 +6,7 @@ import { useRouteParameter, useRoute } from '../../../../../client/contexts/Rout
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import InviteStepperPage from './InviteStepperPage';
-import { useUserId } from '/client/contexts/UserContext';
+import { useUserId } from '../../../../../client/contexts/UserContext';
 
 export const finalStep = 'final';
 export const errorStep = 'error';
@@ -66,11 +66,19 @@ function InvitePageState() {
 
 	const protocolsQuery = useQuery(debouncedParams, debouncedSort);
 
-	const query = useMemo(() => ({
-		query: JSON.stringify({ inviteLink: workingGroupRequestId }),
-	}), [workingGroupRequestId]);
+	const endPoint = workingGroupRequestId === 'all' ? 'working-groups-requests.list' : 'working-groups-requests.getOneByInviteLink';
+	const query = useMemo(() => {
+		if (workingGroupRequestId !== 'all') {
+			return {
+				query: JSON.stringify({ inviteLink: workingGroupRequestId }),
+			};
+		}
+		return {
+			fields: JSON.stringify({ number: 1, desc: 1, date: 1, ts: 1 }),
+		};
+	}, [workingGroupRequestId]);
 
-	const { data, state, error } = useEndpointDataExperimental('working-groups-requests.getOneByInviteLink', query);
+	const { data, state, error } = useEndpointDataExperimental(endPoint, query);
 	const { data: protocolsData, state: protocolsState } = useEndpointDataExperimental('protocols.list.requestAnswer', protocolsQuery);
 	const { data: userInfo, state: userState } = useEndpointDataExperimental('users.getOne', useMemo(() => ({
 		query: JSON.stringify({ _id: userId }),
@@ -88,7 +96,7 @@ function InvitePageState() {
 		goToNextStep,
 		goToFinalStep,
 		goToErrorStep,
-		workingGroupRequestState: { data, state },
+		workingGroupRequestState: { data, state, workingGroupRequestId },
 	}), [
 		currentStep,
 		data,
