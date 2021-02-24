@@ -20,12 +20,13 @@ import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import { hasPermission } from '../../../authorization';
 import { Sections } from './Sections';
 import { EditSection } from './EditSection';
 import { EditAgenda } from './EditAgenda';
 import { Proposals } from './Proposals';
 import { EditProposalsForTheAgenda } from './EditProposalsForTheAgenda';
-import { hasPermission } from '../../../authorization';
+import { ProposalsForTheAgendaPage } from './ProposalsForTheAgenda';
 
 registerLocale('ru', ru);
 
@@ -47,19 +48,19 @@ export function AgendaPage() {
 		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
 	}
 
-	if (!isAllow) {
-		console.log('Permissions_access_missing');
-		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	}
+	// if (!isAllow) {
+	// 	console.log('Permissions_access_missing');
+	// 	return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	// }
 
-	return <Agenda agendaData={agendaData} personsData={personsData} userData={userData}/>;
+	return <Agenda agendaData={agendaData} personsData={personsData} userData={userData} isAllowEdit={isAllow}/>;
 }
 
 AgendaPage.displayName = 'AgendaPage';
 
 export default AgendaPage;
 
-function Agenda({ agendaData, personsData, userData }) {
+function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const id = useRouteParameter('id');
@@ -167,7 +168,8 @@ function Agenda({ agendaData, personsData, userData }) {
 
 	const close = useCallback(() => {
 		setContext('');
-	}, []);
+		onChange();
+	}, [onChange]);
 
 	const onEditAgendaClick = useCallback((context) => () => {
 		setContext(context);
@@ -218,7 +220,8 @@ function Agenda({ agendaData, personsData, userData }) {
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Agenda')}</Label>
 				</Field>
-				{ context === '' && tab === 'agenda' && <ButtonGroup>
+				{ context === '' && tab === 'agenda' && isAllowEdit
+				&& <ButtonGroup>
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>
 						{t('Agenda_add')}
 					</Button>}
@@ -229,13 +232,18 @@ function Agenda({ agendaData, personsData, userData }) {
 						{t('Agenda_section_add')}
 					</Button> }
 				</ButtonGroup>}
+
+				{context === '' && tab === 'proposals' && !isAllowEdit
+				&& <Button mbe='x8' small primary aria-label={t('Proposal_for_the_agenda_add')} onClick={() => setContext('proposal_for_the_agenda_new')}>
+					{t('Proposal_for_the_agenda_add')}
+				</Button>}
 			</Page.Header>
 			<Page.Content>
-				<Tabs flexShrink={0} mbe='x8'>
+				<Tabs flexShrink={0} mbe='x16'>
 					<Tabs.Item selected={tab === 'agenda'} onClick={handleTabClick('agenda')}>{t('Agenda')}</Tabs.Item>
 					<Tabs.Item selected={tab === 'proposals'} onClick={handleTabClick('proposals')}>{t('Proposals_for_the_agenda')}</Tabs.Item>
 				</Tabs>
-				{ tab === 'agenda' && <Page.ScrollableContent>
+				{ tab === 'agenda' && <Page.ScrollableContent mbe='x32'>
 					<Box maxWidth='x800' w='full' alignSelf='center' pi='x32' pb='x24' fontSize='x16' borderStyle='solid' borderWidth='x2' borderColor='hint'>
 						<Box mbe='x24' display='flex' flexDirection='column'>
 							<Box is='span' fontScale='h1' alignSelf='center'>{agendaName}</Box>
@@ -243,10 +251,18 @@ function Agenda({ agendaData, personsData, userData }) {
 						<Box mbe='x16' display='flex' flexDirection='column'>
 							<Box is='span' alignSelf='center'>№ {number}</Box>
 						</Box>
-						<Sections data={sectionsDataView} onItemMenuClick={() => console.log('onItemMenuClick')} onSectionMenuClick={onSectionMenuClick}/>
+						<Sections data={sectionsDataView} onItemMenuClick={() => console.log('onItemMenuClick')} onSectionMenuClick={onSectionMenuClick} isAllowEdit={isAllowEdit}/>
 					</Box>
 				</Page.ScrollableContent>}
-				{ tab === 'proposals' && <Proposals mode={'secretary'} onEditProposal={onEditProposal} userData={userData} proposalsListData={proposalsList} agendaId={agendaId} onAddProposal={onEditSectionDataClick}/>}
+				{ tab === 'proposals'
+				&& (
+					(isAllowEdit
+						&& <Proposals mode={'secretary'} onEditProposal={onEditProposal} userData={userData} proposalsListData={proposalsList} agendaId={agendaId} onAddProposal={onEditSectionDataClick}/>
+					)
+					|| (!isAllowEdit
+						&& <ProposalsForTheAgendaPage isFullLoad={false} onAgendaClick={(proposal) => { setCurrentProposal(proposal); setContext('proposal_for_the_agenda_edit'); }}/>
+					)
+				)}
 			</Page.Content>
 		</Page>
 		{ context
@@ -256,7 +272,8 @@ function Agenda({ agendaData, personsData, userData }) {
 				{ context === 'edit' && t('Agenda_edited') }
 				{ context === 'section-add' && t('Agenda_item_added') }
 				{ context === 'section-edit' && t('Agenda_item_edited') }
-				{ context === 'proposal_edit' && t('Proposal_for_the_agenda_edited')}
+				{ context === 'proposal_for_the_agenda_edit' && t('Proposal_for_the_agenda_edited')}
+				{ context === 'proposal_for_the_agenda_new' && t('Proposal_for_the_agenda_added')}
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			<VerticalBar.ScrollableContent>
@@ -264,7 +281,8 @@ function Agenda({ agendaData, personsData, userData }) {
 				{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={currentAgendaData} onChange={onChange}/>}
 				{context === 'section-add' && <EditSection agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
 				{context === 'section-edit' && <EditSection data={currentSection} agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
-				{context === 'proposal_edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaId} userData={userData}/>}
+				{context === 'proposal_for_the_agenda_edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaId} userData={userData.user}/>}
+				{context === 'proposal_for_the_agenda_new' && <EditProposalsForTheAgenda onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaData._id} userData={userData.user}/>}
 			</VerticalBar.ScrollableContent>
 		</VerticalBar>}
 	</Page>;
