@@ -627,12 +627,6 @@ function Council({
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
-					{/*<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>*/}
-					{/*	{t('Agenda')}*/}
-					{/*</Button>*/}
-					{/*<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>*/}
-					{/*	{t('Protocol')}*/}
-					{/*</Button>*/}
 				</ButtonGroup>}
 			</Page.Header>
 			<Page.Content>
@@ -707,14 +701,18 @@ function Council({
 						</Button>
 					</ButtonGroup>
 				</Field>}
-				{tab === 'persons' && context === 'participants' && isSecretary
+				{tab === 'persons' && isSecretary
+					&& ((context === 'participants'
 					&& <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
-				}
-				{tab === 'persons' && context === 'addParticipants' && isSecretary
+					)
+
+					|| (context === 'addParticipants'
 					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
-				}
-				{tab === 'persons' && context === 'newParticipants' && isSecretary
+					)
+
+					|| (context === 'newParticipants'
 					&& <CreateParticipant workingGroupOptions={workingGroupOptions} councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
+					))
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
