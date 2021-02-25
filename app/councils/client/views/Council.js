@@ -234,7 +234,7 @@ function Council({
 
 	const address = [settings.get('Site_Url'), 'i/', data?.inviteLink || ''].join('');
 
-	const inputStyles = useMemo(() => ({ whiteSpace: 'normal', border: mode === 'edit' ? '1px solid #4fb0fc' : '' }), [mode]);
+	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: mode === 'edit' ? '1px solid #4fb0fc' : '' }), [mode]);
 
 	const invitedPersons = useMemo(() => persons?.filter((person) => {
 		const iPerson = invitedPersonsIds.find((iPerson) => iPerson._id === person._id);
@@ -659,7 +659,7 @@ function Council({
 				<Field mbe='x8' mis='x4'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} row='4' readOnly={mode !== 'edit'} fontScale='p1'/>
+						<TextAreaInput style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} rows='5' readOnly={mode !== 'edit'} fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				{isSecretary && <Field mbe='x8'>

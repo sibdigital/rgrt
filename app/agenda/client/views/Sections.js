@@ -71,7 +71,7 @@ export function Sections({ data, onSectionMenuClick, isAllowEdit }) {
 			className={clickable}
 		>
 			<Box display='flex' flexDirection='row'>
-				<Box mie='x4' fontWeight='600'>{section[1]?.item ? section[1].value : index + 1}: </Box>
+				<Box mie='x4' fontWeight='600'>{section[1]?.item ? section[1].value : index + 1}</Box>
 			</Box>
 			{isAllowEdit && <Box
 				pi='x4' mis='auto' style={{ cursor: 'pointer' }} data-section={section[0]._id} data-first={section.first}

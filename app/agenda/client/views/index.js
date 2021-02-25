@@ -182,7 +182,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 
 	const onEditProposal = useCallback((proposal) => {
 		setCurrentProposal(proposal);
-		setContext('proposal_edit');
+		setContext('proposal_for_the_agenda_edit');
 	}, []);
 
 	const onEditProposalDataClick = useCallback((proposal) => {

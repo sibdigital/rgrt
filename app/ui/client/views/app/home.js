@@ -108,15 +108,15 @@ const toolbarButtons = () => [
 			FlowRouter.go('manual-mail-sender');
 		},
 	},
-	{
-		name: t('Working_group'),
-		icon: 'working_group',
-		context: 'administration',
-		action: () => {
-			menu.close();
-			FlowRouter.go('working-group');
-		},
-	},
+	// {
+	// 	name: t('Working_group'),
+	// 	icon: 'working_group',
+	// 	context: 'administration',
+	// 	action: () => {
+	// 		menu.close();
+	// 		FlowRouter.go('working-group');
+	// 	},
+	// },
 	{
 		name: t('Working_group_composition'),
 		icon: 'team',
