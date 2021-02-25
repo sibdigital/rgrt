@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Field, Button, InputBox, ButtonGroup } from '@rocket.chat/fuselage';
+import CKEditor from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -7,9 +9,7 @@ import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import CKEditor from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
 
 export function AddSection({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -23,8 +23,8 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
 
 	const filterNumber = (value) => {
-		if (checkNumberWithDot(value, number) !== null || value === '') {
-			setNumber(value);
+		if (checkRomanNumber(value.toUpperCase()) !== null) {
+			setNumber(value.toUpperCase());
 		}
 	};
 

@@ -696,14 +696,18 @@ function Council({
 						</Button>
 					</ButtonGroup>
 				</Field>}
-				{tab === 'persons' && context === 'participants' && isSecretary
+				{tab === 'persons' && isSecretary
+					&& ((context === 'participants'
 					&& <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
-				}
-				{tab === 'persons' && context === 'addParticipants' && isSecretary
+					)
+
+					|| (context === 'addParticipants'
 					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
-				}
-				{tab === 'persons' && context === 'newParticipants' && isSecretary
+					)
+
+					|| (context === 'newParticipants'
 					&& <CreateParticipant workingGroupOptions={workingGroupOptions} councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
+					))
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
