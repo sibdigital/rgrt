@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, Children } from 'react';
 import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import moment from 'moment';
@@ -17,6 +17,40 @@ import { SuccessModal, WarningModal } from '../../../utils/index';
 import { downloadCouncilParticipantsForm } from './lib';
 
 require('moment/locale/ru.js');
+
+const getDateStatus = (date) => {
+	const today = new Date();
+	const dt = new Date(date);
+	let result = 'to-be';
+	if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
+		result = 'today';
+	} else if (dt < today) {
+		result = 'held';
+	}
+	return result;
+};
+
+const colorBackgroundCouncil = (date) => {
+	const status = getDateStatus(date);
+	let color = 'var(--rc-color-councils-background-to-be)';
+	if (status === 'today') {
+		color = 'var(--rc-color-councils-background-today)';
+	} else if (status === 'held') {
+		color = 'var(--rc-color-councils-background-held)';
+	}
+	return color;
+};
+
+const colorTextCouncil = (date) => {
+	const status = getDateStatus(date);
+	let color = 'var(--rc-color-councils-text-color-to-be)';
+	if (status === 'today') {
+		color = 'var(--rc-color-councils-text-color-today)';
+	} else if (status === 'held') {
+		color = 'var(--rc-color-councils-text-color-held)';
+	}
+	return color;
+};
 
 export function Councils({
 	displayMode = 'table',
@@ -55,40 +89,6 @@ export function Councils({
 		} catch (e) {
 			console.error('[councils.js].downloadCouncilParticipants :', e);
 		}
-	};
-
-	const getDateStatus = (date) => {
-		const today = new Date();
-		const dt = new Date(date);
-		let result = 'to-be';
-		if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
-			result = 'today';
-		} else if (dt < today) {
-			result = 'held';
-		}
-		return result;
-	};
-
-	const colorBackgroundCouncil = (date) => {
-		const status = getDateStatus(date);
-		let color = 'var(--rc-color-councils-background-to-be)';
-		if (status === 'today') {
-			color = 'var(--rc-color-councils-background-today)';
-		} else if (status === 'held') {
-			color = 'var(--rc-color-councils-background-held)';
-		}
-		return color;
-	};
-
-	const colorTextCouncil = (date) => {
-		const status = getDateStatus(date);
-		let color = 'var(--rc-color-councils-text-color-to-be)';
-		if (status === 'today') {
-			color = 'var(--rc-color-councils-text-color-today)';
-		} else if (status === 'held') {
-			color = 'var(--rc-color-councils-text-color-held)';
-		}
-		return color;
 	};
 
 	const statusCouncil = (date) => {
@@ -178,19 +178,39 @@ function CouncilsCalendar({
 			? data.councils.map((council) => ({ _id: council._id, title: council.desc, start: new Date(council.d), end: new Date(council.d) }))
 			: []
 	, [data]);
+	const councilsDateArray = useMemo(() =>
+			data?.councils?.length > 0
+				? data.councils.map((council) => {
+					const dt = new Date(council.d);
+					return { year: dt.getFullYear(), month: dt.getMonth(), day: dt.getDate() };
+				})
+				: []
+	, [data]);
 
-	// const som = Object.freeze({
-	// 	One: 1,
-	// 	Two: 2,
-	// });
-	// console.log(som);
-	// console.log(som.One);
 	const onSelect = useCallback((one) => {
-		// console.log(one);
 		onClick(one._id)();
 	}, [onClick]);
 
-	return <Box overflow='auto' height='700px'><Calendar
+	const getBackgroundColor = (children, value) => {
+		let color = '';
+		const findDate = new Date(value);
+
+		if (councilsDateArray.find((cDate) => cDate.year === findDate.getFullYear() && cDate.month === findDate.getMonth() && cDate.day === findDate.getDate())) {
+			color = colorBackgroundCouncil(findDate);
+		}
+		return color;
+	};
+
+	const ColoredDateCellWrapper = ({ children, value }) =>
+		React.cloneElement(Children.only(children), {
+			style: {
+				...children.style,
+				backgroundColor: getBackgroundColor(children, value),
+			},
+		});
+
+	return <Box overflow='auto' height='700px' maxHeight='700px'><Calendar
+		// className={clickable}
 		views={['month', 'week', 'day']}
 		culture={'ru'}
 		localizer={localizer}
@@ -205,6 +225,9 @@ function CouncilsCalendar({
 			month: t('Month'),
 			week: t('Week'),
 			day: t('Day'),
+		}}
+		components={{
+			dateCellWrapper: ColoredDateCellWrapper,
 		}}
 	/></Box>;
 }

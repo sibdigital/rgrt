@@ -201,33 +201,34 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8'>
-					<Field.Label>{t('Date')}</Field.Label>
-					<Field.Row>
-						<DatePicker
-							dateFormat='dd.MM.yyyy HH:mm'
-							selected={date}
-							onChange={(newDate) => setDate(newDate)}
-							showTimeSelect
-							timeFormat='HH:mm'
-							timeIntervals={5}
-							timeCaption='Время'
-							customInput={<TextInput border='1px solid #4fb0fc' />}
-							locale='ru'
-							popperClassName='date-picker'
-						/>
-					</Field.Row>
+				<Field mbe='x8' display='flex' flexDirection='row'>
+					<Field mis='x4' >
+						<Field.Label>{t('Council_type')}</Field.Label>
+						<Field.Row>
+							<Select style={ { whiteSpace: 'normal' } } border='1px solid #4fb0fc' options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+						</Field.Row>
+					</Field>
+					<Field mis='x4'>
+						<Field.Label>{t('Date')}</Field.Label>
+						<Field.Row>
+							<DatePicker
+								dateFormat='dd.MM.yyyy HH:mm'
+								selected={date}
+								onChange={(newDate) => setDate(newDate)}
+								showTimeSelect
+								timeFormat='HH:mm'
+								timeIntervals={5}
+								timeCaption='Время'
+								customInput={<TextInput border='1px solid #4fb0fc'/>}
+								locale='ru'
+								popperClassName='date-picker'/>
+						</Field.Row>
+					</Field>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
 						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
-					</Field.Row>
-				</Field>
-				<Field mbe='x8'>
-					<Field.Label>{t('Council_type')}</Field.Label>
-					<Field.Row>
-						<Select style={ { whiteSpace: 'normal' } } border='1px solid #4fb0fc' options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
 					</Field.Row>
 				</Field>
 				<Tabs flexShrink={0} mbe='x8'>

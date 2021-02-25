@@ -521,9 +521,9 @@ function Council({
 	}, [attachedFiles]);
 
 	const header = useMemo(() => [
-		<Th w='x40' key={'Index'} color='default'>
-			{'№' }
-		</Th>,
+		// <Th w='x40' key={'Index'} color='default'>
+		// 	{'№' }
+		// </Th>,
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
 		</Th>,
@@ -552,7 +552,7 @@ function Council({
 		const style = getStyle(document.index);
 
 		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
-			<Table.Cell fontScale='p1' color='default'>{orderIndex ?? document.index}</Table.Cell>
+			{/*<Table.Cell fontScale='p1' color='default'>{orderIndex ?? document.index}</Table.Cell>*/}
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
 			{isSecretary && <Table.Cell alignItems={'end'}>

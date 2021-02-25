@@ -77,8 +77,10 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 		</Field.Row>
 	</Field>, [close, t, handleSave]);
 
-	return <SlideAnimation><Box>
+	return <>
 		{append}
-		<ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} {...props}/>
-	</Box></SlideAnimation>;
+		<SlideAnimation style={{ overflowY: 'auto' }}><Box>
+			<ParticipantForm formValues={values} formHandlers={handlers} workingGroupOptions={workingGroupOptions} {...props}/>
+		</Box></SlideAnimation>
+	</>;
 }
