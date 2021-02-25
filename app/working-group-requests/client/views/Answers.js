@@ -54,8 +54,10 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 	], [mediaQuery]);
 
 	const renderRow = (answer) => {
-		const { sender, commentary, phone, email, unread, ts } = answer;
+		const { sender, commentary, unread, ts } = answer;
 		const organization = sender.organization ?? '';
+		const phone = sender.phone ?? '';
+		const email = sender.email ?? '';
 		return <Table.Row onClick={onClick(answer)} onMouseEnter={() => onMouseEnter(answer)} style={{ borderLeft: unread ? '1px solid #4fb0fc' : '' }} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' color='default'>{organization}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default' style={{ wordBreak: 'break-all' }}>{commentary}</Table.Cell>

@@ -114,3 +114,9 @@ export function createWorkingGroupRequestMessageData(description, number, previo
 
 	return workingGroupRequestData;
 }
+
+// delete html tags
+export const preProcessingProtocolItems = (item) => {
+	const regExp = new RegExp('(<[^>]*>)*(&nbsp;)*', 'gi');
+	return item.replaceAll(regExp, '');
+};

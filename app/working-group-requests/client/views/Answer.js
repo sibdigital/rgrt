@@ -165,13 +165,13 @@ function InfoData({ answer }) {
 		<Field mbe='x8'>
 			<Field.Label>{t('Phone_number')}</Field.Label>
 			<Field.Row>
-				<TextInput readOnly placeholder={t('Phone_number')} is='span' fontScale='p1'>{answer.phone ?? ''}</TextInput>
+				<TextInput readOnly placeholder={t('Phone_number')} is='span' fontScale='p1'>{answer.sender?.phone ?? ''}</TextInput>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>
 			<Field.Label>{t('Email')}</Field.Label>
 			<Field.Row>
-				<TextInput readOnly placeholder={t('Email')} is='span' fontScale='p1'>{answer.email ?? ''}</TextInput>
+				<TextInput readOnly placeholder={t('Email')} is='span' fontScale='p1'>{answer.sender?.email ?? ''}</TextInput>
 			</Field.Row>
 		</Field>
 		<Field mbe='x8'>

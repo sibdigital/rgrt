@@ -1,5 +1,5 @@
 import { Box, Field, Margins, Select, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -14,29 +14,75 @@ import { useMethod } from '../../../../../../client/contexts/ServerContext';
 
 function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDownloadInfo }) {
 	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
+	const t = useTranslation();
 
-	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
-
+	const [committing, setCommitting] = useState(false);
 	const [newData, setNewData] = useState({
+		senderId: { value: '', required: false },
 		sender: { value: '', required: true },
 		senderOrganization: { value: '', required: true },
 		phone: { value: '', required: true },
 		email: { value: '', required: true },
-		unread: { value: true, required: true },
+		unread: { value: true, required: false },
+	});
+
+	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
+
+	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [newData]);
+
+	const constructSenderUserData = useCallback(() => {
+		return {
+			senderId: {
+				value: userInfo._id ?? '',
+				required: newData.senderId.required,
+			},
+			sender: {
+				value: 'Пользователь',
+				required: newData.sender.required,
+			},
+			senderOrganization: {
+				value: constructPersonFullFIO(userInfo),
+				required: newData.senderOrganization.required,
+			},
+			phone: {
+				value: userInfo.phone ?? '',
+				required: newData.phone.required,
+			},
+			email: {
+				value: userInfo.emails[0]?.address ?? '',
+				required: newData.email.required,
+			},
+		};
+	}, [userInfo]);
+
+	const constructClearNewData = () => ({
+		senderId: { value: '', required: false },
+		sender: { value: '', required: true },
+		senderOrganization: { value: '', required: true },
+		phone: { value: '', required: true },
+		email: { value: '', required: true },
+		unread: { value: true, required: false },
 	});
 
 	useEffect(() => {
 		console.log(fileDownloadInfo);
 		if (userInfo) {
-			setNewData({ ...newData,
-				sender: { value: 'Пользователь', required: newData.sender.required },
-				senderOrganization: { value: constructPersonFullFIO(userInfo), required: newData.senderOrganization.required },
-				phone: { value: userInfo.phone ?? '', required: newData.phone.required },
-				email: { value: userInfo.emails[0]?.address ?? '', required: newData.email.required },
+			setNewData({ ...newData, ...constructSenderUserData() });
+		}
+	}, [userInfo, constructSenderUserData]);
+
+	const handleChangeSender = useCallback((value) => {
+		console.log(userInfo);
+		console.log(value);
+		if (value === 'Пользователь') {
+			setNewData({ ...newData, ...constructSenderUserData() });
+		} else {
+			setNewData({ ...constructClearNewData(),
+				sender: { value, required: newData.sender.required },
+				senderId: { value, required: newData.senderId.required },
 			});
 		}
-	}, [userInfo]);
-
+	}, [userInfo, constructSenderUserData]);
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
 	};
@@ -49,25 +95,17 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 	};
 
 	const packNewData = () => {
-		const dataToSend = {};
-		Object.keys(newData).forEach((key) => {
-			if (key === 'sender') {
-				dataToSend[key] = { group: newData.sender.value, organization: newData.senderOrganization.value };
-			} else if (key === 'unread') {
-				dataToSend[key] = newData[key].value;
-			} else if (key !== 'senderOrganization' && key !== 'number') {
-				dataToSend[key] = newData[key].value.trim();
-			}
-		});
+		const dataToSend = { sender: {
+			_id: newData.senderId.value,
+			group: newData.sender.value,
+			organization: newData.senderOrganization.value,
+			phone: newData.phone.value,
+			email: newData.email.value,
+		} };
+		dataToSend.unread = newData.unread.value;
 		dataToSend.ts = new Date();
 		return Object.assign({}, dataToSend, fileDownloadInfo.workingGroupRequestAnswer);
 	};
-
-	const t = useTranslation();
-
-	const [commiting, setComitting] = useState(false);
-
-	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [newData]);
 
 	const handleBackClick = () => {
 		goToPreviousStep();
@@ -75,7 +113,9 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
+		setCommitting(false);
 		try {
+			setCommitting(true);
 			const dataToSave = packNewData();
 			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
 			await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {
@@ -83,8 +123,10 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 				mailId: newMailId === '' ? fileDownloadInfo.mailId : newMailId,
 				answerId,
 			});
+			setCommitting(false);
 			goToFinalStep();
 		} catch (error) {
+			setCommitting(false);
 			console.log(error);
 		}
 	};
@@ -105,7 +147,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 		['Республика Бурятия', 'Республика Бурятия'],
 	], []);
 
-	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
+	return <Step active={active} working={committing} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
@@ -118,7 +160,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 						<Field>
 							<Field.Label>{t('Working_group_request_sender')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
-								<Select width='100%' options={workingGroupOptions} onChange={handleChangeSelect('sender')} value={newData.sender.value} placeholder={t('Working_group_request_sender')}/>
+								<Select width='100%' options={workingGroupOptions} onChange={handleChangeSender} value={newData.sender.value} placeholder={t('Working_group_request_sender')}/>
 							</Field.Row>
 						</Field>
 						<Field>
@@ -139,12 +181,6 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 									countryCodeEditable={false} placeholder={'+7 (123)-456-78-90'}/>
 							</Field.Row>
 						</Field>
-						{/*<Field>*/}
-						{/*	<Field.Label>{t('Phone_number')} <span style={ { color: 'red' } }>*</span></Field.Label>*/}
-						{/*	<Field.Row>*/}
-						{/*		<TextInput value={newData.phone.value} flexGrow={1} onChange={handleChange('phone')} placeholder={`${ t('Council_Contact_person_Phone_number_placeholder') }`}/>*/}
-						{/*	</Field.Row>*/}
-						{/*</Field>*/}
 						<Field>
 							<Field.Label>{t('Email')} <span style={ { color: 'red' } }>*</span></Field.Label>
 							<Field.Row>
@@ -156,7 +192,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 			</Box>
 		</Margins>
 
-		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} />
+		<Pager disabled={committing} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} />
 	</Step>;
 }
 
