@@ -21,10 +21,12 @@ import { Proposals } from './Proposals';
 
 registerLocale('ru', ru);
 
-export function ProposalsForTheAgendaPage() {
+export function ProposalsForTheAgendaPage({ isFullLoad = true, onAgendaClick = null }) {
 	const t = useTranslation();
 	const userId = useUserId();
 	const id = useRouteParameter('id');
+
+	const [cache, setCache] = useState(new Date());
 
 	const { data: userData, state: userState, error: userError } = useEndpointDataExperimental('users.info', useMemo(() => ({
 		userId,
@@ -35,6 +37,10 @@ export function ProposalsForTheAgendaPage() {
 		query: JSON.stringify({ councilId: id, userId }),
 		fields: JSON.stringify({ proposals: 1 }),
 	}), [userId])) || { proposals: [] };
+
+	const onChange = useCallback(() => {
+		setCache(new Date());
+	}, [agendaUserData]);
 
 	if ([userState, agendaUserState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
@@ -51,17 +57,16 @@ export function ProposalsForTheAgendaPage() {
 		return <Callout m='x16' type='danger'>{ agendaUserError }</Callout>;
 	}
 
-	return <ProposalsForTheAgenda userData={userData.user ?? {}} agendaData={agendaUserData}/>;
+	return <ProposalsForTheAgenda userData={userData.user ?? {}} agendaData={agendaUserData} onChange={onChange} isFullLoad={isFullLoad} onAgendaClick={onAgendaClick}/>;
 }
 
 ProposalsForTheAgendaPage.displayName = 'ProposalsForTheAgendaPage';
 
 export default ProposalsForTheAgendaPage;
 
-function ProposalsForTheAgenda({ userData, agendaData }) {
+function ProposalsForTheAgenda({ userData, agendaData, onChange, isFullLoad, onAgendaClick = null }) {
 	const t = useTranslation();
 
-	const [cache, setCache] = useState(new Date());
 	const [context, setContext] = useState('');
 	const [currentProposal, setCurrentProposal] = useState({});
 	const [proposalsList, setProposalsList] = useState([]);
@@ -71,10 +76,6 @@ function ProposalsForTheAgenda({ userData, agendaData }) {
 			setProposalsList(agendaData.proposals);
 		}
 	}, [agendaData]);
-
-	const onChange = useCallback(() => {
-		setCache(new Date());
-	}, [cache]);
 
 	const close = useCallback(() => {
 		setContext('');
@@ -92,23 +93,27 @@ function ProposalsForTheAgenda({ userData, agendaData }) {
 	}, []);
 
 	const onEditProposal = useCallback((proposal) => {
+		if (onAgendaClick) {
+			onAgendaClick(proposal);
+			return;
+		}
 		setCurrentProposal(proposal);
 		setContext('edit');
-	}, []);
+	}, [onAgendaClick]);
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			{isFullLoad && <Page.Header title=''>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Proposals_for_the_agenda')}</Label>
 				</Field>
-				<ButtonGroup>
+				<ButtonGroup mis='auto'>
 					{context === '' && <Button mbe='x8' small primary aria-label={t('Proposal_for_the_agenda_add')} onClick={handleNewProposalClick}>
 						{t('Proposal_for_the_agenda_add')}
 					</Button>}
 				</ButtonGroup>
-			</Page.Header>
+			</Page.Header>}
 			<Page.Content>
 				<Proposals mode={'user'} proposalsListData={proposalsList} agendaId={agendaData._id} onEditProposal={onEditProposal}/>
 			</Page.Content>

@@ -122,7 +122,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				options={personsOptions}
 				value={editData.speakers ?? []}
 				forcePopupIcon={false}
-				getOptionLabel={(option) => constructPersonFIO(option)}
+				getOptionLabel={(userData) => [constructPersonFIO(userData), `, ${ userData.organization ?? '' }`].join('')}
 				filterSelectedOptions
 				filterOptions={createFilterOptions({ limit: 10 })}
 				onChange={(event, value) => handleSpeakers(value)}

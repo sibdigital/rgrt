@@ -91,6 +91,10 @@ export function CouncilPage() {
 	const { data: protocolData, state: protocolsDataState } = useEndpointDataExperimental('protocols.findByCouncilId', query);
 	const { data: workingGroupData, state: workingGroupState } = useEndpointDataExperimental('working-groups.list',
 		useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), []));
+	const { data: agendaData, state: agendaState } = useEndpointDataExperimental('agendas.findByCouncilId', useMemo(() => ({
+		query: JSON.stringify({ councilId }),
+		fields: JSON.stringify({ _id: 0, councilId: 1 }),
+	}), [councilId]));
 
 	useEffect(() => {
 		if (data && data.documents) {
@@ -120,7 +124,7 @@ export function CouncilPage() {
 	], [t]);
 
 	let isLoading = true;
-	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState, protocolsDataState, workingGroupState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState, protocolsDataState, workingGroupState, agendaState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
 	} else {
 		isLoading = false;
@@ -131,7 +135,7 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
+	return <Council isAgendaData={!!agendaData?.success} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -154,6 +158,7 @@ function Council({
 	councilTypeOptions,
 	protocolData,
 	workingGroupOptions,
+	isAgendaData = false,
 }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
@@ -176,6 +181,7 @@ function Council({
 
 	useEffect(() => {
 		if (isLoading) { return; }
+		console.log(isAgendaData);
 		if (userRoles.includes('secretary') || userRoles.includes('admin')) {
 			setIsSecretary(true);
 			setTab('persons');
@@ -593,7 +599,7 @@ function Council({
 					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>}
-					{isSecretary && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
+					{(isSecretary || isAgendaData) && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{t('Agenda')}
 					</Button>}
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
@@ -616,12 +622,6 @@ function Council({
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
-					{/*<Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>*/}
-					{/*	{t('Agenda')}*/}
-					{/*</Button>*/}
-					{/*<Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>*/}
-					{/*	{t('Protocol')}*/}
-					{/*</Button>*/}
 				</ButtonGroup>}
 			</Page.Header>
 			<Page.Content>

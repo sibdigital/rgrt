@@ -1,5 +1,6 @@
 import {
 	Field,
+	Label,
 	Margins,
 	TextInput,
 	Box,
@@ -104,15 +105,11 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 
 	return <Step active={active} working={commiting} onSubmit={handleSave} style={stepStyle}>
 		<StepHeader number={step} title={title} />
-		<Box is='p' fontScale='s1' color='hint' mbe='x16'>{t('Proposal_for_the_agenda_invite_description')}</Box>
+		<Box is='p' fontScale='s1' color='hint' mbe='x16'>
+			{agendaId ? t('Proposal_for_the_agenda_invite_description') : t('Agenda_not_found')}
+		</Box>
 		<Margins blockEnd='x32'>
-			<FieldGroup>
-				{/*<Field>*/}
-				{/*	<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>*/}
-				{/*	<Field.Row>*/}
-				{/*		<InputBox value={editData.item} onChange={(e) => handleEditDataChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />*/}
-				{/*	</Field.Row>*/}
-				{/*</Field>*/}
+			{ agendaId && <FieldGroup>
 				<Field>
 					<Field.Label>{t('Agenda_issue_consideration')} <span style={ { color: 'red' } }>*</span></Field.Label>
 					<Field.Row>
@@ -135,10 +132,10 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 							popperClassName='date-picker'/>
 					</Field.Row>
 				</Field>
-			</FieldGroup>
+			</FieldGroup>}
 		</Margins>
 
-		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} onBackClickText={t('Skip')}/>
+		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled && agendaId} onBackClick={handleBackClick} onBackClickText={t('Skip')}/>
 	</Step>;
 }
 

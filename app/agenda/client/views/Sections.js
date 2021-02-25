@@ -11,7 +11,7 @@ const clickable = css`
 		}
 	`;
 
-export function Sections({ data, onSectionMenuClick }) {
+export function Sections({ data, onSectionMenuClick, isAllowEdit }) {
 	const Item = (item) => <>
 		<Box
 			mis='x40'
@@ -73,11 +73,11 @@ export function Sections({ data, onSectionMenuClick }) {
 			<Box display='flex' flexDirection='row'>
 				<Box mie='x4' fontWeight='600'>{section[1]?.item ? section[1].value : index + 1}: </Box>
 			</Box>
-			<Box
+			{isAllowEdit && <Box
 				pi='x4' mis='auto' style={{ cursor: 'pointer' }} data-section={section[0]._id} data-first={section.first}
 				data-last={section.last} onClick={onSectionMenuClick}>
 				<Icon name='menu' size='x20'/>
-			</Box>
+			</Box>}
 		</Box>
 		<Box mbe='x8'>
 			{(
