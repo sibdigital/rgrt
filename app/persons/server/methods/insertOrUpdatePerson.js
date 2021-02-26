@@ -38,6 +38,8 @@ Meteor.methods({
 				phone: person.phone,
 				email: person.email,
 				group: person.group,
+				organization: person.organization,
+				position: person.position,
 			};
 
 			const _id = Persons.create(createPerson);

@@ -24,6 +24,7 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { useUserId } from '../../../../client/contexts/UserContext';
 import { validate, createCouncilData } from './lib';
 import { Persons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
@@ -60,7 +61,9 @@ const invitedPersonsQuery = ({ itemsPerPage, current }, [column, direction]) => 
 
 export function AddCouncilPage() {
 	const t = useTranslation();
-	const [cache, setCache] = useState();
+	const userId = useUserId();
+
+	const [cache, setCache] = useState(new Date());
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
 	const [persons, setPersons] = useState([]);
@@ -101,7 +104,7 @@ export function AddCouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
 	}
 
-	if (!hasPermission('edit-councils', Meteor.userId())) {
+	if (!hasPermission('edit-councils', userId)) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
