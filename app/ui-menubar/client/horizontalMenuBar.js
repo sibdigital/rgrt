@@ -192,13 +192,15 @@ Template.menuBar.events({
 
 		return this.action && this.action.apply(this, [e]);
 	},
+
 	'click .submenu-link'(e, instance) {
 		console.log(this);
+		
 		return this.action && this.action.apply(this, [e]);
 	},
+
 	'click .icon' (e, instance) {
-		let x = document.getElementById('main-menu')
-		console.log(x)
+		let x = document.getElementById('main-menu');
 
 		if (x.className	===	'menu')	{
 			x.className	+=	' responsive';
@@ -206,4 +208,12 @@ Template.menuBar.events({
 			x.className	= 'menu';
 		}
 	},
+
+	'click .menu.responsive a'(e, instance) {
+		let x = document.getElementById('main-menu');
+
+		if (x.className	===	'menu responsive') {
+			x.className	= 'menu';
+		}
+	}
 });
