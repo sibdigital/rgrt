@@ -51,7 +51,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 			flexDirection='row'
 			className={clickable}>
 			<Box display='flex' flexDirection='row' is='span' pie='x8'>
-				<Box mie='x4' color={getStatusIcon(item.status?.state ?? 1)}><Icon name='circle'/></Box>
+				<Box mie='x4' color={getStatusIcon(item.responsible.length > 0 ? item.status?.state ?? -1 : -1)}><Icon name='circle'/></Box>
 				<Box>{item.sectionNum ? [item.sectionNum, '.'].join('') : ''}{item.num}.</Box>
 			</Box>
 			<Box flexGrow={1}>
