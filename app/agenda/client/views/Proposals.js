@@ -120,7 +120,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 
 	const renderRow = (proposal) => {
 		const { _id, item, issueConsideration, date, initiatedBy, status } = proposal;
-		const isProposalApproved = proposal.status === t('Agenda_status_approved') || proposal.status === 'Agenda_status_approved';
+		const isProposalApproved = (proposal.status === t('Agenda_status_approved') || proposal.status === 'Agenda_status_approved');
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{item ?? ''}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }} onClick={() => onProposalClick(proposal)}>{initiatedBy.value ?? ''}</Table.Cell>}
