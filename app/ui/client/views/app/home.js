@@ -66,6 +66,10 @@ const toolbarButtons = () => [
 		name: t('Council Commission \"Transport\"'),
 		icon: 'help',
 		context: 'home',
+		action: () => {
+			menu.close();
+			FlowRouter.go('working-group');
+		},
 		//openContext: 'handbooks',
 		// condition: () => hasPermission('handbooks-home-page'),
 	},
