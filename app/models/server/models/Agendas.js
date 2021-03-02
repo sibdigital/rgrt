@@ -74,6 +74,7 @@ class Agendas extends Base {
 		const data = this.findOne({ _id });
 
 		if (data.proposals) {
+			console.log({ proposals: data.proposals, proposalId, status });
 			data.proposals = data.proposals.map((proposal) => {
 				if (proposal._id === proposalId) {
 					proposal.status = status;
@@ -89,6 +90,23 @@ class Agendas extends Base {
 	updateAgenda(_id, data) {
 		data._updatedAt = new Date();
 		return this.update({ _id }, { $set: { ...data } });
+	}
+
+	updateAgendaSectionOrder(_id, sections) {
+		const data = this.findOne({ _id });
+		data._updatedAt = new Date();
+		data.sections = sections;
+		return this.update({ _id }, { $set: { ...data } });
+	}
+
+	removeSection(_id, sectionId) {
+		const data = this.findOne({ _id });
+
+		if (data.sections) {
+			data.sections = data.sections.filter((section) => section._id !== sectionId);
+			data._updatedAt = new Date();
+			this.update({ _id }, { $set: { ...data } });
+		}
 	}
 
 	removeProposal(_id, proposalId) {

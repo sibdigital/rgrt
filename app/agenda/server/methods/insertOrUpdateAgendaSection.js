@@ -12,9 +12,9 @@ Meteor.methods({
 		if (!sectionData.issueConsideration) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field issueConsideration is required', { method: 'insertOrUpdateAgendaSection', field: 'issueConsideration' });
 		}
-		if (!sectionData.date) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field date is required', { method: 'insertOrUpdateAgendaSection', field: 'date' });
-		}
+		// if (!sectionData.date) {
+		// 	throw new Meteor.Error('error-the-field-is-required', 'The field date is required', { method: 'insertOrUpdateAgendaSection', field: 'date' });
+		// }
 		if (!sectionData.speakers) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field speakers is required', { method: 'insertOrUpdateAgendaSection', field: 'speakers' });
 		}
@@ -24,9 +24,13 @@ Meteor.methods({
 			initiatedBy: sectionData.initiatedBy,
 			ts: new Date(),
 			issueConsideration: sectionData.issueConsideration ?? '',
-			date: sectionData.date ?? '',
+			// date: sectionData.date ?? '',
 			speakers: sectionData.speakers ?? [],
 		};
+		console.log({ sectionData });
+
+		sectionData.proposalId && Object.assign(agendaSection, { proposalId: sectionData.proposalId });
+		console.log({ agendaSection });
 
 		if (!sectionData._id) {
 			const _id = Agendas.addSection(agendaId, agendaSection);
