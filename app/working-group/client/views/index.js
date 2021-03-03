@@ -19,7 +19,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 export const useQueryUser = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	query: JSON.stringify({ workingGroup: { $regex: text || '', $options: 'i' } }),
-	fields: JSON.stringify({ emails: 1, username: 1, surname: 1, name: 1, patronymic: 1, position: 1, organization: 1, phone: 1, workingGroup: 1 }),
+	fields: JSON.stringify({ emails: 1, surname: 1, name: 1, patronymic: 1, position: 1, organization: 1, phone: 1, workingGroup: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation
@@ -36,11 +36,11 @@ export function WorkingGroupPage() {
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const queryUser = useQueryUser(debouncedParams, debouncedSort, cache);
+	const queryUser = useQueryUser(debouncedParams, debouncedSort);
 
 	const data = useEndpointData('users.list', queryUser) || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-
+	console.log(data)
 	const router = useRoute(routeName);
 
 	const context = useRouteParameter('context');
@@ -117,17 +117,17 @@ export function WorkingGroupPage() {
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Commission of the State Council of the Russian Federation in the direction of \"Transport\"')}</Label>
+					<Label fontScale='h1'>{t('Working_group')}</Label>
 				</Field>
 			</Page.Header>
 			<Page.Content>
-				{/* <Field.Row>
+				<Field.Row>
 					<ButtonGroup>
 						<Button small primary onClick={downloadWorkingGroupParticipants(data.users)} aria-label={t('Download')}>
 							<Box is='span' fontScale='p1'>{t('Download_Council_Participant_List')}</Box>
 						</Button>
 					</ButtonGroup>
-				</Field.Row> */}
+				</Field.Row>
 				<WorkingGroups setParam={setParams} params={params} onHeaderClick={onHeaderClick} userData={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
 			</Page.Content>
 		</Page>
