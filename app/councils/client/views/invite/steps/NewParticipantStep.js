@@ -1,4 +1,4 @@
-import { Box, Margins } from '@rocket.chat/fuselage';
+import { Box, Margins, CheckBox, Field } from '@rocket.chat/fuselage';
 import React, { useMemo, useState, useCallback } from 'react';
 import 'react-phone-input-2/lib/style.css';
 
@@ -21,7 +21,11 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 	const {
 		values,
 		handlers,
-	} = useDefaultPersonForm();
+	} = useDefaultPersonForm({});
+	const {
+		values: contactPersonValues,
+		handlers: contactPersonHandlers,
+	} = useDefaultPersonForm({ isContactPerson: true });
 
 	const {
 		surname,
@@ -29,19 +33,16 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 		patronymic,
 	} = values;
 
-	console.log('new part');
+	const [committing, setCommitting] = useState(false);
+	const [isContactPerson, setIsContactPerson] = useState(false);
 
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 	const insertOrUpdateCouncilPerson = useMethod('insertOrUpdateCouncilPerson');
-
-	const councilId = council._id;
 
 	const saveQuery = useMemo(() => values, [values]);
 
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 	const saveAction = useEndpointAction('POST', 'users.createParticipant', saveQuery, t('Participant_Created_Successfully'));
-
-	const [commiting, setComitting] = useState(false);
 
 	const handleBackClick = () => {
 		goToPreviousStep();
@@ -55,6 +56,7 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 					_id: personId,
 					ts: new Date(),
 				};
+				isContactPerson && Object.assign(person, { isContactPerson, contactPerson: contactPersonValues });
 
 				await insertOrUpdateCouncilPerson(council, person);
 
@@ -71,19 +73,16 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 			dispatchToastMessage({ type: 'error', message: error });
 			return false;
 		}
-	}, [values, saveQuery, saveAction]);
+	}, [values, saveQuery, saveAction, isContactPerson, contactPersonValues]);
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		setComitting(true);
+		setCommitting(true);
 		try {
-			setComitting(false);
+			setCommitting(false);
 			const isSave = await handleSave();
-			if (isSave) {
-				goToFinalStep();
-			}
 		} catch (error) {
-			setComitting(false);
+			setCommitting(false);
 		}
 	};
 
@@ -96,8 +95,9 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 	}, [workingGroups]);
 
 	const allFieldAreFilled = useMemo(() => Object.values(values).filter((current) => current === '').length === 0, [values]);
+	const contactFieldsAreFilled = useMemo(() => (!isContactPerson) || (isContactPerson && Object.values(contactPersonValues).filter((current) => current === '').length === 0), [isContactPerson, contactPersonValues]);
 
-	return <Step active={active} working={commiting} onSubmit={handleSubmit} style={stepStyle}>
+	return <Step active={active} working={committing} onSubmit={handleSubmit} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
@@ -105,10 +105,18 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 				<Box is='p' fontScale='s1' color='hint' marginBlockEnd='x16'>{t('Council_participant_info_description')}</Box>
 
 				<PersonForm defaultValues={values} defaultHandlers={handlers}/>
+
+				<Box margin='x8'>
+					<CheckBox checked={isContactPerson} onChange={() => setIsContactPerson(!isContactPerson)} mie='x8' />
+					<Field.Label>{t('Council_Is_Contact_person')}</Field.Label>
+				</Box>
+				{isContactPerson
+				&& <PersonForm defaultValues={contactPersonValues} defaultHandlers={contactPersonHandlers} isContactPerson={true}/>
+				}
 			</Box>
 		</Margins>
 
-		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled} onBackClick={handleBackClick} />
+		<Pager disabled={committing} isContinueEnabled={allFieldAreFilled && contactFieldsAreFilled} onBackClick={handleBackClick} />
 	</Step>;
 }
 

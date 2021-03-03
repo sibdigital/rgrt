@@ -6,22 +6,23 @@ import { isEmail } from '../../../utils';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
 
-export function useDefaultPersonForm() {
+export function useDefaultPersonForm({ defaultValues = null, isContactPerson = false }) {
+	const defaultFields = {
+		surname: '',
+		name: '',
+		patronymic: '',
+		phone: '',
+		email: '',
+	};
+	!isContactPerson && Object.assign(defaultFields, { organization: '', position: '' });
+
 	const {
 		values,
 		handlers,
 		reset,
 		commit,
 		hasUnsavedChanges,
-	} = useForm({
-		surname: '',
-		name: '',
-		patronymic: '',
-		phone: '',
-		email: '',
-		organization: '',
-		position: '',
-	});
+	} = useForm(defaultValues ?? defaultFields);
 
 	return {
 		values,
@@ -32,7 +33,7 @@ export function useDefaultPersonForm() {
 	};
 }
 
-function PersonForm({ defaultValues = null, defaultHandlers = null }) {
+function PersonForm({ defaultValues = null, defaultHandlers = null, isContactPerson = false }) {
 	const t = useTranslation();
 	const fieldMarginBlock = 'x4';
 	const fieldWidth = '98%';
@@ -42,15 +43,7 @@ function PersonForm({ defaultValues = null, defaultHandlers = null }) {
 		handlers,
 		reset,
 		hasUnsavedChanges,
-	} = useForm(defaultValues ?? {
-		surname: '',
-		name: '',
-		patronymic: '',
-		phone: '',
-		email: '',
-		organization: '',
-		position: '',
-	});
+	} = useDefaultPersonForm({ defaultValues, isContactPerson });
 
 	const {
 		surname,
@@ -73,8 +66,6 @@ function PersonForm({ defaultValues = null, defaultHandlers = null }) {
 	} = handlers;
 
 	const onChangeField = useCallback((val, handler) => {
-		// console.log({ val, handler, defaultHandlers });
-		// console.log(defaultHandlers[handler.name]);
 		handler(val);
 		if (defaultHandlers && defaultHandlers[handler.name]) {
 			defaultHandlers[handler.name](val);
@@ -121,14 +112,14 @@ function PersonForm({ defaultValues = null, defaultHandlers = null }) {
 				</Field.Row>
 			</Field>, [t, email, handleEmail])}
 
-			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
+			{!isContactPerson && useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Position')}</Field.Label>
 				<Field.Row>
 					<TextInput flexGrow={1} value={position} onChange={(val) => onChangeField(val, handlePosition)}/>
 				</Field.Row>
 			</Field>, [t, position, handlePosition])}
 
-			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
+			{!isContactPerson && useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Organization')}</Field.Label>
 				<Field.Row>
 					<TextInput flexGrow={1} value={organization} onChange={(val) => onChangeField(val, handleOrganization)}/>
