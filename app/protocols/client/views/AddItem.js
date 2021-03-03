@@ -16,7 +16,7 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validateItemData, createItemData } from './lib';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { checkNumber } from '../../../utils/client/methods/checkNumber';
 
 registerLocale('ru', ru);
 
@@ -37,7 +37,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
 
 	const filterNumber = (value) => {
-		if (checkNumberWithDot(value, number) !== null || value === '') {
+		if (checkNumber(value) !== null) {
 			setNumber(value);
 		}
 	};

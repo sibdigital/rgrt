@@ -21,7 +21,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		item: '',
 		initiatedBy: {},
 		issueConsideration: '',
-		date: new Date(),
+		// date: new Date(),
 		speakers: [],
 	});
 
@@ -32,7 +32,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				item: data.item ?? '',
 				initiatedBy: data.initiatedBy,
 				issueConsideration: data.issueConsideration,
-				date: new Date(data.date),
+				// date: new Date(data.date),
 				speakers: data.speakers,
 			});
 		}
@@ -49,8 +49,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		setEditData({ ...editData, speakers: value });
 	};
 
-	const saveAction = useCallback(async (item, initiatedBy, issueConsideration, date, speakers, previousData) => {
-		const agendaData = createAgendaSection({ item, initiatedBy, issueConsideration, date, speakers, previousData });
+	const saveAction = useCallback(async (item, initiatedBy, issueConsideration, speakers, previousData) => {
+		const agendaData = createAgendaSection({ item, initiatedBy, issueConsideration, speakers, previousData });
 		const validation = validateAgendaSection(agendaData);
 		// console.log(agendaData);
 		if (validation.length === 0) {
@@ -73,7 +73,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				editData.item,
 				editData.initiatedBy,
 				editData.issueConsideration,
-				editData.date,
+				// editData.date,
 				editData.speakers,
 				data,
 			);
@@ -98,22 +98,22 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				<InputBox value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')} />
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Label>{t('Date')}</Field.Label>
-			<Field.Row>
-				<DatePicker
-					dateFormat='dd.MM.yyyy HH:mm'
-					selected={editData.date}
-					onChange={(newDate) => setEditData({ ...editData, date: newDate })}
-					showTimeSelect
-					timeFormat='HH:mm'
-					timeIntervals={5}
-					timeCaption='Время'
-					customInput={<TextInput />}
-					locale='ru'
-					popperClassName='date-picker'/>
-			</Field.Row>
-		</Field>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Date')}</Field.Label>*/}
+		{/*	<Field.Row>*/}
+		{/*		<DatePicker*/}
+		{/*			dateFormat='dd.MM.yyyy HH:mm'*/}
+		{/*			selected={editData.date}*/}
+		{/*			onChange={(newDate) => setEditData({ ...editData, date: newDate })}*/}
+		{/*			showTimeSelect*/}
+		{/*			timeFormat='HH:mm'*/}
+		{/*			timeIntervals={5}*/}
+		{/*			timeCaption='Время'*/}
+		{/*			customInput={<TextInput />}*/}
+		{/*			locale='ru'*/}
+		{/*			popperClassName='date-picker'/>*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 		<Field>
 			<Field.Label>{t('Agenda_speakers')}</Field.Label>
 			<Autocomplete
@@ -122,7 +122,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				options={personsOptions}
 				value={editData.speakers ?? []}
 				forcePopupIcon={false}
-				getOptionLabel={(option) => constructPersonFIO(option)}
+				getOptionLabel={(userData) => [constructPersonFIO(userData), `, ${ userData.organization ?? '' }`].join('')}
 				filterSelectedOptions
 				filterOptions={createFilterOptions({ limit: 10 })}
 				onChange={(event, value) => handleSpeakers(value)}

@@ -13,6 +13,12 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { validateAgendaSection, createAgendaSection } from './lib';
 
+export const ProposalStatusEnum = Object.freeze({
+	APPROVED: 1,
+	PROPOSED: 2,
+	DELETED: 3,
+});
+
 export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddProposal, mode = '' }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
@@ -40,7 +46,9 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 	}, [cache]);
 
 	const onAddProposalClick = useCallback(async (proposal) => {
+		console.log(proposal);
 		const agendaSection = createAgendaSection({
+			proposalId: proposal._id,
 			item: proposal.item,
 			initiatedBy: proposal.initiatedBy,
 			issueConsideration: proposal.issueConsideration,
@@ -49,6 +57,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 		});
 		const validation = validateAgendaSection(agendaSection);
 		if (validation.length === 0) {
+			console.log(agendaSection);
 			const result = await insertOrUpdateAgendaSection(agendaId, agendaSection);
 			await updateProposalStatus(agendaId, proposal._id, t('Agenda_status_approved'));
 
@@ -111,6 +120,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 
 	const renderRow = (proposal) => {
 		const { _id, item, issueConsideration, date, initiatedBy, status } = proposal;
+		const isProposalApproved = (proposal.status === t('Agenda_status_approved') || proposal.status === 'Agenda_status_approved');
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{item ?? ''}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }} onClick={() => onProposalClick(proposal)}>{initiatedBy.value ?? ''}</Table.Cell>}
@@ -118,7 +128,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 			<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{formatDateAndTime(date ?? new Date())}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{status}</Table.Cell>}
 			{ <Table.Cell alignItems={'end'}>
-				<Button style={tableCellIconStyle} color='red' small aria-label={t('trash')} onClick={() => onDeleteProposalClick(_id)}>
+				<Button style={tableCellIconStyle} disabled={isProposalApproved} color={isProposalApproved ? '#e4e7ea' : 'red'} small aria-label={t('trash')} onClick={() => onDeleteProposalClick(_id)}>
 					<Icon name='trash' size='x16'/>
 				</Button>
 			</Table.Cell>}
@@ -135,9 +145,8 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 		</Table.Row>;
 	};
 
-	return <Field display='flex' flexDirection='row'>
-		<Field>
-			<GenericTable header={header} renderRow={renderRow} results={proposalsList} total={proposalsList.length} setParams={setParams} params={params}/>
-		</Field>
-	</Field>;
+	return <GenericTable header={header} renderRow={renderRow} results={proposalsList} total={proposalsList.length} setParams={setParams} params={params}/>;
+	// return <Field display='flex' flexDirection='row'>
+	// 	<GenericTable header={header} renderRow={renderRow} results={proposalsList} total={proposalsList.length} setParams={setParams} params={params}/>
+	// </Field>;
 }

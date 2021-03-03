@@ -157,12 +157,12 @@ const menuItems = () => [
 					FlowRouter.go('admin', { group: 'permissions' });
 				},
 			},
-			{
-				name: t('Working_group'),
-				action: () => {
-					FlowRouter.go('working-group');
-				},
-			},
+			// {
+			// 	name: t('Working_group'),
+			// 	action: () => {
+			// 		FlowRouter.go('working-group');
+			// 	},
+			// },
 			{
 				name: t('Working_group_composition'),
 				condition: () => hasPermission('manage-working-group'),

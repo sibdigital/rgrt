@@ -18,9 +18,9 @@ export function validateAgendaSection(sectionData) {
 	if (!sectionData.issueConsideration) {
 		errors.push('issueConsideration');
 	}
-	if (!sectionData.date) {
-		errors.push('Date');
-	}
+	// if (!sectionData.date) {
+	// 	errors.push('Date');
+	// }
 	if (!sectionData.speakers) {
 		errors.push('Speakers');
 	}
@@ -41,7 +41,7 @@ export function createAgenda({ number, name, previousData }) {
 	return agendaData;
 }
 
-export function createAgendaSection({ item, initiatedBy, issueConsideration, date, speakers, previousData }) {
+export function createAgendaSection({ item, initiatedBy, issueConsideration, speakers, previousData, proposalId }) {
 	const agendaData = {
 	};
 
@@ -49,10 +49,14 @@ export function createAgendaSection({ item, initiatedBy, issueConsideration, dat
 		agendaData._id = previousData._id;
 	}
 
+	if (proposalId) {
+		agendaData.proposalId = proposalId;
+	}
+
 	agendaData.item = item;
 	agendaData.initiatedBy = initiatedBy;
 	agendaData.issueConsideration = issueConsideration;
-	agendaData.date = date;
+	// agendaData.date = date;
 	agendaData.speakers = speakers;
 
 	return agendaData;

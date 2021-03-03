@@ -84,9 +84,15 @@ export function createItemData(number, name, responsible, expireAt = '', status 
 	} else {
 		itemData.status = { state: 1, title: 'Новое' };
 	}
+
+	if (responsible) {
+		itemData.responsible = responsible;
+	} else {
+		itemData.responsible = [];
+	}
+
 	itemData.num = number;
 	itemData.name = name;
-	itemData.responsible = responsible;
 	itemData.expireAt = expireAt;
 
 	return itemData;

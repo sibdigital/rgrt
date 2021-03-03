@@ -1,6 +1,5 @@
 import { Box, Margins, CheckBox, Field } from '@rocket.chat/fuselage';
 import React, { useMemo, useState, useCallback } from 'react';
-import 'react-phone-input-2/lib/style.css';
 
 import { useMethod } from '../../../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../../../client/contexts/ToastMessagesContext';
@@ -61,12 +60,9 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 				await insertOrUpdateCouncilPerson(council, person);
 
 				dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
-				if (!isAgenda) {
-					goToFinalStep();
-				} else {
-					setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));
-					goToNextStep();
-				}
+
+				setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));
+				goToNextStep();
 			}
 			return false;
 		} catch (error) {

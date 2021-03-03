@@ -7,7 +7,7 @@ import { getURL } from '../../../../utils';
 import '../../../../councils/client/views/invite/SideBar.css';
 
 function SideBar({
-	logoSrc = 'images/logo/herb.png',
+	logoSrc = 'images/logo/herb.svg',
 	currentStep = 1,
 	steps = [],
 	requestInfo = { name: 'unknown' },
@@ -33,11 +33,23 @@ function SideBar({
 			marginBlockEnd={small ? 'none' : 'x32'}
 			marginInline='x24'
 			display='flex'
-			flexDirection='row'
+			flexDirection='column'
 			flexWrap='wrap'
-			alignItems='center'
 		>
-			<img height='64' margin='x4' src={ getURL(logoSrc, { full: true }) }/>
+			<Box
+				display='flex'
+				flexDirection='row'
+			>
+				<img height='64' margin='x4' src={ getURL(logoSrc, { full: true }) }/>
+				<Box
+					is='span'
+					margin='x4'
+					paddingBlock='x4'
+					paddingInline='x8'
+				>
+					{t('Commission of the State Council of the Russian Federation in the direction of \"Transport\"')}
+				</Box>
+			</Box>
 			<Box
 				is='span'
 				margin='x4'
@@ -50,6 +62,7 @@ function SideBar({
 					textTransform: 'uppercase',
 					backgroundColor: 'var(--color-dark, #2f343d)',
 					borderRadius: '9999px',
+					textAlign: 'center'
 				}}
 			>
 				{t('Working_group_request_invite_page', requestInfo.name)}

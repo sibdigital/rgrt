@@ -6,13 +6,37 @@ import ru from 'date-fns/locale/ru';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
+import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { validate, createProtocolData } from './lib';
+import { validate, createProtocolData, createItemData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { Autocomplete } from '@material-ui/lab';
+import { validateSectionData, createSectionData } from './lib';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
+
+const getCouncilAndAgendaDataByCouncilId = (councilId) => {
+	const councilAndAgendaData = { };
+
+	if (councilId) {
+
+		const query = useMemo(() => ({
+			query: JSON.stringify({ _id: councilId }),
+		}), [councilId]);
+
+		const {	data: councilData } = useEndpointDataExperimental('councils.findOne', query) || { };
+		const { data: invitedPersons } = useEndpointDataExperimental('councils.invitedPersons', query) || { persons: [] };
+		const { data: agendaData } = useEndpointDataExperimental('agendas.findByCouncilId', useMemo(() => ({ query: JSON.stringify({ councilId }) }), [councilId])) || { };
+
+		councilAndAgendaData.councilData = councilData;
+		councilAndAgendaData.personsData = invitedPersons;
+		councilAndAgendaData.agendaData = agendaData;
+	}
+
+	return councilAndAgendaData;
+}
 
 export function AddProtocol({ goToNew, close, onChange, ...props }) {
 
@@ -24,32 +48,34 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 	const [place, setPlace] = useState('');
 	const [participants, setParticipants] = useState([]);
 	const [isCouncilProtocol, setIsCouncilProtocol] = useState(false);
+	const [agenda, setAgenda] = useState([]);
 
-	const councilId = FlowRouter.getParam('id');
+	const councilId = useRouteParameter('id');
 
-	if (councilId) {
-		const query = useMemo(() => ({
-			query: JSON.stringify({ _id: councilId }),
-		}), [councilId]);
+	const { councilData, personsData, agendaData } = getCouncilAndAgendaDataByCouncilId(councilId);
 
-		const {	data: council } = useEndpointDataExperimental('councils.findOne', query) || {};
-		const { data: invitedPersonsData } = useEndpointDataExperimental('councils.invitedPersons', query) || { persons: [] };
-		useEffect(() => {
-			if (council && council.d) {
-				setDate(new Date(council.d));
-			}
+	useEffect(() => {
+		if (councilData) {
+			setIsCouncilProtocol(true);
+		}
 
-			if (invitedPersonsData && invitedPersonsData.persons) {
-				setParticipants(invitedPersonsData.persons);
-			}
+		if (councilData && councilData.d) {
+			setDate(new Date(councilData.d));
+		}
 
-			if (!isCouncilProtocol) {
-				setIsCouncilProtocol(true);
-			}
-		}, [council, invitedPersonsData]);
-	}
+		if (personsData && personsData.persons) {
+			setParticipants(personsData.persons);
+		}
+
+		if (agendaData) {
+			setAgenda(agendaData);
+		}
+
+	}, [councilData, personsData, agendaData])
 
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
+	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
+	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -57,12 +83,28 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		}
 	};
 
-	const saveAction = useCallback(async (date, number, place, councilId, participants) => {
+	const saveAction = useCallback(async (date, number, place, councilId, participants, agenda) => {
 		const participantsIds = participants.map((participant) => participant._id)
 		const protocolData = createProtocolData(date, number, place, councilId, participantsIds);
 		const validation = validate(protocolData);
+
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateProtocol(protocolData);
+
+			if (agenda?.sections) {
+				let sectionNumber = 1;
+				for (const section of agenda.sections) {
+					const itemNumber = 1;
+					const sectionData = createSectionData(sectionNumber, section.item);
+					const section_id = await insertOrUpdateSection(_id,sectionData);
+					
+					const itemData = createItemData(itemNumber, section.issueConsideration);
+					const item_id = await insertOrUpdateItem(_id, section_id, itemData);
+
+					sectionNumber++;
+				}
+			}
+
 			return _id;
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
@@ -75,7 +117,8 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 				number,
 				place,
 				councilId,
-				participants
+				participants,
+				agenda
 			);
 			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
 			goToNew(result)();
@@ -83,7 +126,7 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [dispatchToastMessage, goToNew, date, number, place, councilId, participants, onChange, saveAction, t]);
+	}, [dispatchToastMessage, goToNew, date, number, place, councilId, participants, agenda, onChange, saveAction, t]);
 
 	const Participant = (person) => <Box
 		pb='x6'
