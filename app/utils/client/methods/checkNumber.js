@@ -3,6 +3,18 @@ const validate = (value) => {
 	return !(!value || typeof value !== 'string');
 };
 
+export const checkNumber = (value) => {
+	if (value === '') {
+		return value;
+	}
+
+	if (!validate(value) || value === '.') {
+		return null;
+	}
+
+	return value.match(/^\d+$/);
+};
+
 /*
 	input: @value = string
 		   @prevValue = string

@@ -21,6 +21,7 @@ import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { hasPermission } from '../../../authorization';
+import { useMethod } from '../../../../client/contexts/ServerContext';
 import { Sections } from './Sections';
 import { EditSection } from './EditSection';
 import { EditAgenda } from './EditAgenda';
@@ -80,14 +81,17 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const [currentProposal, setCurrentProposal] = useState({});
 
 	const getSection = (section) => {
+		console.log(section);
 		const sections = [{
 			label: [t('Agenda_issue_consideration'), ':'].join(''),
 			value: section.issueConsideration ?? '',
 			renderDirection: 'column',
-		}, {
-			label: [t('Date'), ':'].join(''),
-			value: formatDateAndTime(new Date(section.date ?? '')),
-		}, {
+		},
+		// }, {
+		// 	label: [t('Date'), ':'].join(''),
+		// 	value: formatDateAndTime(new Date(section.date ?? '')),
+		// }, {
+		{
 			label: [t('Agenda_speakers'), ':'].join(''),
 			value: '',
 			items: section.speakers?.map((speaker) => {
@@ -120,11 +124,13 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	};
 
 	const onAgendaSectionInit = (sections) => {
+		console.log(sections);
 		setSectionsData(sections);
 		setSectionsDataView({
 			sections: sections?.map((section) => getSection(section)),
 		});
 	};
+
 	const onAgendaInit = (agenda) => {
 		setAgendaId(agenda._id ?? '');
 		setAgendaName(agenda.name);
@@ -143,6 +149,10 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			setContext('new');
 		}
 	}, [agendaData]);
+
+	const deleteAgendaSection = useMethod('deleteAgendaSection');
+	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
+	const updateProposalStatus = useMethod('updateProposalStatus');
 
 	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setContext(''); }, []);
 
@@ -192,13 +202,70 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		onChange();
 	}, [proposalsList]);
 
+	const onDeleteAgendaSectionClick = useCallback((sectionId, sectionIndex) => async () => {
+		await deleteAgendaSection(agendaId, sectionId);
+		await updateProposalStatus(agendaId, sectionsData[sectionIndex].proposalId, t('Agenda_status_deleted'));
+
+		const proposals = proposalsList.map((proposal) => {
+			if (proposal.proposalId === sectionsData[sectionIndex].proposalId) {
+				proposal.status = t('Agenda_status_deleted');
+			}
+			return proposal;
+		});
+		setProposalsList(proposals);
+
+		const arr = sectionsData.filter((section) => section._id !== sectionId);
+		onAgendaSectionInit(arr);
+		onChange();
+	}, [sectionsData, proposalsList]);
+
+	const onAgendaSectionOrderChange = useCallback((_index, type) => async () => {
+		let isChange = false;
+		const index = parseInt(_index);
+
+		const arr = sectionsData;
+		if (type === 'up') {
+			if (index > 0 && index < sectionsData.length) {
+				[arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+				isChange = true;
+			}
+		} else if (type === 'down') {
+			if (index < sectionsData.length) {
+				[arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+				isChange = true;
+			}
+		}
+
+		console.log({ arr, index, type });
+		await updateAgendaSectionOrder(agendaId, arr);
+
+		if (isChange) {
+			onAgendaSectionInit(arr);
+			onChange();
+		}
+	}, [sectionsData]);
+
 	const onSectionMenuClick = useCallback((event) => {
+		const index = event.currentTarget.dataset.indexNumber;
 		const items = [
 			{
-				name: t('Section_Edit'),
+				name: t('Item_Edit'),
 				action: onEditAgendaSectionClick(event.currentTarget.dataset.section),
 			},
+			{
+				name: t('Item_Delete'),
+				action: onDeleteAgendaSectionClick(event.currentTarget.dataset.section, index),
+			},
 		];
+
+		if (index > 0) {
+			items.push({ name: t('Item_Move_Up'), action: onAgendaSectionOrderChange(index, 'up') });
+		}
+		console.log({ lastIndex: sectionsData.length });
+		if (index < sectionsData.length - 1) {
+			items.push({ name: t('Item_Move_Down'), action: onAgendaSectionOrderChange(index, 'down') });
+		}
+
 		const config = {
 			columns: [
 				{
@@ -229,7 +296,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 						{t('Agenda_edit')}
 					</Button>}
 					{ !isNew && <Button mbe='x8' small primary aria-label={t('Agenda_section_add')} onClick={onEditAgendaClick('section-add')}>
-						{t('Agenda_section_add')}
+						{t('Item_Add')}
 					</Button> }
 				</ButtonGroup>}
 
