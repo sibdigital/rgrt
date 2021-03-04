@@ -4,8 +4,6 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
-import { baseURI } from '../../../utils/client/lib/baseuri';
-import UserAvatar from '../../../../client/components/basic/avatar/UserAvatar';
 
 export function PersonsTable({
 	personsData,

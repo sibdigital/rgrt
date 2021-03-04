@@ -1,21 +1,19 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { ButtonGroup, Button, Field, Box, Label, Icon } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
-import moment from 'moment';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { useMethod } from '../../../../client/contexts/ServerContext';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { PersonsTable } from './PersonsTable';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQueryPerson = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	fields: JSON.stringify({ name: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1 }),
+	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
