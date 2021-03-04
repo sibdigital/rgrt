@@ -250,11 +250,17 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 
 		if (person) {
 			const personKeys = Object.keys(person);
+			let isChange = false;
 			Object.keys(fields).forEach((field) => {
 				if (!personKeys.includes(field)) {
+					isChange = true;
 					person[field] = user[field];
 				}
 			});
+
+			if (isChange) {
+				Persons.update(person);
+			}
 		} else if (!person) {
 			const email = user?.emails[0]?.address ?? '';
 			// console.log(user);
