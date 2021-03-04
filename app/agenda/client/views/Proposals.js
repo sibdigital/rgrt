@@ -128,7 +128,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 			<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{formatDateAndTime(date ?? new Date())}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{status}</Table.Cell>}
 			{ <Table.Cell alignItems={'end'}>
-				<Button style={tableCellIconStyle} disabled={isProposalApproved} color={isProposalApproved ? '#e4e7ea' : 'red'} small aria-label={t('trash')} onClick={() => onDeleteProposalClick(_id)}>
+				<Button style={tableCellIconStyle} disabled={isProposalApproved} color={isProposalApproved ? '#e4e7ea' : ''} small aria-label={t('trash')} onClick={() => onDeleteProposalClick(_id)}>
 					<Icon name='trash' size='x16'/>
 				</Button>
 			</Table.Cell>}

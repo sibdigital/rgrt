@@ -9,6 +9,7 @@ import {
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import s from 'underscore.string';
+import moment from 'moment';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -22,6 +23,7 @@ import { constructPersonFIO } from '../../../utils/client/methods/constructPerso
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { hasPermission } from '../../../authorization';
 import { useMethod } from '../../../../client/contexts/ServerContext';
+import { downloadCouncilParticipantsForm } from '../../../councils/client/views/lib';
 import { Sections } from './Sections';
 import { EditSection } from './EditSection';
 import { EditAgenda } from './EditAgenda';
@@ -153,6 +155,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const deleteAgendaSection = useMethod('deleteAgendaSection');
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
 	const updateProposalStatus = useMethod('updateProposalStatus');
+	const downloadAgenda = useMethod('downloadAgenda');
 
 	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setContext(''); }, []);
 
@@ -280,6 +283,20 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		popover.open(config);
 	}, [sectionsData]);
 
+	const onAgendaDownloadClick = useCallback(async (e) => {
+		e.preventDefault();
+		try {
+			const res = await downloadAgenda({ _id: agendaId });
+			const fileName = [t('Agenda'), ' ', moment(new Date(agendaData.ts)).format('DD MMMM YYYY'), '.docx'].join('');
+			console.log({ docx: res });
+			if (res) {
+				downloadCouncilParticipantsForm({ res, fileName });
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}, [agendaId, downloadAgenda]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -289,6 +306,9 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</Field>
 				{ context === '' && tab === 'agenda' && isAllowEdit
 				&& <ButtonGroup>
+					{ !isNew && <Button mbe='x8' disabled small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
+						{t('Agenda_download')}
+					</Button>}
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>
 						{t('Agenda_add')}
 					</Button>}
