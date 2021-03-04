@@ -233,6 +233,7 @@ export function ErrandPage() {
 			break;
 		case 'charged_to_me':
 			title = 'Tasks_for_me';
+			tab !== 'requests' && setTab('requests');
 			break;
 	}
 
@@ -288,6 +289,10 @@ export function ErrandPage() {
 		return <Field>{t('Loading')}</Field>;
 	}
 
+	const onSendRequestAnswer = () => {
+		window.open([settings.get('Site_Url'), 'd/all'].join(''), '_blank');
+	};
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -298,10 +303,13 @@ export function ErrandPage() {
 				{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={addErrand()} aria-label={t('Add')}>
 					{ t('Add') }
 				</Button> }
+				{ title === 'Tasks_for_me' && <Button width='x160' primary small onClick={onSendRequestAnswer} aria-label={t('Send_request_answer')}>
+					{ t('Send_request_answer') }
+				</Button>}
 			</Page.Header>
 			<Page.Content>
 				{type === 'charged_to_me' && <Tabs flexShrink={0} mbe='x8'>
-					<Tabs.Item selected={tab === 'errands'} onClick={() => setTab('errands')}>{t('Errands_for_me')}</Tabs.Item>
+					{/*<Tabs.Item selected={tab === 'errands'} onClick={() => setTab('errands')}>{t('Errands_for_me')}</Tabs.Item>*/}
 					<Tabs.Item selected={tab === 'requests'} onClick={() => setTab('requests')}>{t('Working_group_requests')}</Tabs.Item>
 				</Tabs>}
 				{tab === 'errands' && <Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>}

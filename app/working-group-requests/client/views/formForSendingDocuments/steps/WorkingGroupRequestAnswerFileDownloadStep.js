@@ -138,7 +138,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const [protocolsFindData, setProtocolsFindData] = useState([]);
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [answerMailLabel, setAnswerMailLabel] = useState(t('Working_group_request_invite_not_mail_chosen'));
-	const [answerTypeContext, setAnswerTypeContext] = useState('protocol');
+	const [answerTypeContext, setAnswerTypeContext] = useState('mail');
 
 	const fileSourceInputId = useUniqueId();
 	const workingGroupRequestId = workingGroupRequest._id;
@@ -148,6 +148,11 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const protocolsOptions = useMemo(() => protocolsData?.map((protocol, index) => [index, protocol.num ?? '']) || [], [protocolsData]);
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0 && attachedFile.length > 0, [newData, attachedFile]);
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_request_select_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
+	const customAnswerMailLabel = useMemo(() =>
+		workingGroupRequest.number && workingGroupRequest.date
+			? ['#', workingGroupRequest.number, ' от ', formatDate(workingGroupRequest.date)].join('')
+			: t('Working_group_request_invite_not_mail_chosen')
+	, [t, workingGroupRequest]);
 
 	useEffect(() => {
 		if (protocolSelectLabel === '') {
@@ -397,7 +402,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								<TextInput disabled readOnly value={answerMailLabel}/>
+								<TextInput disabled readOnly value={customAnswerMailLabel}/>
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
@@ -468,7 +473,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 						<Field>
 							<Field.Label>{t('Commentary')}</Field.Label>
 							<Field.Row>
-								<TextAreaInput rows='6' style={{ whiteSpace: 'normal' }} value={newData.commentary.value} flexGrow={1} onChange={handleChange('commentary')} />
+								<TextAreaInput rows='6' style={{ whiteSpace: 'normal', wordBreak: 'break-word' }} value={newData.commentary.value} flexGrow={1} onChange={handleChange('commentary')} />
 							</Field.Row>
 						</Field>
 						<Field mbe='x8'>
