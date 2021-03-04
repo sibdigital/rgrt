@@ -177,6 +177,16 @@ FlowRouter.route('/councils/:context?/:id?', {
 	}],
 });
 
+FlowRouter.route('/council-commission/:context?/:id?', {
+	name: 'council-commission',
+	action: () => {
+		renderRouteComponent(() => import('../app/council-commission/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/persons/:context?/:id?', {
 	name: 'persons',
 	action: () => {

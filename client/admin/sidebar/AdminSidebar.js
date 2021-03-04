@@ -126,7 +126,7 @@ export default React.memo(function AdminSidebar() {
 
 	useEffect(() => {
 		if (currentRouteGroupName !== 'admin') {
-			SideNav.closeFlex();
+			SideNav.toggleFlex(-1, null);
 		}
 	}, [currentRouteGroupName]);
 
