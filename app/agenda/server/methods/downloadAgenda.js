@@ -82,27 +82,45 @@ Meteor.methods({
 
 		const getSpeakersChildren = (section, speakers) => {
 			const arr = [
-				// new Paragraph({
-				// 	text: 'paragrahp',
-				// 	children: [
-				// 		new TextRun({
-				// 			text: `${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' }`,
-				// 			color: '000000',
-				// 		}),
-				// 	],
+				new Paragraph({
+					text: 'paragraph',
+					children: [
+						new TextRun({
+							text: `${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' }`,
+							color: '000000',
+						}),
+					],
+				}),
+				new Paragraph({
+					text: 'paragraph',
+					children: [
+						new TextRun({
+							text: `${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.item : 'Вопрос' } `,
+							color: '000000',
+						}),
+					],
+				}),
+				new Paragraph({
+					text: 'paragraph',
+					children: [
+						new TextRun({
+							text: `${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : 'Пункт' }`,
+							color: '000000',
+						}),
+					],
+				}),
+				// new TextRun({
+				// 	text: `     ${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' } `,
+				// 	color: '000000',
 				// }),
-				new TextRun({
-					text: `     ${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' } `,
-					color: '000000',
-				}),
-				new TextRun({
-					text: `     ${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.issueConsideration : 'Вопрос' } `,
-					color: '000000',
-				}),
-				new TextRun({
-					text: `     ${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : '' } `,
-					color: '000000',
-				}),
+				// new TextRun({
+				// 	text: `     ${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.issueConsideration : 'Вопрос' } `,
+				// 	color: '000000',
+				// }),
+				// new TextRun({
+				// 	text: `     ${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : '' } `,
+				// 	color: '000000',
+				// }),
 			];
 
 			if (!speakers || typeof speakers !== 'object' || speakers.length <= 0) {

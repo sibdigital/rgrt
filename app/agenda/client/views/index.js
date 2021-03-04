@@ -306,8 +306,8 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</Field>
 				{ context === '' && tab === 'agenda' && isAllowEdit
 				&& <ButtonGroup>
-					{ !isNew && <Button mbe='x8' small primary aria-label={t('Agenda_edit')} onClick={onAgendaDownloadClick}>
-						{t('Download')}
+					{ !isNew && <Button mbe='x8' disabled small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
+						{t('Agenda_download')}
 					</Button>}
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>
 						{t('Agenda_add')}
