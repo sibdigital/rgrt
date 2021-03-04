@@ -209,8 +209,18 @@ function CouncilsCalendar({
 			},
 		});
 
+	const eventHoverWrapper = ({ children }) =>
+		React.cloneElement(Children.only(children), {
+			className: 'custom-calendar-event',
+			style: {
+				...children.style,
+				color: 'white',
+				borderRadius: '10px',
+				backgroundColor: '#3174ad',
+			},
+		});
+
 	return <Box overflow='auto' height='700px' maxHeight='700px'><Calendar
-		// className={clickable}
 		views={['month', 'week', 'day']}
 		culture={'ru'}
 		localizer={localizer}
@@ -226,8 +236,10 @@ function CouncilsCalendar({
 			week: t('Week'),
 			day: t('Day'),
 		}}
+
 		components={{
 			dateCellWrapper: ColoredDateCellWrapper,
+			eventWrapper: eventHoverWrapper,
 		}}
 	/></Box>;
 }
