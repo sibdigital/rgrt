@@ -245,6 +245,13 @@ function Council({
 		} else {
 			person.ts = iPerson.ts;
 		}
+
+		const contactPerson = data.invitedPersons.find((iPerson) => iPerson._id === person._id);
+
+		if (contactPerson) {
+			person.isContactPerson = contactPerson.isContactPerson;
+			person.contactPerson = contactPerson.contactPerson;
+		}
 		return person;
 	}) || [], [invitedPersonsIds, persons]);
 

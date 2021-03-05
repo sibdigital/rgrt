@@ -42,6 +42,7 @@ const toolbarButtons = () => [
 		name: t('Errands_from_me'),
 		icon: 'errands_from_me',
 		context: 'home',
+		condition: () => !hasPermission('manage-errands-from-me'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/initiated_by_me');
@@ -66,6 +67,10 @@ const toolbarButtons = () => [
 		name: t('Council Commission \"Transport\"'),
 		icon: 'help',
 		context: 'home',
+		action: () => {
+			menu.close();
+			FlowRouter.go('/council-commission');
+		},
 		//openContext: 'handbooks',
 		// condition: () => hasPermission('handbooks-home-page'),
 	},

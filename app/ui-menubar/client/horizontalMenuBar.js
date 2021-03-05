@@ -2,7 +2,7 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
 
 import { t } from '../../utils';
-import { AccountBox } from '../../ui-utils';
+import { AccountBox, menu } from '../../ui-utils';
 import { createInteractionActions } from '../../utils/client/views/createInteractionActions';
 import { hasAtLeastOnePermission, hasPermission } from '../../authorization';
 
@@ -35,6 +35,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Errands_from_me'),
+		condition: () => !hasPermission('manage-errands-from-me'),
 		action: () => {
 			FlowRouter.go('/errands/initiated_by_me');
 		},
@@ -96,10 +97,13 @@ const menuItems = () => [
 	},
 	{
 		name: t('Council Commission \"Transport\"'),
-		//subItems: []
+		action: () => {
+			FlowRouter.go('/council-commission');
+		},
 	},
 	{
 		name: t('Administration'),
+		condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
 		subItems: [
 			{
 				name: t('Info'),
@@ -192,13 +196,15 @@ Template.menuBar.events({
 
 		return this.action && this.action.apply(this, [e]);
 	},
+
 	'click .submenu-link'(e, instance) {
 		console.log(this);
+		
 		return this.action && this.action.apply(this, [e]);
 	},
+
 	'click .icon' (e, instance) {
-		let x = document.getElementById('main-menu')
-		console.log(x)
+		let x = document.getElementById('main-menu');
 
 		if (x.className	===	'menu')	{
 			x.className	+=	' responsive';
@@ -206,4 +212,12 @@ Template.menuBar.events({
 			x.className	= 'menu';
 		}
 	},
+
+	'click .menu.responsive a'(e, instance) {
+		let x = document.getElementById('main-menu');
+
+		if (x.className	===	'menu responsive') {
+			x.className	= 'menu';
+		}
+	}
 });

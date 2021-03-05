@@ -242,15 +242,26 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 			phone: 1,
 			email: 1,
 			organization: 1,
+			position: 1,
 		};
 
+		const user = Users.findOneById(query.userId, { fields });
 		const person = Persons.findOne(query, { fields });
-		// console.log('getPerson');
-		// console.log(person);
-		// console.log(query);
 
-		if (!person) {
-			const user = Users.findOneById(query.userId, { fields });
+		if (person) {
+			const personKeys = Object.keys(person);
+			let isChange = false;
+			Object.keys(fields).forEach((field) => {
+				if (!personKeys.includes(field)) {
+					isChange = true;
+					person[field] = user[field];
+				}
+			});
+
+			if (isChange) {
+				Persons.update(person);
+			}
+		} else if (!person) {
 			const email = user?.emails[0]?.address ?? '';
 			// console.log(user);
 			const createPerson = {
@@ -260,6 +271,7 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 				phone: user.phone ?? '',
 				email,
 				organization: user.organization ?? '',
+				position: user.position ?? '',
 				userId: query.userId,
 			};
 			// console.log('user end');

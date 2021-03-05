@@ -1,0 +1,9 @@
+.rcx-button--primary {
+    border-color: var(--rc-color-primary-darkest) !important;
+    background-color: var(--rc-color-primary-darkest) !important;
+}
+
+.rcx-tabs__item--selected {
+    color: var(--rc-color-primary-darkest) !important;
+    border-bottom-color: var(--rc-color-primary-darkest) !important;
+}

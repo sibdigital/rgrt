@@ -5,3 +5,4 @@ import './methods/deleteProposalToAgenda';
 import './methods/updateProposalStatus';
 import './methods/deleteAgendaSection';
 import './methods/updateAgendaSectionOrder';
+import './methods/downloadAgenda';

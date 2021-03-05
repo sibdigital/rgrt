@@ -70,17 +70,29 @@ function InvitedPersonsTable({ invitedPersons, onDelete }) {
 
 	const renderRow = (invitedPerson) => {
 		const iu = invitedPerson;
-		return <Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedPerson)} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.email}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}
-			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('Delete')} onClick={onDelete(iu._id)}>
-					<Icon name='trash'/>
-				</Button>
-			</Table.Cell>
-		</Table.Row>;
+		const { contactPerson } = iu;
+		return <>
+			<Table.Row key={iu._id} style={styleTableRow} backgroundColor={getBackgroundColor(invitedPerson)} tabIndex={0} role='link' action>
+				<Table.Cell fontScale='p1' style={style} color='default'>{iu.surname} {iu.name} {iu.patronymic}</Table.Cell>
+				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.phone}</Table.Cell>}
+				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{iu.email}</Table.Cell>}
+				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{formatDateAndTime(iu.ts)}</Table.Cell>}
+				<Table.Cell alignItems={'end'}>
+					<Button small aria-label={t('Delete')} onClick={onDelete(iu._id)}>
+						<Icon name='trash'/>
+					</Button>
+				</Table.Cell>
+			</Table.Row>
+			{iu.isContactPerson
+			&& <Table.Row key={['contact&', iu._id].join('')} style={styleTableRow} backgroundColor={getBackgroundColor(invitedPerson)} tabIndex={0} role='link' action>
+				<Table.Cell fontScale='p1' style={style} color='default'>{contactPerson.surname} {contactPerson.name} {contactPerson.patronymic}</Table.Cell>
+				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{contactPerson.phone}</Table.Cell>}
+				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{contactPerson.email}</Table.Cell>}
+				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{t('Council_Contact_person')}</Table.Cell>}
+				<Table.Cell alignItems='end'>
+				</Table.Cell>
+			</Table.Row>}
+		</>;
 	};
 
 	return <GenericTable header={header} renderRow={renderRow} results={invitedPersons} total={invitedPersons.length} setParams={setParams} params={params} />;

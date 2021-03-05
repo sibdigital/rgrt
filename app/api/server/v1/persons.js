@@ -4,7 +4,7 @@ import { findPersons, findPerson } from '../lib/persons';
 API.v1.addRoute('persons.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query, fields } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		if (query.isAllow) {
 			API.v1.success({
@@ -22,6 +22,7 @@ API.v1.addRoute('persons.list', { authRequired: true }, {
 				count,
 				sort,
 			},
+			fields: stockFields,
 		})));
 	},
 });

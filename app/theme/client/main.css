@@ -51,6 +51,7 @@
 @import "imports/components/gridOfIcons.css";
 @import "imports/components/goBackButton.css";
 @import "imports/components/menuBar.css";
+@import "imports/components/override-rcx.css";
 
 /* Modal */
 @import 'imports/components/modal/full-modal.css';

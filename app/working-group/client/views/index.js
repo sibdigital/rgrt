@@ -36,11 +36,11 @@ export function WorkingGroupPage() {
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const queryUser = useQueryUser(debouncedParams, debouncedSort, cache);
+	const queryUser = useQueryUser(debouncedParams, debouncedSort);
 
 	const data = useEndpointData('users.list', queryUser) || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-
+	console.log(data)
 	const router = useRoute(routeName);
 
 	const context = useRouteParameter('context');
