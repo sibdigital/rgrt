@@ -1,6 +1,7 @@
 import { API } from '../api';
 import { findAgendas, findAgenda, findByCouncilId } from '../lib/agendas';
 import { findOneCouncilByInviteLink } from '../lib/councils';
+import { Agendas } from '../../../models';
 
 API.v1.addRoute('agendas.list', { authRequired: true }, {
 	get() {
@@ -87,17 +88,21 @@ API.v1.addRoute('agendas.proposals', { authRequired: true }, {
 
 API.v1.addRoute('agendas.proposalsByUser', { authRequired: true }, {
 	get() {
-		const { query, fields } = this.parseJsonQuery();
-		const nonSelectableFields = Object.keys(API.v1.defaultFieldsToExclude);
+		const { query, stockFields } = this.parseJsonQuery();
 
-		Object.keys(fields).forEach((k) => {
-			if (nonSelectableFields.includes(k) || nonSelectableFields.includes(k.split(API.v1.fieldSeparator)[0])) {
-				delete fields[k];
-			}
-		});
-
-		const cursor = Promise.await(findByCouncilId(query.councilId, { fields }));
+		let cursor = Promise.await(findByCouncilId(query.councilId, { fields: stockFields }));
 		const res = [];
+
+		if (!cursor) {
+			const createAgenda = {
+				name: '',
+				number: '',
+				councilId: query.councilId,
+			};
+			Agendas.create(createAgenda);
+
+			cursor = Promise.await(findByCouncilId(query.councilId, { fields: stockFields }));
+		}
 
 		if (cursor.proposals) {
 			cursor.proposals.forEach((proposal) => { proposal.initiatedBy._id === query.userId && res.push(proposal); });

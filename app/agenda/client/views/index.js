@@ -148,7 +148,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			setIsNew(false);
 			setCurrentAgendaData(agendaData);
 		} else {
-			setContext('new');
+			// setContext('new');
 		}
 	}, [agendaData]);
 

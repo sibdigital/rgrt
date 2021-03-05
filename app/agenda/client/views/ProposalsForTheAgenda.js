@@ -36,7 +36,7 @@ export function ProposalsForTheAgendaPage({ isFullLoad = true, onAgendaClick = n
 	const { data: agendaUserData, state: agendaUserState, error: agendaUserError } = useEndpointDataExperimental('agendas.proposalsByUser', useMemo(() => ({
 		query: JSON.stringify({ councilId: id, userId }),
 		fields: JSON.stringify({ proposals: 1 }),
-	}), [userId])) || { proposals: [] };
+	}), [id, userId])) || { proposals: [] };
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -48,13 +48,13 @@ export function ProposalsForTheAgendaPage({ isFullLoad = true, onAgendaClick = n
 	}
 
 	if (userError) {
-		console.log('error');
-		return <Callout m='x16' type='danger'>{ userError }</Callout>;
+		console.log('error', userError);
+		return <Callout m='x16' type='danger'>{ t('Error') }</Callout>;
 	}
 
 	if (agendaUserError) {
-		console.log('error');
-		return <Callout m='x16' type='danger'>{ agendaUserError }</Callout>;
+		console.log('error', agendaUserData);
+		return <Callout m='x16' type='danger'>{ t('Error') }</Callout>;
 	}
 
 	return <ProposalsForTheAgenda userData={userData.user ?? {}} agendaData={agendaUserData} onChange={onChange} isFullLoad={isFullLoad} onAgendaClick={onAgendaClick}/>;
