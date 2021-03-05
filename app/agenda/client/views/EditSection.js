@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Field, Button, InputBox, ButtonGroup, TextInput, FieldGroup } from '@rocket.chat/fuselage';
+import { Field, Button, InputBox, ButtonGroup, TextInput, FieldGroup, TextAreaInput } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
@@ -86,16 +86,17 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 	}, [dispatchToastMessage, close, onChange, t, editData, data]);
 
 	return <FieldGroup {...props}>
-		<Field>
-			<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
-			<Field.Row>
-				<InputBox value={editData.item} onChange={handleChange('item')} placeholder={t('Proposal_for_the_agenda_item')} />
-			</Field.Row>
-		</Field>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>*/}
+		{/*	<Field.Row>*/}
+		{/*		<InputBox value={editData.item} onChange={handleChange('item')} placeholder={t('Proposal_for_the_agenda_item')} />*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 		<Field>
 			<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>
 			<Field.Row>
-				<InputBox value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')} />
+				<TextAreaInput style={{ whiteSpace: 'normal', wordBreak: 'break-word' }} rows='8' value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')}/>
+				{/*<InputBox value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')} />*/}
 			</Field.Row>
 		</Field>
 		{/*<Field>*/}
