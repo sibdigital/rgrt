@@ -77,7 +77,7 @@ export function CouncilsPage() {
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
-				<Field display='flex' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
+				<Field display='block' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
