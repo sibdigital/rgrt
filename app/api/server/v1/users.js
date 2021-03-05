@@ -259,7 +259,11 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 			});
 
 			if (isChange) {
-				Persons.update(person);
+				try {
+					Persons.update({ _id: person._id }, { $set: { ...person } });
+				} catch (e) {
+					console.log(e);
+				}
 			}
 		} else if (!person) {
 			const email = user?.emails[0]?.address ?? '';
