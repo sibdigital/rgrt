@@ -46,7 +46,10 @@ API.v1.addRoute('persons.listToAutoComplete', { authRequired: true }, {
 
 API.v1.addRoute('persons.findOne', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findPerson(query._id)));
+		const { query, stockFields } = this.parseJsonQuery();
+		const cursor = Promise.await(findPerson(query, { fields: stockFields }));
+		console.log({ cursor });
+
+		return API.v1.success(cursor ?? {});
 	},
 });
