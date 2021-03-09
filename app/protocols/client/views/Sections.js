@@ -77,7 +77,8 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick }) {
 		>
 			<Box is='span' pie='x8'>{section.num}.</Box>
 			<Box flexGrow={1}>
-				<Box dangerouslySetInnerHTML={{ __html: section.name }} align='justify'/>
+				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: section.name }} align='justify'/>
+				{ section.speakers && <Box mbe='x4'>{t('Protocol_section_speakers')}: {section.speakers}</Box>}
 			</Box>
 			<Box pi='x4' style={{ cursor: 'pointer' }} data-section={section._id} data-first={section.first}
 				data-last={section.last} onClick={onSectionMenuClick}>
