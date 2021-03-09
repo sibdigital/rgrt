@@ -1,5 +1,5 @@
 import { API } from '../api';
-import { findAgendas, findAgenda, findByCouncilId } from '../lib/agendas';
+import { findAgendas, findAgenda, findByCouncilId, getNumberCount } from '../lib/agendas';
 import { findOneCouncilByInviteLink } from '../lib/councils';
 
 API.v1.addRoute('agendas.list', { authRequired: true }, {
@@ -103,5 +103,12 @@ API.v1.addRoute('agendas.proposalsByUser', { authRequired: true }, {
 			cursor.proposals.forEach((proposal) => { proposal.initiatedBy._id === query.userId && res.push(proposal); });
 		}
 		return API.v1.success({ _id: cursor._id, proposals: res });
+	},
+});
+
+API.v1.addRoute('agendas.numberCount', { authRequired: true }, {
+	get() {
+		const cursor = Promise.await(getNumberCount());
+		return API.v1.success({ numberCount: cursor.numberCount ? cursor.numberCount + 1 : 1 });
 	},
 });

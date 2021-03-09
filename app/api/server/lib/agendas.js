@@ -28,3 +28,12 @@ export async function findByCouncilId(councilId, options = {}) {
 	const cursor = await Agendas.findOne({ councilId }, options);
 	return cursor;
 }
+
+export async function getNumberCount() {
+	const cursor = await Agendas.find({}, { sort: { numberCount: -1 }, limit: 1, fields: { numberCount: 1 } });
+	const agendas = await cursor.toArray();
+	if (agendas.length > 0) {
+		return agendas[0];
+	}
+	return {};
+}

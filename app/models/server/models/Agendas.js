@@ -9,6 +9,8 @@ class Agendas extends Base {
 
 	create(agenda) {
 		agenda.createdAt = new Date();
+		const data = this.find({}, { sort: { numberCount: -1 }, limit: 1 }).fetch();
+		agenda.numberCount = data[0].numberCount ? data[0].numberCount + 1 : 1;
 		return this.insert(agenda);
 	}
 
