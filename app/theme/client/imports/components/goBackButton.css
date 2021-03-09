@@ -2,7 +2,7 @@
 	height: 40px !important;
 
 	border-width: 0.12rem !important;
-	border-color: var(--rc-color-primary-darkest) !important;
+	border-color: var(--rc-color-primary-button-border-color) !important;
 	border-radius: 10rem !important;
 	background-color: transparent !important;
 

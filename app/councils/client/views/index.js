@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Box, Label, FieldGroup, Select, Tabs, Icon } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
@@ -37,6 +37,8 @@ export function CouncilsPage() {
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const query = useQuery(debouncedParams, debouncedSort, cache);
 
@@ -79,7 +81,7 @@ export function CouncilsPage() {
 			<Page.Header title=''>
 				<Field display='block' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Councils')}</Label>
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Councils')}</Label>
 				</Field>
 				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
 					<Tabs flexShrink={0} width='auto'>

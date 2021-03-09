@@ -88,7 +88,7 @@ export function ProtocolsPage() {
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocols')}</Label>
 				</Field>
-				{ !context && <Button width='150px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+				{ !context && <Button mbs='0' pi='x16' width='150px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					{ t('Add') }
 				</Button>}
 			</Page.Header>
