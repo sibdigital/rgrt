@@ -1,6 +1,6 @@
 import {
 	Field,
-	Label,
+	Accordion,
 	Margins,
 	TextInput,
 	Box,
@@ -26,7 +26,7 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 	const dispatchToastMessage = useToastMessageDispatch();
 	const { goToFinalStep, goToPreviousStep } = useInvitePageContext();
 
-	const [commiting, setComitting] = useState(false);
+	const [committing, setCommitting] = useState(false);
 	const [editData, setEditData] = useState({
 		item: '',
 		initiatedBy: { _id: '', surname: '', name: '', patronymic: '', organization: '', value: '' },
@@ -84,9 +84,9 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 
 	const handleSave = async (event) => {
 		event.preventDefault();
-		setComitting(true);
+		setCommitting(true);
 		try {
-			setComitting(false);
+			setCommitting(false);
 			console.log(editData);
 			await saveAction(
 				editData.item,
@@ -97,45 +97,33 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 				null,
 			);
 		} catch (error) {
-			setComitting(false);
+			setCommitting(false);
 		}
 	};
 
 	const allFieldAreFilled = useMemo(() => editData.issueConsideration !== '', [editData.issueConsideration]);
 
-	return <Step active={active} working={commiting} onSubmit={handleSave} style={stepStyle}>
+	return <Step active={active} working={committing} onSubmit={handleSave} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 		<Box is='p' fontScale='s1' color='hint' mbe='x16'>
 			{agendaId ? t('Proposal_for_the_agenda_invite_description') : t('Agenda_not_found')}
 		</Box>
 		<Margins blockEnd='x32'>
-			{ agendaId && <FieldGroup>
-				<Field>
-					<Field.Label>{t('Agenda_issue_consideration')} <span style={ { color: 'red' } }>*</span></Field.Label>
-					<Field.Row>
-						<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
-					</Field.Row>
-				</Field>
-				<Field>
-					<Field.Label>{t('Date')} <span style={ { color: 'red' } }>*</span></Field.Label>
-					<Field.Row>
-						<DatePicker
-							dateFormat='dd.MM.yyyy HH:mm'
-							selected={editData.date}
-							onChange={(newDate) => handleEditDataChange('date', newDate)}
-							showTimeSelect
-							timeFormat='HH:mm'
-							timeIntervals={5}
-							timeCaption='Время'
-							customInput={<TextInput />}
-							locale='ru'
-							popperClassName='date-picker'/>
-					</Field.Row>
-				</Field>
-			</FieldGroup>}
+			{ agendaId
+			&& <Accordion>
+				<Accordion.Item title={t('Agenda_issue_consideration')}>
+					{/*<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />*/}
+					<Field>
+						{/*<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>*/}
+						<Field.Row>
+							<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
+						</Field.Row>
+					</Field>
+				</Accordion.Item>
+			</Accordion>}
 		</Margins>
 
-		<Pager disabled={commiting} isContinueEnabled={allFieldAreFilled && agendaId} onBackClick={handleBackClick} onBackClickText={t('Skip')}/>
+		<Pager disabled={committing} isContinueEnabled={allFieldAreFilled && agendaId} onBackClick={handleBackClick} onBackClickText={t('Skip')} continueButtonLabel={t('Proposal_for_the_agenda_invite_register')}/>
 	</Step>;
 }
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { Box, Icon } from '@rocket.chat/fuselage';
 import { css } from '@rocket.chat/css-in-js';
 
+import { useTranslation } from '../../../../client/contexts/TranslationContext';
+
 const clickable = css`
 		cursor: pointer;
 
@@ -12,6 +14,8 @@ const clickable = css`
 	`;
 
 export function Sections({ data, onSectionMenuClick, isAllowEdit }) {
+	const t = useTranslation();
+
 	const Item = (item) => <>
 		<Box
 			mis='x40'
@@ -44,7 +48,7 @@ export function Sections({ data, onSectionMenuClick, isAllowEdit }) {
 				className={clickable}
 			>
 				<Box display='flex' flexDirection={ section.renderDirection ?? 'row' }>
-					<Box mie='x4'>{section.label}</Box>
+					{!section.isHiddenLabel && <Box mie='x4'>{section.label}</Box>}
 					<Box mbs={section.renderDirection && 'x8'} mis={section.renderDirection && 'x16'}>{section.value}</Box>
 					{ section.items?.length !== 0 && <Box mbe='x4'>{constructPerson(section.items)}</Box> }
 				</Box>
@@ -71,7 +75,8 @@ export function Sections({ data, onSectionMenuClick, isAllowEdit }) {
 			className={clickable}
 		>
 			<Box display='flex' flexDirection='row'>
-				<Box mie='x4' fontWeight='600'>{section[1]?.item ? section[1].value : index + 1}</Box>
+				<Box mie='x9' fontWeight='600'>{section[1]?.item ? section[1].value : index + 1}.</Box>
+				<Box>{t('Agenda_issue_consideration')}</Box>
 			</Box>
 			{isAllowEdit && <Box
 				pi='x4' mis='auto' style={{ cursor: 'pointer' }} data-section={section[0]._id} data-index-number={index} data-first={section.first}

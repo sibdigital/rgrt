@@ -20,7 +20,7 @@ export async function findPersons({ query = {}, fields = {}, pagination: { offse
 	};
 }
 
-export async function findPerson(_id) {
-	const cursor = await Persons.findOne({ _id });
+export async function findPerson(query, options = {}) {
+	const cursor = await Persons.findOne(query, options);
 	return cursor;
 }

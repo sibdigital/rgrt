@@ -26,10 +26,12 @@ function CouncilInfoStep({ stepStyle = {}, step, title, active }) {
 				<Box is='p' fontScale='p1' marginBlockEnd='x16'>{t('Council_info_description')}</Box>
 
 				<Box display='flex' flexDirection='column'>
-					<Margins all='x8'>
-						<Box fontScale='s1'>{t('Description')}</Box>
-						<TextAreaInput style={ { whiteSpace: 'normal' } } rows='6' readOnly fontScale='p1' marginBlockEnd='x32' value={councilState.data.desc}/>
-						<Box fontScale='s1'>{t('Date')}</Box>
+					<Margins all='x8' inlineStart='0'>
+						<Box fontScale='s1' style={{ whiteSpace: 'normal' }}>{t('Description')}: {councilState.data.desc}</Box>
+						{/*<TextAreaInput style={ { whiteSpace: 'normal' } } rows='6' readOnly fontScale='p1' marginBlockEnd='x32' value={councilState.data.desc}/>*/}
+						{/*<Box display='flex' flexDirection='row' fontScale='s1'>{t('Date_and_time')}: <Box alignSelf='center' color='primary' fontScale='p1' mis='x4'>{formatDateAndTime(councilState.data.d)}</Box></Box>*/}
+						{/*<Box color='primary' fontScale='p1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>*/}
+						<Box fontScale='s1'>{t('Date_and_time')}</Box>
 						<Box color='primary' fontScale='p1' marginBlockEnd='x24'>{formatDateAndTime(councilState.data.d)}</Box>
 					</Margins>
 				</Box>
