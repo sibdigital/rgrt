@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useTranslation } from '../../contexts/TranslationContext';
 
-export function Pager({ disabled, onBackClick, onBackClickText = null, isContinueEnabled = true }) {
+export function Pager({ disabled, onBackClick, onBackClickText = null, isContinueEnabled = true, continueButtonLabel = null }) {
 	const t = useTranslation();
 
 	return <ButtonGroup align='end'>
@@ -11,7 +11,7 @@ export function Pager({ disabled, onBackClick, onBackClickText = null, isContinu
 			{ onBackClickText ?? t('Back')}
 		</Button> : null}
 		<Button type='submit' primary disabled={!isContinueEnabled || disabled} data-qa='next-step'>
-			{t('Continue')}
+			{continueButtonLabel ?? t('Continue')}
 		</Button>
 	</ButtonGroup>;
 }
