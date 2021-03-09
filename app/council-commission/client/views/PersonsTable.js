@@ -34,7 +34,7 @@ export function PersonsTable({
 		// <Th w='x40' key='edit'></Th>,
 	], [sort, mediaQuery]);
     
-	const filterPersonsData = personsData ? personsData.filter((item) => item.group.title === 'Состав комиссии') : {};
+	const filterPersonsData = personsData ? personsData.filter((item) => item.group?.title === 'Состав комиссии') : {};
     
 	const renderRow = (persons) => {
 		const { _id, name, surname, patronymic, email, phone, organization, position } = persons;
