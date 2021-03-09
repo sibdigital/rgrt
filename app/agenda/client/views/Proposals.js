@@ -78,18 +78,25 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 			onChange();
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [insertOrUpdateAgendaSection, agendaId, proposalsList]);
+	}, [insertOrUpdateAgendaSection, agendaId, proposalsList, t]);
 
 	const onDeleteProposalClick = useCallback(async (proposalId) => {
 		try {
-			await deleteProposalToAgenda(agendaId, proposalId);
-			const res = proposalsList.filter((proposal) => proposal._id !== proposalId);
-			setProposalsList(res);
-			dispatchToastMessage({ type: 'success', message: t('Proposal_for_the_agenda_deleted') });
+			await updateProposalStatus(agendaId, proposalId, t('Agenda_status_declined'));
+			// await deleteProposalToAgenda(agendaId, proposalId);
+			const arr = proposalsList.map((proposal) => {
+				if (proposal._id === proposalId) {
+					proposal.status = t('Agenda_status_declined');
+					proposal.added = true;
+				}
+				return proposal;
+			});
+			setProposalsList(arr);
+			dispatchToastMessage({ type: 'success', message: t('Proposal_for_the_agenda_declined') });
 		} catch (error) {
 			console.log(error);
 		}
-	}, [agendaId, proposalsList]);
+	}, [agendaId, dispatchToastMessage, t, updateProposalStatus, proposalsList]);
 
 	const onProposalClick = useCallback((proposal) => {
 		if (!proposal.added) {
@@ -98,38 +105,38 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 	}, []);
 
 	const header = useMemo(() => [
-		mediaQuery && <Th w='x150' key={'Proposal_for_the_agenda_item'} color='default'>
-			{ t('Proposal_for_the_agenda_item') }
-		</Th>,
+		// mediaQuery && <Th w='x150' key={'Proposal_for_the_agenda_item'} color='default'>
+		// 	{ t('Proposal_for_the_agenda_item') }
+		// </Th>,
 		mediaQuery && <Th w='x200' key={'Agenda_initiated_by'} color='default'>
 			{ t('Agenda_initiated_by') }
 		</Th>,
 		<Th w='x300' key={'Agenda_issue_consideration'} color='default'>
 			{ t('Agenda_issue_consideration') }
 		</Th>,
-		<Th w='x150' key={'Date'} color='default'>
-			{ t('Date') }
-		</Th>,
+		// <Th w='x150' key={'Date'} color='default'>
+		// 	{ t('Date') }
+		// </Th>,
 		mediaQuery && <Th w='x200' key={'Status'} color='default'>
 			{ t('Status') }
 		</Th>,
-		<Th w='x35' key='delete'/>,
-		<Th w='x35' key='plus'/>,
+		<Th w='x35' key='minus'/>,
+		mode === 'secretary' && <Th w='x35' key='plus'/>,
 		<Th w='x35' key='edit'/>,
-	], [t, mediaQuery]);
+	], [t, mediaQuery, mode]);
 
 	const renderRow = (proposal) => {
 		const { _id, item, issueConsideration, date, initiatedBy, status } = proposal;
 		const isProposalApproved = (proposal.status === t('Agenda_status_approved') || proposal.status === 'Agenda_status_approved');
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{item ?? ''}</Table.Cell>}
+			{/*{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{item ?? ''}</Table.Cell>}*/}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }} onClick={() => onProposalClick(proposal)}>{initiatedBy.value ?? ''}</Table.Cell>}
 			<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{issueConsideration}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{formatDateAndTime(date ?? new Date())}</Table.Cell>
+			{/*<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{formatDateAndTime(date ?? new Date())}</Table.Cell>*/}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{status}</Table.Cell>}
 			{ <Table.Cell alignItems={'end'}>
-				<Button style={tableCellIconStyle} disabled={isProposalApproved} color={isProposalApproved ? '#e4e7ea' : ''} small aria-label={t('trash')} onClick={() => onDeleteProposalClick(_id)}>
-					<Icon name='trash' size='x16'/>
+				<Button style={tableCellIconStyle} disabled={isProposalApproved || proposal.added} color={isProposalApproved ? '#e4e7ea' : ''} small aria-label={t('Decline')} onClick={() => onDeleteProposalClick(_id)}>
+					<Icon name='cross' size='x16'/>
 				</Button>
 			</Table.Cell>}
 			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>

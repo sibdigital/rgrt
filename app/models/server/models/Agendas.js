@@ -76,7 +76,7 @@ class Agendas extends Base {
 		const data = this.findOne({ _id });
 
 		if (data.proposals) {
-			console.log({ proposals: data.proposals, proposalId, status });
+			// console.log({ proposals: data.proposals, proposalId, status });
 			data.proposals = data.proposals.map((proposal) => {
 				if (proposal._id === proposalId) {
 					proposal.status = status;

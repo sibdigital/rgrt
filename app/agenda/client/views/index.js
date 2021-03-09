@@ -108,14 +108,14 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				value: section.initiatedBy.value ?? '',
 			});
 		}
-		if (section.item) {
-			sections.unshift({
-				item: true,
-				hidden: true,
-				label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
-				value: section.item ?? '',
-			});
-		}
+		// if (section.item) {
+		// 	sections.unshift({
+		// 		item: true,
+		// 		hidden: true,
+		// 		label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
+		// 		value: section.item ?? '',
+		// 	});
+		// }
 
 		sections.unshift({
 			_id: section._id,
@@ -148,7 +148,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			setIsNew(false);
 			setCurrentAgendaData(agendaData);
 		} else {
-			setContext('new');
+			// setContext('new');
 		}
 	}, [agendaData]);
 
