@@ -65,7 +65,7 @@ const toolbarButtons = () => [
 	},
 	{
 		name: t('Council Commission \"Transport\"'),
-		icon: 'help',
+		icon: 'team',
 		context: 'home',
 		action: () => {
 			menu.close();
