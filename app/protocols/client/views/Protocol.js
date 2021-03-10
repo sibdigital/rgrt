@@ -321,7 +321,7 @@ export function ProtocolPage() {
 			</Page.ScrollableContent>
 		</Page>
 		{ context
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+		&& <VerticalBar width='x520' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'new-section' && t('Section_Add') }
 				{ context === 'new-item' && t('Item_Add') }

@@ -56,6 +56,8 @@
 	--rc-color-primary: var(--color-dark);
 	--rc-color-primary-background: var(--color-dark);
 	--rc-color-primary-darkest: var(--color-darkest);
+	--rc-color-primary-button-color: var(--color-darkest);
+	--rc-color-primary-button-border-color: var(--color-darkest);
 	--rc-color-primary-dark: var(--color-dark-medium);
 	--rc-color-primary-light: var(--color-gray);
 	--rc-color-primary-light-medium: var(--color-gray-medium);

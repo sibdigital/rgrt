@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Box, Label, FieldGroup, Select, Tabs, Icon } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
+import { Tooltip } from '@material-ui/core';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -37,6 +38,8 @@ export function CouncilsPage() {
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const query = useQuery(debouncedParams, debouncedSort, cache);
 
@@ -77,18 +80,22 @@ export function CouncilsPage() {
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
-				<Field display='flex' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
+				<Field display='block' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Councils')}</Label>
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Councils')}</Label>
 				</Field>
 				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
 					<Tabs flexShrink={0} width='auto'>
-						<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>
-							<Icon name='list'/>
-						</Tabs.Item>
-						<Tabs.Item selected={displayMode === 'calendar'} onClick={() => setDisplayMode('calendar')}>
-							<Icon name='calendar'/>
-						</Tabs.Item>
+						<Tooltip title="Список" arrow>
+							<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>
+								<Icon name='list'/>
+							</Tabs.Item>
+						</Tooltip>
+						<Tooltip title="Календарь" arrow>
+							<Tabs.Item selected={displayMode === 'calendar'} onClick={() => setDisplayMode('calendar')}>
+								<Icon name='calendar'/>
+							</Tabs.Item>
+						</Tooltip>
 					</Tabs>
 					{ isAllow && <Button mbs='0' width='auto' pi='x16' primary small onClick={onAddClick} aria-label={t('Add')}>
 						<Icon name='plus' size={16} mie='x4'/>{ t('Add') }

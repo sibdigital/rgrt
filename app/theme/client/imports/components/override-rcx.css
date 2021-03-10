@@ -1,9 +1,24 @@
-.rcx-button--primary {
-    border-color: var(--rc-color-primary-darkest) !important;
+.rcx-button {
+    &--primary {
+        border-color: var(--rc-color-primary-button-border-color) !important;
+        background-color: var(--rc-color-primary-button-color) !important;
+        height: 40px !important;
+        &-danger {
+            height: 40px !important;
+        }
+    }
+}
+
+.rcx-check-box__input:checked + .rcx-check-box__fake {
     background-color: var(--rc-color-primary-darkest) !important;
+    border-color: var(--rc-color-primary-darkest) !important;
 }
 
 .rcx-tabs__item--selected {
-    color: var(--rc-color-primary-darkest) !important;
-    border-bottom-color: var(--rc-color-primary-darkest) !important;
+    color: var(--rc-color-primary-button-color) !important;
+    border-bottom-color: var(--rc-color-primary-button-border-color) !important;
+}
+
+.toast-error {
+    background-color: var(--color-gray) !important;
 }

@@ -17,6 +17,7 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 
 	const [name, setName] = useState('');
 	const [number, setNumber] = useState('');
+	const [speakers, setSpeakers] = useState('');
 
 	const protocolId = useRouteParameter('id');
 
@@ -28,8 +29,8 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 		}
 	};
 
-	const saveAction = useCallback(async (number, name) => {
-		const sectionData = createSectionData(number, name);
+	const saveAction = useCallback(async (number, name, speakers) => {
+		const sectionData = createSectionData(number, name, speakers);
 		const validation = validateSectionData(sectionData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateSection(protocolId, sectionData);
@@ -42,7 +43,8 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 		try {
 			const result = await saveAction(
 				number,
-				name
+				name,
+				speakers
 			);
 			dispatchToastMessage({ type: 'success', message: t('Section_Added_Successfully') });
 			close()
@@ -50,7 +52,7 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [dispatchToastMessage, close, number, name, onChange, saveAction, t]);
+	}, [dispatchToastMessage, close, number, name, speakers, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
@@ -76,6 +78,12 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 				/>
 			</Field.Row>
 		</Field>
+		<Field>
+			<Field.Label>{t('Protocol_section_speakers')}</Field.Label>
+			<Field.Row>
+				<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />
+			</Field.Row>
+		</Field>	
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
