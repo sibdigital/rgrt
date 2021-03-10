@@ -16,6 +16,11 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 
 	const [name, setName] = useState('');
 	const [number, setNumber] = useState('');
+	const [prevValues, setPrevValues] = useState({
+		name: '',
+		number: 1,
+	});
+	const [isNew, setIsNew] = useState(true);
 
 	const { data: councilData, state: councilState, error: councilError } = useEndpointDataExperimental('councils.findOne', useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
@@ -27,7 +32,9 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 	useEffect(() => {
 		if (data) {
 			setName(data.name);
-			setNumber(data.numberCount);
+			setNumber(data.number);
+			setPrevValues({ name: data.name, number: data.number });
+			setIsNew(false);
 		} else if (councilData && numberCountData) {
 			setName([councilData.type.title, ' от ', formatDate(councilData.d)].join(''));
 			setNumber(numberCountData.numberCount);
@@ -36,7 +43,8 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 
 	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
 
-	const allFieldAreFilled = useMemo(() => name === '' || number === '', [name, number]);
+	const allFieldAreFilled = useMemo(() => name === prevValues.name || number === prevValues.number, [name, number, prevValues]);
+	const fieldEdited = useMemo(() => name !== prevValues.name || number !== prevValues.number, [name, number, prevValues]);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -82,6 +90,7 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
 	}
 
+	console.log({ name, number, prevValues });
 	return <FieldGroup {...props}>
 		<Field>
 			<Field.Label>{t('Section_Name')}</Field.Label>
@@ -99,7 +108,7 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={allFieldAreFilled}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={(isNew && allFieldAreFilled) || (!isNew && !fieldEdited)}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

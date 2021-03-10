@@ -117,3 +117,12 @@ API.v1.addRoute('agendas.numberCount', { authRequired: true }, {
 		return API.v1.success({ numberCount: cursor.numberCount ? cursor.numberCount + 1 : 1 });
 	},
 });
+
+API.v1.addRoute('agendas.itemNumberCount', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+		const cursor = Promise.await(findAgenda(query._id, { fields: { sections: 1 } }));
+		const count = cursor.sections ? cursor.sections.length : 1;
+		return API.v1.success({ count });
+	},
+});

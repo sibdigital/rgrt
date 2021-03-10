@@ -1,6 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Field, Button, InputBox, ButtonGroup, TextInput, FieldGroup, TextAreaInput } from '@rocket.chat/fuselage';
-import DatePicker from 'react-datepicker';
+import {
+	Field,
+	Button,
+	InputBox,
+	ButtonGroup,
+	FieldGroup,
+	TextAreaInput,
+	Callout,
+} from '@rocket.chat/fuselage';
 import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
 import { Autocomplete, createFilterOptions } from '@material-ui/lab';
@@ -9,6 +16,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { validateAgendaSection, createAgendaSection } from './lib';
 
 require('react-datepicker/dist/react-datepicker.css');
@@ -25,6 +33,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		speakers: [],
 	});
 
+	const { data: numberCountData, state: numberCountState } = useEndpointDataExperimental('agendas.itemNumberCount');
+
 	useEffect(() => {
 		if (data) {
 			// console.log(data);
@@ -35,8 +45,10 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				// date: new Date(data.date),
 				speakers: data.speakers,
 			});
+		} else if (numberCountData) {
+			setEditData({ ...editData, item: numberCountData.count });
 		}
-	}, [data]);
+	}, [data, numberCountData]);
 
 	const insertOrUpdateAgendaSection = useMethod('insertOrUpdateAgendaSection');
 
@@ -85,13 +97,18 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		}
 	}, [dispatchToastMessage, close, onChange, t, editData, data]);
 
+	if ([numberCountState].includes(ENDPOINT_STATES.LOADING)) {
+		console.log('Loading');
+		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
+	}
+
 	return <FieldGroup {...props}>
-		{/*<Field>*/}
-		{/*	<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>*/}
-		{/*	<Field.Row>*/}
-		{/*		<InputBox value={editData.item} onChange={handleChange('item')} placeholder={t('Proposal_for_the_agenda_item')} />*/}
-		{/*	</Field.Row>*/}
-		{/*</Field>*/}
+		<Field>
+			<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
+			<Field.Row>
+				<InputBox value={editData.item} onChange={handleChange('item')} placeholder={t('Proposal_for_the_agenda_item')} />
+			</Field.Row>
+		</Field>
 		<Field>
 			<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>
 			<Field.Row>
