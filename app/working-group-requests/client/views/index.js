@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ButtonGroup, Button, Field, Label, Icon, Callout } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -37,6 +37,8 @@ export function WorkingGroupRequestsPage() {
 	const debouncedSort = useDebouncedValue(sort, 500);
 
 	const query = useQuery(debouncedParams, debouncedSort, cache);
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const data = useEndpointData('working-groups-requests.list', query) || {};
 	const docsdata = data.requests ?? [];
@@ -104,7 +106,7 @@ export function WorkingGroupRequestsPage() {
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton onClick={goBack}/>
-					<Label fontScale='h1'>
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>
 						{(context === undefined || context === 'requests') && t('Working_group_requests')}
 						{(context === 'new' || context === 'new-protocols-item-request') && t('Working_group_request_add')}
 						{context === 'edit' && t('Working_group_request_edit')}

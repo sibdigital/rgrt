@@ -225,6 +225,8 @@ export function ErrandPage() {
 	const [cache, setCache] = useState();
 	const [tab, setTab] = useState('errands');
 
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
+	
 	let title = 'Errands';
 	switch (type) {
 		case 'initiated_by_me':
@@ -298,7 +300,7 @@ export function ErrandPage() {
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t(title)}</Label>
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t(title)}</Label>
 				</Field>
 				{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={addErrand()} aria-label={t('Add')}>
 					{ t('Add') }

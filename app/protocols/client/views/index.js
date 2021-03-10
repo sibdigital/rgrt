@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Field, Icon, Label } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
@@ -40,6 +40,8 @@ export function ProtocolsPage() {
 	const data = useEndpointData('protocols.list', query) || { result: [] };
 
 	const router = useRoute(routeName);
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const context = useRouteParameter('context');
 	const id = useRouteParameter('id');
@@ -86,7 +88,7 @@ export function ProtocolsPage() {
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton onClick={goBack}/>
-					<Label fontScale='h1'>{t('Protocols')}</Label>
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Protocols')}</Label>
 				</Field>
 				{ !context && <Button width='200px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					{ t('Add') }
