@@ -9,6 +9,8 @@ class Agendas extends Base {
 
 	create(agenda) {
 		agenda.createdAt = new Date();
+		const data = this.find({}, { sort: { numberCount: -1 }, limit: 1 }).fetch();
+		agenda.numberCount = data[0].numberCount ? data[0].numberCount + 1 : 1;
 		return this.insert(agenda);
 	}
 
@@ -74,7 +76,7 @@ class Agendas extends Base {
 		const data = this.findOne({ _id });
 
 		if (data.proposals) {
-			console.log({ proposals: data.proposals, proposalId, status });
+			// console.log({ proposals: data.proposals, proposalId, status });
 			data.proposals = data.proposals.map((proposal) => {
 				if (proposal._id === proposalId) {
 					proposal.status = status;

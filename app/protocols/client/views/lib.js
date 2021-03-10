@@ -47,7 +47,7 @@ export function validateSectionData(sectionData) {
 	return errors;
 }
 
-export function createSectionData(number, name = '', previousData) {
+export function createSectionData(number, name = '', speakers = '', previousData) {
 	const sectionData = {
 	};
 
@@ -56,6 +56,7 @@ export function createSectionData(number, name = '', previousData) {
 	}
 	sectionData.num = number;
 	sectionData.name = name;
+	sectionData.speakers = speakers;
 
 	return sectionData;
 }

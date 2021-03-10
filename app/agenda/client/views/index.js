@@ -84,23 +84,25 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 
 	const getSection = (section) => {
 		console.log(section);
-		const sections = [{
-			label: [t('Agenda_issue_consideration'), ':'].join(''),
-			value: section.issueConsideration ?? '',
-			renderDirection: 'column',
-		},
-		// }, {
-		// 	label: [t('Date'), ':'].join(''),
-		// 	value: formatDateAndTime(new Date(section.date ?? '')),
-		// }, {
-		{
-			label: [t('Agenda_speakers'), ':'].join(''),
-			value: '',
-			items: section.speakers?.map((speaker) => {
-				speaker.value = constructPersonFIO(speaker);
-				return speaker;
-			}),
-		}];
+		const sections = [
+			// {
+			// 	label: [t('Agenda_issue_consideration'), ':'].join(''),
+			// 	value: section.issueConsideration ?? '',
+			// 	renderDirection: 'column',
+			// },
+			// }, {
+			// 	label: [t('Date'), ':'].join(''),
+			// 	value: formatDateAndTime(new Date(section.date ?? '')),
+			// }, {
+			{
+				label: [t('Agenda_speakers'), ':'].join(''),
+				value: '',
+				items: section.speakers?.map((speaker) => {
+					speaker.value = constructPersonFIO(speaker);
+					return speaker;
+				}),
+			},
+		];
 
 		if (section.initiatedBy && section.initiatedBy.value && s.trim(section.initiatedBy.value) !== '') {
 			sections.unshift({
@@ -108,14 +110,21 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				value: section.initiatedBy.value ?? '',
 			});
 		}
-		if (section.item) {
-			sections.unshift({
-				item: true,
-				hidden: true,
-				label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
-				value: section.item ?? '',
-			});
-		}
+
+		sections.unshift({
+			label: [t('Agenda_issue_consideration'), ':'].join(''),
+			value: section.issueConsideration ?? '',
+			renderDirection: 'column',
+			isHiddenLabel: true,
+		});
+		// if (section.item) {
+		// 	sections.unshift({
+		// 		item: true,
+		// 		hidden: true,
+		// 		label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
+		// 		value: section.item ?? '',
+		// 	});
+		// }
 
 		sections.unshift({
 			_id: section._id,
@@ -148,7 +157,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			setIsNew(false);
 			setCurrentAgendaData(agendaData);
 		} else {
-			setContext('new');
+			// setContext('new');
 		}
 	}, [agendaData]);
 
@@ -207,8 +216,9 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 
 	const onDeleteAgendaSectionClick = useCallback((sectionId, sectionIndex) => async () => {
 		await deleteAgendaSection(agendaId, sectionId);
-		await updateProposalStatus(agendaId, sectionsData[sectionIndex].proposalId, t('Agenda_status_deleted'));
+		sectionsData[sectionIndex].proposalId && await updateProposalStatus(agendaId, sectionsData[sectionIndex].proposalId, t('Agenda_status_deleted'));
 
+		console.log({ sectionsData, sectionIndex, proposalsList });
 		const proposals = proposalsList.map((proposal) => {
 			if (proposal.proposalId === sectionsData[sectionIndex].proposalId) {
 				proposal.status = t('Agenda_status_deleted');

@@ -596,8 +596,7 @@ function Council({
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Council')} {isLoading && t('Loading')}</Label>
-
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Council')} {isLoading && t('Loading')}</Label>
 				</Field>
 				{ mode !== 'edit' && <ButtonGroup>
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>

@@ -5,14 +5,14 @@ import { Agendas } from '../../../models';
 
 Meteor.methods({
 	insertOrUpdateAgenda(agendaData) {
-		if (!hasPermission(this.userId, 'manage-councils')) {
-			throw new Meteor.Error('not_authorized');
-		}
+		// if (!hasPermission(this.userId, 'manage-councils')) {
+		// 	throw new Meteor.Error('not_authorized');
+		// }
 
-		if (!agendaData.name) {
+		if (typeof agendaData.name !== 'string' && !agendaData.name) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field name is required', { method: 'insertOrUpdateAgenda', field: 'name' });
 		}
-		if (!agendaData.number) {
+		if (typeof agendaData.number !== 'string' && typeof agendaData.number !== 'number') {
 			throw new Meteor.Error('error-the-field-is-required', 'The field number is required', { method: 'insertOrUpdateAgenda', field: 'number' });
 		}
 

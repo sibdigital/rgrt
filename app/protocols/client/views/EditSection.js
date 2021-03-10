@@ -55,16 +55,18 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 
 	const section = protocol.sections.find(s => s._id === sectionId);
 
-	const { _id, num: previousNumber, name: previousName } = section || {};
+	const { _id, num: previousNumber, name: previousName, speakers: previousSpeakers} = section || {};
 	const previousSection = section || {};
 
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
+	const [speakers, setSpeakers] = useState('');
 
 	useEffect(() => {
 		setNumber(previousNumber || '');
 		setName(previousName || '');
-	}, [previousNumber, previousName, _id]);
+		setSpeakers(previousSpeakers || '');
+	}, [previousNumber, previousName, previousSpeakers, _id]);
 
 	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
 
@@ -74,20 +76,20 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 		}
 	};
 
-	const hasUnsavedChanges = useMemo(() => previousNumber !== number || previousName !== name,
-		[number, name]);
+	const hasUnsavedChanges = useMemo(() => previousNumber !== number || previousName !== name || previousSpeakers !== speakers,
+		[number, name, speakers]);
 
-	const saveAction = useCallback(async (number, name) => {
-		const sectionData = createSectionData(number, name, { previousNumber, previousName, _id });
+	const saveAction = useCallback(async (number, name, speakers) => {
+		const sectionData = createSectionData(number, name, speakers, { previousNumber, previousName, previousSpeakers, _id });
 		const validation = validateSectionData(sectionData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateSection(protocol._id, sectionData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [_id, dispatchToastMessage, insertOrUpdateSection, number, name, previousNumber, previousName, previousSection, t]);
+	}, [_id, dispatchToastMessage, insertOrUpdateSection, number, name, speakers, previousNumber, previousName, previousSpeakers, previousSection, t]);
 
 	const handleSave = useCallback(async () => {
-		saveAction(number, name);
+		saveAction(number, name, speakers);
 		close();
 		onChange();
 	}, [saveAction, close, onChange]);
@@ -116,6 +118,12 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 				/>
 			</Field.Row>
 		</Field>
+		<Field>
+			<Field.Label>{t('Protocol_section_speakers')}</Field.Label>
+			<Field.Row>
+				<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />
+			</Field.Row>
+		</Field>	
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

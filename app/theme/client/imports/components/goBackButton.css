@@ -1,9 +1,17 @@
 .go-back-button {
+	height: 40px !important;
+
 	border-width: 0.12rem !important;
-	border-color: var(--rc-color-primary-darkest) !important;
+	border-color: var(--rc-color-primary-button-border-color) !important;
 	border-radius: 10rem !important;
 	background-color: transparent !important;
 
 	font-size: 24px !important;
 	margin-inline-end: 10px !important;
+	
+}
+
+.go-back-button .rcx-icon--name-back {
+	line-height: unset !important;
+	vertical-align: unset !important;	
 }

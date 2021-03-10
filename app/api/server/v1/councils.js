@@ -45,8 +45,8 @@ API.v1.addRoute('councils.getOneByInviteLink', { authRequired: false }, {
 
 API.v1.addRoute('councils.findOne', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findCouncil(query._id)));
+		const { query, stockFields } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findCouncil(query._id, { fields: stockFields })));
 	},
 });
 

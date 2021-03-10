@@ -38,10 +38,13 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 	const insertOrUpdateCouncilPerson = useMethod('insertOrUpdateCouncilPerson');
 
-	const saveQuery = useMemo(() => values, [values]);
+	const saveQuery = useMemo(() => ({
+		query: JSON.stringify({ $and: [{ surname }, { email: values.email }] }),
+		fields: JSON.stringify({ _id: 1 }),
+	}), [surname, values.email]);
 
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-	const saveAction = useEndpointAction('POST', 'users.createParticipant', saveQuery, t('Participant_Created_Successfully'));
+	const saveAction = useEndpointAction('GET', 'persons.findOne', saveQuery, null);
 
 	const handleBackClick = () => {
 		goToPreviousStep();
@@ -49,7 +52,16 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 
 	const handleSave = useCallback(async () => {
 		try {
-			const personId = await insertOrUpdatePerson(values);
+			const findPerson = await saveAction();
+			// return;
+			let personId = '';
+			if (findPerson._id) {
+				personId = findPerson._id;
+			} else {
+				personId = await insertOrUpdatePerson(values);
+			}
+			console.log({ personId });
+
 			if (personId) {
 				const person = {
 					_id: personId,
@@ -59,7 +71,7 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 
 				await insertOrUpdateCouncilPerson(council, person);
 
-				dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
+				// dispatchToastMessage({ type: 'success', message: t('Participant_Created_Successfully') });
 
 				setUserDataClick(Object.assign({}, values, { _id: personId }, { type: 'person', value: [surname, name, patronymic].join(' ') }));
 				goToNextStep();

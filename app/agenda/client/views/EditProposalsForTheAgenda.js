@@ -1,10 +1,11 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import {
 	Box,
 	Field,
 	Button,
 	ButtonGroup, FieldGroup,
 	InputBox, TextInput,
+	TextAreaInput,
 } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -29,6 +30,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 		date: new Date(),
 		status: t('Agenda_status_proposed'),
 	});
+	const [prevIssue, setPrevIssue] = useState('');
 
 	useEffect(() => {
 		console.log(userData);
@@ -41,6 +43,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 				date: new Date(data.date ?? ''),
 				status: data.status ?? t('Agenda_status_proposed'),
 			});
+			setPrevIssue(data.issueConsideration ?? '');
 		} else {
 			console.log({ userData });
 			setEditData({
@@ -56,7 +59,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 				},
 			});
 		}
-	}, [data, userData]);
+	}, [data, t, userData]);
 
 	const insertOrUpdateProposalsForTheAgenda = useMethod('insertOrUpdateProposalsForTheAgenda');
 
@@ -99,13 +102,15 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 		}
 	}, [dispatchToastMessage, close, t, editData, data]);
 
+	const allFieldAreFilled = useMemo(() => editData.issueConsideration !== prevIssue && editData.issueConsideration !== '', [editData, prevIssue]);
+
 	return <FieldGroup {...props}>
-		<Field>
-			<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>
-			<Field.Row>
-				<InputBox value={editData.item} onChange={(e) => handleEditDateChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />
-			</Field.Row>
-		</Field>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Proposal_for_the_agenda_item')}</Field.Label>*/}
+		{/*	<Field.Row>*/}
+		{/*		<InputBox value={editData.item} onChange={(e) => handleEditDateChange('item', e.currentTarget.value)} placeholder={t('Proposal_for_the_agenda_item')} />*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 		{mode !== 'invite' && <Field>
 			<Field.Label>{t('Agenda_initiated_by')} <span style={ { color: 'red' } }>*</span></Field.Label>
 			<Field.Row>
@@ -115,25 +120,26 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 		<Field>
 			<Field.Label>{t('Agenda_issue_consideration')} <span style={ { color: 'red' } }>*</span></Field.Label>
 			<Field.Row>
-				<InputBox value={editData.issueConsideration} onChange={(e) => handleEditDateChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
+				<TextAreaInput style={{ whiteSpace: 'normal', wordBreak: 'break-word' }} rows='8' value={editData.issueConsideration} onChange={(e) => handleEditDateChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')}/>
+				{/*<InputBox value={editData.issueConsideration} onChange={(e) => handleEditDateChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />*/}
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Label>{t('Date')} <span style={ { color: 'red' } }>*</span></Field.Label>
-			<Field.Row>
-				<DatePicker
-					dateFormat='dd.MM.yyyy HH:mm'
-					selected={editData.date}
-					onChange={(newDate) => handleEditDateChange('date', newDate)}
-					showTimeSelect
-					timeFormat='HH:mm'
-					timeIntervals={5}
-					timeCaption='Время'
-					customInput={<TextInput />}
-					locale='ru'
-					popperClassName='date-picker'/>
-			</Field.Row>
-		</Field>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Date')} <span style={ { color: 'red' } }>*</span></Field.Label>*/}
+		{/*	<Field.Row>*/}
+		{/*		<DatePicker*/}
+		{/*			dateFormat='dd.MM.yyyy HH:mm'*/}
+		{/*			selected={editData.date}*/}
+		{/*			onChange={(newDate) => handleEditDateChange('date', newDate)}*/}
+		{/*			showTimeSelect*/}
+		{/*			timeFormat='HH:mm'*/}
+		{/*			timeIntervals={5}*/}
+		{/*			timeCaption='Время'*/}
+		{/*			customInput={<TextInput />}*/}
+		{/*			locale='ru'*/}
+		{/*			popperClassName='date-picker'/>*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 		{mode !== 'invite' && <Field>
 			<Field.Label>{t('Status')} <span style={ { color: 'red' } }>*</span></Field.Label>
 			<Field.Row>
@@ -144,7 +150,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={!allFieldAreFilled}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>}

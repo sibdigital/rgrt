@@ -80,10 +80,10 @@ Meteor.methods({
 			}),
 		];
 
-		const getSpeakersChildren = (section, speakers) => {
+		const getSectionChildren = (section, speakers) => {
 			const arr = [
 				new Paragraph({
-					text: 'paragraph',
+					text: 'Пункт',
 					children: [
 						new TextRun({
 							text: `${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' }`,
@@ -92,19 +92,19 @@ Meteor.methods({
 					],
 				}),
 				new Paragraph({
-					text: 'paragraph',
+					text: 'Рассматриваемый вопрос',
 					children: [
 						new TextRun({
-							text: `${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.item : 'Вопрос' } `,
+							text: `${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.item : 'Рассматриваемый вопрос' } `,
 							color: '000000',
 						}),
 					],
 				}),
 				new Paragraph({
-					text: 'paragraph',
+					text: 'Инициатор',
 					children: [
 						new TextRun({
-							text: `${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : 'Пункт' }`,
+							text: `${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : 'Инициатор' }`,
 							color: '000000',
 						}),
 					],
@@ -140,7 +140,7 @@ Meteor.methods({
 		};
 
 		const sectionsRow = agenda?.sections?.map((section) => new Paragraph({
-			children: getSpeakersChildren(section, section.speakers),
+			children: getSectionChildren(section, section.speakers),
 
 				// new Paragraph({
 				// 	children: [new TextRun({
