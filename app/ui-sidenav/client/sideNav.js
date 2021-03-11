@@ -23,7 +23,8 @@ Template.sideNav.helpers({
 	},
 
 	roomType() {
-		const arr = roomTypes.getTypes().filter((item) => item._identifier !== 'c');
+		const arr = roomTypes.getTypes().filter((item) => item._identifier !== 'c' && item.identifier !== 'p');
+		console.log(arr)
 		return arr.map((roomType) => ({
 			template: roomType.customTemplate || 'roomList',
 			data: {
@@ -85,6 +86,10 @@ Template.sideNav.events({
 			}
 		}, 0);
 	},
+
+	'click .rooms-list__type.type-d'(e) {
+		FlowRouter.go('directory');
+	}
 });
 
 const redirectToDefaultChannelIfNeeded = () => {

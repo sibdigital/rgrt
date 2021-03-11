@@ -22,3 +22,15 @@
 .toast-error {
     background-color: var(--color-gray) !important;
 }
+
+.rc-old .page-container {
+    position: relative !important;
+}
+
+.rooms-list__type.type-d:hover{
+    background-color: var(--rc-color-primary-darkest) !important;
+}
+
+.toast-error {
+    background-color: var(--color-gray) !important;
+}
