@@ -108,7 +108,7 @@ export function CouncilPage() {
 		}
 	}, [invitedPersonsData, personsData, data]);
 
-	const mode = useMemo(() => routeUrl[0].includes('council-edit') ? 'edit' : 'read', [routeUrl]);
+	const mode = useMemo(() => (routeUrl[0].includes('council-edit') || currentUser?.roles?.includes('secretary') || currentUser?.roles?.includes('admin')) ? 'edit' : 'read', [currentUser, routeUrl]);
 
 	const workingGroupOptions = useMemo(() => {
 		const res = [[null, t('Not_chosen')]];
@@ -135,7 +135,7 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council isAgendaData={!!agendaData?.success} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
+	return <Council isAgendaData={!!agendaData?.success && !!agendaData?.councilId} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} onCouncilChange={onCouncilChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -598,15 +598,18 @@ function Council({
 					<GoBackButton/>
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Council')} {isLoading && t('Loading')}</Label>
 				</Field>
-				{ mode !== 'edit' && <ButtonGroup>
-					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
-						{t('Edit')}
+				<ButtonGroup>
+					{/*{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>*/}
+					{/*	{t('Edit')}*/}
+					{/*</Button>}*/}
+					{mode === 'edit' && <Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
+						{t('Save')}
 					</Button>}
 					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>}
 					{(isSecretary || isAgendaData) && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
-						{t('Agenda')}
+						{(isAgendaData || !isSecretary) ? t('Agenda') : t('Agenda_create')}
 					</Button>}
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
@@ -615,39 +618,29 @@ function Council({
 						{t('Proposals_for_the_agenda')}
 					</Button>}
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
-						{t('Protocol')}
+						{protocolData.protocol.length !== 0 ? t('Protocol') : t('Protocol_Create')}
 					</Button>}
-				</ButtonGroup>}
-				{ mode === 'edit' && <ButtonGroup>
-					<Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
-						{t('Delete')}
-					</Button>
-					<Button primary small aria-label={t('Cancel')} disabled={isLoading} onClick={resetData}>
-						{t('Cancel')}
-					</Button>
-					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
-						{t('Save')}
-					</Button>
-				</ButtonGroup>}
+				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8' display='flex' flexDirection='row'>
-					<Field mis='x4' >
-						<Field.Label>{t('Council_type')}</Field.Label>
-						<Field.Row>
+				<Field mbe='x16' display='flex' flexDirection='row'>
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
+						<Field.Row width='-moz-available'>
 							{mode !== 'edit'
-							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
+							&& <TextInput mie='x16' readOnly value={councilType ?? t('Council_type_meeting')}/>}
 							{mode === 'edit'
-							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+							&& <Select mie='x16' style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
 							}
 						</Field.Row>
 					</Field>
-					<Field mis='x4'>
-						<Field.Label>{t('Date')}</Field.Label>
-						<Field.Row>
-							{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
+						<Field.Row width='-moz-available'>
+							{mode !== 'edit' && <TextInput mie='x16' readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
 							{mode === 'edit'
 								&& <DatePicker
+									mie='x16'
 									dateFormat='dd.MM.yyyy HH:mm'
 									selected={date}
 									onChange={(newDate) => setDate(newDate)}
@@ -694,9 +687,9 @@ function Council({
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<ButtonGroup mis='auto' mie='x16'>
-						<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>
-							{t('Save_Order')}
-						</Button>
+						{/*<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>*/}
+						{/*	{t('Save_Order')}*/}
+						{/*</Button>*/}
 						<Button disabled={isLoading} onClick={fileUploadClick} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
 						</Button>
