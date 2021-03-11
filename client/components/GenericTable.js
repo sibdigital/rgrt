@@ -46,6 +46,7 @@ export const GenericTable = forwardRef(function GenericTable({
 	setParams = () => { },
 	params: paramsDefault = '',
 	FilterComponent = () => null,
+	isPagination = true,
 	...props
 }, ref) {
 	const t = useTranslation();
@@ -97,7 +98,7 @@ export const GenericTable = forwardRef(function GenericTable({
 						</Table>
 					</Box>
 				</Scrollable>
-				<Pagination
+				{isPagination && <Pagination
 					divider
 					current={current}
 					itemsPerPage={itemsPerPage}
@@ -106,7 +107,7 @@ export const GenericTable = forwardRef(function GenericTable({
 					count={total || 0}
 					onSetItemsPerPage={setItemsPerPage}
 					onSetCurrent={setCurrent}
-				/>
+				/>}
 			</>
 		}
 	</>;

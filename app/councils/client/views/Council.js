@@ -35,12 +35,12 @@ import { fileUploadToCouncil, filesValidation } from '../../../ui/client/lib/fil
 import { mime } from '../../../utils/lib/mimeTypes';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { SuccessModal, WarningModal } from '../../../utils/client/index';
-import { Persons } from './Participants/Participants';
+import { CouncilPersons } from './Participants/Participants';
 import { AddPerson } from './Participants/AddParticipant';
 import { CreateParticipant } from './Participants/CreateParticipant';
-import { downLoadFile } from '../../../utils/client/methods/downloadFile';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { createCouncilData, validate, downloadCouncilParticipantsForm } from './lib';
+import { CouncilFiles } from './CouncilFiles';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -65,7 +65,8 @@ export function CouncilPage() {
 	const [files, setFiles] = useState([]);
 	const [persons, setPersons] = useState([]);
 	const [invitedPersons, setInvitedPersons] = useState([]);
-	const [cache, setCache] = useState();
+	const [cache, setCache] = useState(new Date());
+	const [councilCache, setCouncilCache] = useState(new Date());
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
 
@@ -73,17 +74,26 @@ export function CouncilPage() {
 	const debouncedSort = useDebouncedValue(sort, 500);
 	const personsQuery = invitedPersonsQuery(debouncedParams, debouncedSort, isAllow);
 
-	const onChange = useCallback(() => {
-		console.log('onChange');
-		setCache(new Date());
-	}, [cache]);
+	const councilQuery = useMemo(() => ({
+		query: JSON.stringify({ _id: councilId }),
+		councilCache: JSON.stringify({ councilCache }),
+	}), [councilId, councilCache]);
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
 	}), [councilId]);
 
+	const onChange = useCallback(() => {
+		console.log('onChange');
+		setCache(new Date());
+	}, [cache]);
 
-	const { data, state } = useEndpointDataExperimental('councils.findOne', query) || {};
+	const onCouncilChange = useCallback(() => {
+		console.log('onCouncilChange');
+		setCouncilCache(new Date());
+	}, []);
+
+	const { data, state } = useEndpointDataExperimental('councils.findOne', councilQuery) || {};
 	const { data: invitedPersonsData, state: invitedPersonsDataState } = useEndpointDataExperimental('councils.invitedPersons', useMemo(() => ({ query: JSON.stringify({ _id: councilId }) }), [councilId])) || { persons: [] };
 	const { data: personsData, state: personsDataState } = useEndpointDataExperimental('persons.list', personsQuery) || { persons: [] };
 	const { data: currentUser, state: currentUserState } = useEndpointDataExperimental('users.getRoles', useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
@@ -108,7 +118,7 @@ export function CouncilPage() {
 		}
 	}, [invitedPersonsData, personsData, data]);
 
-	const mode = useMemo(() => routeUrl[0].includes('council-edit') ? 'edit' : 'read', [routeUrl]);
+	const mode = useMemo(() => (routeUrl[0].includes('council-edit') || currentUser?.roles?.includes('secretary') || currentUser?.roles?.includes('admin')) ? 'edit' : 'read', [currentUser, routeUrl]);
 
 	const workingGroupOptions = useMemo(() => {
 		const res = [[null, t('Not_chosen')]];
@@ -135,7 +145,7 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council isAgendaData={!!agendaData?.success} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
+	return <Council isAgendaData={!!agendaData?.success && !!agendaData?.councilId} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} onCouncilChange={onCouncilChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -155,6 +165,7 @@ function Council({
 	data,
 	userRoles,
 	onChange,
+	onCouncilChange,
 	councilTypeOptions,
 	protocolData,
 	workingGroupOptions,
@@ -166,8 +177,8 @@ function Council({
 
 	const [date, setDate] = useState(new Date());
 	const [description, setDescription] = useState('');
+	const [place, setPlace] = useState('');
 	const [councilType, setCouncilType] = useState('');
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [context, setContext] = useState('participants');
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [attachedFiles, setAttachedFiles] = useState([]);
@@ -178,6 +189,7 @@ function Council({
 	const [isUserJoin, setIsUserJoin] = useState(false);
 	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
 	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
+	const [isCouncilFilesReload, setIsCouncilFilesReload] = useState(true);
 
 	useEffect(() => {
 		if (isLoading) { return; }
@@ -193,6 +205,7 @@ function Council({
 			setDate(new Date(data.d));
 			setDescription(data.desc);
 			setCouncilType(data.type?.title ?? '');
+			setPlace(data.place ?? '');
 		}
 		if (invitedPersonsData) {
 			setInvitedPersonsIds(invitedPersonsData);
@@ -216,9 +229,6 @@ function Council({
 	}, [invitedPersonsData, filesData, userRoles, data, currentPerson, isLoading]);
 
 	const setModal = useSetModal();
-
-	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
-	const updateCouncilFilesOrder = useMethod('updateCouncilFilesOrder');
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
 	const deleteCouncil = useMethod('deleteCouncil');
@@ -274,8 +284,8 @@ function Council({
 		FlowRouter.reload();
 	};
 
-	const saveCouncilAction = useCallback(async (date, description, councilType, invitedPersons) => {
-		const councilData = createCouncilData(date, description, councilType, invitedPersons, { _id: councilId });
+	const saveCouncilAction = useCallback(async (date, description, councilType, invitedPersons, place) => {
+		const councilData = createCouncilData(date, description, councilType, invitedPersons, { _id: councilId }, place);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
 			await insertOrUpdateCouncil(councilData);
@@ -290,22 +300,29 @@ function Council({
 			await saveCouncilAction(date, description, {
 				_id: '',
 				title: councilType,
-			}, invitedPersonsIds);
+			}, invitedPersonsIds, place);
 			dispatchToastMessage({ type: 'success', message: t('Council_edited') });
+			onCouncilChange();
 		} catch (error) {
 			console.log(error);
 			dispatchToastMessage({ type: 'error', message: error });
-		} finally {
-			onChange();
 		}
-	}, [date, description, councilType, saveCouncilAction, onChange]);
+	}, [date, description, councilType, place, saveCouncilAction, onCouncilChange]);
 
 	const handleFileUploadChipClick = (index) => () => {
 		setCurrentUploadedFiles(currentUploadedFiles.filter((file, _index) => _index !== index));
 	};
 
-	const hasUnsavedChanges = useMemo(() => isLoading ? false : new Date(data.d).getTime() !== new Date(date).getTime() || data.desc !== description || (!data.type && councilType !== '') || (data.type && data.type.title !== councilType),
-		[date, description, councilType, data]);
+	const hasUnsavedChanges = useMemo(() =>
+		isLoading
+			? false
+			: new Date(data.d).getTime() !== new Date(date).getTime()
+			|| data.desc !== description
+			|| (!data.type && councilType !== '')
+			|| (data.type && data.type.title !== councilType)
+			|| (data.place && data.place !== place)
+			|| (!data.place && place !== '')
+	, [date, description, councilType, place, data]);
 
 	const handleTabClick = useMemo(() => (tab) => () => {
 		setTab(tab);
@@ -325,11 +342,6 @@ function Council({
 		} catch (e) {
 			console.error('[council.js].downloadCouncilParticipants :', e);
 		}
-	};
-
-	const onDownloadFileClick = (file) => async (e) => {
-		console.log('onDownloadFileClick');
-		await downLoadFile(file)(e);
 	};
 
 	const fileUploadClick = async () => {
@@ -400,6 +412,8 @@ function Council({
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				setCurrentUploadedFiles([]);
+				onChange();
+				setIsCouncilFilesReload(!isCouncilFilesReload);
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
 		}
@@ -470,33 +484,6 @@ function Council({
 
 	const onDeleteCouncilClick = () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
-	const onFileDeleteConfirm = async (fileId) => {
-		console.log(fileId);
-		try {
-			await deleteFileFromCouncil(councilId, fileId);
-			setMaxOrderFileIndex(attachedFiles.length);
-
-			const arr = await updateCouncilFilesOrder(councilId, attachedFiles.filter((file) => file._id !== fileId));
-			setAttachedFiles(arr);
-
-			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('File_has_been_deleted')} onClose={() => { setModal(undefined); close(); onChange(); }}/>);
-		} catch (error) {
-			dispatchToastMessage({ type: 'error', message: error });
-			onChange();
-		}
-	};
-
-	const openFileDeleteConfirm = (fileId) => setModal(() => <WarningModal title={t('Are_you_sure')} onDelete={() => onFileDeleteConfirm(fileId) } onCancel={() => setModal(undefined)}/>);
-
-	const onDeleteFileConfirmDel = (fileId) => async (e) => {
-		e.preventDefault();
-		try {
-			openFileDeleteConfirm(fileId);
-		} catch (error) {
-			dispatchToastMessage({ type: 'error', message: error });
-		}
-	};
-
 	const onOpenCouncilProtocol = (protocolData, councilId) => () => {
 		if (protocolData.protocol.length !== 0) {
 			const protocolId = protocolData.protocol[0]._id;
@@ -506,91 +493,6 @@ function Council({
 		}
 	};
 
-	const saveFilesOrder = useCallback(async () => {
-		try {
-			const filesArray = await updateCouncilFilesOrder(councilId, attachedFiles);
-			setAttachedFiles(filesArray);
-			setCurrentMovedFiles({ downIndex: -1, upIndex: -1 });
-			dispatchToastMessage({ type: 'success', message: t('Save_Order_successfully') });
-		} catch (error) {
-			console.log(error);
-			dispatchToastMessage({ type: 'error', message: error });
-		}
-	}, [updateCouncilFilesOrder, councilId, attachedFiles, t]);
-
-	const moveFileUpOrDown = useCallback((type, index) => {
-		const arr = attachedFiles;
-		if ((index > 0 && type === 'up') || (index < attachedFiles.length - 1 && type === 'down')) {
-			if (type === 'up') {
-				setCurrentMovedFiles({ downIndex: index, upIndex: index - 1 });
-				[arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
-			} else {
-				setCurrentMovedFiles({ downIndex: index + 1, upIndex: index });
-				[arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
-			}
-			setAttachedFiles(arr);
-			onChange();
-		}
-	}, [attachedFiles]);
-
-	const header = useMemo(() => [
-		// <Th w='x40' key={'Index'} color='default'>
-		// 	{'№' }
-		// </Th>,
-		<Th key={'File_name'} color='default'>
-			{ t('File_name') }
-		</Th>,
-		<Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
-			{ t('File_uploaded_uploadedAt') }
-		</Th>,
-		isSecretary && <Th w='x40' key='moveUp'/>,
-		isSecretary && <Th w='x40' key='moveDown'/>,
-		<Th w='x40' key='download'/>,
-		isSecretary && <Th w='x40' key='delete'/>,
-	], [mediaQuery, isSecretary]);
-
-	const renderRow = (document) => {
-		const { _id, title, ts, orderIndex } = document;
-
-		const getStyle = (index) => {
-			let style = {};
-			if (index === currentMovedFiles.upIndex) {
-				style = { animation: 'slideDown 0.3s linear' };
-			} else if (index === currentMovedFiles.downIndex) {
-				style = { animation: 'slideUp 0.3s linear' };
-			}
-			return style;
-		};
-
-		const style = getStyle(document.index);
-
-		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
-			{/*<Table.Cell fontScale='p1' color='default'>{orderIndex ?? document.index}</Table.Cell>*/}
-			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
-			{isSecretary && <Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>
-					<Icon name='arrow-down'/>
-				</Button>
-			</Table.Cell>}
-			{isSecretary && <Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>
-					<Icon name='arrow-down'/>
-				</Button>
-			</Table.Cell>}
-			<Table.Cell alignItems={'end'}>
-				<Button small aria-label={t('download')} onClick={onDownloadFileClick(document)}>
-					<Icon name='download'/>
-				</Button>
-			</Table.Cell>
-			{isSecretary && <Table.Cell alignItems={'end'}>
-				<Button small onClick={onDeleteFileConfirmDel(document._id)} aria-label={t('Delete')}>
-					<Icon name='trash'/>
-				</Button>
-			</Table.Cell>}
-		</Table.Row>;
-	};
-
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -598,15 +500,18 @@ function Council({
 					<GoBackButton/>
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Council')} {isLoading && t('Loading')}</Label>
 				</Field>
-				{ mode !== 'edit' && <ButtonGroup>
-					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>
-						{t('Edit')}
+				<ButtonGroup>
+					{/*{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>*/}
+					{/*	{t('Edit')}*/}
+					{/*</Button>}*/}
+					{mode === 'edit' && <Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
+						{t('Save')}
 					</Button>}
 					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>}
 					{(isSecretary || isAgendaData) && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
-						{t('Agenda')}
+						{(isAgendaData || !isSecretary) ? t('Agenda') : t('Agenda_create')}
 					</Button>}
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
@@ -615,39 +520,29 @@ function Council({
 						{t('Proposals_for_the_agenda')}
 					</Button>}
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
-						{t('Protocol')}
+						{protocolData.protocol.length !== 0 ? t('Protocol') : t('Protocol_Create')}
 					</Button>}
-				</ButtonGroup>}
-				{ mode === 'edit' && <ButtonGroup>
-					<Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
-						{t('Delete')}
-					</Button>
-					<Button primary small aria-label={t('Cancel')} disabled={isLoading} onClick={resetData}>
-						{t('Cancel')}
-					</Button>
-					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
-						{t('Save')}
-					</Button>
-				</ButtonGroup>}
+				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8' display='flex' flexDirection='row'>
-					<Field mis='x4' >
-						<Field.Label>{t('Council_type')}</Field.Label>
-						<Field.Row>
+				<Field mbe='x16' display='flex' flexDirection='row'>
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
+						<Field.Row width='-moz-available'>
 							{mode !== 'edit'
-							&& <TextInput readOnly value={councilType ?? t('Council_type_meeting')}/>}
+							&& <TextInput mie='x16' readOnly value={councilType ?? t('Council_type_meeting')}/>}
 							{mode === 'edit'
-							&& <Select style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+							&& <Select mie='x16' style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
 							}
 						</Field.Row>
 					</Field>
-					<Field mis='x4'>
-						<Field.Label>{t('Date')}</Field.Label>
-						<Field.Row>
-							{mode !== 'edit' && <TextInput readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
+						<Field.Row width='-moz-available'>
+							{mode !== 'edit' && <TextInput mie='x16' readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
 							{mode === 'edit'
 								&& <DatePicker
+									mie='x16'
 									dateFormat='dd.MM.yyyy HH:mm'
 									selected={date}
 									onChange={(newDate) => setDate(newDate)}
@@ -662,18 +557,22 @@ function Council({
 						</Field.Row>
 					</Field>
 				</Field>
+				{isSecretary && <Field mbe='x16' display='flex' flexDirection='row' alignItems='center' mis='x4'>
+					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
+						<Label mie='x8'>{t('Council_Place')}</Label>
+						<TextInput fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
+					</Field>
+					<Field display='flex' flexDirection='row' mie='x8'>
+						<Label mie='x8'>{t('Council_invite_link')}</Label>
+						<a href={address} is='span' target='_blank'>{address}</a>
+					</Field>
+				</Field>}
 				<Field mbe='x8' mis='x4'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
 						<TextAreaInput style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} rows='5' readOnly={mode !== 'edit'} fontScale='p1'/>
 					</Field.Row>
 				</Field>
-				{isSecretary && <Field mbe='x8'>
-					<Field.Label>{t('Council_invite_link')}</Field.Label>
-					<Field.Row>
-						<a href={address} is='span' target='_blank'>{address}</a>
-					</Field.Row>
-				</Field>}
 				<Tabs flexShrink={0} mbe='x8'>
 					{isSecretary && <Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>}
 					<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>
@@ -694,9 +593,9 @@ function Council({
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<ButtonGroup mis='auto' mie='x16'>
-						<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>
-							{t('Save_Order')}
-						</Button>
+						{/*<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>*/}
+						{/*	{t('Save_Order')}*/}
+						{/*</Button>*/}
 						<Button disabled={isLoading} onClick={fileUploadClick} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
 						</Button>
@@ -704,7 +603,8 @@ function Council({
 				</Field>}
 				{tab === 'persons' && isSecretary
 					&& ((context === 'participants'
-					&& <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
+					// && <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
+					&& <CouncilPersons councilId={councilId} isSecretary={isSecretary}/>
 					)
 
 					|| (context === 'addParticipants'
@@ -729,15 +629,16 @@ function Council({
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Field mbe='x8'>
 						<Field.Row>
-							<Button onClick={fileUpload} mie='10px' small primary aria-label={t('Click_to_load')}>
-								{t('Click_to_load')}
+							<Button onClick={fileUpload} mie='10px' small primary aria-label={t('Save')}>
+								{t('Save')}
 							</Button>
-							<Field.Label>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
+							<Field.Label alignSelf='center'>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
 						</Field.Row>
 					</Field>
 				}
 				{tab === 'files'
-					&& <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
+					// && <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
+					&& <CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
 				}
 			</Page.Content>
 		</Page>
