@@ -188,7 +188,7 @@
 	/*padding-block: 2px;*/
 	/*padding-inline: 10px;*/
 
-	:hover {
+	&:hover {
 		/*padding: 0 !important;*/
 
 		opacity: 0.7 !important;
