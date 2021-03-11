@@ -7,6 +7,7 @@ class Councils extends Base {
 
 	// INSERT
 	create(data) {
+		data.createdAt = new Date();
 		return this.insert(data);
 	}
 

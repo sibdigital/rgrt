@@ -14,7 +14,6 @@ import moment from 'moment';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
@@ -65,7 +64,6 @@ export default AgendaPage;
 
 function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
 	const id = useRouteParameter('id');
 
 	const [cache, setCache] = useState(new Date());
@@ -149,6 +147,8 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		setProposalsList(agenda.proposals ?? []);
 	};
 
+	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
+
 	useEffect(() => {
 		if (agendaData && agendaData.success) {
 			console.log(agendaData);
@@ -156,10 +156,12 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			onAgendaSectionInit(agendaData.sections ?? []);
 			setIsNew(false);
 			setCurrentAgendaData(agendaData);
-		} else {
-			// setContext('new');
+			if (!agendaData._id) {
+				setIsNew(true);
+				setContext('new');
+			}
 		}
-	}, [agendaData]);
+	}, [agendaData, insertOrUpdateAgenda]);
 
 	const deleteAgendaSection = useMethod('deleteAgendaSection');
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');

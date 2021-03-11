@@ -216,7 +216,12 @@ function CouncilsCalendar({
 				...children.style,
 				color: 'white',
 				borderRadius: '10px',
-				backgroundColor: '#3174ad',
+				backgroundColor: 'var(--sidebar-background)',
+				padding: '2px 4px',
+				height: '45px',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
 			},
 		});
 

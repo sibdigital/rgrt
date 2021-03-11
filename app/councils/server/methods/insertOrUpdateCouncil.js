@@ -31,6 +31,7 @@ Meteor.methods({
 				},
 				d: new Date(councilData.d),
 				desc: councilData.desc,
+				place: councilData.place,
 				inviteLink,
 				type: councilData.type ?? {},
 				invitedPersons: councilData.invitedPersons ?? [],

@@ -113,25 +113,8 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 			<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>
 			<Field.Row>
 				<TextAreaInput style={{ whiteSpace: 'normal', wordBreak: 'break-word' }} rows='8' value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')}/>
-				{/*<InputBox value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')} />*/}
 			</Field.Row>
 		</Field>
-		{/*<Field>*/}
-		{/*	<Field.Label>{t('Date')}</Field.Label>*/}
-		{/*	<Field.Row>*/}
-		{/*		<DatePicker*/}
-		{/*			dateFormat='dd.MM.yyyy HH:mm'*/}
-		{/*			selected={editData.date}*/}
-		{/*			onChange={(newDate) => setEditData({ ...editData, date: newDate })}*/}
-		{/*			showTimeSelect*/}
-		{/*			timeFormat='HH:mm'*/}
-		{/*			timeIntervals={5}*/}
-		{/*			timeCaption='Время'*/}
-		{/*			customInput={<TextInput />}*/}
-		{/*			locale='ru'*/}
-		{/*			popperClassName='date-picker'/>*/}
-		{/*	</Field.Row>*/}
-		{/*</Field>*/}
 		<Field>
 			<Field.Label>{t('Agenda_speakers')}</Field.Label>
 			<Autocomplete
@@ -163,7 +146,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={editData.issueConsideration === ''}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

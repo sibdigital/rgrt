@@ -20,10 +20,7 @@ function InviteStepperPage({ currentStep = 1, council = {}, agendaId = null }) {
 
 	const [isAgenda, setIsAgenda] = useState(!!agendaId);
 	const [userData, setUserData] = useState(false);
-	const stepStyle = { width: '65%', maxWidth: '600px' };
-
-	console.log(agendaId);
-	console.log(isAgenda);
+	const stepStyle = { width: '80%', maxWidth: '1200px' };
 
 	const setUserDataClick = useCallback((data) => setUserData(data), []);
 
