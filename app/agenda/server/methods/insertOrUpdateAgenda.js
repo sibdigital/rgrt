@@ -18,7 +18,7 @@ Meteor.methods({
 
 		if (!agendaData._id) {
 			const createAgenda = {
-				ts: new Date(),
+				ts: agendaData.ts ?? new Date(),
 				name: agendaData.name,
 				number: agendaData.number,
 				councilId: agendaData.councilId ?? '',

@@ -22,6 +22,8 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 	});
 	const [isNew, setIsNew] = useState(true);
 
+	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
+
 	const { data: councilData, state: councilState, error: councilError } = useEndpointDataExperimental('councils.findOne', useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
 		fields: JSON.stringify({ ts: 1, d: 1, type: 1 }),
@@ -36,12 +38,19 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 			setPrevValues({ name: data.name, number: data.number });
 			setIsNew(false);
 		} else if (councilData && numberCountData) {
-			setName([councilData.type.title, ' от ', formatDate(councilData.d)].join(''));
-			setNumber(numberCountData.numberCount);
+			const agendaData = {
+				number: numberCountData.numberCount,
+				name: [councilData.type.title, ' от ', formatDate(councilData.d)].join(''),
+				councilId,
+				ts: new Date(),
+			};
+			insertOrUpdateAgenda(agendaData).then((r) => {
+				onEditDataClick({ ...agendaData, ...r });
+				onChange();
+				close();
+			});
 		}
-	}, [data, councilData, numberCountData]);
-
-	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
+	}, [data, councilData, numberCountData, councilId, insertOrUpdateAgenda]);
 
 	const allFieldAreFilled = useMemo(() => name === prevValues.name || number === prevValues.number, [name, number, prevValues]);
 	const fieldEdited = useMemo(() => name !== prevValues.name || number !== prevValues.number, [name, number, prevValues]);
@@ -70,16 +79,15 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 			}
 			onEditDataClick(agendaData);
 			onChange();
+			close();
+			dispatchToastMessage({ type: 'success', message: !data ? t('Agenda_added_successfully') : t('Agenda_edited_successfully') });
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: [t('error-the-field-is-required '), error].join('') }));
 	}, [dispatchToastMessage, insertOrUpdateAgenda, t, councilId]);
 
 	const handleSave = useCallback(async () => {
 		try {
 			await saveAction(number, name, data);
-			dispatchToastMessage({ type: 'success', message: !data ? t('Agenda_added_successfully') : t('Agenda_edited_successfully') });
-			onChange();
-			close();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
