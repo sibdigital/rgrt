@@ -117,14 +117,14 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			renderDirection: 'column',
 			isHiddenLabel: true,
 		});
-		// if (section.item) {
-		// 	sections.unshift({
-		// 		item: true,
-		// 		hidden: true,
-		// 		label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
-		// 		value: section.item ?? '',
-		// 	});
-		// }
+		if (section.item) {
+			sections.unshift({
+				item: true,
+				hidden: true,
+				label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
+				value: section.item ?? '',
+			});
+		}
 
 		sections.unshift({
 			_id: section._id,
@@ -239,11 +239,13 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		const arr = sectionsData;
 		if (type === 'up') {
 			if (index > 0 && index < sectionsData.length) {
+				[arr[index - 1].item, arr[index].item] = [arr[index].item, arr[index - 1].item];
 				[arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
 				isChange = true;
 			}
 		} else if (type === 'down') {
 			if (index < sectionsData.length) {
+				[arr[index].item, arr[index + 1].item] = [arr[index + 1].item, arr[index].item];
 				[arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
 				isChange = true;
 			}
@@ -256,7 +258,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			onAgendaSectionInit(arr);
 			onChange();
 		}
-	}, [sectionsData]);
+	}, [agendaId, sectionsData]);
 
 	const onSectionMenuClick = useCallback((event) => {
 		const index = event.currentTarget.dataset.indexNumber;
