@@ -172,11 +172,6 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		return <Callout m='x16' type='danger'>{t('Loading')}</Callout>;
 	}
 
-	if (!hasPermission('edit-councils', userId)) {
-		console.log('Permissions_access_missing');
-		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	}
-
 	return <GenericTable header={header} renderRow={renderRow} results={data.documents ?? []} total={data.documents?.length ?? 0} setParams={setParams} params={params}/>;
 }
 

@@ -516,9 +516,9 @@ function Council({
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
 					</Button>}
-					{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>
-						{t('Proposals_for_the_agenda')}
-					</Button>}
+					{/*{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>*/}
+					{/*	{t('Proposals_for_the_agenda')}*/}
+					{/*</Button>}*/}
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
 						{protocolData.protocol.length !== 0 ? t('Protocol') : t('Protocol_Create')}
 					</Button>}
@@ -557,16 +557,16 @@ function Council({
 						</Field.Row>
 					</Field>
 				</Field>
-				{isSecretary && <Field mbe='x16' display='flex' flexDirection='row' alignItems='center' mis='x4'>
+				<Field mbe='x16' display='flex' flexDirection='row' alignItems='center' mis='x4'>
 					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
 						<Label mie='x8'>{t('Council_Place')}</Label>
 						<TextInput fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
 					</Field>
-					<Field display='flex' flexDirection='row' mie='x8'>
+					{isSecretary && <Field display='flex' flexDirection='row' mie='x8'>
 						<Label mie='x8'>{t('Council_invite_link')}</Label>
 						<a href={address} is='span' target='_blank'>{address}</a>
-					</Field>
-				</Field>}
+					</Field>}
+				</Field>
 				<Field mbe='x8' mis='x4'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
