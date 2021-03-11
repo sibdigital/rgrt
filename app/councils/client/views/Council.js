@@ -527,7 +527,7 @@ function Council({
 			<Page.Content>
 				<Field mbe='x16' display='flex' flexDirection='row'>
 					<Field mis='x4' display='flex' flexDirection='row'>
-						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
 						<Field.Row width='-moz-available'>
 							{mode !== 'edit'
 							&& <TextInput mie='x16' readOnly value={councilType ?? t('Council_type_meeting')}/>}
@@ -559,8 +559,8 @@ function Council({
 				</Field>
 				<Field mbe='x16' display='flex' flexDirection='row' alignItems='center' mis='x4'>
 					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
-						<Label mie='x8'>{t('Council_Place')}</Label>
-						<TextInput fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
+						<Label maxWidth='100px' mie='x8'>{t('Council_Place')}</Label>
+						<TextInput mie='x12' fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
 					</Field>
 					{isSecretary && <Field display='flex' flexDirection='row' mie='x8'>
 						<Label mie='x8'>{t('Council_invite_link')}</Label>
