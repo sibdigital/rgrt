@@ -24,12 +24,16 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 		patronymic: '',
 		phone: '',
 		email: '',
-		group: {},
+		group: '',
 	});
-	console.log('createPartic');
+
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const allFieldAreFilled = useMemo(() => Object.values(values).map((item) => item && item !== '') && !isEmail(values.email), [values]);
+	const allFieldAreFilled = useMemo(() =>
+		// (Object.values(values).filter((item) => item === '').length !== 1 && values.patronymic === '')
+		Object.values(values).filter((item) => item === '').length !== 0
+		|| !isEmail(values.email)
+	, [values]);
 
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 	const insertOrUpdateCouncilPerson = useMethod('insertOrUpdateCouncilPerson');
