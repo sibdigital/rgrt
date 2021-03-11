@@ -122,6 +122,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date());
 	const [description, setDescription] = useState('');
+	const [place, setPlace] = useState('');
 	const [councilType, setCouncilType] = useState('');
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [tab, setTab] = useState('persons');
@@ -164,8 +165,8 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 		setContext('participants');
 	};
 
-	const saveAction = useCallback(async (date, description, councilType, invitedPersonsIds) => {
-		const councilData = createCouncilData(date, description, councilType, invitedPersonsIds, null);
+	const saveAction = useCallback(async (date, description, councilType, invitedPersonsIds, place) => {
+		const councilData = createCouncilData(date, description, councilType, invitedPersonsIds, null, place);
 		const validation = validate(councilData);
 		if (validation.length === 0) {
 			const council = await insertOrUpdateCouncil(councilData);
@@ -180,7 +181,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 			await saveAction(date, description, {
 				_id: '',
 				title: councilType,
-			}, invitedPersonsIds);
+			}, invitedPersonsIds, place);
 			dispatchToastMessage({ type: 'success', message: t('Council_edited') });
 		} catch (error) {
 			console.log(error);
@@ -188,14 +189,14 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 		} finally {
 			onChange();
 		}
-	}, [date, description, councilType, invitedPersonsIds, saveAction, onChange, dispatchToastMessage]);
+	}, [date, description, councilType, place, invitedPersonsIds, saveAction, onChange, dispatchToastMessage]);
 
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Council_edit')}</Label>
+					<Label fontScale='h1'>{t('Council_Add')}</Label>
 				</Field>
 				<ButtonGroup>
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveCouncil}>
@@ -229,9 +230,15 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 					</Field>
 				</Field>
 				<Field mbe='x8'>
+					<Field.Label>{t('Council_Place')}</Field.Label>
+					<Field.Row>
+						<TextInput border='1px solid #4fb0fc' value={place} onChange={(e) => setPlace(e.currentTarget.value)} placeholder={t('Council_Place')} />
+					</Field.Row>
+				</Field>
+				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ { whiteSpace: 'normal' } } row='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
+						<TextAreaInput style={ { whiteSpace: 'normal' } } rows='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
 					</Field.Row>
 				</Field>
 				<Tabs flexShrink={0} mbe='x8'>
