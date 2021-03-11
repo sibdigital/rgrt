@@ -23,6 +23,10 @@
     display: none;
 }
 
+.sidebar.sidebar--medium .sidebar__footer .small-logo {
+    display: none;
+}
+
 .sidebar.hidden .rooms-list__type.type-d {
     padding: 6px 18px;
 }
