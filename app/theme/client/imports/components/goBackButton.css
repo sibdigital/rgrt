@@ -1,5 +1,5 @@
 .go-back-button {
-	height: 40px !important;
+	height: 28.8px !important;
 
 	border-width: 0.12rem !important;
 	border-color: var(--rc-color-primary-button-border-color) !important;
@@ -8,10 +8,15 @@
 
 	font-size: 24px !important;
 	margin-inline-end: 10px !important;
-	
+
+	line-height: 0.5rem !important;
 }
 
 .go-back-button .rcx-icon--name-back {
 	line-height: unset !important;
 	vertical-align: unset !important;	
+}
+
+.rcx-box .go-back-button {
+	margin-bottom: 4px !important;
 }
