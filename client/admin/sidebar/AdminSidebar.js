@@ -111,6 +111,8 @@ export default React.memo(function AdminSidebar() {
 		], []),
 	);
 
+	const SideNavClassName = SideNav.sidebarPos.elem.className;
+
 	const closeAdminFlex = useCallback(() => {
 		if (Layout.isEmbedded()) {
 			menu.close();
@@ -125,6 +127,10 @@ export default React.memo(function AdminSidebar() {
 	const [,,, currentRouteGroupName] = currentRoute;
 
 	useEffect(() => {
+		if (SideNavClassName === 'sidebar hidden') {
+			SideNav.setExpanded();
+		}
+
 		if (currentRouteGroupName !== 'admin') {
 			SideNav.toggleFlex(-1, null);
 		}
