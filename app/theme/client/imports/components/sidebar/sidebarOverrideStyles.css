@@ -23,7 +23,7 @@
     display: none;
 }
 
-.sidebar.sidebar--medium .sidebar__footer .small-logo {
+.sidebar:not(.hidden) .sidebar__footer .small-logo {
     display: none;
 }
 
@@ -41,5 +41,6 @@
 }
 
 .rooms-list__type.type-d {
+    cursor: pointer;
     justify-content: unset !important;
 }
