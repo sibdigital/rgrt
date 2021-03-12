@@ -22,3 +22,11 @@
 .toast-error {
     background-color: var(--color-gray) !important;
 }
+
+.rc-old .page-container {
+    position: relative !important;
+}
+
+.toast-error {
+    background-color: var(--color-gray) !important;
+}

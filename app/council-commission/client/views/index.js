@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { ButtonGroup, Button, Field, Box, Label, Icon } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -33,6 +33,8 @@ export function CouncilCommissionPage() {
 
 	const queryPerson = useQueryPerson(debouncedParams, debouncedSort);
 
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
+
     const { data: personsData } = useEndpointDataExperimental('persons.list', queryPerson) || { };
 	
 	useEffect(() => {
@@ -58,7 +60,7 @@ export function CouncilCommissionPage() {
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Commission of the State Council of the Russian Federation in the direction of \"Transport\"')}</Label>
+					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Commission of the State Council of the Russian Federation in the direction of \"Transport\"')}</Label>
 				</Field>
 			</Page.Header>
 			<Page.Content>

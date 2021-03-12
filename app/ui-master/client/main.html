@@ -33,14 +33,14 @@
 						{{else}}
 							{{> videoCall overlay=true}}
 							<div id="user-card-popover"></div>
-							<div style="background-color: var(--sidebar-background);">
-								{{> menuBar}}
-							</div>
 							<div id="rocket-chat" class="{{embeddedVersion}} menu-nav">
 								{{#unless removeSidenav}}
 									{{> sideNav }}
 								{{/unless}}
 								<div class="{{#unless $eq old false}}rc-old{{/unless}} main-content content-background-color {{readReceiptsEnabled}}">
+									<div style="background-color: var(--sidebar-background);">
+										{{> menuBar}}
+									</div>
 									{{> Template.dynamic template=center}}
 								</div>
 							</div>

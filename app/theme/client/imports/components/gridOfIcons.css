@@ -155,7 +155,7 @@
 }
 
 .cbp-ig-grid li > button:hover {
-	background: #47a3da;
+	background: var(--rc-color-primary-darkest);
 }
 
 .cbp-ig-grid li > button:hover .cbp-ig-icon {
