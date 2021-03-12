@@ -245,7 +245,7 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 			position: 1,
 		};
 
-		const user = Users.findOneById(query.userId, { fields });
+		const user = Users.findOneById(query.userId, { ...fields, emails: 1 });
 		const person = Persons.findOne(query, { fields });
 
 		if (person) {
