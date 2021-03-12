@@ -47,7 +47,7 @@ function AddRequestWithData({ mode, request, onChange, onRequestChanged, docsdat
 	const workingGroupRequestContext = FlowRouter.getParam('context')
 
 	if (protocolsItemId && workingGroupRequestContext === 'new-protocols-item-request') {
-		const currentRequestQuery = docsdata.filter(request => request.protocolsItemId === protocolsItemId)[0];
+		const currentRequestQuery = docsdata?.filter(request => request.protocolsItemId === protocolsItemId)[0];
 		
 		if (currentRequestQuery) {
 			FlowRouter.go(`/working-groups-request/${ currentRequestQuery._id }`)

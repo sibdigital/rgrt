@@ -121,8 +121,8 @@ export function DocumentPage() {
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>
-					<Button primary small aria-label={t('Edit')} onClick={handleHeaderButtonClick('edit')}>
-						{t('Edit')}
+					<Button primary small aria-label={t('Save')} onClick={handleHeaderButtonClick('edit')}>
+						{t('Save')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
