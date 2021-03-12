@@ -12,39 +12,11 @@ import { userStatus } from '../../user-status';
 import { hasPermission } from '../../authorization/client';
 import { createTemplateForComponent } from '../../../client/reactAdapters';
 
-
 const setStatus = (status, statusText) => {
 	AccountBox.setStatus(status, statusText);
 	callbacks.run('userStatusManuallySet', status);
 	popover.close();
 };
-
-const isSidebar = (elem) => {
-	return sidebar.className.includes('sidebar sidebar');
-}
-
-const setCollapsed = (sidebar) => {
-	sidebar.elem.className = 'sidebar hidden';
-	sidebar.footer.className = 'small-logo'
-	sidebar.footer.innerHTML = `<img src="assets/favicon.svg" alt="Home"/>`;
-	document.getElementById('sidebar__footer_id').append(sidebar.footer);
-}
-
-const setExpanded = (sidebar) => {
-	sidebar.footer.innerHTML = `<img src="assets/logo.png" alt="Home"/>`;
-	document.getElementById('sidebar__footer_id').append(sidebar.footer);
-	sidebar.elem.className = 'sidebar sidebar--medium';
-}
-
-const constructSidebar = () => {
-	let elem = document.getElementById('sidebar');
-	let footer = document.createElement('a');
-	footer.href = "/home";
-
-	let sidebar = { elem, footer }
-
-	isSidebar(elem) ? setCollapsed(sidebar) : setExpanded(sidebar);
-}
 
 const showToolbar = new ReactiveVar(false);
 
@@ -239,6 +211,6 @@ Template.sidebarHeader.events({
 		}
 	},
 	'click .icon' (e, instance) {
-		constructSidebar();
+		SideNav.constructSidebar();
 	}
 });
