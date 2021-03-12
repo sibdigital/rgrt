@@ -1,0 +1,45 @@
+.pre-header {
+    height: 63px;
+    text-align: right;
+
+    padding: 12px 18px;
+}
+
+.pre-header .icon {
+    font-size: 24px;
+    color: var(--rooms-list-title-color);
+}
+
+.sidebar.hidden {
+    flex: 0 0 1%;
+    width: 70px;
+}
+
+.sidebar.hidden .sidebar__toolbar,
+.sidebar.hidden .sidebar__footer a:not(.small-logo),
+.sidebar.hidden h3:not(.rooms-list__type.type-d),
+.sidebar.hidden .rooms-list__list,
+.sidebar.hidden .rooms-list__type.type-d .rooms-list__type-text {
+    display: none;
+}
+
+.sidebar.sidebar--medium .sidebar__footer .small-logo {
+    display: none;
+}
+
+.sidebar.hidden .rooms-list__type.type-d {
+    padding: 6px 18px;
+}
+
+.rooms-list__type.type-d:hover {
+    background-color: var(--rc-color-primary-darkest) !important;
+}
+
+.rooms-list__type.type-d .icon {
+    font-size: 24px;
+    color: var(--rooms-list-title-color);
+}
+
+.rooms-list__type.type-d {
+    justify-content: unset !important;
+}

@@ -44,7 +44,7 @@
     display: none;
     position: absolute;
     background-color: var(--sidebar-background);
-    z-index: 3;
+    z-index: 100;
 }
 
 .menu .menu-link:hover .submenu {
@@ -75,48 +75,8 @@
     font-size: 24px;
 }
 
-@media screen and (max-width: 860px) {
-    .menu {
+@media screen and (max-width: 780px) {
+    .menu-bar {
         display: none;
-    }
-
-    .menu-bar .icon {
-        display: table-cell;
-        vertical-align: middle;
-    }
-
-    .menu.responsive {
-        position: absolute;
-        display: block;
-        z-index: 10000;
-        overflow: auto;
-        background-color: var(--sidebar-background);
-        left: 0%;
-        width: 100%;
-    }
-
-    .menu.responsive .menu-link .submenu {
-        position: relative;
-        width: 100%;
-        z-index: 0;
-    }
-
-    .menu.responsive .menu-link {
-        float: none;
-        left: 0%;
-    }
-
-    .menu.responsive .menu-link,
-    .menu.responsive .menu-link:first-child {
-        border: none;
-    }
-
-    .menu.responsive .menu-link .goToSection {
-        max-width: 100%;
-    }
-
-    .menu.responsive .submenu-link:hover,
-    .menu.responsive .submenu-link::selection {
-        background-color: var(--rc-color-primary-darkest);
     }
 }

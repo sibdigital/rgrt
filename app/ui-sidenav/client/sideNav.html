@@ -1,5 +1,5 @@
 <template name="sideNav">
-	<aside class="sidebar sidebar--{{sidebarViewMode}} {{#if sidebarHideAvatar}}sidebar--hide-avatar{{/if}}" role="navigation">
+	<aside id="sidebar" class="sidebar sidebar--{{sidebarViewMode}} {{#if sidebarHideAvatar}}sidebar--hide-avatar{{/if}}" role="navigation">
 		{{> sidebarHeader }}
 		{{#if loggedInUser}}
 			<div class="wrapper-unread">
@@ -28,7 +28,7 @@
 			</div>
 		{{/if}}
 
-		<footer class="sidebar__footer">{{{footer}}}</footer>
+		<footer id="sidebar__footer_id" class="sidebar__footer">{{{footer}}}</footer>
 	</aside>
 	<div class="sidebar-wrap"></div>
 </template>
