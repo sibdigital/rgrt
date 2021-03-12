@@ -18,10 +18,6 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field surname is required', { method: 'insertOrUpdatePerson', field: 'surname' });
 		}
 
-		if (!s.trim(person.patronymic)) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field patronymic is required', { method: 'insertOrUpdatePerson', field: 'patronymic' });
-		}
-
 		if (!s.trim(person.phone)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field phone is required', { method: 'insertOrUpdatePerson', field: 'phone' });
 		}
@@ -34,7 +30,7 @@ Meteor.methods({
 			const createPerson = {
 				surname: person.surname,
 				name: person.name,
-				patronymic: person.patronymic,
+				patronymic: person.patronymic ?? '',
 				phone: person.phone,
 				email: person.email,
 				group: person.group,

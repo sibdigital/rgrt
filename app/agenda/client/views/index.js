@@ -14,7 +14,6 @@ import moment from 'moment';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
@@ -65,7 +64,6 @@ export default AgendaPage;
 
 function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
 	const id = useRouteParameter('id');
 
 	const [cache, setCache] = useState(new Date());
@@ -117,14 +115,14 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			renderDirection: 'column',
 			isHiddenLabel: true,
 		});
-		// if (section.item) {
-		// 	sections.unshift({
-		// 		item: true,
-		// 		hidden: true,
-		// 		label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
-		// 		value: section.item ?? '',
-		// 	});
-		// }
+		if (section.item) {
+			sections.unshift({
+				item: true,
+				hidden: true,
+				label: [t('Proposal_for_the_agenda_item'), ':'].join(''),
+				value: section.item ?? '',
+			});
+		}
 
 		sections.unshift({
 			_id: section._id,
@@ -149,6 +147,8 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		setProposalsList(agenda.proposals ?? []);
 	};
 
+	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
+
 	useEffect(() => {
 		if (agendaData && agendaData.success) {
 			console.log(agendaData);
@@ -156,10 +156,12 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			onAgendaSectionInit(agendaData.sections ?? []);
 			setIsNew(false);
 			setCurrentAgendaData(agendaData);
-		} else {
-			// setContext('new');
+			if (!agendaData._id) {
+				setIsNew(true);
+				setContext('new');
+			}
 		}
-	}, [agendaData]);
+	}, [agendaData, insertOrUpdateAgenda]);
 
 	const deleteAgendaSection = useMethod('deleteAgendaSection');
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
@@ -239,11 +241,13 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		const arr = sectionsData;
 		if (type === 'up') {
 			if (index > 0 && index < sectionsData.length) {
+				[arr[index - 1].item, arr[index].item] = [arr[index].item, arr[index - 1].item];
 				[arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
 				isChange = true;
 			}
 		} else if (type === 'down') {
 			if (index < sectionsData.length) {
+				[arr[index].item, arr[index + 1].item] = [arr[index + 1].item, arr[index].item];
 				[arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
 				isChange = true;
 			}
@@ -256,7 +260,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			onAgendaSectionInit(arr);
 			onChange();
 		}
-	}, [sectionsData]);
+	}, [agendaId, sectionsData]);
 
 	const onSectionMenuClick = useCallback((event) => {
 		const index = event.currentTarget.dataset.indexNumber;

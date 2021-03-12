@@ -45,8 +45,8 @@ API.v1.addRoute('councils.getOneByInviteLink', { authRequired: false }, {
 
 API.v1.addRoute('councils.findOne', { authRequired: true }, {
 	get() {
-		const { query, stockFields } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findCouncil(query._id, { fields: stockFields })));
+		const { query, sort, stockFields } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findCouncil(query._id, { sort, fields: stockFields })));
 	},
 });
 
@@ -78,13 +78,27 @@ API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 				total: 0,
 			});
 		}
+		const aggregate = [
+			{ $match: { _id: { $in: council.invitedPersons.map((user) => user._id) } } },
+			{
+				$project: {
+					_id: 1,
+					surname: 1,
+					lowerSurname: { $toLower: '$surname' },
+					name: 1,
+					lowerName: { $toLower: '$name' },
+					patronymic: 1,
+					lowerPatronymic: { $toLower: '$patronymic' },
+					phone: 1,
+					email: 1,
+				},
+			},
+			{ $sort: { weight: 1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },
+			{ $skip: offset },
+			{ $limit: count },
+		];
 
-		const persons = Persons.find({ _id: { $in: council.invitedPersons.map((user) => user._id) || [] } }, {
-			sort: sort || { surname: 1, name: 1, patronymic: 1 },
-			skip: offset,
-			limit: count,
-			fields: { _id: 1, surname: 1, name: 1, patronymic: 1, phone: 1, email: 1 },
-		}).fetch().map((user) => {
+		const persons = Promise.await(Persons.model.rawCollection().aggregate(aggregate).toArray()).map((user) => {
 			const iUser = council.invitedPersons.find((iUser) => iUser._id === user._id);
 			if (!iUser) {
 				return;
@@ -94,22 +108,12 @@ API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 			} else {
 				user.ts = iUser.ts;
 			}
+			if (iUser.isContactPerson) {
+				user.isContactPerson = iUser.isContactPerson;
+				user.contactPerson = iUser.contactPerson;
+			}
 			return user;
 		});
-		// if (persons) {
-		// 	persons = persons.map((user) => {
-		// 		const iUser = council.invitedPersons.find((iUser) => iUser._id === user._id);
-		// 		if (!iUser) {
-		// 			return;
-		// 		}
-		// 		if (!iUser.ts) {
-		// 			user.ts = new Date('January 1, 2021 00:00:00');
-		// 		} else {
-		// 			user.ts = iUser.ts;
-		// 		}
-		// 		return user;
-		// 	});
-		// }
 
 		return API.v1.success({
 			persons,

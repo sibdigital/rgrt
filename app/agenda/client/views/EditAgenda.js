@@ -16,6 +16,13 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 
 	const [name, setName] = useState('');
 	const [number, setNumber] = useState('');
+	const [prevValues, setPrevValues] = useState({
+		name: '',
+		number: 1,
+	});
+	const [isNew, setIsNew] = useState(true);
+
+	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
 
 	const { data: councilData, state: councilState, error: councilError } = useEndpointDataExperimental('councils.findOne', useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
@@ -27,16 +34,26 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 	useEffect(() => {
 		if (data) {
 			setName(data.name);
-			setNumber(data.numberCount);
+			setNumber(data.number);
+			setPrevValues({ name: data.name, number: data.number });
+			setIsNew(false);
 		} else if (councilData && numberCountData) {
-			setName([councilData.type.title, ' от ', formatDate(councilData.d)].join(''));
-			setNumber(numberCountData.numberCount);
+			const agendaData = {
+				number: numberCountData.numberCount,
+				name: [councilData.type.title, ' от ', formatDate(councilData.d)].join(''),
+				councilId,
+				ts: new Date(),
+			};
+			insertOrUpdateAgenda(agendaData).then((r) => {
+				onEditDataClick({ ...agendaData, ...r });
+				onChange();
+				close();
+			});
 		}
-	}, [data, councilData, numberCountData]);
+	}, [data, councilData, numberCountData, councilId, insertOrUpdateAgenda]);
 
-	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
-
-	const allFieldAreFilled = useMemo(() => name === '' || number === '', [name, number]);
+	const allFieldAreFilled = useMemo(() => name === prevValues.name || number === prevValues.number, [name, number, prevValues]);
+	const fieldEdited = useMemo(() => name !== prevValues.name || number !== prevValues.number, [name, number, prevValues]);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -62,16 +79,15 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 			}
 			onEditDataClick(agendaData);
 			onChange();
+			close();
+			dispatchToastMessage({ type: 'success', message: !data ? t('Agenda_added_successfully') : t('Agenda_edited_successfully') });
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: [t('error-the-field-is-required '), error].join('') }));
 	}, [dispatchToastMessage, insertOrUpdateAgenda, t, councilId]);
 
 	const handleSave = useCallback(async () => {
 		try {
 			await saveAction(number, name, data);
-			dispatchToastMessage({ type: 'success', message: !data ? t('Agenda_added_successfully') : t('Agenda_edited_successfully') });
-			onChange();
-			close();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -82,6 +98,7 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
 	}
 
+	console.log({ name, number, prevValues });
 	return <FieldGroup {...props}>
 		<Field>
 			<Field.Label>{t('Section_Name')}</Field.Label>
@@ -99,7 +116,7 @@ export function EditAgenda({ councilId, onEditDataClick, close, onChange, data =
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button mie='x4' onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={allFieldAreFilled}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={(isNew && allFieldAreFilled) || (!isNew && !fieldEdited)}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

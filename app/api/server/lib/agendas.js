@@ -19,8 +19,8 @@ export async function findAgendas({ query = {}, pagination: { offset, count, sor
 	};
 }
 
-export async function findAgenda(_id) {
-	const cursor = await Agendas.findOne({ _id });
+export async function findAgenda(_id, options = {}) {
+	const cursor = await Agendas.findOne({ _id }, options);
 	return cursor;
 }
 

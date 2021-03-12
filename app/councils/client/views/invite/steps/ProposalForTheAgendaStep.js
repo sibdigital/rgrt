@@ -111,12 +111,10 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 		<Margins blockEnd='x32'>
 			{ agendaId
 			&& <Accordion>
-				<Accordion.Item title={t('Agenda_issue_consideration')}>
-					{/*<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />*/}
+				<Accordion.Item title={t('Council_invite_agenda_issue')}>
 					<Field>
-						{/*<Field.Label>{t('Agenda_issue_consideration')}</Field.Label>*/}
 						<Field.Row>
-							<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Agenda_issue_consideration')} />
+							<TextAreaInput rows={6} style={{ whiteSpace: 'normal' }} value={editData.issueConsideration} onChange={(e) => handleEditDataChange('issueConsideration', e.currentTarget.value)} placeholder={t('Council_invite_agenda_issue')} />
 						</Field.Row>
 					</Field>
 				</Accordion.Item>

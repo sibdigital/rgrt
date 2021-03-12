@@ -7,7 +7,7 @@ import { Tooltip } from '@material-ui/core';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { Councils } from './Councils';
-import { useRoute } from '../../../../client/contexts/RouterContext';
+import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { hasPermission } from '../../../authorization';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
@@ -47,6 +47,14 @@ export function CouncilsPage() {
 
 	const router = useRoute(routeName);
 
+	const context = useRouteParameter('context');
+
+	useMemo(() => {
+		if (context && context !== displayMode) {
+			setDisplayMode(context);
+		}
+	}, [context, displayMode]);
+
 	const onClick = (_id) => () => {
 		FlowRouter.go(`/council/${ _id }`);
 	};
@@ -69,7 +77,9 @@ export function CouncilsPage() {
 		setSort([id, 'asc']);
 	};
 
-	const handleHeaderButtonClick = useCallback((context) => () => {
+	const handleTabClick = useCallback((context) => {
+		console.log({ context });
+		setDisplayMode(context);
 		router.push({ context });
 	}, [router]);
 
@@ -91,8 +101,8 @@ export function CouncilsPage() {
 								<Icon name='list'/>
 							</Tabs.Item>
 						</Tooltip>
-						<Tooltip title="Календарь" arrow>
-							<Tabs.Item selected={displayMode === 'calendar'} onClick={() => setDisplayMode('calendar')}>
+						<Tooltip title='Календарь' arrow>
+							<Tabs.Item selected={displayMode === 'calendar'} onClick={() => handleTabClick('calendar')}>
 								<Icon name='calendar'/>
 							</Tabs.Item>
 						</Tooltip>

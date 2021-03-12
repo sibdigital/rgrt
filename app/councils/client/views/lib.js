@@ -13,7 +13,7 @@ export function validate(councilData) {
 	return errors;
 }
 
-export function createCouncilData(date, description = '', councilType, invitedPersons, previousData) {
+export function createCouncilData(date, description = '', councilType, invitedPersons, previousData, place) {
 	const councilData = {
 	};
 
@@ -23,6 +23,7 @@ export function createCouncilData(date, description = '', councilType, invitedPe
 	councilData.d = date;
 	councilData.desc = description;
 	councilData.type = councilType;
+	councilData.place = place;
 	// councilData.invitedUsers = invitedUsers;
 	councilData.invitedPersons = invitedPersons;
 
