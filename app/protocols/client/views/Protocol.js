@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, Label, Modal } from '@rocket.chat/fuselage';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
@@ -8,6 +8,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { Sections } from './Sections';
@@ -21,6 +22,7 @@ import { CreateParticipant } from './participants/CreateParticipant';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import WorkingGroupRequestsPage from '/app/working-group-requests/client/views';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -234,8 +236,9 @@ export function ProtocolPage() {
 		}
 	}, [moveItem, dispatchToastMessage, onChange]);
 
+
 	const openWorkingGroupRequest = (protocolsItemId) => () => {
-		FlowRouter.go(`/working-groups-requests/new-protocols-item-request/${ protocolsItemId }`);
+		FlowRouter.go(`/working-groups-request/add/new-protocols-item-request/${ protocolsItemId }`);
 	};
 
 

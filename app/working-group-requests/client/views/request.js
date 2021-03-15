@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, ButtonGroup, Callout, Field, Icon, Label, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import ru from 'date-fns/locale/ru';
 
 import { settings } from '../../../settings/client';
 import Page from '../../../../client/components/basic/Page';
@@ -13,12 +15,19 @@ import { AddMail } from './AddMail';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import { AddRequest } from './AddRequest';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
+import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { useMethod } from '../../../../client/contexts/ServerContext';
+import { FlowRouter } from 'meteor/kadira:flow-router';
+
+registerLocale('ru', ru);
+require('react-datepicker/dist/react-datepicker.css');
 
 export function DocumentPage() {
 	const t = useTranslation();
+	const dispatchToastMessage = useToastMessageDispatch();
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
@@ -35,7 +44,8 @@ export function DocumentPage() {
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: requestId }),
-	}), [requestId]);
+		cache: JSON.stringify({ cache: cache})
+	}), [requestId, cache]);
 
 	const data = useEndpointData('working-groups-requests.findOne', query) || { mails: [] };
 	const mails = useMemo(() => data.mails ?? [], [data]);
@@ -43,6 +53,7 @@ export function DocumentPage() {
 
 	useEffect(() => {
 		if (data) {
+			console.log(data);
 			setNumber(data.number ?? '');
 			setDate(data.date && new Date(data.date));
 			setDesc(data.desc);
@@ -51,26 +62,28 @@ export function DocumentPage() {
 
 	const address = [settings.get('Site_Url'), 'd/', data.inviteLink].join('') || '';
 
+	const inputStyles = { wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' };
+
 	const onChange = useCallback(() => {
 		console.log('onchange');
 		setCache(new Date());
 	}, [cache]);
 
-	const close = useCallback(() => {
-		router.push({
-			id: requestId,
-		});
-	}, [router]);
+	// const close = useCallback(() => {
+	// 	router.push({
+	// 		id: requestId,
+	// 	});
+	// }, [router]);
 
-	const handleHeaderButtonClick = useCallback((context) => () => {
-		router.push({ id: requestId, context });
-	}, [router]);
+	// const handleHeaderButtonClick = useCallback((context) => () => {
+	// 	router.push({ id: requestId, context });
+	// }, [router]);
 
-	const onRequestChanged = useCallback((request) => {
-		setNumber(request.number);
-		setDate(new Date(request.date));
-		setDesc(request.desc);
-	}, []);
+	// const onRequestChanged = useCallback((request) => {
+	// 	setNumber(request.number);
+	// 	setDate(new Date(request.date));
+	// 	setDesc(request.desc);
+	// }, []);
 
 	const onMailClick = useCallback((curMail) => () => {
 		// setCurrentMail(curMail ?? {});
@@ -104,6 +117,12 @@ export function DocumentPage() {
 		router.push({ id: requestId, context: 'answer', tab: 'info' });
 	}, [router, currentAnswer]);
 
+	const hasUnsavedChanges = useMemo(() =>
+		new Date(data.date).getTime() !== new Date(date).getTime()
+		|| data.desc !== desc
+		|| data.number !== number
+	, [date, desc, number, data]);
+
 	const goBack = () => {
 		FlowRouter.go('working-groups-requests')
 	};
@@ -113,38 +132,68 @@ export function DocumentPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
+	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
+	
+	const saveAction = useCallback(async (number, desc, date) => {
+		const { _id } = data;
+		const requestData = createWorkingGroupRequestData(number, desc, date, { _id });
+		const validation = validateWorkingGroupRequestData(requestData);
+		if (validation.length === 0) {
+			const _id = await insertOrUpdateWorkingGroupRequest(requestData);
+			return _id;
+		}
+		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+	}, [dispatchToastMessage, insertOrUpdateWorkingGroupRequest, number, desc, date, t]);
+
+	const handleSaveRequest = useCallback(async () => {
+		const result = await saveAction(number, desc, date);
+		if (!result) {
+			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
+		} else {
+			dispatchToastMessage({ type: 'success', message: t('Working_group_request_edited') });
+		}
+		onChange();
+	}, [saveAction, number, desc, date]);
+
 	return <Page flexDirection='row'>
-		{(context !== 'answers' && context !== 'answer') && <Page>
+		{ <Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>
-					<Button primary small aria-label={t('Save')} onClick={handleHeaderButtonClick('edit')}>
+					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveRequest}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8' display='flex' flexDirection='row'>
-					<Field mie='x4'>
-						<Field.Label>{t('Number')}</Field.Label>
-						<Field.Row>
-							<TextInput value={number} readOnly placeholder={t('Number')} fontScale='p1'/>
-						</Field.Row>
+				<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
+					<Field display='flex' flexDirection='row'>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Number')}</Field.Label>
+						<TextInput mie='x12' value={number} style={ inputStyles } placeholder={t('Number')} onChange={(e) => setNumber(e.currentTarget.value)} fontScale='p1'/>
 					</Field>
-					<Field mis='x4'>
-						<Field.Label>{t('Date')}</Field.Label>
-						<Field.Row>
-							<TextInput value={formatDateAndTime(date)} readOnly placeholder={t('Date')} fontScale='p1'/>
-						</Field.Row>
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
+							<DatePicker
+							mie='x16'
+							dateFormat='dd.MM.yyyy HH:mm'
+							selected={date}
+							onChange={(newDate) => setDate(newDate)}
+							showTimeSelect
+							timeFormat='HH:mm'
+							timeIntervals={5}
+							timeCaption='Время'
+							customInput={<TextInput style={ inputStyles } />}
+							locale='ru'
+							popperClassName='date-picker'/>
 					</Field>
 				</Field>
 				<Field mbe='x8'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput rows='3' value={desc} readOnly placeholder={t('Description')} fontScale='p1'/>
+						<TextAreaInput rows='3' value={desc} style={ inputStyles } placeholder={t('Description')} onChange={(e) => setDesc(e.currentTarget.value)} fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x8'>
@@ -157,7 +206,7 @@ export function DocumentPage() {
 				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>
 			</Page.Content>
 		</Page>}
-		{(context === 'add' || context === 'editMail' || context === 'edit')
+		{/* {(context === 'add' || context === 'editMail' || context === 'edit')
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'add' && t('Add') }
@@ -168,7 +217,7 @@ export function DocumentPage() {
 			{context === 'add' && <AddMail goToNew={onAddMailClick} close={close} requestId={requestId} onChange={onChange}/>}
 			{context === 'editMail' && <AddMail data={currentMail} goToNew={onAddMailClick} close={close} requestId={requestId} onChange={onChange}/>}
 			{context === 'edit' && <AddRequest onChange={onChange} editData={{ _id: data._id, number, date, desc }} onRequestChanged={onRequestChanged}/>}
-		</VerticalBar>}
+		</VerticalBar>} */}
 	</Page>;
 }
 

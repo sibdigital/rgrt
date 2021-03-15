@@ -1,13 +1,18 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { Button, ButtonGroup, Field, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup, Field, TextInput, TextAreaInput, Label, Select } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
+import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
+import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { useRoute } from '../../../../client/contexts/RouterContext';
+import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
+import { useUserId } from '../../../../client/contexts/UserContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { hasPermission } from '../../../authorization';
+import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
@@ -15,177 +20,143 @@ import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
-export function AddRequest({ editData, onChange, onRequestChanged = null, docsdata }) {
-	const data = {
-		_id: null,
-		number: '',
-		desc: '',
-		date: new Date(),
-		mails: [],
-	};
-	console.log(editData);
-
-	return <AddRequestWithData mode={'edit'} request={editData ?? data} docsdata={docsdata} onChange={onChange} onRequestChanged={onRequestChanged}/>;
-}
-
-function AddRequestWithData({ mode, request, onChange, onRequestChanged, docsdata, ...props }) {
+export function AddRequest() {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const routeName = 'working-groups-requests';
+	const [cache, setCache] = useState();
+	const [number, setNumber] = useState('');
+	const [date, setDate] = useState(new Date());
+	const [desc, setDesc] = useState('');
+	const [council, setCouncil] = useState('');
+	const [protocol, setProtocol] = useState('');
+	const [councilsOptions, setCouncilsOptions] = useState([]);
+	const [protocolsOptions, setProtocolsOptions] = useState([]);
 
-	const { _id, number: previousNumber, desc: previousDescription, date: previousDate } = request || {};
-	const previousRequest = request || {};
+	const inputStyles = { wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' };
+	const councilsList = useEndpointDataExperimental('councils.list') || { result: [] };
 
-	const [number, setNumber] = useState(previousNumber);
-	const [description, setDescription] = useState(previousDescription);
-	const [date, setDate] = useState(previousDate ? new Date(previousDate) : new Date());
-
-	const router = useRoute(routeName);
-
-	const protocolsItemId = FlowRouter.getParam('id');
-	const workingGroupRequestContext = FlowRouter.getParam('context')
-
-	if (protocolsItemId && workingGroupRequestContext === 'new-protocols-item-request') {
-		const currentRequestQuery = docsdata?.filter(request => request.protocolsItemId === protocolsItemId)[0];
-		
-		if (currentRequestQuery) {
-			FlowRouter.go(`/working-groups-request/${ currentRequestQuery._id }`)
+	useEffect(() => {
+		if (councilsList && councilsList.data?.councils) {
+			let options = [];
+			let councilsDesc = councilsList.data.councils.map((council) => council.desc);
+			console.log(councilsDesc);
+			setCouncilsOptions(["councilsDesc","councilsDesc"]);
 		}
+	},[councilsList])
+	
+	const onChange = useCallback(() => {
+		console.log('onchange');
+		setCache(new Date());
+	}, [cache]);
 
-		const query = useMemo(() => ({
-			query: JSON.stringify({ _id: protocolsItemId }),
-		}), [protocolsItemId]);
+	const protocolItemId = useRouteParameter('id');
+	const workingGroupRequestContext = useRouteParameter('context');
 
-		const { data: protocol } = useEndpointDataExperimental('protocols.findByItemId', query) || { sections: [] };
-
+	if (protocolItemId && workingGroupRequestContext === 'new-protocols-item-request') {
+		const { data: protocol } = useEndpointDataExperimental('protocols.findByItemId', 
+			useMemo(() => ({
+				query: JSON.stringify({ _id: protocolItemId }) 
+			}), [protocolItemId])) || { sections: [] };
+	
 		useEffect(() => {
 			if (protocol && protocol.sections) {
-				const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolsItemId)[0])[0];
-				setDescription(protocolItem.name.slice(3,-4));
+				console.log(protocol);
+				const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolItemId)[0])[0];
+				setDesc($(protocolItem.name).text());
 			}
+
 		}, [protocol]);
+
+		if (desc && protocol) {
+			protocol.protocol._id 
+		}
+	}
+
+	const goBack = () => {
+		FlowRouter.go('working-groups-requests')
+	};
+
+	if (!hasPermission('manage-working-group-requests', useUserId())) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
-
-	// const goBack = () => {
-	// 	window.history.back();
-	// };
-
-	const goToNew = useCallback((_id) => () => {
-		//console.log(_id._id)
-		router.push({});
-	}, [router]);
-
-	const hasUnsavedChanges = useMemo(() => (description !== '' && number !== '') && (previousDescription !== description || previousNumber !== number || new Date(previousDate).getTime() !== new Date(date).getTime()),
-		[description, previousDescription, number, previousNumber, date, previousDate]);
-
-	const resetData = () => {
-		setDescription(previousDescription);
-		setNumber(previousNumber);
-		onChange();
-	};
-
-	const filterNumber = (value) => {
-		if (checkNumberWithDot(value, number) !== null || value === '') {
-			setNumber(value);
-		}
-	};
-
-	const saveAction = useCallback(async (number, description, date, protocolsItemId) => {
-		console.log(number);
-		console.log(description);
-		const requestData = createWorkingGroupRequestData(number, description, date, { previousNumber, previousDescription, _id }, protocolsItemId);
+	
+	const saveAction = useCallback(async (number, desc, date, protocolsItemId) => {
+		const requestData = createWorkingGroupRequestData(number, desc, date, protocolsItemId);
 		const validation = validateWorkingGroupRequestData(requestData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateWorkingGroupRequest(requestData);
 			return _id;
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [_id, dispatchToastMessage, insertOrUpdateWorkingGroupRequest, number, description, previousNumber, previousDescription, previousRequest, t, protocolsItemId]);
+	}, [dispatchToastMessage, insertOrUpdateWorkingGroupRequest, number, desc, date, t]);
 
 	const handleSaveRequest = useCallback(async () => {
-		const result = await saveAction(number, description, date, protocolsItemId);
-		if (!request._id) {
+		const result = await saveAction(number, desc, date);
+		if (result) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
-		} else {
-			dispatchToastMessage({ type: 'success', message: t('Working_group_request_edited') });
+			FlowRouter.go(`/working-groups-request/${ result._id }`)
 		}
-		if (onRequestChanged) {
-			onRequestChanged({ number, date, desc: description });
-		}
-		onChange();
-		goToNew(result)();
-	}, [saveAction, onChange, number, description, date]);
+	}, [saveAction, number, desc, date]);
 
-	return <VerticalBar.ScrollableContent {...props}>
-		<Field>
-			<Field.Label>{t('Number')}</Field.Label>
-			<Field.Row>
-				<TextInput border='1px solid #4fb0fc' value={number} onChange={(e) => filterNumber(e.currentTarget.value)} placeholder={t('Number')}/>
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Description')}</Field.Label>
-			<Field.Row>
-				<TextAreaInput style={ { whiteSpace: 'normal' } } row='10' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{t('Date')}</Field.Label>
-			<Field.Row>
-				<DatePicker
-					dateFormat='dd.MM.yyyy HH:mm'
-					selected={date}
-					onChange={(newDate) => setDate(newDate)}
-					showTimeSelect
-					timeFormat='HH:mm'
-					timeIntervals={5}
-					timeCaption='Время'
-					customInput={<TextInput />}
-					locale='ru'
-					popperClassName='date-picker'/>
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Row>
-				<ButtonGroup stretch w='full'>
-					<Button primary small aria-label={t('Cancel')} onClick={resetData}>
-						{t('Cancel')}
-					</Button>
-					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveRequest}>
+	return <Page flexDirection='row'>
+		{ <Page>
+			<Page.Header>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<GoBackButton onClick={goBack}/>
+					<Label fontScale='h1'>{t('Working_group_request_add')}</Label>
+				</Field>
+				<ButtonGroup>
+					<Button primary small aria-label={t('Save')} onClick={handleSaveRequest}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
-			</Field.Row>
-		</Field>
-	</VerticalBar.ScrollableContent>;
-
-	// return <Page flexDirection='row'>
-	// 	<Page>
-	// 		<Page.Content>
-	// 			<ButtonGroup mis='auto'>
-	// 				<Button primary small aria-label={t('Cancel')} disabled={!hasUnsavedChanges} onClick={resetData}>
-	// 					{t('Cancel')}
-	// 				</Button>
-	// 				<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveRequest}>
-	// 					{t('Save')}
-	// 				</Button>
-	// 			</ButtonGroup>
-	// 			{/*<Field mbe='x8'>*/}
-	// 			{/*	<Field.Label>{t('Number')}</Field.Label>*/}
-	// 			{/*	<Field.Row>*/}
-	// 			{/*		<TextInput border='1px solid #4fb0fc' value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Number')} />*/}
-	// 			{/*	</Field.Row>*/}
-	// 			{/*</Field>*/}
-	// 			<Field mbe='x8'>
-	// 				<Field.Label>{t('Description')}</Field.Label>
-	// 				<Field.Row>
-	// 					<TextAreaInput style={ { whiteSpace: 'normal' } } row='10' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
-	// 				</Field.Row>
-	// 			</Field>
-	// 		</Page.Content>
-	// 	</Page>
-	// </Page>;
+			</Page.Header>
+			<Page.Content>
+				<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
+					<Field display='flex' flexDirection='row'>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Number')}</Field.Label>
+						<TextInput value={ number } mie='x12' style={ inputStyles } placeholder={t('Number')} onChange={(e) => setNumber(e.currentTarget.value)} fontScale='p1'/>
+					</Field>
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
+							<DatePicker
+							mie='x16'
+							dateFormat='dd.MM.yyyy HH:mm'
+							selected={date}
+							onChange={(newDate) => setDate(newDate)}
+							showTimeSelect
+							timeFormat='HH:mm'
+							timeIntervals={5}
+							timeCaption='Время'
+							customInput={<TextInput style={ inputStyles } />}
+							locale='ru'
+							popperClassName='date-picker'/>
+					</Field>
+				</Field>
+				<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
+					<Field display='flex' flexDirection='row'>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council')}</Field.Label>
+						<Select mie='x16' style={ inputStyles } options={ councilsOptions } onChange={(val) => setCouncil(val)} value={ council } placeholder={t('Council')}/>
+					</Field>
+					<Field display='flex' flexDirection='row'>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Protocol')}</Field.Label>
+						<Select mie='x16' style={ inputStyles } options={ protocolsOptions } onChange={(val) => setProtocol(val)} value={ protocol } placeholder={t('Protocol')}/>
+					</Field>
+				</Field>
+				<Field mbe='x8'>
+					<Field.Label>{t('Description')}</Field.Label>
+					<Field.Row>
+						<TextAreaInput value={ desc } rows='3' style={ inputStyles } placeholder={t('Description')} onChange={(e) => setDesc(e.currentTarget.value)} fontScale='p1'/>
+					</Field.Row>
+				</Field>
+			</Page.Content>
+		</Page>}
+	</Page>;
 }
+
+AddRequest.displayName = 'AddRequest';
+export default AddRequest;
