@@ -8,6 +8,8 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useFormatDate } from '../../../../client/hooks/useFormatDate';
+import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
@@ -23,6 +25,8 @@ require('react-datepicker/dist/react-datepicker.css');
 export function AddRequest() {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const formatDate = useFormatDate();
+	const formatDateAndTime = useFormatDateAndTime();
 
 	const [cache, setCache] = useState();
 	const [number, setNumber] = useState('');
@@ -33,25 +37,33 @@ export function AddRequest() {
 	const [councilsOptions, setCouncilsOptions] = useState([]);
 	const [protocolsOptions, setProtocolsOptions] = useState([]);
 
+	const protocolItemId = useRouteParameter('id');
+	const workingGroupRequestContext = useRouteParameter('context');
+
 	const inputStyles = { wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' };
-	const councilsList = useEndpointDataExperimental('councils.list') || { result: [] };
+	const councilsList = useEndpointDataExperimental('councils.list') || { councils: [] };
+	const protocolsList = useEndpointDataExperimental('protocols.list') || { protocols: [] };
 
 	useEffect(() => {
-		if (councilsList && councilsList.data?.councils) {
-			let options = [];
-			let councilsDesc = councilsList.data.councils.map((council) => council.desc);
-			console.log(councilsDesc);
-			setCouncilsOptions(["councilsDesc","councilsDesc"]);
+		if (councilsList && councilsList.data) {
+			let options = councilsList.data?.councils.map((council) => [[council._id], 
+				[t('Council').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDateAndTime(council.d))]]);
+
+			setCouncilsOptions(options);
 		}
-	},[councilsList])
+
+		if (protocolsList && protocolsList.data) {
+			let options = protocolsList.data?.protocols.map((protocol) => [[protocol._id], 
+				[t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(protocol.d)).concat(' ').concat(' №').concat(protocol.num)]]);
+
+			setProtocolsOptions(options);
+		}
+	}, [councilsList, protocolsList])
 	
 	const onChange = useCallback(() => {
 		console.log('onchange');
 		setCache(new Date());
 	}, [cache]);
-
-	const protocolItemId = useRouteParameter('id');
-	const workingGroupRequestContext = useRouteParameter('context');
 
 	if (protocolItemId && workingGroupRequestContext === 'new-protocols-item-request') {
 		const { data: protocol } = useEndpointDataExperimental('protocols.findByItemId', 
@@ -61,17 +73,16 @@ export function AddRequest() {
 	
 		useEffect(() => {
 			if (protocol && protocol.sections) {
-				console.log(protocol);
+				console.log($(protocol.sections[0].items[0].name).text());
 				const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolItemId)[0])[0];
-				setDesc($(protocolItem.name).text());
+				setDesc(protocol.sections[0].items[0].name);
 			}
 
 		}, [protocol]);
 
-		if (desc && protocol) {
-			protocol.protocol._id 
-		}
 	}
+
+	console.log(protocol)
 
 	const goBack = () => {
 		FlowRouter.go('working-groups-requests')
