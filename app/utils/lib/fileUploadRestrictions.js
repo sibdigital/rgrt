@@ -44,6 +44,9 @@ const isTypeOnList = function(type, list) {
 export const fileUploadIsValidContentType = function(type, customWhiteList) {
 	const blackList = fileUploadMediaBlackList();
 	const whiteList = fileUploadMediaWhiteList(customWhiteList);
+	if (type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+		whiteList.push(type);
+	}
 
 	if (!type && blackList) {
 		return false;
