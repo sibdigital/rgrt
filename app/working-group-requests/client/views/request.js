@@ -137,7 +137,7 @@ export function DocumentPage() {
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
-			<Page.Content>
+			<Page.ScrollableContent padding='x24'>
 				<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
 					<Field display='flex' flexDirection='row'>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Number')}</Field.Label>
@@ -176,7 +176,7 @@ export function DocumentPage() {
 				<Field mbe='x16'>
 					<Field.Label>{t('Protocol_Item')}</Field.Label>
 					<Field.Row>
-						<TextInput value={'ITEM'} readOnly placeholder={t('Protocol_Item')} fontScale='p1'/>
+						<TextInput value={t('Protocol_Item')} readOnly placeholder={t('Protocol_Item')} fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x16'>
@@ -192,7 +192,7 @@ export function DocumentPage() {
 					</Field.Row>
 				</Field>
 				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>
-			</Page.Content>
+			</Page.ScrollableContent>
 		</Page>
 		{/* {(context === 'add' || context === 'editMail' || context === 'edit')
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
