@@ -1,21 +1,34 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Flex, Skeleton, Table } from '@rocket.chat/fuselage';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
-import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
+import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
+
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+
+const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	fields: JSON.stringify({ place: 1, d: 1, num: 1, sections: 1 }),
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, column, direction]);
 
 export function ProtocolChoose({ setProtocolId, setProtocol, close }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['d']);
 
-	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.list', useMemo(() => ({
-		fields: JSON.stringify({ place: 1, d: 1, num: 1, sections: 1 }),
-		sort: JSON.stringify({ d: -1 }),
-	}), []));
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const query = useQuery(debouncedParams, debouncedSort);
+
+	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.list', query);
 
 	const onProtocolClick = useCallback((protocol) => {
 		console.log({ protocol });

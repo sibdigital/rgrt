@@ -1,6 +1,6 @@
 import { Box, Margins, Scrollable, Tile } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useWipeInitialPageLoading } from '../../../../../client/hooks/useWipeInitialPageLoading';
@@ -20,6 +20,8 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 	useWipeInitialPageLoading();
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
+	const stepStyle = { width: '80%', maxWidth: '1200px' };
+
 	const [info, setInfo] = useState({});
 	const [context, setContext] = useState('');
 	const [protocolId, setProtocolId] = useState('');
@@ -27,7 +29,18 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 	const [section, setSection] = useState(null);
 	const [protocolItemsId, setProtocolItemsId] = useState([]);
 	const [workingGroupRequestData, setWorkingGroupRequestData] = useState(workingGroupRequest);
-	const stepStyle = { width: '80%', maxWidth: '1200px' };
+
+	useEffect(() => {
+		if (workingGroupRequestProtocol) {
+			setProtocol(workingGroupRequestProtocol);
+		}
+	}, [workingGroupRequestProtocol]);
+
+	useEffect(() => {
+		if (workingGroupRequest && workingGroupRequest.protocolItemsId && workingGroupRequest.protocolItemsId.length > 0 && workingGroupRequestProtocol && workingGroupRequestProtocol.sections) {
+			workingGroupRequestProtocol.sections.forEach((section) => section?.items?.forEach((item) => item._id === workingGroupRequest.protocolItemsId[0] && setProtocolItemsId([item])));
+		}
+	}, [workingGroupRequest, workingGroupRequestProtocol]);
 
 	return <>
 		<ConnectionStatusAlert />
