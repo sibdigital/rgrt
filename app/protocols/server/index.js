@@ -8,3 +8,4 @@ import './methods/addParticipantToProtocol';
 import './methods/deleteParticipantFromProtocol';
 import './methods/moveSection';
 import './methods/moveItem';
+import './methods/getMaxProtocolNum';

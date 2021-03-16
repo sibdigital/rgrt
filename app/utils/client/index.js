@@ -24,3 +24,4 @@ export { secondsToHHMMSS } from '../lib/timeConverter';
 export { SuccessModal } from './views/modals/SuccesModal';
 export { WarningModal } from './views/modals/WarningModal';
 export { getAnimation } from './animations/Animation';
+export { romanize, deromanize } from '../lib/romanNumeralConverter'

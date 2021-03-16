@@ -125,7 +125,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateItem(protocol._id, sectionId, itemData);
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
 	}, [_id, dispatchToastMessage, insertOrUpdateItem, previousNumber, previousName, previousResponsible, previousExpireAt, previousItem, t]);
 
 	const handleSave = useCallback(async () => {

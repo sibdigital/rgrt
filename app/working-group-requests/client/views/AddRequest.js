@@ -235,7 +235,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 					setItemResponsible(itemResponsiblePerson);
 					setProtocol({ d: protocol.protocol[0]?.d, num: protocol.protocol[0]?.num,  itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson})
 				}
-				if (protocol.protocol && council) {
+				if (protocol.protocol && council.d) {
 					const protocolCouncilId = protocol.protocol[0]?.councilId;
 					const councilData = council?.councils?.filter(i => i._id === protocolCouncilId);
 					setCouncil({ d: councilData[0]?.d, desc: councilData[0]?.desc });
@@ -271,8 +271,8 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 		console.log(number);
 		console.log(description);
 		const requestData = createWorkingGroupRequestData({
-			protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id }, 
-			protocolsItemId, councilId, protocolItemsId, mail, protocol, council 
+			protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id },
+			protocolsItemId, councilId, protocolItemsId, mail, protocol, council
 		});
 		console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
@@ -313,7 +313,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
-			<Page.ScrollableContent>
+			<Page.ScrollableContent padding='x24'>
 				<Field mbe='x16' display='flex' flexDirection='row'>
 					<Field mie='x4'>
 						<Field.Label>{t('Number')}</Field.Label>

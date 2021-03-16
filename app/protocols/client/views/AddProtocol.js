@@ -6,37 +6,12 @@ import ru from 'date-fns/locale/ru';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { validate, createProtocolData, createItemData } from './lib';
+import { validateProtocolData, createProtocolData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
-import { Autocomplete } from '@material-ui/lab';
-import { validateSectionData, createSectionData } from './lib';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
-
-const getCouncilAndAgendaDataByCouncilId = (councilId) => {
-	const councilAndAgendaData = { };
-
-	if (councilId) {
-
-		const query = useMemo(() => ({
-			query: JSON.stringify({ _id: councilId }),
-		}), [councilId]);
-
-		const {	data: councilData } = useEndpointDataExperimental('councils.findOne', query) || { };
-		const { data: invitedPersons } = useEndpointDataExperimental('councils.invitedPersons', query) || { persons: [] };
-		const { data: agendaData } = useEndpointDataExperimental('agendas.findByCouncilId', useMemo(() => ({ query: JSON.stringify({ councilId }) }), [councilId])) || { };
-
-		councilAndAgendaData.councilData = councilData;
-		councilAndAgendaData.personsData = invitedPersons;
-		councilAndAgendaData.agendaData = agendaData;
-	}
-
-	return councilAndAgendaData;
-}
 
 export function AddProtocol({ goToNew, close, onChange, ...props }) {
 
@@ -46,36 +21,17 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 	const [date, setDate] = useState('');
 	const [number, setNumber] = useState('');
 	const [place, setPlace] = useState('');
-	const [participants, setParticipants] = useState([]);
-	const [isCouncilProtocol, setIsCouncilProtocol] = useState(false);
-	const [agenda, setAgenda] = useState([]);
 
-	const councilId = useRouteParameter('id');
-
-	const { councilData, personsData, agendaData } = getCouncilAndAgendaDataByCouncilId(councilId);
+	const getMaxProtocolNum = useMethod('getMaxProtocolNum');
+	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
 	useEffect(() => {
-		if (councilData) {
-			setIsCouncilProtocol(true);
-		}
-
-		if (councilData && councilData.d) {
-			setDate(new Date(councilData.d));
-		}
-
-		if (personsData && personsData.persons) {
-			setParticipants(personsData.persons);
-		}
-
-		if (agendaData) {
-			setAgenda(agendaData);
-		}
-
-	}, [councilData, personsData, agendaData])
-
-	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
-	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
-	const insertOrUpdateItem = useMethod('insertOrUpdateItem');
+		const getMaxNum = async () => {
+			const num = await getMaxProtocolNum();
+			setNumber(num + 1);
+		};
+		getMaxNum();
+	}, []);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -83,31 +39,15 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		}
 	};
 
-	const saveAction = useCallback(async (date, number, place, councilId, participants, agenda) => {
-		const participantsIds = participants.map((participant) => participant._id)
-		const protocolData = createProtocolData(date, number, place, councilId, participantsIds);
-		const validation = validate(protocolData);
+	const saveAction = useCallback(async (date, number, place) => {
+		const protocolData = createProtocolData(date, number, place);
+		const validation = validateProtocolData(protocolData);
 
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateProtocol(protocolData);
-
-			if (agenda?.sections) {
-				let sectionNumber = 1;
-				for (const section of agenda.sections) {
-					const itemNumber = 1;
-					const sectionData = createSectionData(sectionNumber, section.item);
-					const section_id = await insertOrUpdateSection(_id,sectionData);
-					
-					const itemData = createItemData(itemNumber, section.issueConsideration);
-					const item_id = await insertOrUpdateItem(_id, section_id, itemData);
-
-					sectionNumber++;
-				}
-			}
-
 			return _id;
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
 	}, [dispatchToastMessage, insertOrUpdateProtocol, t]);
 
 	const handleSave = useCallback(async () => {
@@ -115,10 +55,7 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 			const result = await saveAction(
 				date,
 				number,
-				place,
-				councilId,
-				participants,
-				agenda
+				place
 			);
 			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
 			goToNew(result)();
@@ -126,17 +63,7 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [dispatchToastMessage, goToNew, date, number, place, councilId, participants, agenda, onChange, saveAction, t]);
-
-	const Participant = (person) => <Box
-		pb='x6'
-		color='default'
-		display='flex'
-	>
-		<Box is='span' flexGrow={1}>
-			<Box fontSize={'16px'}> {person.surname} {person.name} {person.patronymic} </Box>
-		</Box>
-	</Box>;
+	}, [dispatchToastMessage, goToNew, date, number, place, onChange, saveAction, t]);
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
@@ -164,24 +91,6 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 				<TextAreaInput value={place} onChange={(e) => setPlace(e.currentTarget.value)} placeholder={t('Protocol_Place')} />
 			</Field.Row>
 		</Field>
-		{isCouncilProtocol && <Field>
-			<Field.Label>{t('Participants')}</Field.Label>
-			<Field.Row>
-				<Box mbe='x8' flexGrow={1}>
-					{participants && !participants.length
-						? <Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
-							{t('No_data_found')}
-						</Tile>
-						: <>
-							{participants
-								? participants.map((props, index) => <Participant key={props._id || index} { ...props}/>)
-								: <></>
-							}
-						</>
-					}
-				</Box>
-			</Field.Row>
-		</Field>}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

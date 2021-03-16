@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, Button, Icon, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
@@ -7,6 +7,9 @@ import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { useMethod } from '../../../../client/contexts/ServerContext';
+import { SuccessModal, WarningModal } from '../../../utils/index';
+import { useToastMessageDispatch } from "/client/contexts/ToastMessagesContext";
+import { useSetModal } from '../../../../client/contexts/ModalContext';
 
 export function Protocols({
 	data,
@@ -14,12 +17,32 @@ export function Protocols({
 	onClick,
 	onEditClick,
 	onHeaderClick,
+	onChange,
 	setParams,
 	params,
 }) {
 	const t = useTranslation();
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
+
+	const setModal = useSetModal();
+
+	const deleteProtocol = useMethod('deleteProtocol');
+
+	const dispatchToastMessage = useToastMessageDispatch();
+
+	const onDeleteConfirm = useCallback(async (_id) => {
+		try {
+			await deleteProtocol(_id);
+			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('Protocol_Has_Been_Deleted')} onClose={() => { setModal(undefined); onChange(); }}/>);
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	}, [deleteProtocol, dispatchToastMessage, onChange]);
+
+	const onDel = (_id) => () => { onDeleteConfirm(_id); };
+
+	const onDeleteClick = (_id) => () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Protocol_Delete_Warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
 
 	const downloadProtocolParticipantsMethod = useMethod('downloadProtocolParticipants');
 
@@ -42,8 +65,10 @@ export function Protocols({
 		<Th key={'num'} direction={sort[1]} active={sort[0] === 'num'} onClick={onHeaderClick} sort='num' style={{ width: '80px' }} color='default'>{t('Protocol_Number')}</Th>,
 		<Th key={'d'} direction={sort[1]} active={sort[0] === 'd'} onClick={onHeaderClick} sort='d' color='default'>{t('Protocol_Date')}</Th>,
 		mediaQuery && <Th key={'place'} color='default'>{t('Protocol_Place')}</Th>,
-		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
+		mediaQuery && <Th key={'typename'} color='default'>{t('Council')}</Th>,
+		// mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
 		<Th w='x40' key='edit'></Th>,
+		<Th w='x40' key='delete'></Th>,
 		// <Th w='x40' key='download'></Th>
 	], [sort, mediaQuery]);
 
@@ -51,15 +76,21 @@ export function Protocols({
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const renderRow = (protocol) => {
-		const { _id, d: date, num, place, ts } = protocol;
+		const { _id, d: date, num, place, council, ts } = protocol;
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>№ {num}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(date)}</Box></Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{place}</Box></Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{formatDateAndTime(ts)}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{council?.typename}</Box></Table.Cell>}
+			{/*{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{formatDateAndTime(ts)}</Table.Cell>}*/}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
+				</Button>
+			</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button small onClick={onDeleteClick(_id)} aria-label={t('Delete')}>
+					<Icon name='trash'/>
 				</Button>
 			</Table.Cell>
 			{/*<Table.Cell alignItems={'end'}>*/}
