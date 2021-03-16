@@ -287,6 +287,16 @@ FlowRouter.route('/working-groups-request/:id/:context?', {
 	}],
 });
 
+FlowRouter.route('/working-groups-request-new', {
+	name: 'working-groups-request-new',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/AddRequest'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/working-groups-request/:requestid/mail/:mailid', {
 	name: 'working-groups-request-mail',
 	action: () => {
