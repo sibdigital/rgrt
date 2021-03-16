@@ -15,14 +15,14 @@ import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ itemsPerPage, current }, [ column, direction ]) => useMemo(() => ({
+const useQuery = ({ itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	// query: JSON.stringify({ desc: { $regex: text || '', $options: 'i' } }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	fields: JSON.stringify({ d: 1, num: 1, name: 1, place: 1, council: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation
-}), [itemsPerPage, current, column, direction]);
+}), [itemsPerPage, current, column, direction, cache]);
 
 export function ProtocolsPage() {
 	const t = useTranslation();
@@ -36,7 +36,7 @@ export function ProtocolsPage() {
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery(debouncedParams, debouncedSort);
+	const query = useQuery(debouncedParams, debouncedSort, cache);
 
 	const data = useEndpointData('protocols.list', query) || { result: [] };
 
