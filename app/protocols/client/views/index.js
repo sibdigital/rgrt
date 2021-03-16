@@ -18,6 +18,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
 	// query: JSON.stringify({ desc: { $regex: text || '', $options: 'i' } }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	fields: JSON.stringify({ d: 1, num: 1, name: 1, place: 1, council: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation
@@ -50,12 +51,9 @@ export function ProtocolsPage() {
 		FlowRouter.go(`/protocol/${ _id }`);
 	};
 
-	const onEditClick = useCallback((_id) => () => {
-		router.push({
-			context: 'edit',
-			id: _id,
-		});
-	}, [router]);
+	const onEditClick = (_id) => () => {
+		FlowRouter.go(`/protocol/${ _id }/edit`);
+	};
 
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
@@ -95,18 +93,18 @@ export function ProtocolsPage() {
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				<Protocols setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} sort={sort}/>
+				<Protocols setParams={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
 		{ context
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'edit' && t('Protocol_Info') }
-				{( context === 'new' || context === 'new-council-protocol' ) && t('Protocol_Add') }
+				{ context === 'new' && t('Protocol_Add') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'edit' && <EditProtocol _id={id} close={close} onChange={onChange} cache={cache}/>}
-			{( context === 'new' || context === 'new-council-protocol' )  && <AddProtocol goToNew={onEditClick} close={close} onChange={onChange}/>}
+			{ context === 'new' && <AddProtocol goToNew={onClick} close={close} onChange={onChange}/>}
 		</VerticalBar>}
 	</Page>;
 }

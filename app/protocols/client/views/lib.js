@@ -1,23 +1,23 @@
 // Here previousData will define if it is an update or a new entry
-export function validate(protocolData) {
+export function validateProtocolData(protocolData) {
 	const errors = [];
 
 	if (!protocolData.d) {
-		errors.push('Date');
+		errors.push('Protocol_Date');
 	}
 
-	if (!protocolData.num) {
-		errors.push('Number');
+	if (isNaN(protocolData.num)) {
+		errors.push('Protocol_Number');
 	}
 
 	if (!protocolData.place) {
-		errors.push('Place');
+		errors.push('Protocol_Place');
 	}
 
 	return errors;
 }
 
-export function createProtocolData(date, number, place = '', councilId = '', participants = [], previousData = null) {
+export function createProtocolData(date, number, place, previousData = null) {
 	const protocolData = {
 	};
 
@@ -27,8 +27,6 @@ export function createProtocolData(date, number, place = '', councilId = '', par
 	protocolData.d = date;
 	protocolData.num = number;
 	protocolData.place = place;
-	protocolData.councilId = councilId;
-	protocolData.participants = participants;
 
 	return protocolData;
 }
