@@ -27,7 +27,8 @@ Meteor.methods({
 				inviteLink,
 				protocolItemsId: workingGroupRequestData.protocolItemsId ?? [],
 				mail: workingGroupRequestData.mail ?? [],
-				protocol: workingGroupRequestData.protocol
+				protocol: workingGroupRequestData.protocol,
+				council: workingGroupRequestData.council
 			};
 			workingGroupRequestData.councilId && Object.assign(createWorkingGroupRequest, { councilId: workingGroupRequestData.councilId });
 			workingGroupRequestData.protocolId && Object.assign(createWorkingGroupRequest, { protocolId: workingGroupRequestData.protocolId });

@@ -219,12 +219,12 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 		}), [protocolsItemId]);
 
 		const { data: protocol } = useEndpointDataExperimental('protocols.findByItemId', query) || { sections: [] };
+		const { data: council } = useEndpointDataExperimental('councils.list') || { councils: [] };
 
 		useEffect(() => {
 			console.log(protocol);
 			if (protocol) {
 				if (protocol.protocol) {
-					console.log({ councilId: protocol.protocol[0]?.councilId });
 					setCouncilId(protocol.protocol[0]?.councilId);
 				}
 				if (protocol.sections) {
@@ -235,8 +235,13 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 					setItemResponsible(itemResponsiblePerson);
 					setProtocol({ d: protocol.protocol[0]?.d, num: protocol.protocol[0]?.num,  itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson})
 				}
+				if (protocol.protocol && council) {
+					const protocolCouncilId = protocol.protocol[0]?.councilId;
+					const councilData = council.councils.filter(i => i._id === protocolCouncilId);
+					setCouncil({ d: councilData[0].d, desc: councilData[0].desc });
+				}
 			}
-		}, [protocol, protocolsItemId]);
+		}, [protocol, protocolsItemId, council]);
 	}
 
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
@@ -262,11 +267,13 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 		}
 	};
 
-	const saveAction = useCallback(async (number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol) => {
+	const saveAction = useCallback(async (number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol, council) => {
 		console.log(number);
 		console.log(description);
-		console.log(protocol);
-		const requestData = createWorkingGroupRequestData({ protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id }, protocolsItemId, councilId, protocolItemsId, mail, protocol });
+		const requestData = createWorkingGroupRequestData({
+			protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id }, 
+			protocolsItemId, councilId, protocolItemsId, mail, protocol, council 
+		});
 		console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
 		console.log({ validation });
@@ -278,7 +285,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 	}, [_id, dispatchToastMessage, insertOrUpdateWorkingGroupRequest, previousNumber, previousDescription, previousRequest, t]);
 
 	const handleSaveRequest = useCallback(async () => {
-		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail);
+		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol, council);
 		FlowRouter.go('working-groups-requests');
 		if (result) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
@@ -290,7 +297,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 			onChange();
 		}
 		// goToNew(result)();
-	}, [saveAction, onChange, number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol]);
+	}, [saveAction, onChange, number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol, council]);
 
 	console.log({ councilId, protocolId, protocolItemsId });
 	return <Page flexDirection='row'>
