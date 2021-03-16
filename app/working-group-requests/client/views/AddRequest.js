@@ -47,55 +47,46 @@ export function AddRequest() {
 	const [desc, setDesc] = useState('');
 	const [council, setCouncil] = useState('');
 	const [protocol, setProtocol] = useState('');
+	const [protocolItem, setProtocolItem] = useState('');
 	const [councilsOptions, setCouncilsOptions] = useState([]);
 	const [protocolsOptions, setProtocolsOptions] = useState([]);
+	const [protocolItemsOptions, setProtocolItemsOptions] = useState([]);
 
 	const protocolItemId = useRouteParameter('id');
-	const workingGroupRequestContext = useRouteParameter('context');
 
 	const inputStyles = { wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' };
 	const councilsList = useEndpointDataExperimental('councils.list') || { councils: [] };
 	const protocolsList = useEndpointDataExperimental('protocols.list') || { protocols: [] };
+	const { data: protocolData } = useEndpointDataExperimental('protocols.findByItemId', useMemo(() => ({query: JSON.stringify({ _id: protocolItemId }) }), [protocolItemId])) || { sections: [] };
 
 	useEffect(() => {
 		if (councilsList && councilsList.data) {
-			let options = councilsList.data?.councils.map((council) => [[council._id],
-				[t('Council').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDateAndTime(council.d))]]);
+			let options = councilsList.data?.councils.map((council) => [council._id,
+				t('Council').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDateAndTime(council.d))]);
 
 			setCouncilsOptions(options);
 		}
 
 		if (protocolsList && protocolsList.data) {
-			let options = protocolsList.data?.protocols.map((protocol) => [[protocol._id],
-				[t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(protocol.d)).concat(' ').concat(' №').concat(protocol.num)]]);
+			let options = protocolsList.data?.protocols.map((protocol) => [protocol._id,
+				t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(protocol.d)).concat(' ').concat(' №').concat(protocol.num)]);
 
 			setProtocolsOptions(options);
 		}
-	}, [councilsList, protocolsList]);
+
+		if (protocolItemId && protocolData?.protocol) {
+			const protocolItem = protocolData.sections.map(section => section.items.filter(item => item._id === protocolItemId)[0])[0];
+
+			setDesc($(protocolItem.name).text());
+			setProtocol(protocolData.protocol[0]._id);
+			setCouncil(protocolData.protocol[0].councilId);
+		}
+	}, [councilsList, protocolsList, protocolData])
 
 	const onChange = useCallback(() => {
 		console.log('onchange');
 		setCache(new Date());
 	}, [cache]);
-
-	if (protocolItemId && workingGroupRequestContext === 'new-protocols-item-request') {
-		const { data: protocol } = useEndpointDataExperimental('protocols.findByItemId',
-			useMemo(() => ({
-				query: JSON.stringify({ _id: protocolItemId })
-			}), [protocolItemId])) || { sections: [] };
-
-		useEffect(() => {
-			if (protocol && protocol.sections) {
-				console.log($(protocol.sections[0].items[0].name).text());
-				const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolItemId)[0])[0];
-				setDesc(protocol.sections[0].items[0].name);
-			}
-
-		}, [protocol]);
-
-	}
-
-	console.log(protocol);
 
 	const goBack = () => {
 		FlowRouter.go('working-groups-requests');
@@ -166,9 +157,15 @@ export function AddRequest() {
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council')}</Field.Label>
 						<Select mie='x16' style={ inputStyles } options={ councilsOptions } onChange={(val) => setCouncil(val)} value={ council } placeholder={t('Council')}/>
 					</Field>
+				</Field>
+				<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
 					<Field display='flex' flexDirection='row'>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Protocol')}</Field.Label>
 						<Select mie='x16' style={ inputStyles } options={ protocolsOptions } onChange={(val) => setProtocol(val)} value={ protocol } placeholder={t('Protocol')}/>
+					</Field>
+					<Field display='flex' flexDirection='row'>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Protocol_item')}</Field.Label>
+						<Select mie='x16' style={ inputStyles } options={ protocolItemsOptions } onChange={(val) => setProtocolItem(val)} value={ protocolItem } placeholder={t('Protocol_item')}/>
 					</Field>
 				</Field>
 				<Field mbe='x8'>

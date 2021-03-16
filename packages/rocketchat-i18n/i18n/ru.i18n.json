@@ -1979,6 +1979,7 @@
   "italic": "Курсивный",
   "italics": "курсив",
   "Item_Add": "Добавить пункт",
+  "Protocol_item": "Пункт протокола",
   "Item_Added_Successfully": "Пункт успешно добавлен",
   "Item_Delete": "Удалить пункт",
   "Item_Delete_Warning": "Удаление пункта не может быть отменено",
