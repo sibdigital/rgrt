@@ -15,28 +15,28 @@ import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ text, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
+const useQuery = ({ itemsPerPage, current }, [ column, direction ]) => useMemo(() => ({
 	// query: JSON.stringify({ desc: { $regex: text || '', $options: 'i' } }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	fields: JSON.stringify({ d: 1, num: 1, name: 1, place: 1, council: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation
-}), [text, itemsPerPage, current, column, direction, cache]);
+}), [itemsPerPage, current, column, direction]);
 
 export function ProtocolsPage() {
 	const t = useTranslation();
 
 	const routeName = 'protocols';
 
-	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
+	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d', 'desc']);
 	const [cache, setCache] = useState();
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery(debouncedParams, debouncedSort, cache);
+	const query = useQuery(debouncedParams, debouncedSort);
 
 	const data = useEndpointData('protocols.list', query) || { result: [] };
 
