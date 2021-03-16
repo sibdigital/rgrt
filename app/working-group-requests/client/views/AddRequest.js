@@ -235,7 +235,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 					setItemResponsible(itemResponsiblePerson);
 					setProtocol({ d: protocol.protocol[0]?.d, num: protocol.protocol[0]?.num,  itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson})
 				}
-				if (protocol.protocol && council.d) {
+				if (protocol.protocol && council) {
 					const protocolCouncilId = protocol.protocol[0]?.councilId;
 					const councilData = council?.councils?.filter(i => i._id === protocolCouncilId);
 					setCouncil({ d: councilData[0]?.d, desc: councilData[0]?.desc });
