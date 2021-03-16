@@ -55,8 +55,8 @@ API.v1.addRoute('protocols.findOne', { authRequired: true }, {
 
 API.v1.addRoute('protocols.findByItemId', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findProtocolByItemId(query._id)));
+		const { query, stockFields } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findProtocolByItemId(query._id, { fields: stockFields ?? {} })));
 	},
 });
 
@@ -91,5 +91,49 @@ API.v1.addRoute('protocols.participants', { authRequired: true }, {
 			offset,
 			total: Persons.find({ _id: { $in: protocol.participants } }).count(),
 		});
+	},
+});
+
+API.v1.addRoute('protocols.getProtocolItemsByItemsId', { authRequired: true }, {
+	get() {
+		// const { offset, count } = this.getPaginationItems();
+		const { query } = this.parseJsonQuery();
+
+		const cursor = Promise.await(findProtocol(query._id));
+		console.log({ cursor, query });
+		const items = [];
+
+		if (!cursor) {
+			return API.v1.success({ items });
+		}
+
+		if (cursor.sections) {
+			cursor.sections.forEach((section) => section.items?.forEach((item) => items.push({ _id: item._id, num: item.num, expireAt: item.expireAt, name: item.name })));
+		}
+		console.log({ items });
+
+		return API.v1.success({ items });
+	},
+});
+
+API.v1.addRoute('protocols.getProtocolItemsByProtocolId', { authRequired: true }, {
+	get() {
+		// const { offset, count } = this.getPaginationItems();
+		const { query } = this.parseJsonQuery();
+
+		const cursor = Promise.await(findProtocol(query._id));
+		console.log({ cursor, query });
+		const items = [];
+
+		if (!cursor) {
+			return API.v1.success({ items });
+		}
+
+		if (cursor.sections) {
+			cursor.sections.forEach((section) => section.items?.forEach((item) => items.push({ _id: item._id, num: item.num, expireAt: item.expireAt, name: item.name })));
+		}
+		console.log({ items });
+
+		return API.v1.success({ items });
 	},
 });

@@ -30,7 +30,7 @@ export async function findOneCouncilByInviteLink(inviteLink, options = {}) {
 	return cursor;
 }
 
-export async function findCouncil(_id, options) {
+export async function findCouncil(_id, options = {}) {
 	const cursor = await Councils.findOne({ _id }, options);
 	return cursor;
 }

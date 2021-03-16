@@ -32,17 +32,17 @@ export async function findProtocolByCouncilId(_id) {
 	}
 }
 
-export async function findProtocolByItemId (_id) {
+export async function findProtocolByItemId(_id, options = {}) {
 	const cursor = await Protocols.find({
-		'sections.items._id': _id
-	})
+		'sections.items._id': _id,
+	}, options);
 
 	const protocol = await cursor.toArray();
 
 	return {
 		protocol,
-		sections: protocol[0].sections
-	}
+		sections: protocol[0]?.sections ?? [],
+	};
 }
 
 export async function findProtocol(_id) {
