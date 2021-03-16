@@ -22,7 +22,6 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useRouteParameter, useCurrentRoute } from '../../../../client/contexts/RouterContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -47,6 +46,7 @@ import {
 	createSectionData,
 	validateProtocolData
 } from '../../../protocols/client/views/lib';
+import { romanize } from '../../../utils/lib/romanNumeralConverter';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -511,7 +511,7 @@ function Council({
 							let sectionNumber = 1;
 							for (const section of agendaData.sections) {
 								const itemNumber = 1;
-								const sectionData = createSectionData(sectionNumber, section.item);
+								const sectionData = createSectionData(romanize(sectionNumber), section.item);
 								sectionData.items = [];
 								const itemData = createItemData(itemNumber, section.issueConsideration);
 								sectionData.items.push(itemData);
