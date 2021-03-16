@@ -259,7 +259,7 @@ export function ErrandPage() {
 
 	const requestsQuery = useMemo(() => resData?.protocolItemsPersonsResponsible?.map((protocol) => protocol.itemId) || [], [resData]);
 	const { data: requests, state } = useEndpointDataExperimental('working-groups-requests.list', useMemo(() => ({
-		query: JSON.stringify({ answers: { $elemMatch: { sectionItemId: { $in: requestsQuery } } } }),
+		query: JSON.stringify({ answers: { $elemMatch: { sectionItemsId: { $elemMatch : { _id: { $in: requestsQuery } } } } } }),
 		fields: JSON.stringify({ answers: 0 }),
 	}), [requestsQuery]));
 

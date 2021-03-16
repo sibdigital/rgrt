@@ -32,6 +32,7 @@ export function DocumentPage() {
 	const [number, setNumber] = useState('');
 	const [date, setDate] = useState(new Date());
 	const [desc, setDesc] = useState('');
+	const [itemResponsible, setItemResponsible] = useState('');
 
 	const router = useRoute('working-groups-request');
 	const context = useRouteParameter('context');
@@ -64,6 +65,7 @@ export function DocumentPage() {
 			setNumber(data.number ?? '');
 			setDate(data.date && new Date(data.date));
 			setDesc(data.desc);
+			setItemResponsible(data.protocol.itemResponsible);
 		}
 	}, [data]);
 
@@ -99,7 +101,7 @@ export function DocumentPage() {
 
 	const saveAction = useCallback(async (number, desc, date) => {
 		const { _id } = data;
-		const requestData = createWorkingGroupRequestData(number, desc, date, { _id });
+		const requestData = createWorkingGroupRequestData(number, desc, date, { _id }, itemResponsible);
 		const validation = validateWorkingGroupRequestData(requestData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateWorkingGroupRequest(requestData);
@@ -109,14 +111,14 @@ export function DocumentPage() {
 	}, [dispatchToastMessage, insertOrUpdateWorkingGroupRequest, number, desc, date, t]);
 
 	const handleSaveRequest = useCallback(async () => {
-		const result = await saveAction(number, desc, date);
+		const result = await saveAction(number, desc, date, itemResponsible);
 		if (!result) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
 		} else {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_edited') });
 		}
 		onChange();
-	}, [saveAction, number, desc, date]);
+	}, [saveAction, number, desc, date, itemResponsible]);
 
 
 	if (!hasPermission('manage-working-group-requests', useUserId())) {
@@ -132,7 +134,7 @@ export function DocumentPage() {
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>
-					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveRequest}>
+					<Button primary small aria-label={t('Save')} onClick={handleSaveRequest}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
@@ -173,6 +175,12 @@ export function DocumentPage() {
 						</Field.Row>
 					</Field>}
 				</Field>}
+				<Field mbe='x16'>
+					<Field.Label>{t('Errand_Charged_to')}</Field.Label>
+					<Field.Row>
+						<TextInput value={ itemResponsible } onChange={(e) => setItemResponsible(e.currentTarget.value)} placeholder={t('Errand_Charged_to')} fontScale='p1'/>
+					</Field.Row>
+				</Field>
 				<Field mbe='x16'>
 					<Field.Label>{t('Protocol_Item')}</Field.Label>
 					<Field.Row>
