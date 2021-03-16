@@ -28,9 +28,7 @@ export function DocumentPage() {
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [cache, setCache] = useState();
-	const [currentMail, setCurrentMail] = useState({});
-	const [currentAnswer, setCurrentAnswer] = useState({});
+	const [cache, setCache] = useState(new Date());
 	const [number, setNumber] = useState('');
 	const [date, setDate] = useState(new Date());
 	const [desc, setDesc] = useState('');
@@ -54,12 +52,11 @@ export function DocumentPage() {
 	);
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.findByItemId',
 		useMemo(() => ({
-			query: JSON.stringify({ _id: data?.protocolsItemId ?? '' }),
+			query: JSON.stringify({ $or: [{ _id: data?.protocolsItemId ?? '' }, { _id: data?.protocolId ?? '' }] }),
 			fields: JSON.stringify({ num: 1, d: 1 }),
 		}), [data]),
 	);
 
-	const mails = useMemo(() => data?.mails ?? [], [data]);
 	const answers = useMemo(() => data?.answers ?? [], [data]);
 
 	useEffect(() => {
@@ -74,57 +71,33 @@ export function DocumentPage() {
 
 	const address = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
+	const hasUnsavedChanges = useMemo(() => new Date(data?.date).getTime() !== new Date(date).getTime()
+		|| data?.desc !== desc
+		|| data?.number !== number
+	, [date, desc, number, data]);
+
 	const inputStyles = { wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' };
 
+	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
+
 	const onChange = useCallback(() => {
-		console.log('onchange');
 		setCache(new Date());
-	}, [cache]);
+	}, []);
 
 	// const close = useCallback(() => {
 	// 	router.push({
 	// 		id: requestId,
 	// 	});
-	// }, [router]);
-
-	// const handleHeaderButtonClick = useCallback((context) => () => {
-	// 	router.push({ id: requestId, context });
-	// }, [router]);
-
-	// const onRequestChanged = useCallback((request) => {
-	// 	setNumber(request.number);
-	// 	setDate(new Date(request.date));
-	// 	setDesc(request.desc);
-	// }, []);
+	// }, [requestId, router]);
 
 	const onMailClick = useCallback((curMail) => () => {
 		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ curMail._id }`);
-	}, []);
-
-	const onAddMailClick = useCallback((newMail) => () => {
-		if (newMail) {
-			console.log(newMail);
-			console.log(mails);
-			const index = mails.findIndex((mail) => mail._id === newMail._id);
-			if (index < 0) {
-				mails.push(newMail);
-			} else {
-				mails[index] = newMail;
-			}
-		}
-		router.push({ id: requestId });
-	}, [router, mails]);
+	}, [requestId]);
 
 	const goBack = () => {
 		FlowRouter.go('working-groups-requests');
 	};
 
-	if (!hasPermission('manage-working-group-requests', useUserId())) {
-		console.log('Permissions_access_missing');
-		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	}
-
-	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
 
 	const saveAction = useCallback(async (number, desc, date) => {
 		const { _id } = data;
@@ -147,8 +120,14 @@ export function DocumentPage() {
 		onChange();
 	}, [saveAction, number, desc, date, itemResponsible]);
 
+
+	if (!hasPermission('manage-working-group-requests', useUserId())) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
+
 	return <Page flexDirection='row'>
-		{ <Page>
+		<Page>
 			<Page.Header>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton onClick={goBack}/>
@@ -168,7 +147,7 @@ export function DocumentPage() {
 					</Field>
 					<Field mis='x4' display='flex' flexDirection='row'>
 						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
-							<DatePicker
+						<DatePicker
 							mie='x16'
 							dateFormat='dd.MM.yyyy HH:mm'
 							selected={date}
@@ -220,10 +199,9 @@ export function DocumentPage() {
 						<a href={address} is='span' target='_blank'>{address}</a>
 					</Field.Row>
 				</Field>
-				{/*<Mails data={mails} onClick={onMailClick} onEditClick={onEditMailClick} params={params} setParams={setParams}/>*/}
 				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>
 			</Page.Content>
-		</Page>}
+		</Page>
 		{/* {(context === 'add' || context === 'editMail' || context === 'edit')
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>

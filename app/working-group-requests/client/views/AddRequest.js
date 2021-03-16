@@ -282,7 +282,6 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 		FlowRouter.go('working-groups-requests');
 		if (result) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
-			FlowRouter.go('working-groups-requests');
 		} else {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_edited') });
 		}

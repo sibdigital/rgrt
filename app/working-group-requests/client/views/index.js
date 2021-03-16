@@ -68,10 +68,9 @@ export function WorkingGroupRequestsPage() {
 		FlowRouter.go(`/working-groups-request/${ _id }/edit`);
 	}, [router, currentRequestToEdit, docsdata]);
 
-	const handleHeaderButtonClick = useCallback((context) => () => {
+	const handleHeaderButtonClick = useCallback(() => {
 		FlowRouter.go('working-groups-request-new');
-		// router.push({ context });
-	}, [router]);
+	}, []);
 
 	const onHeaderClick = (id) => {
 		const [sortBy, sortDirection] = sort;
