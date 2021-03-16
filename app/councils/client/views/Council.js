@@ -132,7 +132,7 @@ export function CouncilPage() {
 		[t('Council_type_meeting'), t('Council_type_meeting')],
 		[t('Council_type_conference'), t('Council_type_conference')],
 	], [t]);
-	
+
 	let isLoading = true;
 	if ([state, invitedPersonsDataState, personsDataState, currentUserState, currentPersonState, protocolsDataState, workingGroupState, agendaState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
