@@ -270,9 +270,9 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 
 	const handleSaveRequest = useCallback(async () => {
 		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail);
+		FlowRouter.go('working-groups-requests');
 		if (!request._id) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
-			FlowRouter.go('working-groups-requests');
 		} else {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_edited') });
 		}
