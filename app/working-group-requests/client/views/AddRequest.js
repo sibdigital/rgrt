@@ -205,8 +205,9 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 	const [council, setCouncil] = useState({});
 
 	const protocolsItemId = FlowRouter.getParam('id');
+	const workingGroupRequestContext = FlowRouter.getParam('context');
 
-	if (protocolsItemId) {
+	if (protocolsItemId && workingGroupRequestContext === 'new-protocols-item-request') {
 		const currentRequestQuery = docsdata?.filter(request => request.protocolsItemId === protocolsItemId)[0];
 
 		if (currentRequestQuery) {
@@ -277,8 +278,9 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 	}, [_id, dispatchToastMessage, insertOrUpdateWorkingGroupRequest, previousNumber, previousDescription, previousRequest, t]);
 
 	const handleSaveRequest = useCallback(async () => {
-		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol);
-		if (!request._id) {
+		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail);
+		FlowRouter.go('working-groups-requests');
+		if (result) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
 			FlowRouter.go('working-groups-requests');
 		} else {
