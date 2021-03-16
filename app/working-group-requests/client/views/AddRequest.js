@@ -222,20 +222,20 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 			console.log(protocol);
 			if (protocol) {
 				if (protocol.protocol) {
-					setCouncilId(protocol.protocol[0]?.councilId);
+					setCouncilId(protocol.protocol[0]?.council?._id);
 				}
 				if (protocol.sections) {
 					const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolsItemId)[0])[0];
-					const itemDesc = $(protocolItem.name).text();
-					const itemResponsiblePerson = constructPersonFIO(protocolItem.responsible[0]);
+					const itemDesc = $(protocolItem?.name).text();
+					const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0]);
 					setDescription(itemDesc);
 					setItemResponsible(itemResponsiblePerson);
 					setProtocol({ d: protocol.protocol[0]?.d, num: protocol.protocol[0]?.num,  itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson})
 				}
-				if (protocol.protocol && council.d) {
-					const protocolCouncilId = protocol.protocol[0]?.councilId;
-					const councilData = council.councils.filter(i => i._id === protocolCouncilId);
-					setCouncil({ d: councilData[0].d, desc: councilData[0].desc });
+				if (protocol.protocol && council) {
+					const protocolCouncilId = protocol.protocol[0]?.council?._id;
+					const councilData = council?.councils?.filter(i => i._id === protocolCouncilId);
+					setCouncil({ d: councilData[0]?.d, desc: councilData[0]?.desc });
 				}
 			}
 		}, [protocol, protocolsItemId, council]);
