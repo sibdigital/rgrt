@@ -8,7 +8,6 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { Requests } from './requests';
-import { AddRequest } from './AddRequest';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { hasPermission } from '../../../authorization';
@@ -66,10 +65,7 @@ export function WorkingGroupRequestsPage() {
 		console.log(request);
 		console.log(_id);
 		setCurrentRequestToEdit(request);
-		router.push({
-			context: 'edit',
-			id: _id,
-		});
+		FlowRouter.go(`/working-groups-request/${ _id }/edit`);
 	}, [router, currentRequestToEdit, docsdata]);
 
 	const handleHeaderButtonClick = useCallback((context) => () => {
@@ -115,7 +111,7 @@ export function WorkingGroupRequestsPage() {
 					</Label>
 				</Field>
 				{(context === undefined || context === 'requests') && <ButtonGroup>
-					<Button small primary aria-label={t('Add')} onClick={handleHeaderButtonClick('new')}>
+					<Button small primary aria-label={t('Add')} onClick={handleHeaderButtonClick}>
 						{t('Add')}
 					</Button>
 				</ButtonGroup>
@@ -125,7 +121,7 @@ export function WorkingGroupRequestsPage() {
 				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
 			</Page.Content>
 		</Page>
-		{(context === 'new' || context === 'edit' || context === 'new-protocols-item-request')
+		{/* {(context === 'new' || context === 'edit' || context === 'new-protocols-item-request')
 		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ (context === 'new' || context === 'new-protocols-item-request') && t('Add') }
@@ -134,7 +130,7 @@ export function WorkingGroupRequestsPage() {
 			</VerticalBar.Header>
 			{(context === 'new' || context === 'new-protocols-item-request') && <AddRequest onChange={onChange} docsdata={docsdata}/>}
 			{context === 'edit' && <AddRequest onChange={onChange} editData={currentRequestToEdit}/>}
-		</VerticalBar>}
+		</VerticalBar>} */}
 	</Page>;
 }
 

@@ -277,7 +277,17 @@ FlowRouter.route('/working-groups-requests/:context?/:id?', {
 	}],
 });
 
-FlowRouter.route('/working-groups-request/:id/:context?', {
+FlowRouter.route('/working-groups-request/:id', {
+	name: 'working-groups-request',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/request'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-groups-request/:id/edit', {
 	name: 'working-groups-request',
 	action: () => {
 		renderRouteComponent(() => import('../app/working-group-requests/client/views/request'), { template: 'main', region: 'center' });
@@ -321,6 +331,16 @@ FlowRouter.route('/working-groups-request/:requestid/mail/:mailid/answer/:answer
 	name: 'working-groups-request-answer',
 	action: () => {
 		renderRouteComponent(() => import('../app/working-group-requests/client/views/Answer'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/working-groups-request/add/:context/:id?', {
+	name: 'working-groups-request-add',
+	action: () => {
+		renderRouteComponent(() => import('../app/working-group-requests/client/views/AddRequest'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');
