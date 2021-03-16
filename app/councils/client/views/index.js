@@ -113,7 +113,7 @@ export function CouncilsPage() {
 				</FieldGroup>
 			</Page.Header>
 			<Page.Content>
-				<Councils displayMode={displayMode} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
+				<Councils displayMode={displayMode} setParams={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onEditClick={onEditClick} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
 	</Page>;
