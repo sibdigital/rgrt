@@ -63,9 +63,9 @@ export function DocumentPage() {
 		if (data) {
 			console.log(data);
 			setNumber(data.number ?? '');
-			setDate(data.date && new Date(data.date));
+			data.date && setDate(new Date(data.date));
 			setDesc(data.desc);
-			setItemResponsible(data.protocol.itemResponsible);
+			setItemResponsible(data.protocol?.itemResponsible ?? '');
 		}
 	}, [data]);
 
