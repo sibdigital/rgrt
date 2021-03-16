@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
-	Field,
+	Icon,
 	Button,
-	Table, Icon,
+	Table,
 } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { Tooltip } from '@material-ui/core';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -120,7 +121,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 		mediaQuery && <Th w='x200' key={'Status'} color='default'>
 			{ t('Status') }
 		</Th>,
-		<Th w='x35' key='minus'/>,
+		mode === 'secretary' && <Th w='x35' key='minus'/>,
 		mode === 'secretary' && <Th w='x35' key='plus'/>,
 		<Th w='x35' key='edit'/>,
 	], [t, mediaQuery, mode]);
@@ -134,20 +135,26 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 			<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{issueConsideration}</Table.Cell>
 			{/*<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{formatDateAndTime(date ?? new Date())}</Table.Cell>*/}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{status}</Table.Cell>}
-			{ <Table.Cell alignItems={'end'}>
-				<Button style={tableCellIconStyle} disabled={isProposalApproved || proposal.added} color={isProposalApproved ? '#e4e7ea' : ''} small aria-label={t('Decline')} onClick={() => onDeleteProposalClick(_id)}>
-					<Icon name='cross' size='x16'/>
-				</Button>
+			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>
+				<Tooltip title={t('Decline')} arrow placement='top'>
+					<Button style={tableCellIconStyle} disabled={isProposalApproved || proposal.added} color={isProposalApproved ? '#e4e7ea' : ''} small aria-label={t('Decline')} onClick={() => onDeleteProposalClick(_id)}>
+						<Icon name='cross' size='x16'/>
+					</Button>
+				</Tooltip>
 			</Table.Cell>}
 			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>
-				<Button style={tableCellIconStyle} disabled={proposal.added} color={proposal.added ? '#e4e7ea' : 'green'} small aria-label={t('plus')} onClick={() => onAddProposalClick(proposal)}>
-					<Icon name='plus' size='x16'/>
-				</Button>
+				<Tooltip title={t('Add')} arrow placement='top'>
+					<Button style={tableCellIconStyle} disabled={proposal.added} color={proposal.added ? '#e4e7ea' : 'green'} small aria-label={t('plus')} onClick={() => onAddProposalClick(proposal)}>
+						<Icon name='plus' size='x16'/>
+					</Button>
+				</Tooltip>
 			</Table.Cell>}
 			{ <Table.Cell alignItems={'end'}>
-				<Button style={tableCellIconStyle} disabled={proposal.added} small aria-label={t('edit')} onClick={() => onProposalClick(proposal)}>
-					<Icon name='edit' size='x16'/>
-				</Button>
+				<Tooltip title={t('Edit')} arrow placement='top'>
+					<Button style={tableCellIconStyle} disabled={proposal.added} small aria-label={t('edit')} onClick={() => onProposalClick(proposal)}>
+						<Icon name='edit' size='x16'/>
+					</Button>
+				</Tooltip>
 			</Table.Cell>}
 		</Table.Row>;
 	};

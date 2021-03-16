@@ -10,6 +10,13 @@ class Persons extends Base {
 		return this.insert(person);
 	}
 
+	updatePerson(_id, person) {
+		const data = this.findOne({ _id });
+		data._updatedAt = new Date();
+
+		return this.update({ _id }, { $set: { ...data, ...person } });
+	}
+
 	addToCouncil(council, personId) {
 		const data = this.findOne({ _id: personId });
 		data._updatedAt = new Date();

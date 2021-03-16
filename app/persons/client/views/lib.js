@@ -9,9 +9,12 @@ export function validate(personData) {
 	return errors;
 }
 
-export function createPerson(surname, name, patronymic, phone, email, previousData) {
+export function createPerson(surname, name, patronymic, phone, email, previousData, weight) {
 	const personData = {
+		...previousData,
 	};
+	personData.key && delete personData.key;
+	personData.index && delete personData.index;
 
 	if (previousData && previousData._id) {
 		personData._id = previousData._id;
@@ -22,6 +25,7 @@ export function createPerson(surname, name, patronymic, phone, email, previousDa
 	personData.patronymic = patronymic;
 	personData.phone = phone;
 	personData.email = email;
-    
+	personData.weight = weight;
+
 	return personData;
 }
