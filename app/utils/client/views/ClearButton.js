@@ -7,7 +7,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 export function ClearButton({
 	onClick = () => {},
 	tooltipText = '',
-	iconName = 'refresh',
+	iconName = 'cross',
 	...props
 }) {
 	const t = useTranslation();
