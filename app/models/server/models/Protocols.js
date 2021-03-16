@@ -9,6 +9,7 @@ class Protocols extends Base {
 
 	// INSERT
 	create(data) {
+		data.createdAt = new Date();
 		return this.insert(data);
 	}
 
