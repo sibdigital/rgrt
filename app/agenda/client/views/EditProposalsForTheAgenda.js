@@ -83,7 +83,7 @@ export function EditProposalsForTheAgenda({ mode = '', onEditDataClick, close, a
 			close();
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [dispatchToastMessage, insertOrUpdateProposalsForTheAgenda, t]);
+	}, [insertOrUpdateProposalsForTheAgenda, agendaId, onEditDataClick, data, close, t]);
 
 	const handleSave = useCallback(async () => {
 		try {

@@ -21,7 +21,7 @@ import { Proposals } from './Proposals';
 
 registerLocale('ru', ru);
 
-export function ProposalsForTheAgendaPage({ isFullLoad = true, onAgendaClick = null }) {
+export function ProposalsForTheAgendaPage({ proposalsCache = new Date(), isFullLoad = true, onAgendaClick = null }) {
 	const t = useTranslation();
 	const userId = useUserId();
 	const id = useRouteParameter('id');
@@ -36,15 +36,17 @@ export function ProposalsForTheAgendaPage({ isFullLoad = true, onAgendaClick = n
 	const { data: agendaUserData, state: agendaUserState, error: agendaUserError } = useEndpointDataExperimental('agendas.proposalsByUser', useMemo(() => ({
 		query: JSON.stringify({ councilId: id, userId }),
 		fields: JSON.stringify({ proposals: 1 }),
-	}), [id, userId])) || { proposals: [] };
+		cache: JSON.stringify({ cache }),
+		proposalsCache: JSON.stringify({ proposalsCache }),
+	}), [id, userId, cache, proposalsCache])) || { proposals: [] };
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
-	}, [agendaUserData]);
+	}, []);
 
 	if ([userState, agendaUserState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
+		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
 
 	if (userError) {
@@ -81,12 +83,12 @@ function ProposalsForTheAgenda({ userData, agendaData, onChange, isFullLoad, onA
 		setContext('');
 	}, []);
 
-	const onEditDataClick = useCallback((proposal, type = 'new') => {
+	const onEditDataClick = useCallback((proposal, type) => {
 		const arr = type !== 'new' ? proposalsList.map((_proposal) => (_proposal._id === proposal._id && proposal) || _proposal) : proposalsList.concat(proposal);
 		setProposalsList(arr);
 		setContext('');
 		onChange();
-	}, [proposalsList]);
+	}, [onChange, proposalsList]);
 
 	const handleNewProposalClick = useCallback(() => {
 		setContext('new');

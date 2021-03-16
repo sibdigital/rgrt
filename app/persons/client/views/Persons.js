@@ -26,7 +26,7 @@ export function Persons({
 		mediaQuery && <Th key={'Email'} color='default'>
 			{t('Email')}
 		</Th>,
-		<Th w='x40' key='edit'></Th>,
+		<Th w='x40' key='edit'/>,
 	], [sort, mediaQuery]);
 
 	const renderRow = (person) => {

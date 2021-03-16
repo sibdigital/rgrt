@@ -36,6 +36,7 @@ Meteor.methods({
 				group: person.group,
 				organization: person.organization,
 				position: person.position,
+				weight: person.weight ?? 100,
 			};
 
 			const _id = Persons.create(createPerson);
@@ -43,6 +44,6 @@ Meteor.methods({
 			return _id;
 		}
 
-		return Persons.update(person._id, person);
+		return Persons.updatePerson(person._id, person);
 	},
 });

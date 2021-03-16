@@ -67,6 +67,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const id = useRouteParameter('id');
 
 	const [cache, setCache] = useState(new Date());
+	const [proposalsCache, setProposalsCache] = useState(new Date());
 	const [context, setContext] = useState('');
 	const [tab, setTab] = useState('agenda');
 	const [isNew, setIsNew] = useState(true);
@@ -172,7 +173,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
-	}, [cache]);
+	}, []);
 
 	const onEditAgendaDataClick = useCallback((agenda) => {
 		setIsNew(false);
@@ -209,12 +210,13 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		setContext('proposal_for_the_agenda_edit');
 	}, []);
 
-	const onEditProposalDataClick = useCallback((proposal) => {
-		const arr = proposalsList.map((_proposal) => (_proposal._id === proposal._id && proposal) || _proposal);
+	const onEditProposalDataClick = useCallback((proposal, type) => {
+		const arr = type !== 'new' ? proposalsList.map((_proposal) => (_proposal._id === proposal._id && proposal) || _proposal) : proposalsList.concat(proposal);
 		setProposalsList(arr);
 		setContext('');
+		setProposalsCache(new Date());
 		onChange();
-	}, [proposalsList]);
+	}, [onChange, proposalsList]);
 
 	const onDeleteAgendaSectionClick = useCallback((sectionId, sectionIndex) => async () => {
 		await deleteAgendaSection(agendaId, sectionId);
@@ -335,7 +337,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</ButtonGroup>}
 
 				{context === '' && tab === 'proposals' && !isAllowEdit
-				&& <Button mbe='x8' small primary aria-label={t('Proposal_for_the_agenda_add')} onClick={() => setContext('proposal_for_the_agenda_new')}>
+				&& <Button mbe='x8' width='x250' small primary aria-label={t('Proposal_for_the_agenda_add')} onClick={() => setContext('proposal_for_the_agenda_new')}>
 					{t('Proposal_for_the_agenda_add')}
 				</Button>}
 			</Page.Header>
@@ -361,7 +363,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 						&& <Proposals mode={'secretary'} onEditProposal={onEditProposal} userData={userData} proposalsListData={proposalsList} agendaId={agendaId} onAddProposal={onEditSectionDataClick}/>
 					)
 					|| (!isAllowEdit
-						&& <ProposalsForTheAgendaPage isFullLoad={false} onAgendaClick={(proposal) => { setCurrentProposal(proposal); setContext('proposal_for_the_agenda_edit'); }}/>
+						&& <ProposalsForTheAgendaPage proposalsCache={proposalsCache} isFullLoad={false} onAgendaClick={(proposal) => { setCurrentProposal(proposal); setContext('proposal_for_the_agenda_edit'); }}/>
 					)
 				)}
 			</Page.Content>

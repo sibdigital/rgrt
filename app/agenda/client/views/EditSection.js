@@ -17,6 +17,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { validateAgendaSection, createAgendaSection } from './lib';
 
 require('react-datepicker/dist/react-datepicker.css');
@@ -53,7 +54,12 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 	const insertOrUpdateAgendaSection = useMethod('insertOrUpdateAgendaSection');
 
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
-		setEditData({ ...editData, [field]: getValue(e) });
+		let value = getValue(e);
+		if (field === 'item' && !checkNumber(value)) {
+			value = editData.item;
+		}
+
+		setEditData({ ...editData, [field]: value });
 		onChange();
 	};
 	const handleSpeakers = (value) => {

@@ -38,7 +38,9 @@ function replaceCenterDomBy(dom) {
 			const mainNode = document.querySelector('.main-content');
 			if (mainNode) {
 				for (const child of Array.from(mainNode.children)) {
-					if (child) { mainNode.removeChild(child); }
+					if (child && child?.className !== 'horizontal-menu-bar') { 
+						mainNode.removeChild(child); 
+					}
 				}
 				const roomNode = dom();
 				mainNode.appendChild(roomNode);

@@ -38,7 +38,7 @@
 									{{> sideNav }}
 								{{/unless}}
 								<div class="{{#unless $eq old false}}rc-old{{/unless}} main-content content-background-color {{readReceiptsEnabled}}">
-									<div style="background-color: var(--sidebar-background);">
+									<div class="horizontal-menu-bar">
 										{{> menuBar}}
 									</div>
 									{{> Template.dynamic template=center}}

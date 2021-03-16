@@ -24,7 +24,7 @@ Template.sideNav.helpers({
 
 	roomType() {
 		const arr = roomTypes.getTypes().filter((item) => item._identifier !== 'c' && item.identifier !== 'p');
-		console.log(arr)
+
 		return arr.map((roomType) => ({
 			template: roomType.customTemplate || 'roomList',
 			data: {
