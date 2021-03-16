@@ -1,16 +1,18 @@
-import { Box, Field, Margins, TextInput, TextAreaInput, Select, Table, Button, Icon, Accordion } from '@rocket.chat/fuselage';
+import { Box, Field, Margins, TextInput, TextAreaInput, Table, Accordion } from '@rocket.chat/fuselage';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import s from 'underscore.string';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
 import { Pager } from '../../../../../../client/views/setupWizard/Pager';
 import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { useFormatDate } from '../../../../../../client/hooks/useFormatDate';
-import { useInvitePageContext } from '../InvitePageState';
 import GenericTable, { Th } from '../../../../../../client/components/GenericTable';
+import { useEndpointDataExperimental } from '../../../../../../client/hooks/useEndpointDataExperimental';
+import { useInvitePageContext } from '../InvitePageState';
 
 registerLocale('ru', ru);
 
@@ -55,15 +57,13 @@ function WorkingGroupRequestInfoStep({ stepStyle, step, title, active, setWorkin
 			<Box>
 				<Box is='p' fontScale='p1' marginBlockEnd='x16'>{t('Working_group_request_invite_description')}</Box>
 				{isSelectWGRequest
-				&& <Box mbs='x16' mbe='x32' maxHeight='x500'>
-					<Accordion>
-						<Accordion.Item maxHeight='x450' title={t('Working_group_requests')}>
-							<Box maxHeight='x450' overflow='auto'>
-								<RequestsTable requests={workingGroupRequestState.data.requests ?? []} onClick={onClick}/>
-							</Box>
-						</Accordion.Item>
-					</Accordion>
-				</Box>
+				&& <Accordion mbs='x16' mbe='x32'>
+					<Accordion.Item overflowY='auto' maxHeight='x450' title={t('Working_group_requests')}>
+						<Box maxHeight='x300' overflowY='auto' overflowX='hidden'>
+							<RequestsTable onClick={onClick}/>
+						</Box>
+					</Accordion.Item>
+				</Accordion>
 				}
 				<Field>
 					<Field.Label>{t('Query')}</Field.Label>
@@ -86,10 +86,27 @@ function WorkingGroupRequestInfoStep({ stepStyle, step, title, active, setWorkin
 
 export default WorkingGroupRequestInfoStep;
 
-function RequestsTable({ requests, onClick }) {
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+
+const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	fields: JSON.stringify({ number: 1, desc: 1, date: 1, ts: 1 }),
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [itemsPerPage, current, column, direction]);
+
+function RequestsTable({ onClick }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['date']);
+
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const query = useQuery(debouncedParams, debouncedSort);
+
+	const { data, state } = useEndpointDataExperimental('working-groups-requests.list', query);
 
 	const header = useMemo(() => [
 		<Th key={'Number'} color='default'>
@@ -112,5 +129,6 @@ function RequestsTable({ requests, onClick }) {
 			<Table.Cell fontScale='p1' color='default'>{formatDate(new Date(date ?? ts))}</Table.Cell>
 		</Table.Row>;
 	};
-	return <GenericTable header={header} renderRow={renderRow} results={requests} total={requests.length} setParams={setParams} params={params}/>;
+
+	return <GenericTable header={header} renderRow={renderRow} results={data?.requests ?? []} total={data?.total ?? 0} setParams={setParams} params={params}/>;
 }
