@@ -41,7 +41,7 @@ export function Requests({
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{number ?? 'null'}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>
-				{protocol && ("№").concat(protocol?.num).concat(" протокола").concat(t(" от ")).concat(formatDate(protocol?.d)).concat(" №").concat(protocol?.num)}
+				{protocol?.num && ("№").concat(protocol?.itemNum).concat(" протокола").concat(t(" от ")).concat(formatDate(protocol?.d)).concat(" №").concat(protocol?.num)}
 			</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{protocol?.itemResponsible}</Box></Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>
