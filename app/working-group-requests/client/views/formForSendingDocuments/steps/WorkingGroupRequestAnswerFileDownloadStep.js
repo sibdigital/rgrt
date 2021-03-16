@@ -25,7 +25,11 @@ import GenericTable, { Th } from '../../../../../../client/components/GenericTab
 import { ClearButton } from '../../../../../utils/client/views/ClearButton';
 import { preProcessingProtocolItems } from '../../lib';
 import { CustomSelectOptions } from '../CustomSelectOptions';
+import { ProtocolChoose } from '../../ProtocolChoose';
 import './reactTooltip.css';
+import VerticalBar from '/client/components/basic/VerticalBar';
+import { CouncilChoose } from '/app/working-group-requests/client/views/CouncilChoose';
+import { ItemsChoose } from '/app/working-group-requests/client/views/ItemsChoose';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -112,7 +116,23 @@ const FilterByDateRange = ({ protocolsData, setProtocolsData, ...props }) => {
 	</Box>;
 };
 
-function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workingGroupRequest, protocolsData, setInfo }) {
+function WorkingGroupRequestAnswerFileDownloadStep({
+	stepStyle,
+	step,
+	title,
+	active,
+	workingGroupRequest,
+	protocol,
+	protocolsData,
+	setInfo,
+	setVerticalContext,
+	protocolSelected,
+	setProtocolSelected,
+	sectionSelected,
+	setSectionSelected,
+	protocolItemsId,
+	setProtocolItemsId,
+}) {
 	console.log('WorkingGroupRequestAnswerStep');
 	// console.log(protocolsData);
 	const t = useTranslation();
@@ -135,10 +155,13 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const [context, setContext] = useState('');
 	const [filterContext, setFilterContext] = useState(-1);
 	const [protocolSelectLabel, setProtocolSelectLabel] = useState('');
+	const [protocolSectionSelectLabel, setProtocolSectionSelectLabel] = useState('');
+	const [protocolSelectItemLabel, setProtocolSelectItemLabel] = useState('');
 	const [protocolsFindData, setProtocolsFindData] = useState([]);
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [answerMailLabel, setAnswerMailLabel] = useState(t('Working_group_request_invite_not_mail_chosen'));
 	const [answerTypeContext, setAnswerTypeContext] = useState('mail');
+	const [customAnswerMailLabel, setCustomAnswerMailLabel] = useState('');
 
 	const fileSourceInputId = useUniqueId();
 	const workingGroupRequestId = workingGroupRequest._id;
@@ -148,19 +171,40 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	const protocolsOptions = useMemo(() => protocolsData?.map((protocol, index) => [index, protocol.num ?? '']) || [], [protocolsData]);
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0 && attachedFile.length > 0, [newData, attachedFile]);
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_request_select_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
-	const customAnswerMailLabel = useMemo(() =>
-		workingGroupRequest.number && workingGroupRequest.date
-			? ['#', workingGroupRequest.number, ' от ', formatDate(workingGroupRequest.date)].join('')
-			: t('Working_group_request_invite_not_mail_chosen')
-	, [t, workingGroupRequest]);
+	// const customAnswerMailLabel = useMemo(() =>
+	// 	workingGroupRequest.number && workingGroupRequest.date
+	// 		? ['#', workingGroupRequest.number, ' от ', formatDate(workingGroupRequest.date)].join('')
+	// 		: t('Working_group_request_invite_not_mail_chosen')
+	// , [t, workingGroupRequest]);
 
 	useEffect(() => {
 		if (protocolSelectLabel === '') {
 			setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
 		}
 		setProtocolsFindData(protocolsData ?? []);
+		workingGroupRequest.mail && setCustomAnswerMailLabel(workingGroupRequest.mail);
 		workingGroupRequest.number && workingGroupRequest.date && setAnswerMailLabel(['#', workingGroupRequest.number, ' от ', formatDate(workingGroupRequest.date)].join(''));
-	}, [t, protocolsData, workingGroupRequest]);
+		console.log({ protocol });
+		if (protocolSelected) {
+			const protocolLabel = [t('Protocol'), '№', protocolSelected.num, 'от', formatDate(protocolSelected.d)].join(' ');
+			setProtocolSelectLabel(protocolLabel);
+		}
+	}, [t, protocolsData, workingGroupRequest, protocolSelected]);
+
+	useEffect(() => {
+		if (sectionSelected) {
+			const protocolSectionLabel = [t('Section'), ' №', sectionSelected.num].join('');
+			setProtocolSectionSelectLabel(protocolSectionLabel);
+		}
+	}, [sectionSelected, t]);
+
+	useEffect(() => {
+		console.log({ protocolItemsId });
+		if (protocolItemsId && protocolItemsId.length > 0) {
+			const protocolItemLabel = [t('Working_group_request_invite_select_sections_items'), ' №', protocolItemsId[0].num].join('');
+			setProtocolSelectItemLabel(protocolItemLabel);
+		}
+	}, [protocolItemsId, t]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -194,35 +238,37 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		setNewData(updateData);
 	}, [newData, protocolsData]);
 
-	const handleClearSelectItemsOptions = useCallback((isOptionsClear = false) => {
-		if (isOptionsClear) {
-			setSectionItemsOptions([]);
-		}
-		setNewData({ ...newData, sectionItem: { value: '', required: newData.sectionItem.required } });
-	}, [newData, setSectionItemsOptions]);
+	const handleClearSelectItemsOptions = useCallback(() => {
+		setProtocolItemsId([]);
+		setProtocolSelectItemLabel('');
+	}, [setProtocolItemsId]);
 
-	const handleClearSelectOptions = useCallback((isOptionsClear = false) => {
-		handleClearSelectItemsOptions(true);
-		if (isOptionsClear) {
-			setSectionOptions([]);
-		}
-		setNewData({ ...newData, section: { value: '', required: newData.section.required }, sectionItem: { value: '', required: newData.sectionItem.required } });
-	}, [newData, handleClearSelectItemsOptions]);
+	const handleClearSelectOptions = useCallback(() => {
+		setSectionSelected(null);
+		setProtocolSectionSelectLabel('');
+	}, [setSectionSelected]);
 
 	const handleClearProtocol = useCallback(() => {
-		handleClearSelectOptions(true);
-		setNewData({ ...newData, protocol: { value: '', required: newData.protocol.required }, section: { value: '', required: newData.section.required }, sectionItem: { value: '', required: newData.sectionItem.required } });
-	}, [newData, handleClearSelectOptions]);
+		// handleClearSelectOptions(true);
+		// setNewData({ ...newData, protocol: { value: '', required: newData.protocol.required }, section: { value: '', required: newData.section.required }, sectionItem: { value: '', required: newData.sectionItem.required } });
+		setProtocolSelected(null);
+		setSectionSelected(null);
+		setProtocolItemsId([]);
+		setProtocolSelectLabel('');
+		setProtocolSectionSelectLabel('');
+		setProtocolSelectItemLabel('');
+	}, [setProtocolSelected, setSectionSelected, setProtocolItemsId, t]);
 
 	const handleChangeContext = useCallback((contextField) => () => {
 		if (context === '') {
 			setProtocolsFindData(protocolsData);
 			setFilterContext(-1);
 			setContext(contextField);
+			setVerticalContext(contextField);
 		} else {
 			setContext('');
 		}
-	}, [context]);
+	}, [context, protocolsData]);
 
 	const handleFilterContext = useCallback((filter) => {
 		console.log(filter);
@@ -288,24 +334,31 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		dataToSend.answerType = answerTypeContext;
 
 		if (answerTypeContext === 'protocol') {
-			const protocolData = protocolsData[newData.protocol.value];
-			const sectionData = protocolData.sections[newData.section.value];
-			const sectionItemData = sectionData.items[newData.sectionItem.value];
-			dataToSend.protocol = {
-				_id: protocolData._id,
-				title: [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' '),
-				section: {
-					_id: sectionData._id,
-					title: [sectionData.num ?? '', ': ', sectionData.name ? preProcessingProtocolItems(sectionData.name) : ''].join(''),
-				},
-				sectionItem: {
-					_id: sectionItemData._id,
-					title: [sectionItemData.num ?? '', ': ', sectionItemData.name ? preProcessingProtocolItems(sectionItemData.name) : ''].join(''),
-				},
-			};
-			dataToSend.protocolId = protocolData._id;
-			dataToSend.sectionId = sectionData._id;
-			dataToSend.sectionItemId = sectionItemData._id;
+			console.log({ protocolsData, newData });
+			console.log({ protocolSelected, sectionSelected, protocolItemsId });
+			protocolSelected && Object.assign(dataToSend, { protocolId: protocolSelected._id });
+			sectionSelected && Object.assign(dataToSend, { sectionId: sectionSelected._id });
+			protocolItemsId && Object.assign(dataToSend, { sectionItemsId: protocolItemsId });
+			// const protocolData = protocolsData[newData.protocol.value];
+			// const sectionData = protocolData.sections[newData.section.value];
+			// const sectionItemData = sectionData.items[newData.sectionItem.value];
+			// dataToSend.protocol = {
+			// 	_id: protocolData._id,
+			// 	title: [t('Protocol'), '№', protocolData.num, t('Date_From'), formatDate(protocolData.d)].join(' '),
+			// 	section: {
+			// 		_id: sectionData._id,
+			// 		title: [sectionData.num ?? '', ': ', sectionData.name ? preProcessingProtocolItems(sectionData.name) : ''].join(''),
+			// 	},
+			// 	sectionItem: {
+			// 		_id: sectionItemData._id,
+			// 		title: [sectionItemData.num ?? '', ': ', sectionItemData.name ? preProcessingProtocolItems(sectionItemData.name) : ''].join(''),
+			// 	},
+			// };
+			// dataToSend.protocolId = protocolData._id;
+			// dataToSend.sectionId = sectionData._id;
+			// dataToSend.sectionItemId = sectionItemData._id;
+		} else if (answerTypeContext === 'mail') {
+			dataToSend.mailAnswer = customAnswerMailLabel;
 		}
 
 		dataToSend.commentary = newData.commentary.value.trim();
@@ -340,6 +393,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 					onChange();
 				} else {
 					setInfo({ workingGroupRequestId, mailId, workingGroupRequestAnswer, attachedFile });
+					console.log({ workingGroupRequestId, mailId, workingGroupRequestAnswer });
 					goToNextStep();
 				}
 			}
@@ -350,6 +404,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 	};
 
 	const onRowClick = (field, id) => () => {
+		console.log({ field, id });
 		const index = protocolsData.findIndex((protocol) => protocol._id === id);
 		if (index > -1) {
 			const protocolLabel = [t('Protocol'), '№', protocolsData[index].num, 'от', formatDate(protocolsData[index].d)].join(' ');
@@ -377,7 +432,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 		active={newData.sectionItem.value !== ''}
 	/>, [sectionsItemsOptions, newData.sectionItem, t]);
 
-	return <Step active={active} working={committing} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
+	return <Step active={active} working={committing} onSubmit={handleSubmit} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
@@ -402,74 +457,133 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								<TextInput disabled readOnly value={customAnswerMailLabel}/>
+								<TextInput onChange={(event) => setCustomAnswerMailLabel(event.currentTarget.value)} value={customAnswerMailLabel}/>
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_protocol')}
-									{newData.protocol.value !== ''
-									&& <ClearButton onClick={() => { handleClearProtocol(); setProtocolSelectLabel(t('Working_group_request_invite_select_protocol')); }}/>}
+									{protocolSelected
+									&& <ClearButton onClick={() => handleClearProtocol()}/>}
+									<Button
+										onClick={() => setVerticalContext('protocolSelect')}
+										backgroundColor='transparent'
+										borderColor='transparent'
+										style={{ whiteSpace: 'normal' }}>
+										{t('Choose')}
+									</Button>
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								{mediaQuery && <Button backgroundColor={protocolsData.length === 0 ? '#f2f3f5' : 'transparent'} disabled={protocolsData.length === 0} textAlign='left' onClick={handleChangeContext('protocolSelect')} fontScale='p1' display='inline-flex' flexGrow={1} borderWidth='0.125rem' borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>
-									<Label
-										width='100%' disabled={protocolsData.length === 0}
-										color={ protocolSelectLabel === t('Working_group_request_invite_select_protocol') ? '#9ea2a8' : ''}
-										fontScale='p1'
-										fontWeight={ protocolSelectLabel === t('Working_group_request_invite_select_protocol') ? '400' : '500'}>
-										{protocolsData.length === 0 ? t('Working_group_request_invite_not_protocol_chosen') : protocolSelectLabel}
-									</Label>
-									<Box color='var(--rc-color-primary-dark)' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>
-								</Button>}
+								{mediaQuery
+									&& <TextInput readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
+								}
+								{/*{mediaQuery && <Button backgroundColor={protocolsData.length === 0 ? '#f2f3f5' : 'transparent'} disabled={protocolsData.length === 0} textAlign='left' onClick={handleChangeContext('protocolSelect')} fontScale='p1' display='inline-flex' flexGrow={1} borderWidth='0.125rem' borderColor='var(--rcx-input-colors-border-color, var(--rcx-color-neutral-500, #cbced1))'>*/}
+								{/*	<Label*/}
+								{/*		width='100%' disabled={protocolsData.length === 0}*/}
+								{/*		color={ protocolSelectLabel === t('Working_group_request_invite_select_protocol') ? '#9ea2a8' : ''}*/}
+								{/*		fontScale='p1'*/}
+								{/*		fontWeight={ protocolSelectLabel === t('Working_group_request_invite_select_protocol') ? '400' : '500'}>*/}
+								{/*		{protocolsData.length === 0 ? t('Working_group_request_invite_not_protocol_chosen') : protocolSelectLabel}*/}
+								{/*		{protocolSelected*/}
+								{/*		&& <ClearButton onClick={() => handleClearSelectOptions()}/>*/}
+								{/*		}*/}
+								{/*		{protocolSelected && <Button*/}
+								{/*			onClick={() => setVerticalContext('protocolSectionSelect')}*/}
+								{/*			backgroundColor='transparent'*/}
+								{/*			borderColor='transparent'*/}
+								{/*			style={{ whiteSpace: 'normal' }}>*/}
+								{/*			{t('Choose')}*/}
+								{/*		</Button>}*/}
+								{/*	</Label>*/}
+								{/*	<Box color='var(--rc-color-primary-dark)' fontFamily='RocketChat' fontSize='1.25rem' mis='auto'></Box>*/}
+								{/*</Button>}*/}
 								{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}
 							</Field.Row>
 							<Field.Row maxHeight='500px'>
-								{context === 'protocolSelect'
-								&& mediaQuery && <Field mb='x4'>
-									<Field.Row>
-										<Field.Label alignSelf='center' mie='x16'>{t('Search')}:</Field.Label>
-										<CustomSelectOptions items={ [[0, 'По номеру'], [1, 'По дате']] } onChange={handleFilterContext} active backgroundColor='#ffffff' showLabelTooltip={false}/>
-									</Field.Row>
-									{filterContext === 1 && <FilterByDateRange protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}
-									{filterContext === 0 && <FilterByText protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}
-									{ protocolsFindData && !protocolsFindData.length
-										? <>
-											<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
-												{ t('No_data_found') }
-											</Tile>
-										</>
-										: <>
-											<ProtocolsTable protocolsData={ protocolsFindData } onRowClick={ onRowClick }/>
-										</>
-									}
-								</Field>}
+								{/*{context === 'protocolSelect'*/}
+								{/*	&& mediaQuery && <ProtocolChoose setProtocolId={(id) => onRowClick('protocol', id)} close={() => setContext('')}/>*/}
+								{/*}*/}
+								{/*{context === 'protocolSelect'*/}
+								{/*&& mediaQuery && <Field mb='x4'>*/}
+								{/*	<Field.Row>*/}
+								{/*		<Field.Label alignSelf='center' mie='x16'>{t('Search')}:</Field.Label>*/}
+								{/*		<CustomSelectOptions items={ [[0, 'По номеру'], [1, 'По дате']] } onChange={handleFilterContext} active backgroundColor='#ffffff' showLabelTooltip={false}/>*/}
+								{/*	</Field.Row>*/}
+								{/*	{filterContext === 1 && <FilterByDateRange protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}*/}
+								{/*	{filterContext === 0 && <FilterByText protocolsData={protocolsData} setProtocolsData={setProtocolsFindData}/>}*/}
+								{/*	{ protocolsFindData && !protocolsFindData.length*/}
+								{/*		? <>*/}
+								{/*			<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>*/}
+								{/*				{ t('No_data_found') }*/}
+								{/*			</Tile>*/}
+								{/*		</>*/}
+								{/*		: <>*/}
+								{/*			<ProtocolsTable protocolsData={ protocolsFindData } onRowClick={ onRowClick }/>*/}
+								{/*		</>*/}
+								{/*	}*/}
+								{/*</Field>}*/}
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_sections')}
-									{newData.section.value !== ''
-										&& <ClearButton onClick={() => handleClearSelectOptions(false)}/>
+									{sectionSelected
+									&& <ClearButton onClick={() => handleClearSelectOptions()}/>
 									}
+									{protocolSelected && <Button
+										onClick={() => setVerticalContext('protocolSectionSelect')}
+										backgroundColor='transparent'
+										borderColor='transparent'
+										style={{ whiteSpace: 'normal' }}>
+										{t('Choose')}
+									</Button>}
 								</Label>
 							</Field.Row>
-							{ SectionsSelect }
+							<TextInput disabled={!protocolSelected} readOnly value={protocolSectionSelectLabel} placeholder={t('Working_group_request_invite_select_sections')}/>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_sections_items')}
-									{newData.sectionItem.value !== ''
-										&& <ClearButton onClick={() => handleClearSelectItemsOptions(false)}/>
+									{protocolItemsId && protocolItemsId.length > 0
+									&& <ClearButton onClick={() => handleClearSelectItemsOptions()}/>
 									}
+									{protocolSelected && <Button
+										onClick={() => setVerticalContext('protocolItemSelect')}
+										backgroundColor='transparent'
+										borderColor='transparent'
+										style={{ whiteSpace: 'normal' }}>
+										{t('Choose')}
+									</Button>}
 								</Label>
 							</Field.Row>
-							{ SectionItemsSelect }
+							<TextInput disabled={!protocolSelected} readOnly value={protocolSelectItemLabel} placeholder={t('Working_group_request_invite_select_sections_items')}/>
 						</Field>}
+						{/*{answerTypeContext === 'protocol' && <Field>*/}
+						{/*	<Field.Row height='40px'>*/}
+						{/*		<Label>*/}
+						{/*			{t('Working_group_request_invite_select_sections')}*/}
+						{/*			{newData.section.value !== ''*/}
+						{/*				&& <ClearButton onClick={() => handleClearSelectOptions(false)}/>*/}
+						{/*			}*/}
+						{/*		</Label>*/}
+						{/*	</Field.Row>*/}
+						{/*	{ SectionsSelect }*/}
+						{/*</Field>}*/}
+						{/*{answerTypeContext === 'protocol' && <Field>*/}
+						{/*	<Field.Row height='40px'>*/}
+						{/*		<Label>*/}
+						{/*			{t('Working_group_request_invite_select_sections_items')}*/}
+						{/*			{newData.sectionItem.value !== ''*/}
+						{/*				&& <ClearButton onClick={() => handleClearSelectItemsOptions(false)}/>*/}
+						{/*			}*/}
+						{/*		</Label>*/}
+						{/*	</Field.Row>*/}
+						{/*	{ SectionItemsSelect }*/}
+						{/*</Field>}*/}
 						<Field>
 							<Field.Label>{t('Commentary')}</Field.Label>
 							<Field.Row>
@@ -499,6 +613,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({ step, title, active, workin
 							</Box>}
 						</Field>
 					</Margins>
+
+
 				</Box>
 			</Box>
 		</Margins>

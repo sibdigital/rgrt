@@ -80,10 +80,16 @@ function InvitePageState() {
 
 	const { data, state, error } = useEndpointDataExperimental(endPoint, query);
 	const { data: protocolsData, state: protocolsState } = useEndpointDataExperimental('protocols.list.requestAnswer', protocolsQuery);
+	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.findOne', useMemo(() => ({
+		query: JSON.stringify({ _id: workingGroupRequestId === 'all' ? '' : data?.protocolId ?? '' }),
+	}), [data, workingGroupRequestId]));
+	// const { data: protocolItemsData, state: protocolItemsState } = useEndpointDataExperimental('protocols.getProtocolItemsByProtocolId', useMemo(() => ({
+	// 	query: JSON.stringify({ _id: workingGroupRequestId === 'all' ? '' : data.protocolId }),
+	// }), [data, workingGroupRequestId]));
 	const { data: userInfo, state: userState } = useEndpointDataExperimental('users.getOne', useMemo(() => ({
 		query: JSON.stringify({ _id: userId }),
 		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1, phone: 1, emails: 1 }),
-	}), []));
+	}), [userId]));
 
 	const goToPreviousStep = useCallback(() => setCurrentStep((currentStep) => (currentStep !== 1 ? currentStep - 1 : currentStep)), []);
 	const goToNextStep = useCallback(() => setCurrentStep((currentStep) => currentStep + 1), []);
@@ -97,16 +103,23 @@ function InvitePageState() {
 		goToFinalStep,
 		goToErrorStep,
 		workingGroupRequestState: { data, state, workingGroupRequestId },
+		// protocolDataState: { protocolData, protocolState, workingGroupRequestId },
+		// protocolItemsDataState: { protocolItemsData, protocolItemsState, workingGroupRequestId },
 	}), [
 		currentStep,
 		data,
 		state,
-		error,
+		// protocolData,
+		// protocolState,
+		// protocolItemsData,
+		// protocolItemsState,
+		workingGroupRequestId,
 	]);
 
-	if ([state, protocolsState, userState].includes(ENDPOINT_STATES.LOADING)) {
+	console.log({ data, protocolData });
+	if ([state, protocolsState, userState, protocolsState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
+		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
 
 	if (currentStep !== errorStep) {
@@ -120,7 +133,7 @@ function InvitePageState() {
 	}
 
 	return <InvitePageContext.Provider value={value}>
-		<InviteStepperPage currentStep={currentStep} workingGroupRequest={data} protocolsData={protocolsData?.protocols || []} userInfo={userInfo}/>
+		<InviteStepperPage currentStep={currentStep} workingGroupRequest={data} workingGroupRequestProtocol={protocolData} protocolsData={protocolsData?.protocols || []} userInfo={userInfo}/>
 	</InvitePageContext.Provider>;
 }
 

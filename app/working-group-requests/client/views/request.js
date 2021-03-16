@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, ButtonGroup, Callout, Field, Icon, Label, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { settings } from '../../../settings/client';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { Mails } from './Mails';
 import { Answers } from './Answers';
 import { Answer } from './Answer';
@@ -37,9 +39,22 @@ export function DocumentPage() {
 		query: JSON.stringify({ _id: requestId }),
 	}), [requestId]);
 
-	const data = useEndpointData('working-groups-requests.findOne', query) || { mails: [] };
-	const mails = useMemo(() => data.mails ?? [], [data]);
-	const answers = useMemo(() => data.answers ?? [], [data]);
+	const data = useEndpointData('working-groups-requests.findOne', query);
+	const { data: councilData, state: councilState } = useEndpointDataExperimental('councils.findOne',
+		useMemo(() => ({
+			query: JSON.stringify({ _id: data?.councilId ?? '' }),
+			fields: JSON.stringify({ d: 1 }),
+		}), [data]),
+	);
+	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.findByItemId',
+		useMemo(() => ({
+			query: JSON.stringify({ _id: data?.protocolsItemId ?? '' }),
+			fields: JSON.stringify({ num: 1, d: 1 }),
+		}), [data]),
+	);
+
+	const mails = useMemo(() => data?.mails ?? [], [data]);
+	const answers = useMemo(() => data?.answers ?? [], [data]);
 
 	useEffect(() => {
 		if (data) {
@@ -49,7 +64,7 @@ export function DocumentPage() {
 		}
 	}, [data]);
 
-	const address = [settings.get('Site_Url'), 'd/', data.inviteLink].join('') || '';
+	const address = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
 	const onChange = useCallback(() => {
 		console.log('onchange');
@@ -73,15 +88,8 @@ export function DocumentPage() {
 	}, []);
 
 	const onMailClick = useCallback((curMail) => () => {
-		// setCurrentMail(curMail ?? {});
-		// router.push({ id: requestId, context: 'answers' });
 		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ curMail._id }`);
 	}, []);
-
-	const onEditMailClick = useCallback((curMail) => () => {
-		setCurrentMail(curMail ?? {});
-		router.push({ id: requestId, context: 'editMail' });
-	}, [router]);
 
 	const onAddMailClick = useCallback((newMail) => () => {
 		if (newMail) {
@@ -97,15 +105,8 @@ export function DocumentPage() {
 		router.push({ id: requestId });
 	}, [router, mails]);
 
-	const onAnswerClick = useCallback((answer) => () => {
-		if (answer) {
-			setCurrentAnswer(answer);
-		}
-		router.push({ id: requestId, context: 'answer', tab: 'info' });
-	}, [router, currentAnswer]);
-
 	const goBack = () => {
-		FlowRouter.go('working-groups-requests')
+		FlowRouter.go('working-groups-requests');
 	};
 
 	if (!hasPermission('manage-working-group-requests', useUserId())) {
@@ -127,7 +128,7 @@ export function DocumentPage() {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8' display='flex' flexDirection='row'>
+				<Field mbe='x16' display='flex' flexDirection='row'>
 					<Field mie='x4'>
 						<Field.Label>{t('Number')}</Field.Label>
 						<Field.Row>
@@ -141,13 +142,33 @@ export function DocumentPage() {
 						</Field.Row>
 					</Field>
 				</Field>
-				<Field mbe='x8'>
+				{(councilData || protocolData?.protocol) && <Field mbe='x16' display='flex' flexDirection='row'>
+					{councilData && <Field mie='x4'>
+						<Field.Label>{t('Council')}</Field.Label>
+						<Field.Row>
+							<TextInput value={['От ', formatDateAndTime(councilData.d)].join('')} readOnly placeholder={t('Council')} fontScale='p1'/>
+						</Field.Row>
+					</Field>}
+					{protocolData?.protocol[0] && <Field mis='x4'>
+						<Field.Label>{t('Protocol')}</Field.Label>
+						<Field.Row>
+							<TextInput value={['№', protocolData.protocol[0].num, ' от ', formatDateAndTime(protocolData.protocol[0].d)].join('')} readOnly placeholder={t('Protocol')} fontScale='p1'/>
+						</Field.Row>
+					</Field>}
+				</Field>}
+				<Field mbe='x16'>
+					<Field.Label>{t('Protocol_Item')}</Field.Label>
+					<Field.Row>
+						<TextInput value={'ITEM'} readOnly placeholder={t('Protocol_Item')} fontScale='p1'/>
+					</Field.Row>
+				</Field>
+				<Field mbe='x16'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
 						<TextAreaInput rows='3' value={desc} readOnly placeholder={t('Description')} fontScale='p1'/>
 					</Field.Row>
 				</Field>
-				<Field mbe='x8'>
+				<Field mbe='x16'>
 					<Field.Label>{t('Working_group_request_invite_link')}</Field.Label>
 					<Field.Row>
 						<a href={address} is='span' target='_blank'>{address}</a>

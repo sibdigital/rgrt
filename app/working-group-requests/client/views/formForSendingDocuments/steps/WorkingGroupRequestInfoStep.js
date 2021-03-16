@@ -14,7 +14,7 @@ import GenericTable, { Th } from '../../../../../../client/components/GenericTab
 
 registerLocale('ru', ru);
 
-function WorkingGroupRequestInfoStep({ step, title, active, setWorkingGroupRequestData }) {
+function WorkingGroupRequestInfoStep({ stepStyle, step, title, active, setWorkingGroupRequestData }) {
 	const { goToNextStep, workingGroupRequestState } = useInvitePageContext();
 	const t = useTranslation();
 	const formatDate = useFormatDate();
@@ -48,7 +48,7 @@ function WorkingGroupRequestInfoStep({ step, title, active, setWorkingGroupReque
 		goToNextStep();
 	};
 
-	return <Step active={active} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
+	return <Step active={active} onSubmit={handleSubmit} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>

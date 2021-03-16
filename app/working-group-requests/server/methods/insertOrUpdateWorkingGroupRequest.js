@@ -13,6 +13,7 @@ Meteor.methods({
 		if (!s.trim(workingGroupRequestData.desc)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field desc is required', { method: 'insertOrUpdateWorkingGroupRequest', field: 'workingGroupRequestData' });
 		}
+		console.log({ workingGroupRequestData });
 
 		if (!workingGroupRequestData._id) {
 			const inviteLink = new Date().getTime().toString().substr(0, 9);
@@ -24,7 +25,11 @@ Meteor.methods({
 				date: workingGroupRequestData.date,
 				protocolsItemId: workingGroupRequestData.protocolsItemId,
 				inviteLink,
+				protocolItemsId: workingGroupRequestData.protocolItemsId ?? [],
+				mail: workingGroupRequestData.mail ?? [],
 			};
+			workingGroupRequestData.councilId && Object.assign(createWorkingGroupRequest, { councilId: workingGroupRequestData.councilId });
+			workingGroupRequestData.protocolId && Object.assign(createWorkingGroupRequest, { protocolId: workingGroupRequestData.protocolId });
 
 			const _id = WorkingGroupsRequests.create(createWorkingGroupRequest);
 

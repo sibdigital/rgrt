@@ -68,7 +68,7 @@ export function validateWorkingGroupRequestData(workingGroupRequestData) {
 	return errors;
 }
 
-export function createWorkingGroupRequestData(number, desc, date, previousData, protocolsItemId) {
+export function createWorkingGroupRequestData({ number, desc, date, previousData, protocolsItemId, councilId, protocolId, protocolItemsId = [], mail = '' }) {
 	const workingGroupRequestData = {
 	};
 
@@ -80,6 +80,10 @@ export function createWorkingGroupRequestData(number, desc, date, previousData, 
 	workingGroupRequestData.desc = desc;
 	workingGroupRequestData.date = date;
 	workingGroupRequestData.protocolsItemId = protocolsItemId;
+	councilId && Object.assign(workingGroupRequestData, { councilId });
+	protocolId && Object.assign(workingGroupRequestData, { protocolId });
+	workingGroupRequestData.protocolItemsId = protocolItemsId;
+	workingGroupRequestData.mail = mail;
 
 	return workingGroupRequestData;
 }

@@ -1,3 +1,4 @@
+import { FlowRouter } from 'meteor/kadira:flow-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ButtonGroup, Button, Field, Label, Icon, Callout } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
@@ -72,7 +73,8 @@ export function WorkingGroupRequestsPage() {
 	}, [router, currentRequestToEdit, docsdata]);
 
 	const handleHeaderButtonClick = useCallback((context) => () => {
-		router.push({ context });
+		FlowRouter.go('working-groups-request-new');
+		// router.push({ context });
 	}, [router]);
 
 	const onHeaderClick = (id) => {

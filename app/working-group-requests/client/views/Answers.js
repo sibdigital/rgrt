@@ -22,8 +22,6 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 	const requestId = useRouteParameter('id');
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const numberLabel = mail.number ? [t('Working_group_mail'), formatDate(mail.ts ?? ''), '№', mail.number ?? ''].join(' ') : t('Working_group_request_mail_not_chosen_answer');
-	const descriptionLabel = mail.number ? mail.desc : t('Working_group_request_mail_not_chosen_answer');
 
 	const readAnswer = useMethod('readAnswer');
 

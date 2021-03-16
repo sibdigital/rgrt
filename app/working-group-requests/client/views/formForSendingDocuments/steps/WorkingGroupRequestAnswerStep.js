@@ -12,7 +12,7 @@ import { constructPersonFullFIO } from '../../../../../utils/client/methods/cons
 import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
 import { useMethod } from '../../../../../../client/contexts/ServerContext';
 
-function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDownloadInfo }) {
+function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInfo, fileDownloadInfo }) {
 	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
 	const t = useTranslation();
 
@@ -147,7 +147,7 @@ function WorkingGroupRequestAnswerStep({ step, title, active, userInfo, fileDown
 		['Республика Бурятия', 'Республика Бурятия'],
 	], []);
 
-	return <Step active={active} working={committing} onSubmit={handleSubmit} style={{ maxWidth: '450px' }}>
+	return <Step active={active} working={committing} onSubmit={handleSubmit} style={stepStyle}>
 		<StepHeader number={step} title={title} />
 
 		<Margins blockEnd='x32'>
