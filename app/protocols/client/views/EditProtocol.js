@@ -12,6 +12,7 @@ import {
 	TextInput,
 	Modal
 } from '@rocket.chat/fuselage';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 registerLocale('ru', ru);
@@ -20,7 +21,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
-import { validate, createProtocolData } from './lib';
+import { validateProtocolData, createProtocolData } from './lib';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
@@ -71,7 +72,7 @@ export function EditProtocol({ _id, cache, onChange, ...props }) {
 		query: JSON.stringify({ _id }),
 	}), [_id, cache]);
 
-	const { data, state, error } = useEndpointDataExperimental('protocols.list', query);
+	const { data, state, error } = useEndpointDataExperimental('protocols.findOne', query);
 
 	if (state === ENDPOINT_STATES.LOADING) {
 		return <Box pb='x20'>
@@ -85,24 +86,24 @@ export function EditProtocol({ _id, cache, onChange, ...props }) {
 				<Button disabled><Throbber inheritColor/></Button>
 				<Button primary disabled><Throbber inheritColor/></Button>
 			</ButtonGroup>
-			<ButtonGroup stretch w='full' mbs='x8'>
+			{/*<ButtonGroup stretch w='full' mbs='x8'>
 				<Button primary danger disabled><Throbber inheritColor/></Button>
-			</ButtonGroup>
+			</ButtonGroup>*/}
 		</Box>;
 	}
 
-	if (error || !data || data.protocols.length < 1) {
+	if (error || !data) {
 		return <Box fontScale='h1' pb='x20'>{error}</Box>;
 	}
 
-	return <EditProtocolWithData protocol={data.protocols[0]} onChange={onChange} {...props}/>;
+	return <EditProtocolWithData protocol={data} onChange={onChange} {...props}/>;
 }
 
 function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const { _id, d: previousDate, num: previousNumber, place: previousPlace } = protocol || {};
+	const { _id, d: previousDate, num: previousNumber, place: previousPlace, council } = protocol || {};
 	const previousProtocol = protocol || {};
 
 	const [date, setDate] = useState(new Date(previousDate));
@@ -129,16 +130,16 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 		[date, number, place]);
 
 	const saveAction = useCallback(async (date, number, place) => {
-		const protocolData = createProtocolData(date, number, place, { previousDate, previousNumber, previousPlace, _id });
-		const validation = validate(protocolData);
+		const protocolData = createProtocolData(date, number, place, previousProtocol);
+		const validation = validateProtocolData(protocolData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateProtocol(protocolData);
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [_id, dispatchToastMessage, insertOrUpdateProtocol, date, number, place, previousDate, previousNumber, previousPlace, previousProtocol, t]);
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
+	}, [_id, dispatchToastMessage, insertOrUpdateProtocol, date, number, place, previousProtocol, t]);
 
 	const handleSave = useCallback(async () => {
-		saveAction(date, number, place);
+		await saveAction(date, number, place);
 		onChange();
 	}, [saveAction, onChange]);
 
@@ -153,6 +154,10 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	}, [_id, close, deleteProtocol, dispatchToastMessage, onChange]);
 
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
+
+	const goToCouncil = (councilId) => () => {
+		FlowRouter.go(`/council/${ councilId }`);
+	};
 
 	return <VerticalBar.ScrollableContent {...props}>
 		<Field>
@@ -179,6 +184,12 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 				<TextAreaInput value={place} onChange={(e) => setPlace(e.currentTarget.value)} placeholder={t('Protocol_Place')} />
 			</Field.Row>
 		</Field>
+		{ council && <Field>
+			<Field.Label>{t('Council')}</Field.Label>
+			<Field.Row>
+				<Button is={'a'} primary onClick={goToCouncil(council._id)}>{council.typename}</Button>
+			</Field.Row>
+		</Field>}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
@@ -187,12 +198,12 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
-		<Field>
+		{/*<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button primary danger onClick={openConfirmDelete}><Icon name='trash' mie='x4'/>{t('Delete')}</Button>
 				</ButtonGroup>
 			</Field.Row>
-		</Field>
+		</Field>*/}
 	</VerticalBar.ScrollableContent>;
 }

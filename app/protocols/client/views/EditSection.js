@@ -85,7 +85,7 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateSection(protocol._id, sectionData);
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
 	}, [_id, dispatchToastMessage, insertOrUpdateSection, number, name, speakers, previousNumber, previousName, previousSpeakers, previousSection, t]);
 
 	const handleSave = useCallback(async () => {
@@ -123,7 +123,7 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 			<Field.Row>
 				<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />
 			</Field.Row>
-		</Field>	
+		</Field>
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

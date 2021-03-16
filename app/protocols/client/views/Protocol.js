@@ -21,6 +21,7 @@ import { CreateParticipant } from './participants/CreateParticipant';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { EditProtocol } from '../../../protocols/client/views/EditProtocol';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -84,10 +85,27 @@ export function ProtocolPage() {
 
 	const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
 
+	const deleteProtocol = useMethod('deleteProtocol');
 	const deleteSection = useMethod('deleteSection');
 	const deleteItem = useMethod('deleteItem');
 	const moveSection = useMethod('moveSection');
 	const moveItem = useMethod('moveItem');
+
+	const onEditClick = useCallback((context) => () => {
+		router.push({ id: protocolId, context });
+	}, [router]);
+
+	const onDeleteConfirm = useCallback(async () => {
+		try {
+			await deleteProtocol(protocolId);
+			setModal(() => <SuccessModal title={t('Protocol_Has_Been_Deleted')} onClose={() => { setModal(undefined); }}/>);
+			FlowRouter.go('protocols');
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	}, [deleteProtocol, dispatchToastMessage]);
+
+	const onDeleteClick = () => setModal(() => <DeleteWarningModal title={t('Protocol_Delete_Warning')} onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
 	const onAddSectionClick = useCallback((context) => () => {
 		router.push({ id: protocolId, context });
@@ -300,7 +318,13 @@ export function ProtocolPage() {
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
 				<ButtonGroup>
-					{!context && <Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('New')}>
+					{!context && <Button mbe='x8' small primary onClick={onEditClick('edit')} aria-label={t('Protocol_Info')}>
+						{t('Protocol_Info')}
+					</Button>}
+					{!context && <Button mbe='x8' small primary danger onClick={onDeleteClick} aria-label={t('Delete')}>
+						{t('Delete')}
+					</Button>}
+					{!context && <Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('Section_Add')}>
 						{t('Section_Add')}
 					</Button>}
 					{!context && <Button mbe='x8' small primary onClick={onParticipantsClick('participants')} aria-label={t('Participants')}>
@@ -323,6 +347,7 @@ export function ProtocolPage() {
 		{ context
 		&& <VerticalBar width='x520' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
+				{ context === 'edit' && t('Protocol_Info') }
 				{ context === 'new-section' && t('Section_Add') }
 				{ context === 'new-item' && t('Item_Add') }
 				{ context === 'edit-section' && t('Section_Info') }
@@ -332,6 +357,7 @@ export function ProtocolPage() {
 				{ context === 'create-participant' && t('Participant_Create') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
+			{context === 'edit' && <EditProtocol _id={protocolId} close={close} onChange={onChange} cache={cache}/>}
 			{context === 'new-section' && <AddSection goToNew={onEditSectionClick} close={close} onChange={onChange}/>}
 			{context === 'new-item' && <AddItem goToNew={onEditItemClick} close={close} onChange={onChange}/>}
 			{context === 'edit-section' && <EditSection protocolId={protocolId} _id={sectionId} close={close} onChange={onChange} cache={cache}/>}

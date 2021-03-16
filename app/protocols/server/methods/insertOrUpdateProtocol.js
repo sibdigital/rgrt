@@ -14,7 +14,7 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field Date is required', { method: 'insertOrUpdateProtocol', field: 'Date' });
 		}
 
-		if (!s.trim(protocolData.num)) {
+		if (isNaN(protocolData.num)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field Number is required', { method: 'insertOrUpdateProtocol', field: 'Number' });
 		}
 
@@ -26,6 +26,10 @@ Meteor.methods({
 
 			const user = Meteor.user();
 
+			if (protocolData.num === 0) {
+				protocolData.num = Protocols.getMaxProtocolNum() + 1;
+			}
+
 			const createProtocol = {
 				ts: new Date(),
 				u: {
@@ -34,13 +38,37 @@ Meteor.methods({
 				},
 				d: new Date(protocolData.d),
 				num: protocolData.num,
-				place: protocolData.place,
-				sections: [],
-				councilId: protocolData.councilId,
-				participants: protocolData.participants,
+				place: protocolData.place
 			};
 
+			if (protocolData.council) {
+				createProtocol.council = protocolData.council;
+			}
+
 			const _id = Protocols.create(createProtocol);
+
+			if (protocolData.sections) {
+				protocolData.sections.forEach((sectionData) => {
+					const createSection = {
+						num: sectionData.num,
+						name: sectionData.name,
+						speakers: sectionData.speakers
+					}
+					const sectionId = Protocols.createSection(_id, createSection);
+
+					if (sectionData.items) {
+						sectionData.items.forEach((itemData) => {
+							Protocols.createItem(_id, sectionId, itemData);
+						})
+					}
+				});
+			}
+
+			if (protocolData.participants) {
+				protocolData.participants.forEach((p) => {
+					Protocols.addParticipant(_id, p);
+				})
+			}
 
 			return _id;
 		}

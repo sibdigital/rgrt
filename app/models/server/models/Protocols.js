@@ -1,6 +1,4 @@
-import { ObjectID } from 'bson';
-
-import { Base } from './_Base';
+import {Base} from './_Base';
 
 class Protocols extends Base {
 	constructor() {
@@ -9,6 +7,7 @@ class Protocols extends Base {
 
 	// INSERT
 	create(data) {
+		data.num = Number(data.num);
 		return this.insert(data);
 	}
 
@@ -20,11 +19,12 @@ class Protocols extends Base {
 	// UPDATE
 	updateProtocol(_id, data) {
 		data._updatedAt = new Date();
+		data.num = Number(data.num);
 		return this.update({ _id }, { $set: { ...data } });
 	}
 
 	createSection(protocolId, sectionData) {
-		const _id = new ObjectID().toHexString();
+		const _id = Random.id();
 		sectionData._id = _id;
 
 		const data = this.findOne({ _id: protocolId });
@@ -79,7 +79,7 @@ class Protocols extends Base {
 	}
 
 	createItem(protocolId, sectionId, item) {
-		const _id = new ObjectID().toHexString();
+		const _id = Random.id();
 		item._id = _id;
 
 		const data = this.findOne({ _id: protocolId });
@@ -166,6 +166,14 @@ class Protocols extends Base {
 		if (data.participants) {
 			this.update({ _id: protocolId }, { $pull: { participants: userId }});
 		}
+	}
+
+	getMaxProtocolNum() {
+		const data = this.findOne({}, { sort: { num: -1 }, limit: 1 });
+		if (data) {
+			return data.num;
+		}
+		return 0;
 	}
 }
 

@@ -41,6 +41,12 @@ import { CreateParticipant } from './Participants/CreateParticipant';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { createCouncilData, validate, downloadCouncilParticipantsForm } from './lib';
 import { CouncilFiles } from './CouncilFiles';
+import {
+	createItemData,
+	createProtocolData,
+	createSectionData,
+	validateProtocolData
+} from '../../../protocols/client/views/lib';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -103,7 +109,7 @@ export function CouncilPage() {
 		useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), []));
 	const { data: agendaData, state: agendaState } = useEndpointDataExperimental('agendas.findByCouncilId', useMemo(() => ({
 		query: JSON.stringify({ councilId }),
-		fields: JSON.stringify({ _id: 0, councilId: 1 }),
+		fields: JSON.stringify({ _id: 0, councilId: 1, sections: 1 }),
 	}), [councilId]));
 
 	useEffect(() => {
@@ -145,7 +151,7 @@ export function CouncilPage() {
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
 	}
 
-	return <Council isAgendaData={!!agendaData?.success && !!agendaData?.councilId} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} onCouncilChange={onCouncilChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
+	return <Council isAgendaData={!!agendaData?.success && !!agendaData?.councilId} agendaData={agendaData} isLoading={isLoading} mode={mode} persons={persons} setPersons={setPersons} filesData={files} invitedPersonsData={invitedPersons} currentPerson={currentPerson} councilId={councilId} data={data} userRoles={currentUser?.roles ?? []} onChange={onChange} onCouncilChange={onCouncilChange} workingGroupOptions={workingGroupOptions} councilTypeOptions={councilTypeOptions} protocolData={protocolData}/>;
 }
 
 CouncilPage.displayName = 'CouncilPage';
@@ -170,6 +176,7 @@ function Council({
 	protocolData,
 	workingGroupOptions,
 	isAgendaData = false,
+	agendaData,
 }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
@@ -239,6 +246,7 @@ function Council({
 	const addPersonsToCouncil = useMethod('addPersonsToCouncil');
 	const addCouncilToPersons = useMethod('addCouncilToPersons');
 	const deletePersonFromCouncil = useMethod('deletePersonFromCouncil');
+	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -484,12 +492,48 @@ function Council({
 
 	const onDeleteCouncilClick = () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Council_Delete_Warning')} onDelete={onDeleteCouncilConfirm} onCancel={() => setModal(undefined)}/>);
 
-	const onOpenCouncilProtocol = (protocolData, councilId) => () => {
+	const onOpenCouncilProtocol = (protocolData, councilId) => async () => {
 		if (protocolData.protocol.length !== 0) {
 			const protocolId = protocolData.protocol[0]._id;
 			FlowRouter.go(`/protocol/${ protocolId }`);
 		} else {
-			FlowRouter.go(`/protocols/new-council-protocol/${ councilId }`);
+			try {
+				const createProtocol = async () => {
+					const protocolData = createProtocolData(date, 0, place);
+					const validation = validateProtocolData(protocolData);
+					if (validation.length === 0) {
+						protocolData.council = {
+							_id: councilId,
+							typename: councilType
+						};
+						protocolData.sections = [];
+						if (agendaData?.sections) {
+							let sectionNumber = 1;
+							for (const section of agendaData.sections) {
+								const itemNumber = 1;
+								const sectionData = createSectionData(sectionNumber, section.item);
+								sectionData.items = [];
+								const itemData = createItemData(itemNumber, section.issueConsideration);
+								sectionData.items.push(itemData);
+								protocolData.sections.push(sectionData);
+								sectionNumber++;
+							}
+						}
+						protocolData.participants = invitedPersons.map((person) => person._id);
+
+						const _id = await insertOrUpdateProtocol(protocolData);
+
+						return _id;
+					}
+					validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
+				}
+				const protocolId = await createProtocol();
+				if (protocolId) {
+					FlowRouter.go(`/protocol/${protocolId}/edit`);
+				}
+			} catch (error) {
+				dispatchToastMessage({type: 'error', message: error});
+			}
 		}
 	};
 

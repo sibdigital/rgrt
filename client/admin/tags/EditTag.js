@@ -103,7 +103,7 @@ function EditTag({ close, onChange, data, ...props }) {
 		if (validation.length === 0) {
 			let tagId = await insertOrUpdateTag(tagData);
 		}
-		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); })
+		validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
 	}, [_id, dispatchToastMessage, insertOrUpdateTag, name, previousName, previousTag, t]);
 
 	const handleSave = useCallback(async () => {
