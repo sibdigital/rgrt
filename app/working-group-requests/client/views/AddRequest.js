@@ -30,6 +30,7 @@ import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
 import { CouncilChoose } from './CouncilChoose';
 import { ProtocolChoose } from './ProtocolChoose';
 import { ItemsChoose } from './ItemsChoose';
+import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -198,13 +199,15 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 	const [councilId, setCouncilId] = useState('');
 	const [protocolId, setProtocolId] = useState('');
 	const [protocolItemsId, setProtocolItemsId] = useState([]);
+	const [itemResponsible, setItemResponsible] = useState('');
 	const [context, setContext] = useState('');
+	const [protocol, setProtocol] = useState({});
+	const [council, setCouncil] = useState({});
 
 	const protocolsItemId = FlowRouter.getParam('id');
-	const workingGroupRequestContext = FlowRouter.getParam('context');
 
-	if (protocolsItemId && workingGroupRequestContext === 'new-protocols-item-request') {
-		const currentRequestQuery = docsdata.filter(request => request.protocolsItemId === protocolsItemId)[0];
+	if (protocolsItemId) {
+		const currentRequestQuery = docsdata?.filter(request => request.protocolsItemId === protocolsItemId)[0];
 
 		if (currentRequestQuery) {
 			FlowRouter.go(`/working-groups-request/${ currentRequestQuery._id }`);
@@ -225,7 +228,11 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 				}
 				if (protocol.sections) {
 					const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolsItemId)[0])[0];
-					setDescription(protocolItem.name.slice(3, -4));
+					const itemDesc = $(protocolItem.name).text();
+					const itemResponsiblePerson = constructPersonFIO(protocolItem.responsible[0]);
+					setDescription(itemDesc);
+					setItemResponsible(itemResponsiblePerson);
+					setProtocol({ d: protocol.protocol[0]?.d, num: protocol.protocol[0]?.num,  itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson})
 				}
 			}
 		}, [protocol, protocolsItemId]);
@@ -254,10 +261,11 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 		}
 	};
 
-	const saveAction = useCallback(async (number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail) => {
+	const saveAction = useCallback(async (number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol) => {
 		console.log(number);
 		console.log(description);
-		const requestData = createWorkingGroupRequestData({ protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id }, protocolsItemId, councilId, protocolItemsId, mail });
+		console.log(protocol);
+		const requestData = createWorkingGroupRequestData({ protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id }, protocolsItemId, councilId, protocolItemsId, mail, protocol });
 		console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
 		console.log({ validation });
@@ -269,7 +277,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 	}, [_id, dispatchToastMessage, insertOrUpdateWorkingGroupRequest, previousNumber, previousDescription, previousRequest, t]);
 
 	const handleSaveRequest = useCallback(async () => {
-		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail);
+		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol);
 		if (!request._id) {
 			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
 			FlowRouter.go('working-groups-requests');
@@ -281,7 +289,7 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 			onChange();
 		}
 		// goToNew(result)();
-	}, [saveAction, onChange, number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail]);
+	}, [saveAction, onChange, number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol]);
 
 	console.log({ councilId, protocolId, protocolItemsId });
 	return <Page flexDirection='row'>
@@ -340,6 +348,12 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 					<Field.Label>{t('Protocol_Item')}</Field.Label>
 					<Field.Row>
 						<Button onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{[t('Choose'), protocolId ?? ''].join(' ')}</Button>
+					</Field.Row>
+				</Field>
+				<Field mbe='x16'>
+					<Field.Label>{t('Errand_Charged_to')}</Field.Label>
+					<Field.Row>
+						<TextInput value={ itemResponsible } onChange={(e) => setItemResponsible(e.currentTarget.value)} placeholder={t('Errand_Charged_to')} fontScale='p1'/>
 					</Field.Row>
 				</Field>
 				<Field mbe='x16'>
