@@ -93,6 +93,7 @@ API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 					lowerPatronymic: { $toLower: '$patronymic' },
 					phone: 1,
 					email: 1,
+					weight: 1,
 				},
 			},
 			{ $sort: { weight: 1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },

@@ -21,6 +21,8 @@ import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { validate, createPerson } from './lib';
 
+const DEFAULT_WEIGHT_PERSON = 100;
+
 const DeleteWarningModal = ({ onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
 	return <Modal {...props}>
@@ -63,6 +65,7 @@ const SuccessModal = ({ onClose, ...props }) => {
 export function EditPerson({ _id, person, cache, onChange, ...props }) {
 	const curPerson = person ?? {
 		_id: null,
+		weight: DEFAULT_WEIGHT_PERSON,
 		surname: '',
 		name: '',
 		patronymic: '',
@@ -83,6 +86,7 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 		patronymic: previousPatronymic,
 		phone: previousPhone,
 		email: previousEmail,
+		weight: previousWeight,
 	} = person || {};
 	const previousPerson = person || {};
 
@@ -91,6 +95,7 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 	const [patronymic, setPatronymic] = useState(previousPatronymic);
 	const [phone, setPhone] = useState(previousPhone);
 	const [email, setEmail] = useState(previousEmail);
+	const [weight, setWeight] = useState(person.weight ?? DEFAULT_WEIGHT_PERSON);
 
 	const setModal = useSetModal();
 
@@ -100,7 +105,8 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 		setPatronymic(previousPatronymic || '');
 		setPhone(previousPhone || '');
 		setEmail(previousEmail || '');
-	}, [previousSurname, previousName, previousPatronymic, previousPhone, previousEmail, previousPerson]);
+		setWeight(previousWeight || DEFAULT_WEIGHT_PERSON);
+	}, [previousSurname, previousName, previousPatronymic, previousPhone, previousEmail, previousPerson, previousWeight]);
 
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 	const deletePerson = useMethod('deletePerson');
@@ -110,30 +116,32 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 		|| previousName !== name
 		|| previousPatronymic !== patronymic
 		|| previousPhone !== phone
-		|| previousEmail !== email,
-	[surname, name, patronymic, phone, email]);
-	
-	const allFieldFilled = useMemo(() => 
+		|| previousEmail !== email
+		|| previousWeight !== weight
+	, [previousSurname, surname, previousName, name, previousPatronymic, patronymic, previousPhone, phone, previousEmail, email, previousWeight, weight]);
+
+	const allFieldFilled = useMemo(() =>
 		surname !== ''
 		&& name !== ''
 		&& patronymic !== ''
 		&& phone !== ''
-		&& email !== '', 
-	[surname, name, patronymic, phone, email]);
+		&& email !== ''
+		&& weight !== ''
+	, [surname, name, patronymic, phone, email, weight]);
 
-	const saveAction = useCallback(async (surname, name, patronymic, phone, email) => {
-		const personData = createPerson(surname, name, patronymic, phone, email, previousPerson);
+	const saveAction = useCallback(async (surname, name, patronymic, phone, email, weight) => {
+		const personData = createPerson(surname, name, patronymic, phone, email, previousPerson, weight);
 		const validation = validate(personData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdatePerson(personData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [previousPerson]);
+	}, [insertOrUpdatePerson, previousPerson, t]);
 
 	const handleSave = useCallback(async () => {
-		await saveAction(surname, name, patronymic, phone, email);
-		onChange();
-	}, [saveAction, onChange, surname, name, patronymic, phone, email]);
+		await saveAction(surname, name, patronymic, phone, email, weight);
+		close();
+	}, [saveAction, close, surname, name, patronymic, phone, email, weight]);
 
 	const onDeleteConfirm = useCallback(async () => {
 		try {
@@ -148,6 +156,12 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
 	return <VerticalBar.ScrollableContent {...props}>
+		<Field>
+			<Field.Label>{t('Weight')}</Field.Label>
+			<Field.Row>
+				<TextInput value={weight} onChange={(e) => setWeight(e.currentTarget.value)}/>
+			</Field.Row>
+		</Field>
 		<Field>
 			<Field.Label>{t('Surname')}</Field.Label>
 			<Field.Row>
