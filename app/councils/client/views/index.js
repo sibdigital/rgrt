@@ -95,9 +95,9 @@ export function CouncilsPage() {
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Councils')}</Label>
 				</Field>
 				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
-					<Tabs flexShrink={0} width='auto'>
-						<Tooltip title='Список' arrow>
-							<Tabs.Item selected={displayMode === 'table'} onClick={() => handleTabClick('table')}>
+					<Tabs mbe='x8' flexShrink={0} width='auto'>
+						<Tooltip title="Список" arrow>
+							<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>
 								<Icon name='list'/>
 							</Tabs.Item>
 						</Tooltip>

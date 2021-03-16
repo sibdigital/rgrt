@@ -12,7 +12,6 @@ import { userStatus } from '../../user-status';
 import { hasPermission } from '../../authorization/client';
 import { createTemplateForComponent } from '../../../client/reactAdapters';
 
-
 const setStatus = (status, statusText) => {
 	AccountBox.setStatus(status, statusText);
 	callbacks.run('userStatusManuallySet', status);
@@ -212,20 +211,6 @@ Template.sidebarHeader.events({
 		}
 	},
 	'click .icon' (e, instance) {
-		let x = document.getElementById('sidebar');
-		let a = document.createElement('a');
-		a.href = "/home";
-
-		if (x.className	===	'sidebar sidebar--medium')	{
-			x.className	= 'sidebar hidden';
-			a.className = 'small-logo'
-			a.innerHTML = `<img src="assets/favicon.svg" alt="Home"/>`;
-			document.getElementById('sidebar__footer_id').append(a);
-		} else {
-			a.innerHTML = `<img src="assets/logo.png" alt="Home"/>`;
-			document.getElementById('sidebar__footer_id').append(a);
-			x.className	= 'sidebar sidebar--medium';
-		}
-
+		SideNav.constructSidebar();
 	}
 });

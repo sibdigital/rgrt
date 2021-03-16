@@ -1,3 +1,7 @@
+.horizontal-menu-bar {
+    background-color: var(--sidebar-background);
+}
+
 .menu-bar {
     position: relative;
 }
@@ -5,7 +9,7 @@
 .menu {
     position: relative;
     left: 50%;
-    float: left;
+    /* float: left; */
 }
 
 .menu .menu-link:first-child {

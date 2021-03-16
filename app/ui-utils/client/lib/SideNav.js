@@ -12,6 +12,7 @@ export const SideNav = new class {
 		this.flexNav = {};
 		this.animating = false;
 		this.openQueue = [];
+		this.sidebarPos = {};
 	}
 
 	toggleFlex(status, callback) {
@@ -128,10 +129,17 @@ export const SideNav = new class {
 	}
 
 	init() {
+		let elem = document.getElementById('sidebar');
+		let footer = document.createElement('a');
+		footer.href = '/home';
+
 		this.sideNav = $('.sidebar');
 		this.flexNav = this.sideNav.find('.flex-nav');
 		this.setFlex('');
 		this.initiated = true;
+
+		this.sidebarPos = { elem, footer }
+
 		if (this.openQueue.length > 0) {
 			this.openQueue.forEach((item) => {
 				this.setFlex(item.config.template, item.config.data);
@@ -139,5 +147,30 @@ export const SideNav = new class {
 			});
 			this.openQueue = [];
 		}
+	}
+
+	isSidebar = () => {
+		return this.sidebarPos.elem.className === 'sidebar hidden';
+	}
+	
+	setCollapsed = () => {
+		Session.set('sidebar_className', this.sidebarPos.elem.className);
+
+		this.sidebarPos.elem.className = 'sidebar hidden';
+		this.sidebarPos.footer.className = 'small-logo';
+		this.sidebarPos.footer.innerHTML = `<img src="assets/favicon.svg" alt="Home"/>`;
+
+		document.getElementById('sidebar__footer_id').append(this.sidebarPos.footer);
+	}
+	
+	setExpanded = () => {
+		this.sidebarPos.elem.className = Session.get('sidebar_className');
+		this.sidebarPos.footer.innerHTML = `<img src="assets/logo.png" alt="Home"/>`;
+
+		document.getElementById('sidebar__footer_id').append(this.sidebarPos.footer);
+	}
+	
+	constructSidebar() {
+		this.isSidebar() ? this.setExpanded() : this.setCollapsed();
 	}
 }();
