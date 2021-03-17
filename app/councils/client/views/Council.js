@@ -526,13 +526,13 @@ function Council({
 						return _id;
 					}
 					validation.forEach((error) => dispatchToastMessage({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }));
-				}
+				};
 				const protocolId = await createProtocol();
 				if (protocolId) {
-					FlowRouter.go(`/protocol/${protocolId}/edit`);
+					FlowRouter.go(`/protocol/${ protocolId }/edit`);
 				}
 			} catch (error) {
-				dispatchToastMessage({type: 'error', message: error});
+				dispatchToastMessage({ type: 'error', message: error });
 			}
 		}
 	};
@@ -548,7 +548,7 @@ function Council({
 					{/*{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>*/}
 					{/*	{t('Edit')}*/}
 					{/*</Button>}*/}
-					{mode === 'edit' && <Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
+					{mode === 'edit' && <Button danger={!hasUnsavedChanges} primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>}
 					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
