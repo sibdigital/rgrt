@@ -97,7 +97,7 @@ export function CouncilsPage() {
 				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
 					<Tabs mbe='x8' flexShrink={0} width='auto'>
 						<Tooltip title="Список" arrow>
-							<Tabs.Item selected={displayMode === 'table'} onClick={() => setDisplayMode('table')}>
+							<Tabs.Item selected={displayMode === 'table'} onClick={() => handleTabClick('table')}>
 								<Icon name='list'/>
 							</Tabs.Item>
 						</Tooltip>
