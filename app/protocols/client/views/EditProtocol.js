@@ -25,6 +25,8 @@ import { validateProtocolData, createProtocolData } from './lib';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -102,6 +104,7 @@ export function EditProtocol({ _id, cache, onChange, ...props }) {
 function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const { _id, d: previousDate, num: previousNumber, place: previousPlace, council } = protocol || {};
 	const previousProtocol = protocol || {};
@@ -194,7 +197,7 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+					{ isAllowedEdit && <Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>}
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

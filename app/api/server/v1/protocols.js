@@ -69,9 +69,9 @@ API.v1.addRoute('protocols.findByCouncilId', {authRequired: true}, {
 
 API.v1.addRoute('protocols.participants', { authRequired: true }, {
 	get() {
-		if (!hasPermission(this.userId, 'manage-protocols')) {
-			return API.v1.unauthorized();
-		}
+		// if (!hasPermission(this.userId, 'manage-protocols')) {
+		// 	return API.v1.unauthorized();
+		// }
 
 		const { offset, count } = this.getPaginationItems();
 		const { sort, fields, query } = this.parseJsonQuery();

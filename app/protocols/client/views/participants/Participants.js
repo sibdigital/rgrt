@@ -9,6 +9,8 @@ import { useMethod } from '../../../../../client/contexts/ServerContext';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../../client/components/basic/VerticalBar';
+import { hasPermission } from '../../../../authorization';
+import { useUserId } from '../../../../../client/contexts/UserContext';
 
 const clickable = css`
 		cursor: pointer;
@@ -93,6 +95,7 @@ export function Participants({ protocolId, onAddParticipantClick }) {
 function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const setModal = useSetModal();
 
@@ -120,7 +123,7 @@ function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 			<Box fontSize={"16px"}>{user.surname} {user.name} {user.patronymic}</Box>
 			{/* <Box color='hint'>{user.position}, {user.organization}</Box> */}
 		</Box>
-		<Icon onClick={openConfirmDelete(user._id)} pi='x8' name='cross'/>
+		{ isAllowedEdit && <Icon onClick={openConfirmDelete(user._id)} pi='x8' name='cross'/>}
 	</Box>;
 
 	return <VerticalBar.ScrollableContent>
@@ -137,8 +140,8 @@ function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 				</>
 			}
 		</Box>
-		<Button primary onClick={onAddClick('add-participant')} aria-label={t('New')}>
+		{ isAllowedEdit && <Button primary onClick={onAddClick('add-participant')} aria-label={t('New')}>
 			{t('Participant_Add')}
-		</Button>
+		</Button>}
 	</VerticalBar.ScrollableContent>;
 }
