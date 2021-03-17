@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
 	Field,
 	Button,
@@ -34,7 +34,9 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		speakers: [],
 	});
 
-	const { data: numberCountData, state: numberCountState } = useEndpointDataExperimental('agendas.itemNumberCount');
+	const { data: numberCountData, state: numberCountState } = useEndpointDataExperimental('agendas.itemNumberCount', useMemo(() => ({
+		query: JSON.stringify({ _id: agendaId }),
+	}), [agendaId]));
 
 	useEffect(() => {
 		if (data) {
@@ -55,6 +57,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		let value = getValue(e);
+		console.log({ check: checkNumber(value) });
 		if (field === 'item' && !checkNumber(value)) {
 			value = editData.item;
 		}
@@ -105,7 +108,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 
 	if ([numberCountState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('Loading');
-		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
+		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
 
 	return <FieldGroup {...props}>
