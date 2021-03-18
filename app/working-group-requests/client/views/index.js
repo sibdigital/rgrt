@@ -120,16 +120,6 @@ export function WorkingGroupRequestsPage() {
 				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
 			</Page.Content>
 		</Page>
-		{/* {(context === 'new' || context === 'edit' || context === 'new-protocols-item-request')
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
-			<VerticalBar.Header>
-				{ (context === 'new' || context === 'new-protocols-item-request') && t('Add') }
-				{ context === 'edit' && t('Edit') }
-				<VerticalBar.Close onClick={close}/>
-			</VerticalBar.Header>
-			{(context === 'new' || context === 'new-protocols-item-request') && <AddRequest onChange={onChange} docsdata={docsdata}/>}
-			{context === 'edit' && <AddRequest onChange={onChange} editData={currentRequestToEdit}/>}
-		</VerticalBar>} */}
 	</Page>;
 }
 
