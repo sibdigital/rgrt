@@ -130,9 +130,12 @@ API.v1.addRoute('protocols.getProtocolItemsByProtocolId', { authRequired: true }
 		}
 
 		if (cursor.sections) {
-			cursor.sections.forEach((section) => section.items?.forEach((item) => items.push({ _id: item._id, num: item.num, expireAt: item.expireAt, name: item.name })));
+			cursor.sections.forEach((section) => section.items?.forEach((item) =>
+				(!query.protocolItems || query.protocolItems.length === 0 || !query.protocolItems?.some((protocolItem) => item._id === protocolItem._id))
+				&& items.push({ _id: item._id, num: item.num, expireAt: item.expireAt, name: item.name })
+			));
 		}
-		console.log({ items });
+		// console.log({ items });
 
 		return API.v1.success({ items });
 	},

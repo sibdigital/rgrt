@@ -6,7 +6,7 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 
-export function CouncilChoose({ setCouncilId, close }) {
+export function CouncilChoose({ setCouncilId, setCouncil, close }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 
@@ -19,9 +19,10 @@ export function CouncilChoose({ setCouncilId, close }) {
 
 	const onCouncilClick = useCallback((council) => {
 		console.log({ council });
-		setCouncilId(council._id);
+		setCouncilId && setCouncilId(council._id);
+		setCouncil && setCouncil({ ...council, label: [t('Council'), t('Date_to'), formatDateAndTime(council.d)].join(' ') });
 		close();
-	}, [setCouncilId, close]);
+	}, [setCouncilId, setCouncil, t, formatDateAndTime, close]);
 
 	const header = useMemo(() => [
 		<Th w='x200' key={'Council_place'} color='default'>

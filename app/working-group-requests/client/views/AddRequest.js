@@ -25,12 +25,8 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { hasPermission } from '../../../authorization';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
-import { CouncilChoose } from './CouncilChoose';
-import { ProtocolChoose } from './ProtocolChoose';
-import { ItemsChoose } from './ItemsChoose';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
+import RequestForm, { useDefaultRequestForm, WorkingGroupRequestVerticalChooseBar } from './RequestForm';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -179,124 +175,132 @@ export function AddRequest() {
 	</Page>;
 }
 
+function GetDataFromProtocolItem({ protocolsItemId }) {
+	const [description, setDescription] = useState(null);
+	const [councilId, setCouncilId] = useState(null);
+	const [itemResponsible, setItemResponsible] = useState(null);
+	const [protocolRes, setProtocolRes] = useState({});
+	const [councilRes, setCouncilRes] = useState({});
 
-function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ...props }) {
+	const query = useMemo(() => ({
+		query: JSON.stringify({ _id: protocolsItemId }),
+	}), [protocolsItemId]);
+
+	const { data: protocolData } = useEndpointDataExperimental('protocols.findByItemId', query);
+	const { data: councilData } = useEndpointDataExperimental('councils.findOne', useMemo(() => ({
+		query: JSON.stringify({ _id: protocolData?.protocol[0]?.council?._id ?? '' }),
+		fields: JSON.stringify({ d: 1 }),
+	}), [protocolData]));
+
+	useEffect(() => {
+		if (protocolData) {
+			console.dir({ protocolData, councilData });
+			if (protocolData.protocol) {
+				setCouncilId(protocolData.protocol[0]?.council?._id);
+			}
+			if (protocolData.sections) {
+				const protocolItem = protocolData.sections.map((section) => section.items.filter((item) => item._id === protocolsItemId)[0])[0];
+				const itemDesc = $(protocolItem?.name).text();
+				const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0]);
+				setDescription(itemDesc);
+				setItemResponsible(itemResponsiblePerson);
+				setProtocolRes({ d: protocolData.protocol[0]?.d, num: protocolData.protocol[0]?.num, itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson });
+			}
+			if (protocolData.protocol && councilData) {
+				setCouncilRes({ d: councilData.d });
+			}
+		}
+	}, [protocolData, protocolsItemId, councilData]);
+
+	return { description, councilId, itemResponsible, protocol: protocolRes.d ?? null, council: councilRes.d ?? null };
+}
+
+function NewAddRequest() {
 	console.log('ADD REQUEST');
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
-	const formatDateAndTime = useFormatDateAndTime();
-
-	const { _id, number: previousNumber, desc: previousDescription, date: previousDate } = request || {};
-	const previousRequest = request || {};
-
-	const [number, setNumber] = useState(previousNumber);
-	const [description, setDescription] = useState(previousDescription);
-	const [date, setDate] = useState(previousDate ? new Date(previousDate) : new Date());
-	const [mail, setMail] = useState('');
-	const [councilId, setCouncilId] = useState('');
-	const [protocolId, setProtocolId] = useState('');
-	const [protocolItemsId, setProtocolItemsId] = useState([]);
-	const [itemResponsible, setItemResponsible] = useState('');
-	const [context, setContext] = useState('');
-	const [protocol, setProtocol] = useState({});
-	const [council, setCouncil] = useState({});
 
 	const protocolsItemId = FlowRouter.getParam('id');
 	const workingGroupRequestContext = FlowRouter.getParam('context');
 
-	if (protocolsItemId && workingGroupRequestContext === 'new-protocols-item-request') {
-		const currentRequestQuery = docsdata?.filter(request => request.protocolsItemId === protocolsItemId)[0];
+	const [context, setContext] = useState('');
 
-		if (currentRequestQuery) {
-			FlowRouter.go(`/working-groups-request/${ currentRequestQuery._id }`);
-		}
-
-		const query = useMemo(() => ({
-			query: JSON.stringify({ _id: protocolsItemId }),
-		}), [protocolsItemId]);
-
-		const { data: protocol } = useEndpointDataExperimental('protocols.findByItemId', query) || { sections: [] };
-		const { data: council } = useEndpointDataExperimental('councils.list') || { councils: [] };
-
-		useEffect(() => {
-			console.log(protocol);
-			if (protocol) {
-				if (protocol.protocol) {
-					setCouncilId(protocol.protocol[0]?.council?._id);
-				}
-				if (protocol.sections) {
-					const protocolItem = protocol.sections.map(section => section.items.filter(item => item._id === protocolsItemId)[0])[0];
-					const itemDesc = $(protocolItem?.name).text();
-					const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0]);
-					setDescription(itemDesc);
-					setItemResponsible(itemResponsiblePerson);
-					setProtocol({ d: protocol.protocol[0]?.d, num: protocol.protocol[0]?.num,  itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson})
-				}
-				if (protocol.protocol && council) {
-					const protocolCouncilId = protocol.protocol[0]?.council?._id;
-					const councilData = council?.councils?.filter(i => i._id === protocolCouncilId);
-					setCouncil({ d: councilData[0]?.d, desc: councilData[0]?.desc });
-				}
-			}
-		}, [protocol, protocolsItemId, council]);
-	}
+	const { values, handlers, allFieldAreFilled } = useDefaultRequestForm({ defaultValues: null });
 
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
 
-	const handleChoose = useCallback((context) => {
-		setContext(context);
-	}, []);
+	useEffect(() => {
+		if (protocolsItemId && workingGroupRequestContext === 'new-protocols-item-request') {
+			// eslint-disable-next-line new-cap
+			const { description, itemResponsible, protocol, council } = GetDataFromProtocolItem({ protocolsItemId });
+			description && handlers.handleDescription && handlers.handleDescription(description);
+			protocol && handlers.handleProtocol && handlers.handleProtocol(protocol);
+			council && handlers.handleCouncil && handlers.handleCouncil(council);
+			itemResponsible && handlers.handleItemResponsible && handlers.handleItemResponsible(itemResponsible);
+		}
+	}, [handlers, protocolsItemId, workingGroupRequestContext]);
 
 	const close = useCallback(() => setContext(''), []);
 
-	const hasUnsavedChanges = useMemo(() => (description !== '' && number !== '') && (previousDescription !== description || previousNumber !== number || new Date(previousDate).getTime() !== new Date(date).getTime()),
-		[description, previousDescription, number, previousNumber, date, previousDate]);
-
-	const resetData = () => {
-		setDescription(previousDescription);
-		setNumber(previousNumber);
-		onChange();
-	};
-
-	const filterNumber = (value) => {
-		if (checkNumberWithDot(value, number) !== null || value === '') {
-			setNumber(value);
-		}
-	};
-
-	const saveAction = useCallback(async (number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol, council) => {
-		console.log(number);
-		console.log(description);
+	const saveAction = useCallback(async ({
+		number,
+		date,
+		council,
+		protocol,
+		protocolItems,
+		itemResponsible,
+		mail,
+		description,
+		protocolsItemId,
+	}) => {
 		const requestData = createWorkingGroupRequestData({
-			protocolId, number, desc: description, date, previousData: { previousNumber, previousDescription, _id },
-			protocolsItemId, councilId, protocolItemsId, mail, protocol, council
+			number,
+			date,
+			council,
+			protocol,
+			protocolItemsId: protocolItems?.map((protocolItem) => protocolItem._id) ?? [],
+			itemResponsible,
+			mail,
+			desc: description,
+			protocolsItemId,
 		});
 		console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
 		console.log({ validation });
 		if (validation.length === 0) {
-			const _id = await insertOrUpdateWorkingGroupRequest(requestData);
-			return _id;
+			await insertOrUpdateWorkingGroupRequest(requestData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [_id, dispatchToastMessage, insertOrUpdateWorkingGroupRequest, previousNumber, previousDescription, previousRequest, t]);
+	}, [insertOrUpdateWorkingGroupRequest, t]);
 
 	const handleSaveRequest = useCallback(async () => {
-		const result = await saveAction(number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol, council);
-		FlowRouter.go('working-groups-requests');
-		if (result) {
-			dispatchToastMessage({ type: 'success', message: t('Working_group_request_added') });
-		} else {
-			dispatchToastMessage({ type: 'success', message: t('Working_group_request_edited') });
-		}
-		if (onRequestChanged) {
-			onRequestChanged({ number, date, desc: description });
-			onChange();
-		}
-		// goToNew(result)();
-	}, [saveAction, onChange, number, description, date, protocolsItemId, councilId, protocolId, protocolItemsId, mail, protocol, council]);
+		try {
+			await saveAction({
+				number: values.number,
+				date: values.date,
+				council: values.council,
+				protocol: values.protocol,
+				protocolItems: values.protocolItems,
+				itemResponsible: values.itemResponsible,
+				mail: values.mail,
+				description: values.description,
+				protocolsItemId,
+			});
 
-	console.log({ councilId, protocolId, protocolItemsId });
+			dispatchToastMessage({
+				type: 'success',
+				message: t('Working_group_request_added'),
+			});
+
+			FlowRouter.go('working-groups-requests');
+		} catch (error) {
+			dispatchToastMessage({
+				type: 'error',
+				message: error,
+			});
+		}
+	}, [saveAction, values, protocolsItemId, t, dispatchToastMessage]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
@@ -305,90 +309,22 @@ function NewAddRequest({ mode, request, onChange, onRequestChanged, docsdata, ..
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup mis='auto'>
-					<Button primary small aria-label={t('Save')} onClick={handleSaveRequest}>
+					<Button disabled={!allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSaveRequest}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
 			<Page.ScrollableContent padding='x24'>
-				<Field mbe='x16' display='flex' flexDirection='row'>
-					<Field mie='x4'>
-						<Field.Label>{t('Number')}</Field.Label>
-						<Field.Row>
-							<TextInput value={number} onChange={(e) => setNumber(e.currentTarget.value)} placeholder={t('Number')} fontScale='p1'/>
-						</Field.Row>
-					</Field>
-					<Field mis='x4'>
-						<Field.Label>{t('Date')}</Field.Label>
-						<Field.Row>
-							<DatePicker
-								dateFormat='dd.MM.yyyy HH:mm'
-								selected={date}
-								onChange={(newDate) => setDate(newDate)}
-								showTimeSelect
-								timeFormat='HH:mm'
-								timeIntervals={5}
-								timeCaption='Время'
-								customInput={<TextInput />}
-								locale='ru'
-								popperClassName='date-picker'/>
-						</Field.Row>
-					</Field>
-				</Field>
-				{<Field mbe='x16' display='flex' flexDirection='row'>
-					{<Field mie='x4'>
-						<Field.Label>{t('Council')}</Field.Label>
-						<Field.Row>
-							<Button onClick={() => handleChoose('councilChoose')} fontScale='p1'>{[councilId ?? '', t('Choose')].join(' ')}</Button>
-						</Field.Row>
-					</Field>}
-					{<Field mis='x4'>
-						<Field.Label>{t('Protocol')}</Field.Label>
-						<Field.Row>
-							<Button onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{[protocolId ?? '', t('Choose')].join(' ')}</Button>
-						</Field.Row>
-					</Field>}
-				</Field>}
-				<Field mbe='x16'>
-					<Field.Label>{t('Protocol_Item')}</Field.Label>
-					<Field.Row>
-						<Button onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{[t('Choose'), protocolId ?? ''].join(' ')}</Button>
-					</Field.Row>
-				</Field>
-				<Field mbe='x16'>
-					<Field.Label>{t('Errand_Charged_to')}</Field.Label>
-					<Field.Row>
-						<TextInput value={ itemResponsible } onChange={(e) => setItemResponsible(e.currentTarget.value)} placeholder={t('Errand_Charged_to')} fontScale='p1'/>
-					</Field.Row>
-				</Field>
-				<Field mbe='x16'>
-					<Field.Label>{t('Working_group_request_select_mail')}</Field.Label>
-					<Field.Row>
-						<TextInput value={mail} onChange={(event) => setMail(event.currentTarget.value)} fontScale='p1'/>
-					</Field.Row>
-				</Field>
-				<Field mbe='x16'>
-					<Field.Label>{t('Description')}</Field.Label>
-					<Field.Row>
-						<TextAreaInput rows='3' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} fontScale='p1'/>
-					</Field.Row>
-				</Field>
+				{
+					useMemo(() =>
+						<RequestForm defaultHandlers={handlers} defaultValues={values} setContext={setContext}/>
+					, [handlers, values])
+				}
 			</Page.ScrollableContent>
 		</Page>
-		{context
-		&& <VerticalBar className='contextual-bar' style={{ flex: 'auto' }} width='x450' qa-context-name={`admin-user-and-room-context-${ context }`}>
-			<VerticalBar.Header>
-				{ context === 'councilChoose' && t('Council_Choose') }
-				{ context === 'protocolChoose' && t('Protocol_Choose') }
-				{ context === 'protocolItemChoose' && t('Protocol_Item_Choose') }
-				<VerticalBar.Close onClick={close}/>
-			</VerticalBar.Header>
-			<VerticalBar.ScrollableContent>
-				{context === 'councilChoose' && <CouncilChoose setCouncilId={setCouncilId} close={close}/>}
-				{context === 'protocolChoose' && <ProtocolChoose setProtocolId={setProtocolId} close={close}/>}
-				{context === 'protocolItemChoose' && <ItemsChoose protocolId={protocolId} setProtocolItemsId={setProtocolItemsId} close={close}/>}
-			</VerticalBar.ScrollableContent>
-		</VerticalBar>}
+		{useMemo(() =>
+			<WorkingGroupRequestVerticalChooseBar handlers={handlers} context={context} close={close} protocolId={values.protocol?._id ?? ''} protocolItems={values.protocolItems}/>
+		, [close, context, handlers, values.protocol, values.protocolItems])}
 	</Page>;
 }
 

@@ -6,19 +6,21 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	fields: JSON.stringify({ place: 1, d: 1, num: 1, sections: 1 }),
+const useQuery = ({ itemsPerPage, current }, [column, direction], protocolsFields) => useMemo(() => ({
+	fields: JSON.stringify(protocolsFields),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
-}), [itemsPerPage, current, column, direction]);
+}), [itemsPerPage, current, column, direction, protocolsFields]);
 
-export function ProtocolChoose({ setProtocolId, setProtocol, close }) {
+export function ProtocolChoose({ setProtocolId, setProtocol, close, protocolsFields = { place: 1, d: 1, num: 1 } }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
+	const formatDate = useFormatDate();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d']);
@@ -26,16 +28,16 @@ export function ProtocolChoose({ setProtocolId, setProtocol, close }) {
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery(debouncedParams, debouncedSort);
+	const query = useQuery(debouncedParams, debouncedSort, protocolsFields);
 
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.list', query);
 
 	const onProtocolClick = useCallback((protocol) => {
 		console.log({ protocol });
-		setProtocolId(protocol._id);
-		setProtocol(protocol);
+		setProtocolId && setProtocolId(protocol._id);
+		setProtocol && setProtocol({ ...protocol, label: [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('') });
 		close();
-	}, [setProtocolId, close, setProtocol]);
+	}, [setProtocolId, setProtocol, t, formatDate, close]);
 
 	const header = useMemo(() => [
 		<Th w='x200' key={'Protocol_Place'} color='default'>
