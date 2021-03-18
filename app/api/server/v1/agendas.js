@@ -109,8 +109,8 @@ API.v1.addRoute('agendas.numberCount', { authRequired: true }, {
 API.v1.addRoute('agendas.itemNumberCount', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		const cursor = Promise.await(findAgenda(query._id, { fields: { sections: 1 } }));
-		const count = cursor.sections ? cursor.sections.length : 1;
+		const cursor = Promise.await(findAgenda(query._id, { fields: { sections: 1, councilId: 1 } }));
+		const count = cursor.sections ? cursor.sections.length + 1 : 1;
 		return API.v1.success({ count });
 	},
 });
