@@ -21,13 +21,13 @@ export function Requests({
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const header = useMemo(() => [
-		<Th key={'Number'} style={{ width: '190px' }} color='default'>
+		<Th key={'Number'} style={{ width: '100px' }} color='default'>
 			{t('Number')}
 		</Th>,
-		<Th key={'Council'} style={{ width: '190px' }} color='default'>
+		<Th key={'Council'} style={{ width: '230px' }} color='default'>
 			{t('Council')}
 		</Th>,
-		<Th key={'Protocol_Item'} style={{ width: '190px' }} color='default'>
+		<Th key={'Protocol_Item'} style={{ width: '240px' }} color='default'>
 			{t('Protocol_Item')}
 		</Th>,
 		<Th key={'Errand_Charged_to'} color='default'>
@@ -36,18 +36,21 @@ export function Requests({
 		<Th key={'Created_at'} color='default'>
 			{t('Created_at')}
 		</Th>,
-		<Th w='x40' key='edit'></Th>,
+		<Th w='x40' key='edit'/>,
 	], [mediaQuery]);
 
 	const renderRow = (request) => {
-		const { _id, number, desc, ts, protocol, council } = request;
+		const { _id, number, ts, protocol, council } = request;
+		const councilLabel = council?.d ? [t('Council'), ' от ', formatDate(council.d)].join('') : '';
+		const protocolLabel = protocol?.d && protocol?.itemNum && protocol?.num ? [t('Protocol_Item'), ' №', protocol.itemNum, ' протокола от ', formatDate(protocol.d), ' №', protocol.num].join('') : '';
+
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{number ?? 'null'}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{number ?? '???'}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>
-				{council?.d && ("Мероприятие").concat(t(" от ")).concat(formatDate(council?.d))}
+				{councilLabel}
 			</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>
-				{protocol?.num && ("№").concat(protocol?.itemNum).concat(" протокола").concat(t(" от ")).concat(formatDate(protocol?.d)).concat(" №").concat(protocol?.num)}
+				{protocolLabel}
 			</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{protocol?.itemResponsible}</Box></Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>

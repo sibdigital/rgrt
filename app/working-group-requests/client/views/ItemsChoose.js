@@ -27,15 +27,13 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 	}), [protocolId, protocolItems]));
 
 	const getLog = (protocolItem) => {
-		console.log({ protocolItem });
 		return ['№', protocolItem.num, ', ', preProcessingProtocolItems(protocolItem.name)].join('');
-		// return ['№', protocolItem.num, ' от ', formatDate(protocolItem.expireAt)].join('');
 	};
 
 	const handleSave = useCallback((protocolItem) => {
 		setProtocolItems && setProtocolItems([...protocolItems, protocolItem]);
 		setProtocolItemsId && setProtocolItemsId([protocolItem.id]);
-		protocolData.protocolItems.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
+		protocolData?.protocolItems?.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
 	}, [protocolItems, setProtocolItems, setProtocolItemsId]);
 
 	const ProtocolItem = (protocolItem) => <Box
@@ -88,9 +86,7 @@ export function SectionChoose({ sectionArray = [], setSection, close }) {
 	const t = useTranslation();
 
 	const getLog = (protocolItem) => {
-		console.log({ protocolItem });
 		return ['№', protocolItem.num, preProcessingProtocolItems(protocolItem.name)].join(', ');
-		// return ['№', protocolItem.num, ' от ', formatDate(protocolItem.expireAt)].join('');
 	};
 
 	const handleSave = useCallback((section) => {

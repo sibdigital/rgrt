@@ -8,6 +8,8 @@ import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
+import { getAnimation } from '../../../utils';
+import { ClearButton } from '../../../utils/client/views/ClearButton';
 import { CouncilChoose } from './CouncilChoose';
 import { ProtocolChoose } from './ProtocolChoose';
 import { ItemsChoose } from './ItemsChoose';
@@ -48,38 +50,36 @@ export function useDefaultRequestForm({ defaultValues = null }) {
 	};
 }
 
-function CouncilField({ council, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
+function CouncilField({ council, handleCouncil, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const label = useMemo(() => (!council.d ? '' : [t('Council'), t('Date_to'), formatDateAndTime(council.d)].join(' ')), [council, formatDateAndTime, t]);
-	console.log('council field');
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
-			<Field.Label>{t('Council')}</Field.Label>
+			<Field.Label>{t('Council')} {council && council._id && <ClearButton onClick={() => handleCouncil({})}/>}</Field.Label>
 			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row'>
 				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Council')}/>
 				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('councilChoose')} fontScale='p1'>{t('Choose')}</Button>
 			</Box>
 		</Field>
-	, [chooseButtonStyles, flexDirection, handleChoose, label, t]);
+	, [chooseButtonStyles, flexDirection, handleChoose, handleCouncil, label, t]);
 }
 
-function ProtocolField({ protocol, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
+function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const label = useMemo(() => (!protocol.d && !protocol.num ? '' : [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('')), [protocol, formatDate, t]);
-	console.log('ProtocolField field');
 
 	return useMemo(() =>
 		<Field mis='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
-			<Field.Label>{t('Protocol')}</Field.Label>
+			<Field.Label>{t('Protocol')} {protocol && protocol._id && <ClearButton onClick={() => { handleProtocolItems([]); handleProtocol({ }); }}/>}</Field.Label>
 			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row'>
 				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>
 				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{t('Choose')}</Button>
 			</Box>
 		</Field>
-	, [t, label, chooseButtonStyles, handleChoose, flexDirection]);
+	, [flexDirection, t, protocol, label, chooseButtonStyles, handleProtocolItems, handleProtocol, handleChoose]);
 }
 
 function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, chooseButtonStyles, handleChoose }) {
@@ -94,13 +94,13 @@ function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, ch
 
 	return useMemo(() =>
 		<Box display='flex' flexDirection='column' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
-			<Field.Label>{t('Protocol_Item')}</Field.Label>
+			<Field.Label>{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}</Field.Label>
 			<Margins all='x4'>
 				<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
 					{ protocolItems.map((item, index) =>
-						<Chip pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }}
+						<Chip mie='x8' mbe='x8' pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }}
 							onClick={() => handleProtocolItemChipClick(index)} border='1px solid' color='var(--rc-color-button-primary-light)'>
-							{(!item.d && !item.num ? '' : [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(item.d), ' №', item.num].join(''))}
+							{(!item.num ? '' : [t('Protocol_Item'), ' №', item.num].join(''))}
 						</Chip>)}
 				</Box>
 				<Field
@@ -110,8 +110,10 @@ function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, ch
 				</Field>
 			</Margins>
 		</Box>
-	, [chooseButtonStyles, formatDate, handleChoose, handleProtocolItemChipClick, protocolItems, t, protocolId]);
+	, [t, protocolItems, protocolId, chooseButtonStyles, handleProtocolItems, formatDate, handleProtocolItemChipClick, handleChoose]);
 }
+
+const SlideAnimation = getAnimation({ type: 'slideInDown' });
 
 function RequestForm({ defaultValues = null, defaultHandlers = null, setContext = null }) {
 	const t = useTranslation();
@@ -139,6 +141,8 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 		handleMail,
 		handleDescription,
 		handleProtocolItems,
+		handleCouncil,
+		handleProtocol,
 	} = defaultHandlers ?? handlers;
 
 	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' }), []);
@@ -154,7 +158,7 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 
 	const filterNumber = (value) => {
 		if (checkNumber(value) !== null) {
-			// setNumber(value);
+			handleNumber(value);
 		}
 	};
 
@@ -164,7 +168,7 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
 				<Field display='flex' flexDirection='row'>
 					<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Number')}</Field.Label>
-					<TextInput mie='x12' value={number} style={ inputStyles } placeholder={t('Number')} onChange={(e) => onChangeField(e, handleNumber)} fontScale='p1'/>
+					<TextInput mie='x12' value={number} style={ inputStyles } placeholder={t('Number')} onChange={(e) => filterNumber(e.currentTarget.value)} fontScale='p1'/>
 				</Field>
 				<Field mis='x4' display='flex' flexDirection='row'>
 					<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
@@ -183,13 +187,20 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 				</Field>
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
-				<CouncilField chooseButtonStyles={chooseButtonStyles} council={council} handleChoose={handleChoose}/>
-				<ProtocolField chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleChoose={handleChoose}/>
+				{useMemo(() =>
+					<CouncilField chooseButtonStyles={chooseButtonStyles} council={council} handleCouncil={handleCouncil} handleChoose={handleChoose}/>
+				, [chooseButtonStyles, council, handleChoose, handleCouncil])}
+				{useMemo(() =>
+					<ProtocolField chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleProtocol={handleProtocol} handleProtocolItems={handleProtocolItems} handleChoose={handleChoose}/>
+				, [chooseButtonStyles, handleChoose, handleProtocol, protocol, handleProtocolItems])}
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
 				{
 					useMemo(() =>
-						<ProtocolItemsField protocolId={protocol?._id ?? null} handleChoose={handleChoose} chooseButtonStyles={chooseButtonStyles} protocolItems={protocolItems} handleProtocolItems={handleProtocolItems}/>
+						protocol._id && protocol._id !== ''
+						&& <SlideAnimation>
+							<ProtocolItemsField protocolId={protocol?._id ?? null} handleChoose={handleChoose} chooseButtonStyles={chooseButtonStyles} protocolItems={protocolItems} handleProtocolItems={handleProtocolItems}/>
+						</SlideAnimation>
 					, [chooseButtonStyles, handleChoose, handleProtocolItems, protocolItems, protocol])
 				}
 			</Field>

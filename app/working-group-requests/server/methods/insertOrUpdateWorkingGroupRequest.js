@@ -29,7 +29,7 @@ Meteor.methods({
 				mail: workingGroupRequestData.mail ?? [],
 			};
 
-			workingGroupRequestData.itemResponsible && Object.assign(workingGroupRequestData, { itemResponsible: workingGroupRequestData.itemResponsible });
+			workingGroupRequestData.itemResponsible && Object.assign(createWorkingGroupRequest, { itemResponsible: workingGroupRequestData.itemResponsible });
 			workingGroupRequestData.protocol && Object.assign(createWorkingGroupRequest, { protocol: workingGroupRequestData.protocol });
 			workingGroupRequestData.council && Object.assign(createWorkingGroupRequest, { council: workingGroupRequestData.council });
 			workingGroupRequestData.councilId && Object.assign(createWorkingGroupRequest, { councilId: workingGroupRequestData.councilId });

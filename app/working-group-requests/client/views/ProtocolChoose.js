@@ -17,23 +17,23 @@ const useQuery = ({ itemsPerPage, current }, [column, direction], protocolsField
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction, protocolsFields]);
 
-export function ProtocolChoose({ setProtocolId, setProtocol, close, protocolsFields = { place: 1, d: 1, num: 1 } }) {
+export function ProtocolChoose({ setProtocolId, setProtocol, close, protocolsFields = null }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const formatDate = useFormatDate();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d']);
+	const [refProtocolsFields, setRefProtocolsFields] = useState(protocolsFields ?? { place: 1, d: 1, num: 1 });
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery(debouncedParams, debouncedSort, protocolsFields);
+	const query = useQuery(debouncedParams, debouncedSort, refProtocolsFields);
 
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.list', query);
 
 	const onProtocolClick = useCallback((protocol) => {
-		console.log({ protocol });
 		setProtocolId && setProtocolId(protocol._id);
 		setProtocol && setProtocol({ ...protocol, label: [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('') });
 		close();
