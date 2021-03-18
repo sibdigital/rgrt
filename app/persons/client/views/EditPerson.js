@@ -20,6 +20,8 @@ import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { validate, createPerson } from './lib';
+import { useFileInput } from '/client/hooks/useFileInput';
+import { uploadPersonAvatar } from './uploadPersonAvatar';
 
 const DEFAULT_WEIGHT_PERSON = 100;
 
@@ -96,6 +98,10 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 	const [phone, setPhone] = useState(previousPhone);
 	const [email, setEmail] = useState(previousEmail);
 	const [weight, setWeight] = useState(person.weight ?? DEFAULT_WEIGHT_PERSON);
+	const [avatarObj, setAvatarObj] = useState();
+	const [newAvatarSource, setNewAvatarSource] = useState();
+
+	const url = newAvatarSource;
 
 	const setModal = useSetModal();
 
@@ -129,8 +135,9 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 		&& weight !== ''
 	, [surname, name, patronymic, phone, email, weight]);
 
-	const saveAction = useCallback(async (surname, name, patronymic, phone, email, weight) => {
-		const personData = createPerson(surname, name, patronymic, phone, email, previousPerson, weight);
+	const saveAction = useCallback(async (surname, name, patronymic, phone, email, weight, avatarSource) => {
+		
+		const personData = createPerson(surname, name, patronymic, phone, email, previousPerson, weight, avatarSource);
 		const validation = validate(personData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdatePerson(personData);
@@ -139,7 +146,13 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 	}, [insertOrUpdatePerson, previousPerson, t]);
 
 	const handleSave = useCallback(async () => {
-		await saveAction(surname, name, patronymic, phone, email, weight);
+		const promiseResolve = uploadAvatar().then((resolve) => {
+			return resolve;
+		})
+		const avatarSource = await promiseResolve;
+		console.log(avatarSource);
+
+		await saveAction(surname, name, patronymic, phone, email, weight, avatarSource);
 		close();
 	}, [saveAction, close, surname, name, patronymic, phone, email, weight]);
 
@@ -155,7 +168,25 @@ function EditWorkingGroupWithData({ person, onChange, close, ...props }) {
 
 	const openConfirmDelete = () => setModal(() => <DeleteWarningModal onDelete={onDeleteConfirm} onCancel={() => setModal(undefined)}/>);
 
+	const setUploadedPreview = useCallback(async (file) => {
+		setNewAvatarSource(URL.createObjectURL(file));
+		setAvatarObj({ file: file });
+	}, [setAvatarObj]);
+
+	const [clickUpload] = useFileInput(setUploadedPreview);
+
+	const uploadAvatar = async() => {
+		const avatarData = await uploadPersonAvatar(avatarObj);
+
+		return avatarData;
+	}
+
 	return <VerticalBar.ScrollableContent {...props}>
+		<Field>
+			<a><img height='100%' width='100%' src={url}/></a>
+			<Button mbs='x4' w={'auto'} square onClick={clickUpload}><Icon name='upload' size='x20'/>{t('Upload photo')}</Button>
+		</Field>
+		<hr align='center' width='100%' size='2' color='#cbced1' />
 		<Field>
 			<Field.Label>{t('Weight')}</Field.Label>
 			<Field.Row>
