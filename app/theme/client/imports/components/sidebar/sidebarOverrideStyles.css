@@ -1,3 +1,7 @@
+#sidebar {
+	transition: all 0.15s cubic-bezier(0.5, 0, 0.1, 1);
+}
+
 .pre-header {
     height: 63px;
     text-align: right;
@@ -13,6 +17,11 @@
 .sidebar.hidden {
     flex: 0 0 1%;
     width: 70px;
+}
+
+.sidebar.hidden .sidebar__footer {
+    width: 70px;
+    height: 76px !important;
 }
 
 .sidebar.hidden .sidebar__toolbar,
