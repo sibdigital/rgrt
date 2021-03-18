@@ -45,7 +45,7 @@ export async function findProtocolByItemId(_id, options = {}) {
 	};
 }
 
-export async function findProtocol(_id) {
-	const cursor = await Protocols.findOne({ _id });
+export async function findProtocol(_id, options = {}) {
+	const cursor = await Protocols.findOne({ _id }, options);
 	return cursor;
 }

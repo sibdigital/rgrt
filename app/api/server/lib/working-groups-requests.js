@@ -69,12 +69,8 @@ export async function findWorkingGroupRequestAnswerByAnswerId(requestId, answerI
 	return {};
 }
 
-export async function findWorkingGroupRequestByProtocolsItemId(_id) {
-	const cursor = await WorkingGroupsRequests.find()
+export async function findWorkingGroupRequestByProtocolsItemId(protocolsItemId, options = {}) {
+	const cursor = await WorkingGroupsRequests.findOne({ protocolsItemId }, options);
 
-	const workingGroupsRequest = await cursor.toArray();
-	console.log(workingGroupsRequest)
-	return {
-		workingGroupsRequest
-	}
+	return cursor ?? {};
 }
