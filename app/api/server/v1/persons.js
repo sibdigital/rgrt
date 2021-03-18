@@ -97,6 +97,7 @@ API.v1.addRoute('persons.uploadAvatar', { authRequired: true }, {
 		const details = {
 			name: file.name,
 			size: file.fileBuffer.length,
+			type: file.mimetype
 		}
 
 		const fileData = Meteor.runAsUser(this.userId, () => {
