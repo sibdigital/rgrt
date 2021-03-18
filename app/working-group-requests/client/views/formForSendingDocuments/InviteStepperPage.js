@@ -127,7 +127,7 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 						<VerticalBar.Close onClick={() => setContext('')}/>
 					</VerticalBar.Header>
 					<VerticalBar.ScrollableContent>
-						{context === 'protocolSelect' && <ProtocolChoose setProtocolId={setProtocolId} setProtocol={setProtocol} close={() => setContext('')}/>}
+						{context === 'protocolSelect' && <ProtocolChoose protocolsFields={{ place: 1, d: 1, num: 1, sections: 1 }} setProtocolId={setProtocolId} setProtocol={setProtocol} close={() => setContext('')}/>}
 						{context === 'protocolSectionSelect' && <SectionChoose sectionArray={protocol?.sections ?? []} setSection={setSection} close={() => setContext('')}/>}
 						{context === 'protocolItemSelect' && <ItemsChoose protocolId={protocolId} setProtocolItemsId={() => console.log('')} setProtocolItems={setProtocolItemsId} close={() => setContext('')}/>}
 					</VerticalBar.ScrollableContent>
