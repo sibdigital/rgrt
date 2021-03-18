@@ -19,7 +19,7 @@ Template.sideNav.helpers({
 	},
 
 	footer() {
-		return String(settings.get('Layout_Sidenav_Footer')).trim();
+		return '<a id="logo-place" href="/home" class="small-logo"><img src="assets/favicon.svg" alt="Home" /></a>';
 	},
 
 	roomType() {
