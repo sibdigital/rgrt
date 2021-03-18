@@ -15,6 +15,7 @@ import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { SuccessModal, WarningModal } from '../../../utils/index';
 import { downloadCouncilParticipantsForm } from './lib';
+import { useRoute, useRouteParameter } from '/client/contexts/RouterContext';
 
 require('moment/locale/ru.js');
 
@@ -173,6 +174,10 @@ function CouncilsCalendar({
 }) {
 	const t = useTranslation();
 	const localizer = momentLocalizer(moment);
+
+	const router = useRoute('councils');
+	const context = useRouteParameter('context');
+
 	const myEventsList = useMemo(() =>
 		data?.councils?.length > 0
 			? data.councils.map((council) => ({ _id: council._id, title: council.desc, start: new Date(council.d), end: new Date(council.d) }))
@@ -240,6 +245,7 @@ function CouncilsCalendar({
 			month: t('Month'),
 			week: t('Week'),
 			day: t('Day'),
+			showMore: (target) => <a href={[router.getUrl(), context].join('/')}>{`+ёще ${ target }`}</a>,
 		}}
 
 		components={{
