@@ -5,6 +5,7 @@ import { css } from '@rocket.chat/css-in-js';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
+import { romanize } from '../../../utils/lib/romanNumeralConverter';
 
 const clickable = css`
 		cursor: pointer;
@@ -75,7 +76,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick, isAllowedE
 			flexDirection='row'
 			className={clickable}
 		>
-			<Box is='span' pie='x8'>{section.num}.</Box>
+			<Box is='span' pie='x8'>{romanize(section.num)}.</Box>
 			<Box flexGrow={1}>
 				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: section.name }} align='justify'/>
 				{ section.speakers && <Box mbe='x4'>{t('Protocol_section_speakers')}: {section.speakers}</Box>}

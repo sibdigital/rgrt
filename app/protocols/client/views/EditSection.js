@@ -19,6 +19,7 @@ import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client
 import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
+import { romanize, deromanize } from '../../../utils/lib/romanNumeralConverter';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -63,7 +64,7 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 	const [speakers, setSpeakers] = useState('');
 
 	useEffect(() => {
-		setNumber(previousNumber || '');
+		setNumber(romanize(previousNumber) || '');
 		setName(previousName || '');
 		setSpeakers(previousSpeakers || '');
 	}, [previousNumber, previousName, previousSpeakers, _id]);
@@ -80,7 +81,7 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 		[number, name, speakers]);
 
 	const saveAction = useCallback(async (number, name, speakers) => {
-		const sectionData = createSectionData(number, name, speakers, { previousNumber, previousName, previousSpeakers, _id });
+		const sectionData = createSectionData(deromanize(number), name, speakers, { previousNumber, previousName, previousSpeakers, _id });
 		const validation = validateSectionData(sectionData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateSection(protocol._id, sectionData);

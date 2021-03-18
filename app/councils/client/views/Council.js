@@ -46,7 +46,6 @@ import {
 	createSectionData,
 	validateProtocolData
 } from '../../../protocols/client/views/lib';
-import { romanize } from '../../../utils/lib/romanNumeralConverter';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -511,7 +510,7 @@ function Council({
 							let sectionNumber = 1;
 							for (const section of agendaData.sections) {
 								const itemNumber = 1;
-								const sectionData = createSectionData(romanize(sectionNumber), section.item);
+								const sectionData = createSectionData(sectionNumber, section.item);
 								sectionData.items = [];
 								const itemData = createItemData(itemNumber, section.issueConsideration);
 								sectionData.items.push(itemData);
