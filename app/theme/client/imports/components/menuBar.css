@@ -84,3 +84,9 @@
         display: none;
     }
 }
+
+.imgRerenderer {
+    object-fit: cover;
+	image-rendering: -webkit-optimize-contrast;
+	image-rendering: optimizeQuality;
+}

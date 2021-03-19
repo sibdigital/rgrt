@@ -9,7 +9,7 @@ export function validate(personData) {
 	return errors;
 }
 
-export function createPerson(surname, name, patronymic, phone, email, previousData, weight) {
+export function createPerson(surname, name, patronymic, phone, email, previousData, weight, avatarSource = {}) {
 	const personData = {
 		...previousData,
 	};
@@ -26,6 +26,7 @@ export function createPerson(surname, name, patronymic, phone, email, previousDa
 	personData.phone = phone;
 	personData.email = email;
 	personData.weight = weight;
+	personData.avatar = avatarSource;
 
 	return personData;
 }

@@ -3,6 +3,7 @@ import { Session } from 'meteor/session';
 
 import { AccountBox } from './AccountBox';
 import { roomTypes } from '../../../utils/client/lib/roomTypes';
+import { getUserPreference } from '../../../utils/lib/getUserPreference';
 import { Subscriptions } from '../../../models';
 
 export const SideNav = new class {
@@ -59,6 +60,10 @@ export const SideNav = new class {
 			return;
 		}
 		this.toggleFlex(-1, callback);
+
+		setTimeout(() => {
+			this.setCollapsed();
+		},25)
 	}
 
 	flexStatus() {
@@ -130,8 +135,7 @@ export const SideNav = new class {
 
 	init() {
 		let elem = document.getElementById('sidebar');
-		let footer = document.createElement('a');
-		footer.href = '/home';
+		let footer = document.getElementById('logo-place');
 
 		this.sideNav = $('.sidebar');
 		this.flexNav = this.sideNav.find('.flex-nav');
@@ -154,8 +158,6 @@ export const SideNav = new class {
 	}
 	
 	setCollapsed = () => {
-		Session.set('sidebar_className', this.sidebarPos.elem.className);
-
 		this.sidebarPos.elem.className = 'sidebar hidden';
 		this.sidebarPos.footer.className = 'small-logo';
 		this.sidebarPos.footer.innerHTML = `<img src="assets/favicon.svg" alt="Home"/>`;
@@ -164,7 +166,10 @@ export const SideNav = new class {
 	}
 	
 	setExpanded = () => {
-		this.sidebarPos.elem.className = Session.get('sidebar_className');
+		const viewMode = getUserPreference(Meteor.userId(), 'sidebarViewMode');
+		const sidebarHideAvatar = getUserPreference(Meteor.userId(), 'sidebarHideAvatar');
+		this.sidebarPos.elem.className = `sidebar sidebar--${ viewMode ?? 'condensed' } ${ sidebarHideAvatar ? 'sidebar--hide-avatar' : '' }`;
+		this.sidebarPos.footer.className = 'standard-logo';
 		this.sidebarPos.footer.innerHTML = `<img src="assets/logo.png" alt="Home"/>`;
 
 		document.getElementById('sidebar__footer_id').append(this.sidebarPos.footer);

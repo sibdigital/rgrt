@@ -30,10 +30,10 @@ export function Persons({
 	], [sort, mediaQuery]);
 
 	const renderRow = (person) => {
-		const { _id, name, surname, patronymic, email, emails, phone } = person;
+		const { _id, name, surname, patronymic, email, emails, phone, avatarUrl } = person;
 		// const email = emails ? emails[0].address : '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{surname} {name} {patronymic}</Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'> {surname} {name} {patronymic}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'><Box withTruncatedText>{email}</Box></Table.Cell>}
 			<Table.Cell alignItems={'end'}>
