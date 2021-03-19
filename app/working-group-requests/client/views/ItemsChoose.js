@@ -21,10 +21,12 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 
+	const protocolItemsState = useMemo(() => protocolItems, [protocolItems]);
+
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.getProtocolItemsByProtocolId', useMemo(() => ({
-		query: JSON.stringify({ _id: protocolId, protocolItems }),
+		query: JSON.stringify({ _id: protocolId, protocolItems: protocolItemsState }),
 		fields: JSON.stringify({ expireAt: 1, num: 1 }),
-	}), [protocolId, protocolItems]));
+	}), [protocolId, protocolItemsState]));
 
 	const getLog = (protocolItem) => {
 		return ['№', protocolItem.num, ', ', preProcessingProtocolItems(protocolItem.name)].join('');
@@ -34,7 +36,7 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 		setProtocolItems && setProtocolItems([...protocolItems, protocolItem]);
 		setProtocolItemsId && setProtocolItemsId([protocolItem.id]);
 		protocolData?.protocolItems?.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
-	}, [protocolItems, setProtocolItems, setProtocolItemsId]);
+	}, [protocolData, protocolItems, setProtocolItems, setProtocolItemsId]);
 
 	const ProtocolItem = (protocolItem) => <Box
 		pb='x4'
