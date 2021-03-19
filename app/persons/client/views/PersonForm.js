@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Field, Icon, Margins, TextInput } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, Icon, Margins, TextInput } from '@rocket.chat/fuselage';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -56,7 +56,14 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 	};
 }
 
-function PersonForm({ defaultValues = null, defaultHandlers = null, isWeight = true }) {
+function PersonForm({
+	defaultValues = null,
+	defaultHandlers = null,
+	isWeight = true,
+	onShowCancelAndSaveButtons = false,
+	onCancel = null,
+	onSave = null,
+}) {
 	const t = useTranslation();
 	const fieldMarginBlock = 'x4';
 	const fieldWidth = '98%';
@@ -64,6 +71,7 @@ function PersonForm({ defaultValues = null, defaultHandlers = null, isWeight = t
 	const {
 		values,
 		handlers,
+		allFieldAreFilled,
 	} = useDefaultPersonForm({ defaultValues });
 
 	const {
@@ -88,13 +96,6 @@ function PersonForm({ defaultValues = null, defaultHandlers = null, isWeight = t
 		handlePosition,
 	} = defaultHandlers ?? handlers;
 
-	const onChangeField = useCallback((val, handler) => {
-		handler(val);
-		if (defaultHandlers && defaultHandlers[handler.name]) {
-			defaultHandlers[handler.name](val);
-		}
-	}, [defaultHandlers]);
-
 	const filterNumber = useCallback((value) => {
 		if (checkNumber(value) !== null) {
 			handleWeight(value);
@@ -114,21 +115,21 @@ function PersonForm({ defaultValues = null, defaultHandlers = null, isWeight = t
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Surname')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={surname} onChange={(val) => onChangeField(val, handleSurname)}/>
+					<TextInput flexGrow={1} value={surname} onChange={(val) => handleSurname(val)}/>
 				</Field.Row>
-			</Field>, [t, surname, handleSurname, onChangeField])}
+			</Field>, [t, surname, handleSurname])}
 
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Name')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={name} onChange={(val) => onChangeField(val, handleName)}/>
+					<TextInput flexGrow={1} value={name} onChange={(val) => handleName(val)}/>
 				</Field.Row>
 			</Field>, [t, name, handleName])}
 
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Patronymic')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={patronymic} onChange={(val) => onChangeField(val, handlePatronymic)}/>
+					<TextInput flexGrow={1} value={patronymic} onChange={(val) => handlePatronymic(val)}/>
 				</Field.Row>
 			</Field>, [t, patronymic, handlePatronymic])}
 
@@ -136,7 +137,7 @@ function PersonForm({ defaultValues = null, defaultHandlers = null, isWeight = t
 				<Field.Label>{t('Phone_number')}</Field.Label>
 				<Field.Row>
 					<PhoneInput
-						inputStyle={{ width: '100%', borderWidth: '0.125rem', borderRadius: '0' }} value={phone} onChange={(val) => onChangeField(val, handlePhone)} country={'ru'}
+						inputStyle={{ width: '100%', borderWidth: '0.125rem', borderRadius: '0' }} value={phone} onChange={(val) => handlePhone(val )} country={'ru'}
 						countryCodeEditable={false} placeholder={'+7 (123)-456-78-90'}/>
 				</Field.Row>
 			</Field>, [t, phone, handlePhone])}
@@ -144,23 +145,28 @@ function PersonForm({ defaultValues = null, defaultHandlers = null, isWeight = t
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Email')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={(val) => onChangeField(val, handleEmail)} addon={<Icon name='mail' size='x20'/>}/>
+					<TextInput flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={(val) => handleEmail(val)} addon={<Icon name='mail' size='x20'/>}/>
 				</Field.Row>
 			</Field>, [t, email, handleEmail])}
 
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Position')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={position} onChange={(val) => onChangeField(val, handlePosition)}/>
+					<TextInput flexGrow={1} value={position} onChange={(val) => handlePosition(val)}/>
 				</Field.Row>
-			</Field>, [t, position, onChangeField, handlePosition])}
+			</Field>, [t, position, handlePosition])}
 
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
 				<Field.Label>{t('Organization')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={organization} onChange={(val) => onChangeField(val, handleOrganization)}/>
+					<TextInput flexGrow={1} value={organization} onChange={(val) => handleOrganization(val)}/>
 				</Field.Row>
-			</Field>, [t, organization, onChangeField, handleOrganization])}
+			</Field>, [t, organization, handleOrganization])}
+
+			{onShowCancelAndSaveButtons && <ButtonGroup mb='x16'>
+				<Button flexGrow={1} onClick={() => !!onCancel && onCancel()}>{t('Cancel')}</Button>
+				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Send_request_answer')}</Button>
+			</ButtonGroup>}
 		</Margins>
 	</Box>;
 }

@@ -33,7 +33,7 @@ export function CouncilsPage() {
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d', 'desc']);
-	const [cache, setCache] = useState();
+	const [cache, setCache] = useState(new Date());
 	const [displayMode, setDisplayMode] = useState('table');
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -96,12 +96,12 @@ export function CouncilsPage() {
 				</Field>
 				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
 					<Tabs mbe='x8' flexShrink={0} width='auto'>
-						<Tooltip title="Список" arrow>
+						<Tooltip title={t('List')} arrow>
 							<Tabs.Item selected={displayMode === 'table'} onClick={() => handleTabClick('table')}>
 								<Icon name='list'/>
 							</Tabs.Item>
 						</Tooltip>
-						<Tooltip title='Календарь' arrow>
+						<Tooltip title={t('Calendar')} arrow>
 							<Tabs.Item selected={displayMode === 'calendar'} onClick={() => handleTabClick('calendar')}>
 								<Icon name='calendar'/>
 							</Tabs.Item>
