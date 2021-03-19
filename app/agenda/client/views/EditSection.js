@@ -7,6 +7,7 @@ import {
 	FieldGroup,
 	TextAreaInput,
 	Callout,
+	Modal,
 } from '@rocket.chat/fuselage';
 import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
@@ -18,13 +19,30 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { checkNumber } from '../../../utils/client/methods/checkNumber';
+import { useSetModal } from '../../../../client/contexts/ModalContext';
+import PersonForm from '../../../persons/client/views/PersonForm';
 import { validateAgendaSection, createAgendaSection } from './lib';
 
 require('react-datepicker/dist/react-datepicker.css');
 
+function RenderNewPersonCreateModal({ onCancel, onSave, ...props }) {
+	const t = useTranslation();
+
+	return <Modal {...props}>
+		<Modal.Header>
+			<Modal.Title>{t('Errand_details')}</Modal.Title>
+			<Modal.Close onClick={onCancel}/>
+		</Modal.Header>
+		<Modal.Content fontScale='p1' mb='x24'>
+			<PersonForm isWeight={false} onShowCancelAndSaveButtons={true} onCancel={onCancel} onSave={onSave}/>
+		</Modal.Content>
+	</Modal>;
+}
+
 export function EditSection({ agendaId = null, councilId, onEditDataClick, close, onChange, personsOptions, data = null, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const setModal = useSetModal();
 
 	const [editData, setEditData] = useState({
 		item: '',
@@ -54,10 +72,10 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 	}, [data, numberCountData]);
 
 	const insertOrUpdateAgendaSection = useMethod('insertOrUpdateAgendaSection');
+	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		let value = getValue(e);
-		console.log({ check: checkNumber(value) });
 		if (field === 'item' && !checkNumber(value)) {
 			value = editData.item;
 		}
@@ -66,8 +84,25 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		onChange();
 	};
 	const handleSpeakers = (value) => {
-		// console.log(value);
 		setEditData({ ...editData, speakers: value });
+	};
+
+	const cancelModal = useCallback(() => setModal(undefined), [setModal]);
+
+	const handleCreateNewPerson = useCallback(async (person) => {
+		try {
+			const personId = await insertOrUpdatePerson(person);
+			console.dir({ person, personId });
+			setEditData({ ...editData, speakers: [...editData.speakers, { _id: personId, surname: person.surname, name: person.name, patronymic: person.patronymic }] });
+			cancelModal();
+		} catch (error) {
+			console.error(error);
+		}
+	}, [cancelModal, editData, insertOrUpdatePerson]);
+
+	const onCreateNewPerson = () => {
+		// eslint-disable-next-line new-cap
+		setModal(() => RenderNewPersonCreateModal({ onCancel: cancelModal, onSave: handleCreateNewPerson }));
 	};
 
 	const saveAction = useCallback(async (item, initiatedBy, issueConsideration, speakers, previousData) => {
@@ -149,6 +184,18 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 						placeholder={t('Agenda_speakers')}
 					/>
 				)}
+				noOptionsText={
+					<Button
+						onMouseDown={onCreateNewPerson}
+						backgroundColor='inherit'
+						borderColor='lightgrey'
+						borderWidth='0.5px'
+						textAlign='center'
+						width='100%'
+					>
+						{ t('Participant_Create') }
+					</Button>
+				}
 			/>
 		</Field>
 		<Field>
