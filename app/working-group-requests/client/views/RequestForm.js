@@ -82,7 +82,7 @@ function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseBu
 	, [flexDirection, t, protocol, label, chooseButtonStyles, handleProtocolItems, handleProtocol, handleChoose]);
 }
 
-function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, chooseButtonStyles, handleChoose }) {
+export function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, chooseButtonStyles, onShowLabelAndTooltip = true, onShowChooseButton = true, handleChoose = () => {} }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 
@@ -94,7 +94,7 @@ function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, ch
 
 	return useMemo(() =>
 		<Box display='flex' flexDirection='column' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
-			<Field.Label>{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}</Field.Label>
+			{onShowLabelAndTooltip && <Field.Label>{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}</Field.Label>}
 			<Margins all='x4'>
 				<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
 					{ protocolItems.map((item, index) =>
@@ -103,11 +103,11 @@ function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, ch
 							{(!item.num ? '' : [t('Protocol_Item'), ' №', item.num].join(''))}
 						</Chip>)}
 				</Box>
-				<Field
+				{onShowChooseButton && <Field
 					maxHeight='30px' maxWidth='250px' display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start'
 					border='0px hidden transparent' borderRadius='0.6rem' alignItems='center'>
 					<Button disabled={!protocolId} style={chooseButtonStyles} small onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{t('Add')}</Button>
-				</Field>
+				</Field>}
 			</Margins>
 		</Box>
 	, [t, protocolItems, protocolId, chooseButtonStyles, handleProtocolItems, formatDate, handleProtocolItemChipClick, handleChoose]);

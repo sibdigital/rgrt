@@ -33,7 +33,7 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 	};
 
 	const handleSave = useCallback((protocolItem) => {
-		setProtocolItems && setProtocolItems([...protocolItems, protocolItem]);
+		setProtocolItems && setProtocolItems([...protocolItems, { ...protocolItem, name: preProcessingProtocolItems(protocolItem.name) }]);
 		setProtocolItemsId && setProtocolItemsId([protocolItem.id]);
 		protocolData?.protocolItems?.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
 	}, [protocolData, protocolItems, setProtocolItems, setProtocolItemsId]);

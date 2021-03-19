@@ -24,6 +24,7 @@ import { filesValidation } from '../../../../../ui/client/lib/fileUpload';
 import GenericTable, { Th } from '../../../../../../client/components/GenericTable';
 import { ClearButton } from '../../../../../utils/client/views/ClearButton';
 import { preProcessingProtocolItems } from '../../lib';
+import { ProtocolItemsField } from '../../RequestForm';
 import './reactTooltip.css';
 
 registerLocale('ru', ru);
@@ -164,9 +165,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
 
 	useEffect(() => {
-		if (protocolSelectLabel === '') {
-			setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
-		}
+		// if (protocolSelectLabel === '') {
+		// 	setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
+		// }
 		// setProtocolsFindData(protocolsData ?? []);
 		workingGroupRequest.mail && setCustomAnswerMailLabel(workingGroupRequest.mail);
 		// workingGroupRequest.number && workingGroupRequest.date && setAnswerMailLabel(['#', workingGroupRequest.number, ' от ', formatDate(workingGroupRequest.date)].join(''));
@@ -446,7 +447,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 									</Button>}
 								</Label>
 							</Field.Row>
-							<TextInput disabled={!protocolSelected} readOnly value={protocolSelectItemLabel} placeholder={t('Working_group_request_invite_select_sections_items')}/>
+							{/*<TextInput disabled={!protocolSelected} readOnly value={protocolSelectItemLabel} placeholder={t('Working_group_request_invite_select_sections_items')}/>*/}
+							<ProtocolItemsField protocolItems={protocolItemsId} handleProtocolItems={setProtocolItemsId} protocolId={protocol?._id ?? ''} onShowChooseButton={false} onShowLabelAndTooltip={false}/>
 						</Field>}
 						<Field>
 							<Field.Label>{t('Commentary')}</Field.Label>
