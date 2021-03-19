@@ -1,9 +1,9 @@
 import { APIClient } from '../../../utils';
 
-export const uploadPersonAvatar = async ({file}) => {
+export const uploadPersonAvatar = async (file) => {
 	const uploadedFile = await uploadFile({
 		description: '',
-		file: { file },
+		file: file,
 		// ts: file.ts,
 	});
 
