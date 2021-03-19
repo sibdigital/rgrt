@@ -15,7 +15,7 @@ import UserAvatar from '../../../../client/components/basic/avatar/UserAvatar';
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQueryPerson = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	//query: JSON.stringify({ workingGroup: "Состав комиссии" }),
+	query: JSON.stringify({ workingGroup: "Состав комиссии" }),
 	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, workingGroup: 1, avatar: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
