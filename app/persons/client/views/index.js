@@ -28,8 +28,8 @@ export function PersonsPage() {
 	const routeName = 'persons';
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [sort, setSort] = useState(['_id']);
-	const [cache, setCache] = useState();
+	const [sort, setSort] = useState(['createdAt']);
+	const [cache, setCache] = useState(new Date());
 	const [currentPerson, setCurrentPerson] = useState({});
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -112,10 +112,10 @@ export function PersonsPage() {
 				{ context === 'edit' && t('Person_edit') }
 				{ context === 'new' && t('Person_add') }
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
-			<VerticalBar.Content>
-				{context === 'edit' && <EditPerson _id={id} person={currentPerson} close={close} onChange={onChange} cache={cache}/>}
-				{context === 'new' && <EditPerson _id={null} persons={null} close={close} onChange={onChange} cache={cache}/>}
-			</VerticalBar.Content>
+			<VerticalBar.ScrollableContent mbe='x32'>
+				{context === 'edit' && <EditPerson person={currentPerson} close={close} onChange={onChange}/>}
+				{context === 'new' && <EditPerson person={null} close={close} onChange={onChange}/>}
+			</VerticalBar.ScrollableContent>
 		</VerticalBar>}
 	</Page>;
 }

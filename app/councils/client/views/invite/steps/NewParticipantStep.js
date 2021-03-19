@@ -10,7 +10,7 @@ import { Pager } from '../../../../../../client/views/setupWizard/Pager';
 import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { useInvitePageContext } from '../InvitePageState';
-import PersonForm, { useDefaultPersonForm } from '../../../../../persons/client/views/PersonForm';
+import PersonForm, { useDefaultPersonForm, ContactPersonForm } from '../../../../../persons/client/views/PersonForm';
 
 function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAgenda, setUserDataClick }) {
 	const t = useTranslation();
@@ -112,14 +112,14 @@ function NewParticipantStep({ stepStyle = {}, step, title, active, council, isAg
 			<Box>
 				<Box is='p' fontScale='s1' color='hint' marginBlockEnd='x16'>{t('Council_participant_info_description')}</Box>
 
-				<PersonForm defaultValues={values} defaultHandlers={handlers}/>
+				<PersonForm defaultValues={values} defaultHandlers={handlers} isWeight={false}/>
 
 				<Box margin='x8'>
 					<CheckBox checked={isContactPerson} onChange={() => setIsContactPerson(!isContactPerson)} mie='x8' />
 					<Field.Label>{t('Council_Is_Contact_person')}</Field.Label>
 				</Box>
 				{isContactPerson
-				&& <PersonForm defaultValues={contactPersonValues} defaultHandlers={contactPersonHandlers} isContactPerson={true}/>
+				&& <ContactPersonForm defaultValues={contactPersonValues} defaultHandlers={contactPersonHandlers}/>
 				}
 			</Box>
 		</Margins>

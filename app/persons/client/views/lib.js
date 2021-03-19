@@ -9,7 +9,7 @@ export function validate(personData) {
 	return errors;
 }
 
-export function createPerson(surname, name, patronymic, phone, email, previousData, weight, avatarSource = {}) {
+export function createPerson({ personToSave }, { previousData }) {
 	const personData = {
 		...previousData,
 	};
@@ -19,14 +19,18 @@ export function createPerson(surname, name, patronymic, phone, email, previousDa
 	if (previousData && previousData._id) {
 		personData._id = previousData._id;
 	}
+	const { surname, name, patronymic, phone, email, organization, position, weight, avatarSource = {} } = personToSave;
 
-	personData.surname = surname;
-	personData.name = name;
-	personData.patronymic = patronymic;
-	personData.phone = phone;
-	personData.email = email;
-	personData.weight = weight;
-	personData.avatar = avatarSource;
+	surname && Object.assign(personData, { surname });
+	name && Object.assign(personData, { name });
+	patronymic && Object.assign( personData, { patronymic });
+	phone && Object.assign(personData, { phone });
+	email && Object.assign(personData, { email });
+	position && Object.assign(personData, { position });
+	organization && Object.assign(personData, { organization });
+	weight && Object.assign(personData, { weight });
+	avatarSource && Object.assign(personData, { avatarSource });
 
+	// console.dir({ personData, personToSave });
 	return personData;
 }
