@@ -57,8 +57,11 @@ Meteor.methods({
 
 				if (direction === 'down') {
 					if (index < section.items.length - 1) {
+						const newNum = section.items[index + 1].num;
 						const newIndex = section.items[index + 1].inum;
+						section.items[index + 1].num = item.num;
 						section.items[index + 1].inum = item.inum;
+						item.num = newNum;
 						item.inum = newIndex;
 						section.items.sort(sortItems);
 						Protocols.updateProtocol(protocolId, protocol);
@@ -66,8 +69,11 @@ Meteor.methods({
 					}
 				} else {
 					if (index > 0) {
+						const newNum = section.items[index - 1].num;
 						const newIndex = section.items[index - 1].inum;
+						section.items[index - 1].num = item.num;
 						section.items[index - 1].inum = item.inum;
+						item.num = newNum;
 						item.inum = newIndex;
 						section.items.sort(sortItems);
 						Protocols.updateProtocol(protocolId, protocol);

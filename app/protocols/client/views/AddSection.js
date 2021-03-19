@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Field, Button, InputBox, ButtonGroup } from '@rocket.chat/fuselage';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -10,6 +10,7 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
+import { romanize, deromanize } from '../../../utils/lib/romanNumeralConverter';
 
 export function AddSection({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -21,7 +22,16 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 
 	const protocolId = useRouteParameter('id');
 
+	const getMaxProtocolSectionNum = useMethod('getMaxProtocolSectionNum');
 	const insertOrUpdateSection = useMethod('insertOrUpdateSection');
+
+	useEffect(() => {
+		const getMaxNum = async () => {
+			const num = await getMaxProtocolSectionNum(protocolId);
+			setNumber(romanize(num + 1));
+		};
+		getMaxNum();
+	}, []);
 
 	const filterNumber = (value) => {
 		if (checkRomanNumber(value.toUpperCase()) !== null) {
@@ -30,7 +40,7 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 	};
 
 	const saveAction = useCallback(async (number, name, speakers) => {
-		const sectionData = createSectionData(number, name, speakers);
+		const sectionData = createSectionData(deromanize(number), name, speakers);
 		const validation = validateSectionData(sectionData);
 		if (validation.length === 0) {
 			const _id = await insertOrUpdateSection(protocolId, sectionData);
@@ -83,7 +93,7 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 			<Field.Row>
 				<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />
 			</Field.Row>
-		</Field>	
+		</Field>
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

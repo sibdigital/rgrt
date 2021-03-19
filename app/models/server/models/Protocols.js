@@ -28,6 +28,8 @@ class Protocols extends Base {
 		const _id = Random.id();
 		sectionData._id = _id;
 
+		sectionData.num = Number(sectionData.num);
+
 		const data = this.findOne({ _id: protocolId });
 
 		if (data.sections) {
@@ -67,6 +69,7 @@ class Protocols extends Base {
 		if (data.sections) {
 			data.sections = data.sections.map((section) => {
 				if (section._id === sectionData._id) {
+					sectionData.num = Number(sectionData.num);
 					return { ...sectionData, inum: section.inum, items: section.items };
 				}
 				return section;
@@ -173,6 +176,30 @@ class Protocols extends Base {
 		const data = this.findOne({}, { sort: { num: -1 }, limit: 1 });
 		if (data) {
 			return data.num;
+		}
+		return 0;
+	}
+
+	getMaxProtocolSectionNum(protocolId) {
+		const data = this.findOne({ _id: protocolId });
+		if (data.sections && data.sections.length > 0) {
+			return Math.max.apply(Math, data.sections.map(function(section) { return section.num; }));
+		}
+		return 0;
+	}
+
+	getMaxProtocolSectionItemNum(protocolId, sectionId) {
+		const data = this.findOne({ _id: protocolId });
+		if (data.sections) {
+			data.sections.map((section) => {
+				if (section._id === sectionId) {
+					if (section.items && section.items.length > 0) {
+						return Math.max.apply(Math, section.items.map(function (item) {
+							return item.num;
+						}));
+					}
+				}
+			});
 		}
 		return 0;
 	}

@@ -22,6 +22,8 @@ import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { EditProtocol } from '../../../protocols/client/views/EditProtocol';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -66,6 +68,7 @@ export function ProtocolPage() {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const formatDate = useFormatDate();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const [cache, setCache] = useState();
 	const setModal = useSetModal();
@@ -321,10 +324,10 @@ export function ProtocolPage() {
 					{!context && <Button mbe='x8' small primary onClick={onEditClick('edit')} aria-label={t('Protocol_Info')}>
 						{t('Protocol_Info')}
 					</Button>}
-					{!context && <Button mbe='x8' small primary danger onClick={onDeleteClick} aria-label={t('Delete')}>
+					{isAllowedEdit && !context && <Button mbe='x8' small primary danger onClick={onDeleteClick} aria-label={t('Delete')}>
 						{t('Delete')}
 					</Button>}
-					{!context && <Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('Section_Add')}>
+					{isAllowedEdit && !context && <Button mbe='x8' small primary onClick={onAddSectionClick('new-section')} aria-label={t('Section_Add')}>
 						{t('Section_Add')}
 					</Button>}
 					{!context && <Button mbe='x8' small primary onClick={onParticipantsClick('participants')} aria-label={t('Participants')}>
@@ -340,7 +343,7 @@ export function ProtocolPage() {
 					<Box mbe='x16' display='flex' flexDirection='column'>
 						<Box is='span' alignSelf='center'>{data.place}</Box>
 					</Box>
-					<Sections data={data.sections} onSectionMenuClick={onSectionMenuClick} onItemMenuClick={onItemMenuClick}/>
+					<Sections data={data.sections} onSectionMenuClick={onSectionMenuClick} onItemMenuClick={onItemMenuClick} isAllowedEdit={isAllowedEdit}/>
 				</Box>
 			</Page.ScrollableContent>
 		</Page>

@@ -25,6 +25,11 @@ import { validateProtocolData, createProtocolData } from './lib';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkNumberWithDot } from '../../../utils/client/methods/checkNumber';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
+import { useFormatDate } from '../../../../client/hooks/useFormatDate';
+import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { settings } from '../../../settings/client';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -102,6 +107,8 @@ export function EditProtocol({ _id, cache, onChange, ...props }) {
 function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const formatDate = useFormatDate();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const { _id, d: previousDate, num: previousNumber, place: previousPlace, council } = protocol || {};
 	const previousProtocol = protocol || {};
@@ -119,6 +126,12 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 
 	const deleteProtocol = useMethod('deleteProtocol');
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
+
+	const councilUrl = council ? [ settings.get('Site_Url'), 'council/', council._id ].join('') : '';
+	const councilData = council ? useEndpointData('councils.findOne', {
+		query: JSON.stringify({ _id: council._id }),
+		fields: JSON.stringify({ d: 1, type: 1 }),
+	}) : undefined;
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -184,17 +197,17 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 				<TextAreaInput value={place} onChange={(e) => setPlace(e.currentTarget.value)} placeholder={t('Protocol_Place')} />
 			</Field.Row>
 		</Field>
-		{ council && <Field>
+		{ councilData && <Field>
 			<Field.Label>{t('Council')}</Field.Label>
 			<Field.Row>
-				<Button is={'a'} primary onClick={goToCouncil(council._id)}>{council.typename}</Button>
+				<a href={councilUrl}>{councilData.type.title} от {formatDate(councilData.d)}</a>
 			</Field.Row>
 		</Field>}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+					{ isAllowedEdit && <Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>}
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

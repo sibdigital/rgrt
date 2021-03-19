@@ -10,6 +10,8 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { SuccessModal, WarningModal } from '../../../utils/index';
 import { useToastMessageDispatch } from "/client/contexts/ToastMessagesContext";
 import { useSetModal } from '../../../../client/contexts/ModalContext';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 export function Protocols({
 	data,
@@ -22,6 +24,7 @@ export function Protocols({
 	params,
 }) {
 	const t = useTranslation();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
@@ -67,8 +70,8 @@ export function Protocols({
 		mediaQuery && <Th key={'place'} color='default'>{t('Protocol_Place')}</Th>,
 		mediaQuery && <Th key={'typename'} color='default'>{t('Council')}</Th>,
 		// mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
-		<Th w='x40' key='edit'></Th>,
-		<Th w='x40' key='delete'></Th>,
+		isAllowedEdit && <Th w='x40' key='edit'></Th>,
+		isAllowedEdit && <Th w='x40' key='delete'></Th>,
 		// <Th w='x40' key='download'></Th>
 	], [sort, mediaQuery]);
 
@@ -83,16 +86,16 @@ export function Protocols({
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{place}</Box></Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{council?.typename}</Box></Table.Cell>}
 			{/*{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{formatDateAndTime(ts)}</Table.Cell>}*/}
-			<Table.Cell alignItems={'end'}>
+			{ isAllowedEdit && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
 				</Button>
-			</Table.Cell>
-			<Table.Cell alignItems={'end'}>
+			</Table.Cell>}
+			{ isAllowedEdit && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onDeleteClick(_id)} aria-label={t('Delete')}>
 					<Icon name='trash'/>
 				</Button>
-			</Table.Cell>
+			</Table.Cell>}
 			{/*<Table.Cell alignItems={'end'}>*/}
 			{/*	<Button small onClick={downloadProtocolParticipants(_id)} aria-label={t('Download')}>*/}
 			{/*		<Icon name='download'/>*/}

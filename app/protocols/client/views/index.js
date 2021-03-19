@@ -12,6 +12,8 @@ import { EditProtocol } from './EditProtocol';
 import { AddProtocol } from './AddProtocol';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -26,6 +28,7 @@ const useQuery = ({ itemsPerPage, current }, [ column, direction ], cache) => us
 
 export function ProtocolsPage() {
 	const t = useTranslation();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const routeName = 'protocols';
 
@@ -88,7 +91,7 @@ export function ProtocolsPage() {
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Protocols')}</Label>
 				</Field>
-				{ !context && <Button mbs='0' pi='x16' width='150px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
+				{ isAllowedEdit && <Button mbs='0' pi='x16' width='150px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					{ t('Add') }
 				</Button>}
 			</Page.Header>
