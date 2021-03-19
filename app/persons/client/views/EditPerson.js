@@ -50,7 +50,7 @@ export function EditPerson({ person, onChange, close, ...props }) {
 	const uploadAvatar = useCallback(async () => {
 		const avatarData = await uploadPersonAvatar({ file: avatarObj.file });
 
-		return { _id: avatarData._id, url: avatarData._url };
+		return { _id: avatarData._id, url: avatarData.url };
 	}, [avatarObj]);
 
 	const saveAction = useCallback(async (personValues, avatarSource, previousPersonId) => {
@@ -66,7 +66,6 @@ export function EditPerson({ person, onChange, close, ...props }) {
 	const handleSave = useCallback(async () => {
 		try {
 			const avatarSource = await uploadAvatar();
-			// console.log({ avatarSource });
 
 			await saveAction(values, avatarSource, person?._id ?? null);
 			onChange();
@@ -87,7 +86,7 @@ export function EditPerson({ person, onChange, close, ...props }) {
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={person._id ? !hasUnsavedChanges && prevUrl === url : !allFieldAreFilled}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={person?._id ? !hasUnsavedChanges && prevUrl === url : !allFieldAreFilled}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
