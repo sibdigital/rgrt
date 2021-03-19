@@ -83,7 +83,7 @@ export function Participants({ protocolId, onAddParticipantClick }) {
 
 	const query = useQuery(debouncedParams, debouncedSort, cache);
 
-	const data = useEndpointData('protocols.participants', query) || { users: [] };
+	const data = useEndpointData('protocols.allParticipants', query) || { users: [] };
 
 	const onChange = useCallback(() => {
 		setCache(new Date());

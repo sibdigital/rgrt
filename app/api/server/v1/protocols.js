@@ -95,6 +95,24 @@ API.v1.addRoute('protocols.participants', { authRequired: true }, {
 	},
 });
 
+API.v1.addRoute('protocols.allParticipants', { authRequired: true }, {
+	get() {
+		const { sort, fields, query } = this.parseJsonQuery();
+
+		const protocol = Promise.await(findProtocol(query._id));
+
+		const users = Persons.find({ _id: { $in: protocol.participants } }, {
+			sort: sort || { username: 1 },
+			fields,
+		}).fetch();
+
+		return API.v1.success({
+			users,
+			count: users.length,
+		});
+	},
+});
+
 API.v1.addRoute('protocols.getProtocolItemsByItemsId', { authRequired: true }, {
 	get() {
 		// const { offset, count } = this.getPaginationItems();

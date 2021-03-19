@@ -75,12 +75,13 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 	const query = useQuery(debouncedParams, debouncedSort);
 
 	const data = useEndpointData('persons.list', query) || { persons: [] };
-	
+
+	const participantsData = useEndpointData('protocols.allParticipants', useMemo(() => ({ query: JSON.stringify({ _id: protocolId }) }), [protocolId] )) || { users: [] };
+
 	useEffect(() => {
-		if (data.persons) {
-			setFindUsers(data.persons);
-		}
-	}, [data]);
+		const persons = data?.persons.length > 0 ? participantsData?.users.length > 0 ? data.persons.filter(person => participantsData.users.find(p => p._id === person._id) === undefined) : data.persons : [];
+		setFindUsers(persons);
+	}, [data, participantsData]);
 
 	const insertOrUpdateSection = useMethod('addParticipantToProtocol');
 
