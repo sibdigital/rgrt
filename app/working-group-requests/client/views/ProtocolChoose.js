@@ -40,23 +40,23 @@ export function ProtocolChoose({ setProtocolId, setProtocol, close, protocolsFie
 	}, [setProtocolId, setProtocol, t, formatDate, close]);
 
 	const header = useMemo(() => [
-		<Th w='x200' key={'Protocol_Place'} color='default'>
-			{ t('Protocol_Place') }
-		</Th>,
 		<Th w='x100' key={'Protocol_Number'} color='default'>
 			{ t('Protocol_Number') }
 		</Th>,
 		<Th w='x160' key={'Date'} color='default'>
 			{ t('Date') }
 		</Th>,
+		<Th w='x200' key={'Protocol_Place'} color='default'>
+			{ t('Protocol_Place') }
+		</Th>,
 	], [t]);
 
 	const renderRow = (protocol) => {
 		const { _id, place, d, num } = protocol;
 		return <Table.Row key={_id} tabIndex={0} role='link' action onClick={() => onProtocolClick(protocol)}>
-			<Table.Cell fontScale='p1' color='default'>{place ?? ''}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{num ?? ''}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(d ?? '')}</Table.Cell>
+			<Table.Cell fontScale='p1' color='default'>{place ?? ''}</Table.Cell>
 		</Table.Row>;
 	};
 
