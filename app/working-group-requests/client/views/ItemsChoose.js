@@ -15,28 +15,28 @@ const clickable = css`
 		}
 	`;
 
-export function ItemsChoose({ protocolId = '', setProtocolItems, setProtocolItemsId, close }) {
+export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems = [], setProtocolItemsId, close }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 
+	const protocolItemsState = useMemo(() => protocolItems, [protocolItems]);
+
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.getProtocolItemsByProtocolId', useMemo(() => ({
-		query: JSON.stringify({ _id: protocolId }),
+		query: JSON.stringify({ _id: protocolId, protocolItems: protocolItemsState }),
 		fields: JSON.stringify({ expireAt: 1, num: 1 }),
-	}), [protocolId]));
+	}), [protocolId, protocolItemsState]));
 
 	const getLog = (protocolItem) => {
-		console.log({ protocolItem });
-		return ['№', protocolItem.num, preProcessingProtocolItems(protocolItem.name)].join(', ');
-		// return ['№', protocolItem.num, ' от ', formatDate(protocolItem.expireAt)].join('');
+		return ['№', protocolItem.num, ', ', preProcessingProtocolItems(protocolItem.name)].join('');
 	};
 
 	const handleSave = useCallback((protocolItem) => {
-		setProtocolItems([protocolItem]);
-		setProtocolItemsId([protocolItem.id]);
-		close();
-	}, [setProtocolItems, setProtocolItemsId, close]);
+		setProtocolItems && setProtocolItems([...protocolItems, protocolItem]);
+		setProtocolItemsId && setProtocolItemsId([protocolItem.id]);
+		protocolData?.protocolItems?.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
+	}, [protocolData, protocolItems, setProtocolItems, setProtocolItemsId]);
 
 	const ProtocolItem = (protocolItem) => <Box
 		pb='x4'
@@ -88,9 +88,7 @@ export function SectionChoose({ sectionArray = [], setSection, close }) {
 	const t = useTranslation();
 
 	const getLog = (protocolItem) => {
-		console.log({ protocolItem });
 		return ['№', protocolItem.num, preProcessingProtocolItems(protocolItem.name)].join(', ');
-		// return ['№', protocolItem.num, ' от ', formatDate(protocolItem.expireAt)].join('');
 	};
 
 	const handleSave = useCallback((section) => {

@@ -150,7 +150,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const [protocolSelectLabel, setProtocolSelectLabel] = useState('');
 	const [protocolSectionSelectLabel, setProtocolSectionSelectLabel] = useState('');
 	const [protocolSelectItemLabel, setProtocolSelectItemLabel] = useState('');
-	const [protocolsFindData, setProtocolsFindData] = useState([]);
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [answerTypeContext, setAnswerTypeContext] = useState('mail');
 	const [customAnswerMailLabel, setCustomAnswerMailLabel] = useState('');
@@ -195,7 +194,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
-	}, [cache]);
+	}, []);
 
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });

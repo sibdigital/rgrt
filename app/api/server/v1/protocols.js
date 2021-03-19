@@ -48,8 +48,9 @@ API.v1.addRoute('protocols.list.requestAnswer', { authRequired: false }, {
 
 API.v1.addRoute('protocols.findOne', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findProtocol(query._id)));
+		const { query, stockFields } = this.parseJsonQuery();
+		const cursor = Promise.await(findProtocol(query._id, { fields: stockFields ?? {} }));
+		return API.v1.success(cursor ?? {});
 	},
 });
 
@@ -130,9 +131,12 @@ API.v1.addRoute('protocols.getProtocolItemsByProtocolId', { authRequired: true }
 		}
 
 		if (cursor.sections) {
-			cursor.sections.forEach((section) => section.items?.forEach((item) => items.push({ _id: item._id, num: item.num, expireAt: item.expireAt, name: item.name })));
+			cursor.sections.forEach((section) => section.items?.forEach((item) =>
+				(!query.protocolItems || query.protocolItems.length === 0 || !query.protocolItems?.some((protocolItem) => (item._id === protocolItem._id || item._id === protocolItem)))
+				&& items.push({ _id: item._id, num: item.num, expireAt: item.expireAt, name: item.name })
+			));
 		}
-		console.log({ items });
+		// console.log({ items });
 
 		return API.v1.success({ items });
 	},

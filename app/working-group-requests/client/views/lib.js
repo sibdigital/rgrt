@@ -68,24 +68,39 @@ export function validateWorkingGroupRequestData(workingGroupRequestData) {
 	return errors;
 }
 
-export function createWorkingGroupRequestData({ number, desc, date, previousData, protocolsItemId, councilId, protocolId, protocolItemsId = [], mail = '', protocol = {}, council = {} }) {
+export function createWorkingGroupRequestData({
+	number,
+	desc,
+	date,
+	previousData = null,
+	protocolsItemId,
+	councilId,
+	protocolId,
+	protocolItemsId = [],
+	mail = '',
+	protocol = {},
+	council = {},
+	itemResponsible = null,
+}) {
 	const workingGroupRequestData = {
 	};
 
-	if (previousData) {
+	if (previousData && previousData._id) {
 		workingGroupRequestData._id = previousData._id;
 	}
 
 	workingGroupRequestData.number = number;
 	workingGroupRequestData.desc = desc;
 	workingGroupRequestData.date = date;
-	workingGroupRequestData.protocolsItemId = protocolsItemId;
+	workingGroupRequestData.mail = mail;
+
+	protocol && Object.assign(workingGroupRequestData, { protocol });
+	council && Object.assign(workingGroupRequestData, { council });
+	protocolsItemId && Object.assign(workingGroupRequestData, { protocolsItemId });
 	councilId && Object.assign(workingGroupRequestData, { councilId });
 	protocolId && Object.assign(workingGroupRequestData, { protocolId });
-	workingGroupRequestData.protocolItemsId = protocolItemsId;
-	workingGroupRequestData.mail = mail;
-	workingGroupRequestData.protocol = protocol;
-	workingGroupRequestData.council = council;
+	protocolItemsId && Object.assign(workingGroupRequestData, { protocolItemsId });
+	itemResponsible && Object.assign(workingGroupRequestData, { itemResponsible });
 
 	return workingGroupRequestData;
 }

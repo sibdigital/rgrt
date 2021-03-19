@@ -1,5 +1,5 @@
 import styled, { keyframes } from 'styled-components';
-import { slideInLeft, slideInRight } from 'react-animations';
+import { slideInLeft, slideInRight, slideInUp, slideInDown } from 'react-animations';
 
 /* @keyframes duration | timing-function | delay |
    iteration-count | direction | fill-mode | play-state | name */
@@ -16,6 +16,12 @@ export function getAnimation({ type, duration = '0.2s', timingFunction = 'linear
 			break;
 		case 'slideInRight':
 			animationType = slideInRight;
+			break;
+		case 'slideInUp':
+			animationType = slideInUp;
+			break;
+		case 'slideInDown':
+			animationType = slideInDown;
 			break;
 		default:
 			break;

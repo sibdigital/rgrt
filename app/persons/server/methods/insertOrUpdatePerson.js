@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import s from 'underscore.string';
 
-import { hasPermission } from '../../../authorization';
 import { Persons } from '../../../models';
 
 Meteor.methods({
@@ -37,7 +36,7 @@ Meteor.methods({
 				organization: person.organization,
 				position: person.position,
 				weight: person.weight ?? 100,
-				avatar: person.avatar
+				avatar: person.avatar,
 			};
 
 			const _id = Persons.create(createPerson);

@@ -126,9 +126,9 @@ API.v1.addRoute('working-groups-requests.upload/:id/:answerId', { authRequired: 
 	},
 });
 
-API.v1.addRoute('working-groups-requests.findByProtocolsItemId', {authRequired: true}, {
+API.v1.addRoute('working-groups-requests.findByProtocolsItemId', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findWorkingGroupRequestByProtocolsItemId(query._id)))
+		const { query, stockFields } = this.parseJsonQuery();
+		return API.v1.success(Promise.await(findWorkingGroupRequestByProtocolsItemId(query.protocolsItemId, { fields: stockFields ?? { _id: 1 } })));
 	}
 });

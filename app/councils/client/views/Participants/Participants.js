@@ -77,7 +77,7 @@ export function CouncilPersons({ councilId, isSecretary }) {
 
 	if ([invitedPersonsDataState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading')}</Callout>;
+		return <InvitedPersonsTable invitedPersons={[]} onDelete={onDeletePersonFromCouncilClick}/>;
 	}
 
 	return <SlideAnimation style={{ overflow: 'hidden auto', borderBlockEndWidth: invitedPersonsData?.persons?.length > 0 ? '1px' : '0', marginBlockEnd: '1.5rem' }}>
@@ -129,7 +129,7 @@ function InvitedPersonsTable({ invitedPersons, onDelete }) {
 				</Table.Cell>
 			</Table.Row>
 			{iu.isContactPerson
-			&& <Table.Row key={['contact&', iu._id].join('')} style={styleTableRow} backgroundColor={getBackgroundColor(invitedPerson)} tabIndex={0} role='link' action>
+			&& <Table.Row key={['contact&', iu._id].join('')} style={{ ...styleTableRow, fontStyle: 'italic' }} backgroundColor={getBackgroundColor(invitedPerson)} tabIndex={0} role='link' action>
 				<Table.Cell fontScale='p1' style={style} color='default'>{contactPerson.surname} {contactPerson.name} {contactPerson.patronymic}</Table.Cell>
 				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{contactPerson.phone}</Table.Cell>}
 				{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>{contactPerson.email}</Table.Cell>}

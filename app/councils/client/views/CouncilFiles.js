@@ -20,12 +20,11 @@ require('react-datepicker/dist/react-datepicker.css');
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	text,
+const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
-}), [text, itemsPerPage, current, column, direction]);
+}), [itemsPerPage, current, column, direction]);
 
 export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false }) {
 	const t = useTranslation();
@@ -169,7 +168,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 
 	if ([state].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading')}</Callout>;
+		return <GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>;
 	}
 
 	return <GenericTable header={header} renderRow={renderRow} results={data.documents ?? []} total={data.documents?.length ?? 0} setParams={setParams} params={params}/>;

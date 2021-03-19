@@ -20,14 +20,25 @@ export const uploadFile = async ({
 	data.append('file', file.file);
 	data.append('ts', new Date());
 
-	const { xhr, promise } = APIClient.upload(`v1/persons.uploadAvatar`, {}, data, {});
+	const { xhr, promise } = APIClient.upload('v1/persons.uploadAvatar', {}, data, {});
 
 	try {
 		await promise;
-		console.log(promise)
+		console.log(promise);
 		return promise;
 		//return { id: promise.responseJSON._id, url: promise.responseJSON.url, description };
 	} catch (error) {
 		console.log(error);
 	}
+};
+
+export const uploadPersonAvatar = async ({ file }) => {
+	// console.dir({ file });
+	const uploadedFile = await uploadFile({
+		description: '',
+		file: { file },
+		// ts: file.ts,
+	});
+
+	return uploadedFile;
 };
