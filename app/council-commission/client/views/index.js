@@ -52,17 +52,32 @@ export function CouncilCommissionPage(
 
 	const [cache, setCache] = useState();
 
-	const mediaQuery = useMediaQuery('(min-width: 520px)');
+	const mediaQuery = useMediaQuery('(min-width: 890px)');
 
-	const RenderBox = (persons) => {
-		const { _id, name, surname, patronymic, email, phone, organization, position, username, avatar} = persons;
-		return  <Box display={'flex'} mb='x16' mi='x16' height='x320' maxWidth={'x500'} w='full'>
-				<Box><img width='250px' height='320px' className='imgRerenderer' src={avatar.url}/></Box>
-				<Box pi={'x16'} pb={'x24'} minWidth={'x250'} backgroundColor={'whitesmoke'}>
-					<Box fontSize={'x24'}>{surname} {name}{"\n" + patronymic}</Box>
-					<Box lineHeight={'x24'} fontSize={'x16'} mb='x12'>{position}</Box>
+	const RenderBox = ({person, index}) => {
+		const { _id, name, surname, patronymic, email, phone, organization, position, username, avatar} = person;
+
+		if (index === 0) {
+			return <Box className={'commission-person-block'} position={'relative'} flexBasis='33.333%' height='x700'>
+			<img width='100%' height='100%' className='imgRerenderer' src={avatar?.url}/>
+			<Box className={'imgSide-bg gradient'} w='100%' >
+				<Box className={'imgSide-inf'}>
+					<Box fontSize={mediaQuery ? 'x32' : 'x24'}>
+						<Box>{surname}</Box>
+						<Box>{name} {patronymic}</Box>
+					</Box>
+					<Box lineHeight={'x24'} fontSize={mediaQuery ? 'x18': 'x12'} mb='x12'>{position}</Box>
 				</Box>
-			</Box>;
+			</Box>
+		</Box>;
+		}
+		return  <Box className={'commission-person-block'} flexBasis='33.333%' display={'flex'} mb='x32' height='x334'>
+			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatar?.url}/></Box>
+			<Box flexBasis='60%' pi={'x16'} pb={'x24'} backgroundColor={'whitesmoke'}>
+				<Box fontSize={'x24'}>{surname} {name}{"\n" + patronymic}</Box>
+				<Box lineHeight={'x24'} fontSize={'x16'} mb='x12'>{position}</Box>
+			</Box>
+		</Box>;
 	};
 
 	return <Page flexDirection='row'>
@@ -74,10 +89,16 @@ export function CouncilCommissionPage(
 				</Field>
 			</Page.Header>
 			<Page.ScrollableContent>
-				<Box display={mediaQuery ? 'flex' : 'unset'} flexWrap={'wrap'} justifyContent={'flex-start'} maxWidth='x1800' w='full' alignSelf='center' pi='x32' pb='x24' fontSize='x16'>
+				<Box className={'council-commission-grid'} pi='x32'>
+				{/* display={mediaQuery ? 'flex' : 'unset'} flexWrap={'wrap'} justifyContent={'flex-start'} maxWidth='x1800' w='full' alignSelf='center' fontSize='x16' */}
 					{persons 
-						? persons.persons.map((props, person) => <RenderBox key={props._id || person} {...props}/>)
-						: <Box/>}
+						? persons.persons.map((person, index) => 
+						<RenderBox 
+						key={person._id || index} 
+						person={person}
+						index={index}
+						/>)
+						: <Box>{'123'}</Box>}
 				</Box>
 				{/* <PersonsTable setParam={setParams} params={params}  personsData={persons} onEditClick={onEditClick} sort={sort}/> */}
 			</Page.ScrollableContent>
