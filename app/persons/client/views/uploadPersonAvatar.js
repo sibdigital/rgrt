@@ -1,9 +1,10 @@
 import { APIClient } from '../../../utils';
 
-export const uploadPersonAvatar = async (file) => {
+export const uploadPersonAvatar = async ({ file }) => {
+	// console.dir({ file });
 	const uploadedFile = await uploadFile({
 		description: '',
-		file: file,
+		file: { file },
 		// ts: file.ts,
 	});
 
@@ -30,15 +31,4 @@ export const uploadFile = async ({
 	} catch (error) {
 		console.log(error);
 	}
-};
-
-export const uploadPersonAvatar = async ({ file }) => {
-	// console.dir({ file });
-	const uploadedFile = await uploadFile({
-		description: '',
-		file: { file },
-		// ts: file.ts,
-	});
-
-	return uploadedFile;
 };

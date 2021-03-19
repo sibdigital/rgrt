@@ -8,15 +8,13 @@ import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterC
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
-import { PersonsTable } from './PersonsTable';
 import { useEndpointData } from '/client/hooks/useEndpointData';
-import UserAvatar from '../../../../client/components/basic/avatar/UserAvatar';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQueryPerson = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
 	query: JSON.stringify({ workingGroup: "Состав комиссии" }),
-	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, workingGroup: 1, avatar: 1 }),
+	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, workingGroup: 1, avatarSource: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
@@ -55,11 +53,11 @@ export function CouncilCommissionPage(
 	const mediaQuery = useMediaQuery('(min-width: 890px)');
 
 	const RenderBox = ({person, index}) => {
-		const { _id, name, surname, patronymic, email, phone, organization, position, username, avatar} = person;
+		const { _id, name, surname, patronymic, email, phone, organization, position, username, avatarSource} = person;
 
 		if (index === 0) {
 			return <Box className={'commission-person-block'} position={'relative'} flexBasis='33.333%' height='x700'>
-			<img width='100%' height='100%' className='imgRerenderer' src={avatar?.url}/>
+			<img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/>
 			<Box className={'imgSide-bg gradient'} w='100%' >
 				<Box className={'imgSide-inf'}>
 					<Box fontSize={mediaQuery ? 'x32' : 'x24'}>
@@ -72,7 +70,7 @@ export function CouncilCommissionPage(
 		</Box>;
 		}
 		return  <Box className={'commission-person-block'} flexBasis='33.333%' display={'flex'} mb='x32' height='x334'>
-			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatar?.url}/></Box>
+			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/></Box>
 			<Box flexBasis='60%' pi={'x16'} pb={'x24'} backgroundColor={'whitesmoke'}>
 				<Box fontSize={'x24'}>{surname} {name}{"\n" + patronymic}</Box>
 				<Box lineHeight={'x24'} fontSize={'x16'} mb='x12'>{position}</Box>

@@ -36,7 +36,7 @@ Meteor.methods({
 				organization: person.organization,
 				position: person.position,
 				weight: person.weight ?? 100,
-				avatar: person.avatar,
+				avatarSource: person.avatarSource,
 			};
 
 			const _id = Persons.create(createPerson);
