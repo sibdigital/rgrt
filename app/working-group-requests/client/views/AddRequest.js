@@ -56,11 +56,14 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 				itemResponsiblePerson && handlers.handleItemResponsible && handlers.handleItemResponsible(itemResponsiblePerson);
 				handlers.handleProtocolItems && protocolData.sections.forEach((section) => section.items?.forEach((item) => item._id === protocolsItemId && handlers.handleProtocolItems([item])));
 			}
-			if (protocolData.protocol && councilData) {
-				handlers.handleCouncil && handlers.handleCouncil({ _id: councilData._id, d: councilData.d });
-			}
 		}
-	}, [protocolData, protocolsItemId, councilData]);
+	}, [protocolData, protocolsItemId]);
+
+	useEffect(() => {
+		if (councilData) {
+			handlers.handleCouncil && handlers.handleCouncil({ _id: councilData._id, d: councilData.d });
+		}
+	}, [councilData]);
 
 	return { };
 }
