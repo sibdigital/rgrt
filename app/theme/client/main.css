@@ -27,7 +27,10 @@
 @import 'imports/components/sidebar/sidebar-flex.css';
 @import 'imports/components/sidebar/toolbar.css';
 @import 'imports/components/sidebar/rooms-list.css';
-@import "imports/components/sidebar/sidebarOverrideStyles.css";
+@import 'imports/components/sidebar/sidebarOverrideStyles.css';
+
+/* CouncilCommission */
+@import 'imports/components/council-commission/councilCommissionGrid.css';
 
 /* Main */
 @import 'imports/components/flex-nav.css';
