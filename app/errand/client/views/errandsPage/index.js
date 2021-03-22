@@ -226,7 +226,7 @@ export function ErrandPage() {
 	const [tab, setTab] = useState('errands');
 
 	const mediaQuery = useMediaQuery('(min-width: 520px)');
-	
+
 	let title = 'Errands';
 	switch (type) {
 		case 'initiated_by_me':
@@ -310,12 +310,13 @@ export function ErrandPage() {
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				{type === 'charged_to_me' && <Tabs flexShrink={0} mbe='x8'>
-					{/*<Tabs.Item selected={tab === 'errands'} onClick={() => setTab('errands')}>{t('Errands_for_me')}</Tabs.Item>*/}
-					<Tabs.Item selected={tab === 'requests'} onClick={() => setTab('requests')}>{t('Working_group_requests')}</Tabs.Item>
-				</Tabs>}
-				{tab === 'errands' && <Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>}
-				{tab === 'requests' && <Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={requests} onClick={onRequestClick} sort={sort}/>}
+				{/*{type === 'charged_to_me' && <Tabs flexShrink={0} mbe='x8'>*/}
+				{/*	/!*<Tabs.Item selected={tab === 'errands'} onClick={() => setTab('errands')}>{t('Errands_for_me')}</Tabs.Item>*!/*/}
+				{/*	<Tabs.Item selected={tab === 'requests'} onClick={() => setTab('requests')}>{t('Working_group_requests')}</Tabs.Item>*/}
+				{/*</Tabs>}*/}
+				{/*{tab === 'errands' && <Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>}*/}
+				{/*{tab === 'requests' && <Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={requests} onClick={onRequestClick} sort={sort}/>}*/}
+				<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>
 			</Page.Content>
 		</Page>
 	</Page>;
