@@ -37,3 +37,11 @@
 .rc-old .page-container {
     position: relative !important;
 }
+
+@media screen and (max-width: 520px) {
+    .rcx-button-group > .rcx-button-group__item {
+        margin-inline: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0.5rem !important;
+    }
+}
