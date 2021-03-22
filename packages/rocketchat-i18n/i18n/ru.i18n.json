@@ -2695,6 +2695,7 @@
   "Permissions_access_missing": "Отсутствуют права доступа ",
   "Person_add": "Добавить физическое лицо",
   "Person_edit": "Редактировать физическое лицо",
+  "Person_was_deleted_successful": "Физическое лицо было успешно удалено",
   "Persons": "Справочник физических лиц",
   "Personal_Access_Tokens": "Токены для личного доступа",
   "Phone_number": "Номер телефона",

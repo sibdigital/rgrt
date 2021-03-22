@@ -10,6 +10,7 @@ export function Persons({
 	sort,
 	onClick,
 	onEditClick,
+	onDeleteClick,
 	onHeaderClick,
 	setParams,
 	params,
@@ -27,10 +28,11 @@ export function Persons({
 			{t('Email')}
 		</Th>,
 		<Th w='x40' key='edit'/>,
+		<Th w='x40' key='delete'/>,
 	], [sort, mediaQuery]);
 
 	const renderRow = (person) => {
-		const { _id, name, surname, patronymic, email, emails, phone, avatarUrl } = person;
+		const { _id, name, surname, patronymic, email, emails, phone, group, avatarSource } = person;
 		// const email = emails ? emails[0].address : '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'> {surname} {name} {patronymic}</Table.Cell>
@@ -39,6 +41,11 @@ export function Persons({
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id, person)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
+				</Button>
+			</Table.Cell>
+			<Table.Cell alignItems={'end'}>
+				<Button small onClick={onDeleteClick(_id)} aria-label={t('Delete')}>
+					<Icon name='trash'/>
 				</Button>
 			</Table.Cell>
 		</Table.Row>;
