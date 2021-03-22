@@ -24,6 +24,7 @@ import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { EditProtocol } from '../../../protocols/client/views/EditProtocol';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import { useMediaQuery } from '@material-ui/core';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -72,6 +73,9 @@ export function ProtocolPage() {
 
 	const [cache, setCache] = useState();
 	const setModal = useSetModal();
+
+	const mediumScreenWidth = useMediaQuery('(min-width: 1367px)')
+	const smallScreenWidth = useMediaQuery('(min-width: 520px)')
 
 	const router = useRoute('protocol');
 	const protocolId = useRouteParameter('id');
@@ -315,12 +319,12 @@ export function ProtocolPage() {
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			<Page.Header display={smallScreenWidth ? 'flex' : 'block'}>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton onClick={goBack}/>
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
-				<ButtonGroup>
+				<ButtonGroup display={smallScreenWidth ? 'flex' : 'block'}>
 					{!context && <Button mbe='x8' small primary onClick={onEditClick('edit')} aria-label={t('Protocol_Info')}>
 						{t('Protocol_Info')}
 					</Button>}
@@ -348,7 +352,7 @@ export function ProtocolPage() {
 			</Page.ScrollableContent>
 		</Page>
 		{ context
-		&& <VerticalBar width='x520' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+		&& <VerticalBar width={mediumScreenWidth ? 'x520' : 'x380'} qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 			<VerticalBar.Header>
 				{ context === 'edit' && t('Protocol_Info') }
 				{ context === 'new-section' && t('Section_Add') }

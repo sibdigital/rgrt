@@ -89,12 +89,12 @@ export function CouncilsPage() {
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header title=''>
+			<Page.Header display={mediaQuery ? 'flex' : 'block'} title=''>
 				<Field display='block' flexDirection='row' width='auto' alignItems='center' marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Councils')}</Label>
+					<Label fontScale='h1'>{t('Councils')}</Label>
 				</Field>
-				<FieldGroup flexDirection='row' alignItems='center' justifyContent='center' mis='auto'>
+				<FieldGroup flexDirection='row' alignItems='center' justifyContent={mediaQuery ? 'center' : 'left'} mis='auto'>
 					<Tabs mbe='x8' flexShrink={0} width='auto'>
 						<Tooltip title={t('List')} arrow>
 							<Tabs.Item selected={displayMode === 'table'} onClick={() => handleTabClick('table')}>
