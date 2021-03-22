@@ -47,13 +47,8 @@ export function AgendaPage() {
 
 	if ([agendaState, personsState, userState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
+		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
-
-	// if (!isAllow) {
-	// 	console.log('Permissions_access_missing');
-	// 	return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	// }
 
 	return <Agenda agendaData={agendaData} personsData={personsData} userData={userData} isAllowEdit={isAllow}/>;
 }

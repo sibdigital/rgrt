@@ -165,7 +165,7 @@ function PersonForm({
 
 			{onShowCancelAndSaveButtons && <ButtonGroup mb='x16'>
 				<Button flexGrow={1} onClick={() => !!onCancel && onCancel()}>{t('Cancel')}</Button>
-				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Send_request_answer')}</Button>
+				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Save')}</Button>
 			</ButtonGroup>}
 		</Margins>
 	</Box>;
