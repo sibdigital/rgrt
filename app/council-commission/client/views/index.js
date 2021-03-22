@@ -13,8 +13,8 @@ import { useEndpointData } from '/client/hooks/useEndpointData';
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQueryPerson = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	query: JSON.stringify({ workingGroup: "Состав комиссии" }),
-	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, workingGroup: 1, avatarSource: 1 }),
+	query: JSON.stringify({ 'group.title': 'Состав комиссии' }),
+	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, avatarSource: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
@@ -32,11 +32,10 @@ export function CouncilCommission() {
 	const queryPerson = useQueryPerson(debouncedParams, debouncedSort);
 
 	const { data: personsData } = useEndpointDataExperimental('persons.list', queryPerson) || { };
-	console.log(personsData)
+
 	useEffect(() => {
 		if (personsData && personsData.persons) {
 			setPersons(personsData.persons);
-			console.log(personsData);
 		}
 	}, [personsData]);
 
@@ -72,7 +71,10 @@ export function CouncilCommissionPage(
 		return  <Box className={'commission-person-block'} flexBasis='33.333%' display={'flex'} mb='x32' height='x334'>
 			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/></Box>
 			<Box flexBasis='60%' pi={'x16'} pb={'x24'} backgroundColor={'whitesmoke'}>
-				<Box fontSize={'x24'}>{surname} {name}{"\n" + patronymic}</Box>
+				<Box fontSize='x24'>
+					<Box>{surname} {name}</Box>
+					<Box>{patronymic}</Box>
+				</Box>
 				<Box lineHeight={'x24'} fontSize={'x16'} mb='x12'>{position}</Box>
 			</Box>
 		</Box>;

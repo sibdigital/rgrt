@@ -94,7 +94,7 @@ API.v1.addRoute('persons.uploadAvatar', { authRequired: true }, {
 
 		const file = files[0];
 
-		console.log({ files, fields })
+		// console.log({ files, fields })
 
 		const details = {
 			name: file.fieldname,

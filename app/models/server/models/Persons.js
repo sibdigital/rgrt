@@ -9,6 +9,10 @@ class Persons extends Base {
 		person.createdAt = new Date();
 		return this.insert(person);
 	}
+	
+	removeById(_id) {
+		return this.remove({ _id });
+	}
 
 	updatePerson(_id, person) {
 		const data = this.findOne({ _id });
