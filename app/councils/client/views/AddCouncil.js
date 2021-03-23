@@ -11,7 +11,7 @@ import {
 	Tabs,
 	Select,
 } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
@@ -117,6 +117,7 @@ export default AddCouncilPage;
 
 function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingGroupOptions }) {
 	const t = useTranslation();
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date());
@@ -194,19 +195,19 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			<Page.Header display={mediaQuery ? 'flex' : 'block'}>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Council_Add')}</Label>
 				</Field>
-				<ButtonGroup>
+				<ButtonGroup display={mediaQuery ? 'flex' : 'block'}>
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x16' display='flex' flexDirection='row'>
+				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
 					<Field mis='x4' display='flex' flexDirection='row'>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
 						<Field.Row width='-moz-available'>
@@ -231,7 +232,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 						</Field.Row>
 					</Field>
 				</Field>
-				<Field mbe='x16' display='flex' flexDirection='row' alignItems='center' mis='x4'>
+				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row' alignItems='center' mis='x4'>
 					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
 						<Label maxWidth='100px' mie='x8'>{t('Council_Place')}</Label>
 						<TextInput mie='x12' fontScale='p1' placeholder={t('Council_Place')} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
@@ -248,7 +249,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>
 				</Tabs>
 				{context === 'participants' && tab === 'persons' && <Field mbe='x8'>
-					<Field.Row marginInlineStart='auto'>
+					<Field.Row marginInlineStart='auto' display={mediaQuery ? 'flex' : 'block'}>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
