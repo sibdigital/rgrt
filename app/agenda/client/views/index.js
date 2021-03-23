@@ -29,6 +29,7 @@ import { EditAgenda } from './EditAgenda';
 import { Proposals } from './Proposals';
 import { EditProposalsForTheAgenda } from './EditProposalsForTheAgenda';
 import { ProposalsForTheAgendaPage } from './ProposalsForTheAgenda';
+import { downloadAgenda } from './testDownload';
 
 registerLocale('ru', ru);
 
@@ -162,7 +163,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const deleteAgendaSection = useMethod('deleteAgendaSection');
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
 	const updateProposalStatus = useMethod('updateProposalStatus');
-	const downloadAgenda = useMethod('downloadAgenda');
+	// const downloadAgenda = useMethod('downloadAgenda');
 
 	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setContext(''); }, []);
 
@@ -297,7 +298,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const onAgendaDownloadClick = useCallback(async (e) => {
 		e.preventDefault();
 		try {
-			const res = await downloadAgenda({ _id: agendaId });
+			const res = await downloadAgenda({ _id: agendaId, agendaData, dateString: new Date() });
 			const fileName = [t('Agenda'), ' ', moment(new Date(agendaData.ts)).format('DD MMMM YYYY'), '.docx'].join('');
 			console.log({ docx: res });
 			if (res) {
@@ -317,7 +318,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</Field>
 				{ context === '' && tab === 'agenda' && isAllowEdit
 				&& <ButtonGroup>
-					{ !isNew && <Button mbe='x8' disabled small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
+					{ !isNew && <Button mbe='x8' small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
 						{t('Agenda_download')}
 					</Button>}
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>
