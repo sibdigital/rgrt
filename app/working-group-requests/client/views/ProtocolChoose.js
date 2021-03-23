@@ -35,10 +35,10 @@ export function ProtocolChoose({ setProtocolId, setProtocol, setCouncil, close, 
 		setProtocolId && setProtocolId(protocol._id);
 		setProtocol && setProtocol({ ...protocol, label: [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('') });
 
-		console.dir({ protocol, protocolCouncilId: protocol.council._id });
-		protocol.council?._id && setCouncil({ _id: protocol.council._id, d: protocol.council.d ? new Date(protocol.council.d) : new Date(), typename: protocol.council.typename });
+		// console.dir({ protocol, protocolCouncilId: protocol.council._id });
+		// protocol.council?._id && setCouncil({ _id: protocol.council._id, d: protocol.council.d ? new Date(protocol.council.d) : new Date(), typename: protocol.council.typename });
 		close();
-	}, [setProtocolId, setProtocol, t, formatDate, setCouncil, close]);
+	}, [setProtocolId, setProtocol, t, formatDate, close]);
 
 	const header = useMemo(() => [
 		<Th w='x100' key={'Protocol_Number'} color='default'>

@@ -294,8 +294,14 @@ export function WorkingGroupRequestVerticalChooseBar({ handlers, context, protoc
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			<VerticalBar.ScrollableContent>
-				{context === 'councilChoose' && <CouncilChoose setCouncil={verticalBarFieldChange('handleCouncil')} close={close}/>}
-				{context === 'protocolChoose' && <ProtocolChoose setCouncil={verticalBarFieldChange('handleCouncil')} setProtocol={verticalBarFieldChange('handleProtocol')} close={close}/>}
+				{context === 'councilChoose' && <CouncilChoose
+					setProtocol={verticalBarFieldChange('handleProtocol')}
+					setCouncil={verticalBarFieldChange('handleCouncil')}
+					close={close}/>}
+				{context === 'protocolChoose' && <ProtocolChoose
+					setProtocol={verticalBarFieldChange('handleProtocol')}
+					setCouncil={verticalBarFieldChange('handleCouncil')}
+					close={close}/>}
 				{context === 'protocolItemChoose' && <ItemsChoose
 					protocolId={protocolId}
 					protocolItems={protocolItems}
