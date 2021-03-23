@@ -24,20 +24,28 @@ export function Persons({
 			{t('Full_Name')}
 		</Th>,
 		mediaQuery && <Th key={'Phone_number'} style={{ width: '190px' }} color='default'>{t('Phone_number')}</Th>,
-		mediaQuery && <Th key={'Email'} color='default'>
+		mediaQuery && <Th key={'Email'} style={{ width: '190px' }} color='default'>
 			{t('Email')}
 		</Th>,
+		mediaQuery && <Th key={'Organization'} style={{ width: '190px' }} color='default'>
+			{t('Organization')}
+		</Th>,
+		mediaQuery && <Th key={'Position'} color='default'>
+		{t('Position')}
+	</Th>,
 		<Th w='x40' key='edit'/>,
 		<Th w='x40' key='delete'/>,
 	], [sort, mediaQuery]);
 
 	const renderRow = (person) => {
-		const { _id, name, surname, patronymic, email, phone, group, avatarSource } = person;
+		const { _id, name, surname, patronymic, email, phone, organization, position, group, avatarSource } = person;
 		// const email = emails ? emails[0].address : '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'> {surname} {name} {patronymic}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'><Box withTruncatedText>{email}</Box></Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{organization}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{position}</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id, person)} aria-label={t('Edit')}>
 					<Icon name='edit'/>

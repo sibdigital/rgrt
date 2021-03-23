@@ -71,7 +71,7 @@ export function EditPerson({ workingGroupOptions, person, onChange, close, ...pr
 		try {
 			const avatarData = picturePreview?.file ? await uploadPersonAvatar(picturePreview?.file) : avatarSource;
 			const uploadingAvatar = {_id: avatarData?._id, url: avatarData?.url};
-			console.log(uploadingAvatar);
+
 			await saveAction(values, uploadingAvatar, person?._id ?? null);
 			onChange();
 			dispatchToastMessage({ type: 'success', message: t('Person_was_added_successful') });
