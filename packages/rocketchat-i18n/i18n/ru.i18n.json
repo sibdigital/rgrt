@@ -1215,6 +1215,8 @@
   "Desktop_Notifications_Not_Enabled": "Уведомления на рабочем столе не включены",
   "Details": "Подробности",
   "Different_Style_For_User_Mentions": "Другой стиль для упоминаний пользователей",
+  "Direct_message_creation_description": "Вы собираетесь создать чат с несколькими пользователями. Добавьте тех, с кем вы хотите поговорить, используя личные сообщения.",
+  "Direct_message_you_have_joined": "Вы присоединились к новому чату с ",
   "Direct_message_someone": "Личная переписка с кем-нибудь",
   "Direct_Message": "Личное сообщение",
   "Direct_Messages": "Личная переписка",
