@@ -32,7 +32,7 @@ export function Persons({
 	], [sort, mediaQuery]);
 
 	const renderRow = (person) => {
-		const { _id, name, surname, patronymic, email, emails, phone, group, avatarSource } = person;
+		const { _id, name, surname, patronymic, email, phone, group, avatarSource } = person;
 		// const email = emails ? emails[0].address : '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'> {surname} {name} {patronymic}</Table.Cell>
