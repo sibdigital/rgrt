@@ -10,9 +10,11 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { getAnimation } from '../../../utils';
 import { ClearButton } from '../../../utils/client/views/ClearButton';
+import { constructPersonFullFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { CouncilChoose } from './CouncilChoose';
 import { ProtocolChoose } from './ProtocolChoose';
 import { ItemsChoose } from './ItemsChoose';
+import { settings } from '../../../settings/client';
 
 export function useDefaultRequestForm({ defaultValues = null }) {
 	const defaultFields = {
@@ -34,10 +36,17 @@ export function useDefaultRequestForm({ defaultValues = null }) {
 		hasUnsavedChanges,
 	} = useForm(defaultValues ?? defaultFields);
 
-	const allFieldAreFilled = useMemo(() => Object.values(values).filter((val) => {
-		if (typeof val === 'string' && val.trim() !== '') { return false; }
-		if (typeof val === 'object' && val.length > 0) { return false; }
-		return val.toString().trim() === '';
+	// const allFieldAreFilled = useMemo(() => Object.values(values).filter((val) => {
+	// 	if (typeof val === 'string' && val.trim() !== '') { return false; }
+	// 	if (typeof val === 'object' && val.length > 0) { return false; }
+	// 	return val.toString().trim() === '';
+	// }).length === 0, [values]);
+	const allFieldAreFilled = useMemo(() => Object.entries(values).filter((val) => {
+		const [key, value] = val;
+		if (key === 'mail' || key === 'protocol' || key === 'council') { return false; }
+		if (typeof value === 'string' && value.trim() !== '') { return false; }
+		if (typeof value === 'object' && value.length > 0) { return false; }
+		return value.toString().trim() === '';
 	}).length === 0, [values]);
 
 	return {
@@ -54,12 +63,18 @@ function CouncilField({ council, handleCouncil, chooseButtonStyles, handleChoose
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const label = useMemo(() => (!council.d ? '' : [t('Council'), t('Date_to'), formatDateAndTime(council.d)].join(' ')), [council, formatDateAndTime, t]);
+	const address = useMemo(() => [settings.get('Site_Url'), 'council/', council?._id ?? ''].join(''), [council]);
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
-			<Field.Label>{t('Council')} {council && council._id && <ClearButton onClick={() => handleCouncil({})}/>}</Field.Label>
-			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row'>
-				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Council')}/>
+			<Field.Label alignSelf='center' mie='x16' display='flex' flexDirection='row' alignItems='center'>
+				{t('Council')} {council && council._id && <ClearButton onClick={() => handleCouncil({})}/>}
+			</Field.Label>
+			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
+				{label === ''
+					? <TextInput value={label} borderWidth='0' readOnly placeholder={t('Council')}/>
+					: <Box display='flex' alignItems='center' borderWidth='0' padding='x8'><a href={address} target='_blank'>{label}</a></Box>
+				}
 				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('councilChoose')} fontScale='p1'>{t('Choose')}</Button>
 			</Box>
 		</Field>
@@ -70,19 +85,35 @@ function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseBu
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const label = useMemo(() => (!protocol.d && !protocol.num ? '' : [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('')), [protocol, formatDate, t]);
+	const address = useMemo(() => [settings.get('Site_Url'), 'protocol/', protocol?._id ?? ''].join(''), [protocol]);
 
 	return useMemo(() =>
 		<Field mis='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
-			<Field.Label>{t('Protocol')} {protocol && protocol._id && <ClearButton onClick={() => { handleProtocolItems([]); handleProtocol({ }); }}/>}</Field.Label>
-			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row'>
-				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>
+			<Field.Label alignSelf='center' mie='x16' display='flex' flexDirection='row' alignItems='center'>
+				{t('Protocol')} {protocol && protocol._id && <ClearButton onClick={() => { handleProtocolItems([]); handleProtocol({ }); }}/>}
+			</Field.Label>
+			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
+				{label === ''
+					? <TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>
+					: <Box display='flex' alignItems='center' borderWidth='0' padding='x8'><a href={address} target='_blank'>{label}</a></Box>
+				}
+				{/*<TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>*/}
 				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{t('Choose')}</Button>
 			</Box>
 		</Field>
 	, [flexDirection, t, protocol, label, chooseButtonStyles, handleProtocolItems, handleProtocol, handleChoose]);
 }
 
-export function ProtocolItemsField({ protocolId, protocolItems, handleProtocolItems, chooseButtonStyles, onShowLabelAndTooltip = true, onShowChooseButton = true, handleChoose = () => {} }) {
+export function ProtocolItemsField({
+	protocolId,
+	protocolItems,
+	handleProtocolItems,
+	chooseButtonStyles,
+	onShowLabelAndTooltip = true,
+	onShowChooseButton = true,
+	handleChoose = () => {},
+	handleItemResponsible,
+}) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 
@@ -90,11 +121,19 @@ export function ProtocolItemsField({ protocolId, protocolItems, handleProtocolIt
 		console.log('handleProtocolItemChipClick');
 		const arr = protocolItems.filter((chip, _index) => _index !== index);
 		handleProtocolItems(arr);
-	}, [handleProtocolItems, protocolItems]);
+		if (arr && arr.length > 0) {
+			handleItemResponsible(constructPersonFullFIO(arr[0]));
+		}
+	}, [handleItemResponsible, handleProtocolItems, protocolItems]);
+	// useMemo(() => console.log({ protocolItems }), [protocolItems]);
 
 	return useMemo(() =>
-		<Box display='flex' flexDirection='column' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
-			{onShowLabelAndTooltip && <Field.Label>{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}</Field.Label>}
+		<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
+			{onShowLabelAndTooltip
+			&& <Field.Label display='flex' flexDirection='row' alignItems='center'>
+				{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}
+			</Field.Label>
+			}
 			<Margins all='x4'>
 				<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
 					{ protocolItems.map((item, index) =>
@@ -106,7 +145,7 @@ export function ProtocolItemsField({ protocolId, protocolItems, handleProtocolIt
 				{onShowChooseButton && <Field
 					maxHeight='30px' maxWidth='250px' display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start'
 					border='0px hidden transparent' borderRadius='0.6rem' alignItems='center'>
-					<Button disabled={!protocolId} style={chooseButtonStyles} small onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{t('Add')}</Button>
+					<Button disabled={!protocolId} style={chooseButtonStyles} small onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{t('Choose')}</Button>
 				</Field>}
 			</Margins>
 		</Box>
@@ -188,10 +227,10 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
 				{useMemo(() =>
-					<CouncilField chooseButtonStyles={chooseButtonStyles} council={council} handleCouncil={handleCouncil} handleChoose={handleChoose}/>
+					<CouncilField flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} council={council} handleCouncil={handleCouncil} handleChoose={handleChoose}/>
 				, [chooseButtonStyles, council, handleChoose, handleCouncil])}
 				{useMemo(() =>
-					<ProtocolField chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleProtocol={handleProtocol} handleProtocolItems={handleProtocolItems} handleChoose={handleChoose}/>
+					<ProtocolField flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleProtocol={handleProtocol} handleProtocolItems={handleProtocolItems} handleChoose={handleChoose}/>
 				, [chooseButtonStyles, handleChoose, handleProtocol, protocol, handleProtocolItems])}
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
@@ -199,21 +238,29 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 					useMemo(() =>
 						protocol._id && protocol._id !== ''
 						&& <SlideAnimation>
-							<ProtocolItemsField protocolId={protocol?._id ?? null} handleChoose={handleChoose} chooseButtonStyles={chooseButtonStyles} protocolItems={protocolItems} handleProtocolItems={handleProtocolItems}/>
+							<ProtocolItemsField
+								protocolId={protocol?._id ?? null}
+								handleChoose={handleChoose}
+								chooseButtonStyles={chooseButtonStyles}
+								protocolItems={protocolItems}
+								handleProtocolItems={handleProtocolItems}
+								handleItemResponsible={handleItemResponsible}
+							/>
 						</SlideAnimation>
-					, [chooseButtonStyles, handleChoose, handleProtocolItems, protocolItems, protocol])
+					, [chooseButtonStyles, handleChoose, handleProtocolItems, handleItemResponsible, protocolItems, protocol])
 				}
 			</Field>
-			<Field mbe='x16'>
-				<Field.Label>{t('Errand_Charged_to')}</Field.Label>
-				<Field.Row>
-					<TextInput style={ inputStyles } value={ itemResponsible } onChange={(event) => onChangeField(event, handleItemResponsible)} placeholder={t('Errand_Charged_to')} fontScale='p1'/>
-				</Field.Row>
-			</Field>
-			<Field mbe='x16'>
-				<Field.Label>{t('Working_group_request_select_mail')}</Field.Label>
-				<Field.Row>
+			{useMemo(() => protocolItems && protocolItems.length === 0 && <Field mbe='x16' display='flex' flexDirection='row'>
+				<Field.Label alignSelf='center' mie='x16' style={{ whiteSpace: 'pre' }}>{t('Working_group_request_select_mail')}</Field.Label>
+				<Field.Row width='inherit'>
 					<TextInput style={ inputStyles } placeholder={t('Working_group_request_select_mail')} value={mail} onChange={(event) => onChangeField(event, handleMail)} fontScale='p1'/>
+				</Field.Row>
+			</Field>, [handleMail, inputStyles, mail, onChangeField, protocolItems, t])}
+			{/*<ItemResponsibleField itemResponsible={itemResponsible} handleItemResponsible={handleItemResponsible} protocolItems={protocolItems} inputStyles={inputStyles}/>*/}
+			<Field mbe='x16' display='flex' flexDirection='row'>
+				<Field.Label alignSelf='center' mie='x16'>{t('Errand_Charged_to')}</Field.Label>
+				<Field.Row width='inherit'>
+					<TextInput style={ inputStyles } value={ itemResponsible } onChange={(event) => handleItemResponsible(event)} placeholder={t('Errand_Charged_to')} fontScale='p1'/>
 				</Field.Row>
 			</Field>
 			<Field mbe='x16'>
@@ -248,8 +295,13 @@ export function WorkingGroupRequestVerticalChooseBar({ handlers, context, protoc
 			</VerticalBar.Header>
 			<VerticalBar.ScrollableContent>
 				{context === 'councilChoose' && <CouncilChoose setCouncil={verticalBarFieldChange('handleCouncil')} close={close}/>}
-				{context === 'protocolChoose' && <ProtocolChoose setProtocol={verticalBarFieldChange('handleProtocol')} close={close}/>}
-				{context === 'protocolItemChoose' && <ItemsChoose protocolId={protocolId} protocolItems={protocolItems} setProtocolItems={verticalBarFieldChange('handleProtocolItems')} close={close}/>}
+				{context === 'protocolChoose' && <ProtocolChoose setCouncil={verticalBarFieldChange('handleCouncil')} setProtocol={verticalBarFieldChange('handleProtocol')} close={close}/>}
+				{context === 'protocolItemChoose' && <ItemsChoose
+					protocolId={protocolId}
+					protocolItems={protocolItems}
+					setItemResponsible={verticalBarFieldChange('handleItemResponsible')}
+					setProtocolItems={verticalBarFieldChange('handleProtocolItems')}
+					close={close}/>}
 			</VerticalBar.ScrollableContent>
 		</VerticalBar>;
 }

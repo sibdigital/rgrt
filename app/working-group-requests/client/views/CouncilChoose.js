@@ -45,26 +45,7 @@ export function CouncilChoose({ setCouncilId, setCouncil, close }) {
 		</Table.Row>;
 	};
 
-	if ([councilState].includes(ENDPOINT_STATES.LOADING)) {
-		return <Table.Row>
-			<Table.Cell>
-				<Box display='flex'>
-					<Flex.Item>
-						<Skeleton variant='rect' height={40} width={40} />
-					</Flex.Item>
-					<Box mi='x8' flexGrow={1}>
-						<Skeleton width='100%' />
-						<Skeleton width='100%' />
-					</Box>
-				</Box>
-			</Table.Cell>
-			{ Array.from({ length: 10 }, (_, i) => <Table.Cell key={i}>
-				<Skeleton width='100%' />
-			</Table.Cell>)}
-		</Table.Row>;
-	}
-
-	return <GenericTable header={header} renderRow={renderRow} results={councilData.councils} total={councilData.total} setParams={setParams} params={params}/>;
+	return <GenericTable header={header} renderRow={renderRow} results={councilData?.councils ?? []} total={councilData?.total ?? 0} setParams={setParams} params={params}/>;
 }
 
 export default CouncilChoose;

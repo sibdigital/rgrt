@@ -47,6 +47,7 @@ API.v1.addRoute('councils.findOne', { authRequired: true }, {
 	get() {
 		const { query, stockFields } = this.parseJsonQuery();
 		const cursor = Promise.await(findCouncil(query._id, { fields: stockFields ?? {} }));
+		console.log({ cursor, query });
 		return API.v1.success(cursor ?? {});
 	},
 });

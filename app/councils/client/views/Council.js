@@ -503,7 +503,8 @@ function Council({
 					if (validation.length === 0) {
 						protocolData.council = {
 							_id: councilId,
-							typename: councilType
+							typename: councilType,
+							d: date,
 						};
 						protocolData.sections = [];
 						if (agendaData?.sections) {
