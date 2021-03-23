@@ -166,12 +166,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		</Table.Row>;
 	};
 
-	if ([state].includes(ENDPOINT_STATES.LOADING)) {
-		console.log('loading');
-		return <GenericTable header={header} renderRow={renderRow} results={[]} total={0} setParams={setParams} params={params}/>;
-	}
-
-	return <GenericTable header={header} renderRow={renderRow} results={data.documents ?? []} total={data.documents?.length ?? 0} setParams={setParams} params={params}/>;
+	return <GenericTable header={header} renderRow={renderRow} results={data?.documents ?? []} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>;
 }
 
 CouncilFiles.displayName = 'CouncilFiles';

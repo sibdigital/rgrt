@@ -25,6 +25,7 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field email is required', { method: 'insertOrUpdatePerson', field: 'email' });
 		}
 
+		person.weight = parseInt(person.weight ?? 100);
 		if (!person._id) {
 			const createPerson = {
 				surname: person.surname,

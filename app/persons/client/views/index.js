@@ -28,7 +28,7 @@ export function PersonsPage() {
 	const routeName = 'persons';
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [sort, setSort] = useState(['createdAt']);
+	const [sort, setSort] = useState(['weight']);
 	const [cache, setCache] = useState(new Date());
 	const [currentPerson, setCurrentPerson] = useState({});
 

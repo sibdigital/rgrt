@@ -48,10 +48,13 @@ export function EditPerson({ person, onChange, close, ...props }) {
 	const [clickUpload] = useFileInput(setUploadedPreview);
 
 	const uploadAvatar = useCallback(async () => {
-		const avatarData = await uploadPersonAvatar({ file: avatarObj.file });
-
-		return { _id: avatarData._id, url: avatarData.url };
-	}, [avatarObj]);
+		if (url !== prevUrl) {
+			const avatarData = await uploadPersonAvatar({ file: avatarObj.file });
+			return { _id: avatarData._id, url: avatarData.url };
+		} else {
+			return person.avatarSource;
+		}
+	}, [avatarObj, person, prevUrl, url]);
 
 	const saveAction = useCallback(async (personValues, avatarSource, previousPersonId) => {
 		// console.dir({ personValues });
