@@ -25,21 +25,32 @@ export function EditPerson({ workingGroupOptions, person, onChange, close, ...pr
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
-	const [prevUrl, setPrevUrl] = useState('');
-	const [avatarSource, setAvatarSource] = useState(person?.avatarSource ?? {});
+	const [picturePreview, setPicturePreview] = useState({});
+	const [avatarSource, setAvatarSource] = useState({});
 
 	const { values, handlers, hasUnsavedChanges, allFieldAreFilled } = useDefaultPersonForm({ defaultValues: person && person._id ? person : null });
 
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 
-	const uploadAvatar = useCallback(async (file) => {
-		const avatarData = await uploadPersonAvatar(file);
-		setAvatarSource(() => {
-			return {_id: avatarData?._id, url: avatarData?.url}
-		})
-	}, [setAvatarSource, uploadPersonAvatar]);
+	useMemo(() => {
+		setAvatarSource(person?.avatarSource ?? {})
+	}, [person])
 
-	const [clickUpload] = useFileInput(uploadAvatar);
+	const loadPreview = useCallback(async (file) => {
+		setPicturePreview(() => {
+			return {
+				url: URL.createObjectURL(file),
+				file: file,
+			}
+		})
+	}, [setPicturePreview]);
+
+	const [clickUpload] = useFileInput(loadPreview);
+
+	const deletePhoto = useCallback(() => { 
+		setPicturePreview({});
+		setAvatarSource({});
+	}, [setPicturePreview]);
 
 	const saveAction = useCallback(async (personValues, avatarSource, previousPersonId) => {
 		// console.dir({ personValues });
@@ -58,26 +69,36 @@ export function EditPerson({ workingGroupOptions, person, onChange, close, ...pr
 
 	const handleSave = useCallback(async () => {
 		try {
-			await saveAction(values, avatarSource, person?._id ?? null);
+			const avatarData = picturePreview?.file ? await uploadPersonAvatar(picturePreview?.file) : avatarSource;
+			const uploadingAvatar = {_id: avatarData?._id, url: avatarData?.url};
+			console.log(uploadingAvatar);
+			await saveAction(values, uploadingAvatar, person?._id ?? null);
 			onChange();
+			dispatchToastMessage({ type: 'success', message: t('Person_was_added_successful') });
 			close();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [uploadAvatar, saveAction, avatarSource, values, person, onChange, close, dispatchToastMessage]);
+	}, [saveAction, avatarSource, picturePreview, values, person, onChange, close, dispatchToastMessage]);
 
 	return <Box {...props}>
-		<Field>
-			<a><img alt={t('Avatar')} height='100%' width='100%' src={avatarSource?.url}/></a>
-			<Button mbs='x4' w={'auto'} square onClick={clickUpload}><Icon name='upload' size='x20'/>{t('Upload_avatar')}</Button>
+		<Field m='x8' mbe='0' w='98%'>
+			{picturePreview?.url || avatarSource?.url
+				? <a><img alt={t('Avatar')} height='100%' width='100%' src={picturePreview?.url ?? avatarSource?.url}/></a>
+				: <Box lineHeight='6.5' h='x100' borderStyle='dashed' borderRadius='0.125rem' borderWidth='0.125rem' borderColor='#cbced1' textAlign='center'>
+					{t('Place_for_person_picture')}</Box>}
+			{picturePreview?.url || avatarSource?.url 
+				? <Button mb='x8' w={'auto'} square onClick={deletePhoto}><Icon name='trash' size='x20' pie='x4'/>{t('Delete_photo')}</Button>
+				: <Button mb='x8' w={'auto'} square onClick={clickUpload}><Icon name='upload' size='x20' pie='x4'/>{t('Upload_photo')}</Button>}
+			<hr align='center' width='100%' size='2' color='#cbced1' />
 		</Field>
-		<hr align='center' width='100%' size='2' color='#cbced1' />
 		<PersonForm workingGroupOptions={workingGroupOptions} defaultHandlers={handlers} defaultValues={values} />
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={person?._id ? !hasUnsavedChanges && prevUrl === avatarSource?.url : !allFieldAreFilled}>{t('Save')}</Button>
+					<Button primary onClick={handleSave} disabled={person?._id ? !hasUnsavedChanges 
+						&& picturePreview?.url === undefined && avatarSource?.url !== undefined : !allFieldAreFilled}>{t('Save')}</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
