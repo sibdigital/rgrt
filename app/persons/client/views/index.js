@@ -75,6 +75,7 @@ export function PersonsPage() {
 		const personToEdit = { ...person };
 		person && !person.organization && Object.assign(personToEdit, { organization: '' });
 		person && !person.position && Object.assign(personToEdit, { position: '' });
+		person && !person.group && Object.assign(personToEdit, { group: { _id: '', title: '' } });
 		setCurrentPerson(personToEdit);
 		router.push({
 			context: 'edit',

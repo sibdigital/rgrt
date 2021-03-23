@@ -167,10 +167,10 @@ function PersonForm({
 			</Field>, [t, organization, handleOrganization])}
 
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
-					<Field.Label>{t('Group')}</Field.Label>
-					<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />
-				</Field>, [t, group, handleGroup, workingGroupOptions])}
-			
+				<Field.Label>{t('Group')}</Field.Label>
+				<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />
+			</Field>, [t, group, handleGroup, workingGroupOptions])}
+
 			{onShowCancelAndSaveButtons && <ButtonGroup mb='x16'>
 				<Button flexGrow={1} onClick={() => !!onCancel && onCancel()}>{t('Cancel')}</Button>
 				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Save')}</Button>
