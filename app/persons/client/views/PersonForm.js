@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Button, ButtonGroup, Field, Icon, Margins, TextInput } from '@rocket.chat/fuselage';
+import { Box, Button, ButtonGroup, Field, Icon, Margins, TextInput, Select } from '@rocket.chat/fuselage';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -20,6 +20,7 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 		email: '',
 		organization: '',
 		position: '',
+		group: '',
 	};
 	const contactFields = {
 		surname: '',
@@ -31,7 +32,6 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 
 	const fields = useMemo(() => isContactPerson ? contactFields : defaultValues ?? defaultFields, [isContactPerson, defaultValues]);
 	// useMemo(() => console.log({ fields }), [fields]);
-
 	const {
 		values,
 		handlers,
@@ -42,8 +42,8 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 
 	const allFieldAreFilled = useMemo(() => Object.values(values).filter((val) => {
 		if (typeof val === 'string' && val.trim() !== '') { return false; }
-		if (typeof val === 'object' && val.length > 0) { return false; }
-		return val.toString().trim() === '';
+		if (typeof val === 'object' && val?.length > 0) { return false; }
+		return val?.toString().trim() === '';
 	}).length === 0, [values]);
 
 	return {
@@ -63,6 +63,7 @@ function PersonForm({
 	onShowCancelAndSaveButtons = false,
 	onCancel = null,
 	onSave = null,
+	workingGroupOptions,
 }) {
 	const t = useTranslation();
 	const fieldMarginBlock = 'x4';
@@ -83,6 +84,7 @@ function PersonForm({
 		email,
 		organization,
 		position,
+		group,
 	} = defaultValues ?? values;
 
 	const {
@@ -94,6 +96,7 @@ function PersonForm({
 		handleEmail,
 		handleOrganization,
 		handlePosition,
+		handleGroup,
 	} = defaultHandlers ?? handlers;
 
 	const filterNumber = useCallback((value) => {
@@ -163,6 +166,11 @@ function PersonForm({
 				</Field.Row>
 			</Field>, [t, organization, handleOrganization])}
 
+			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
+					<Field.Label>{t('Group')}</Field.Label>
+					<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />
+				</Field>, [t, group, handleGroup, workingGroupOptions])}
+			
 			{onShowCancelAndSaveButtons && <ButtonGroup mb='x16'>
 				<Button flexGrow={1} onClick={() => !!onCancel && onCancel()}>{t('Cancel')}</Button>
 				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Save')}</Button>
