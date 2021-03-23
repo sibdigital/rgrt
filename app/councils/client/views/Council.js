@@ -544,9 +544,6 @@ function Council({
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Council')} {isLoading && t('Loading')}</Label>
 				</Field>
 				<ButtonGroup>
-					{/*{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>*/}
-					{/*	{t('Edit')}*/}
-					{/*</Button>}*/}
 					{mode === 'edit' && <Button danger={!hasUnsavedChanges} primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>}
@@ -559,9 +556,6 @@ function Council({
 					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
 					</Button>}
-					{/*{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>*/}
-					{/*	{t('Proposals_for_the_agenda')}*/}
-					{/*</Button>}*/}
 					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
 						{protocolData.protocol.length !== 0 ? t('Protocol') : t('Protocol_Create')}
 					</Button>}
@@ -636,9 +630,6 @@ function Council({
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<ButtonGroup mis='auto' mie='x16'>
-						{/*<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>*/}
-						{/*	{t('Save_Order')}*/}
-						{/*</Button>*/}
 						<Button disabled={isLoading} onClick={fileUploadClick} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
 						</Button>
@@ -646,7 +637,6 @@ function Council({
 				</Field>}
 				{tab === 'persons' && isSecretary
 					&& ((context === 'participants'
-					// && <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
 					&& <CouncilPersons councilId={councilId} isSecretary={isSecretary}/>
 					)
 
@@ -680,7 +670,6 @@ function Council({
 					</Field>
 				}
 				{tab === 'files'
-					// && <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
 					&& <CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
 				}
 			</Page.Content>

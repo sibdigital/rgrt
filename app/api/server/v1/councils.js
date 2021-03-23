@@ -95,7 +95,7 @@ API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 					weight: 1,
 				},
 			},
-			{ $sort: { weight: 1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },
+			{ $sort: { weight: -1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },
 			{ $skip: offset },
 			{ $limit: count },
 		];
