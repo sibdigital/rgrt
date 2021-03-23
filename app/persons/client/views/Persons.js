@@ -19,6 +19,7 @@ export function Persons({
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const header = useMemo(() => [
+		<Th key={'Weight'} color='default' width='x50'>{t('Weight')}</Th>,
 		<Th key={'name'} style={{ width: '190px' }} color='default'>
 			{t('Full_Name')}
 		</Th>,
@@ -30,9 +31,10 @@ export function Persons({
 	], [sort, mediaQuery]);
 
 	const renderRow = (person) => {
-		const { _id, name, surname, patronymic, email, emails, phone, avatarUrl } = person;
+		const { _id, name, surname, patronymic, email, emails, phone, avatarUrl, weight } = person;
 		// const email = emails ? emails[0].address : '';
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
+			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{weight ?? ''}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'> {surname} {name} {patronymic}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'><Box withTruncatedText>{email}</Box></Table.Cell>}
