@@ -86,10 +86,10 @@ export function ProtocolsPage() {
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			<Page.Header display={mediaQuery ? 'flex' : 'block'}>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton onClick={goBack}/>
-					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Protocols')}</Label>
+					<Label fontScale='h1' fontSize={mediaQuery ? '1.375rem' : '1.3rem'}>{t('Protocols')}</Label>
 				</Field>
 				{ isAllowedEdit && <Button mbs='0' pi='x16' width='150px' primary small onClick={handleHeaderButtonClick('new')} aria-label={t('New')}>
 					{ t('Add') }

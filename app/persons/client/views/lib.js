@@ -19,7 +19,7 @@ export function createPerson({ personToSave }, { previousData }) {
 	if (previousData && previousData._id) {
 		personData._id = previousData._id;
 	}
-	const { surname, name, patronymic, phone, email, organization, position, weight, avatarSource = {} } = personToSave;
+	const { surname, name, patronymic, phone, email, organization, position, weight, avatarSource = {}, group } = personToSave;
 
 	surname && Object.assign(personData, { surname });
 	name && Object.assign(personData, { name });
@@ -30,6 +30,8 @@ export function createPerson({ personToSave }, { previousData }) {
 	organization && Object.assign(personData, { organization });
 	weight && Object.assign(personData, { weight });
 	avatarSource && Object.assign(personData, { avatarSource });
+	group && Object.assign(personData, { group });
+
 
 	// console.dir({ personData, personToSave });
 	return personData;

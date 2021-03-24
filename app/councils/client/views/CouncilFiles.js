@@ -115,12 +115,12 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
 		</Th>,
-		<Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
+		mediaQuery && <Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
 			{ t('File_uploaded_uploadedAt') }
 		</Th>,
-		isSecretary && <Th w='x40' key='moveUp'/>,
-		isSecretary && <Th w='x40' key='moveDown'/>,
-		<Th w='x40' key='download'/>,
+		mediaQuery && isSecretary && <Th w='x40' key='moveUp'/>,
+		mediaQuery && isSecretary && <Th w='x40' key='moveDown'/>,
+		mediaQuery && <Th w='x40' key='download'/>,
 		isSecretary && <Th w='x40' key='delete'/>,
 	], [mediaQuery, isSecretary]);
 
@@ -142,22 +142,22 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
 			<Table.Cell fontScale='p1' color='default'>{document.index + 1}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>
-			{isSecretary && <Table.Cell alignItems={'end'}>
+			{mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>}
+			{mediaQuery && isSecretary && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>
 					<Icon name='arrow-down'/>
 				</Button>
 			</Table.Cell>}
-			{isSecretary && <Table.Cell alignItems={'end'}>
+			{mediaQuery && isSecretary && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('moveDown')} onClick={() => moveFileUpOrDown('down', document.index)}>
 					<Icon name='arrow-down'/>
 				</Button>
 			</Table.Cell>}
-			<Table.Cell alignItems={'end'}>
+			{mediaQuery && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('download')} onClick={onDownloadFileClick(document)}>
 					<Icon name='download'/>
 				</Button>
-			</Table.Cell>
+			</Table.Cell>}
 			{isSecretary && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onDeleteFileConfirmDel(document._id)} aria-label={t('Delete')}>
 					<Icon name='trash'/>
