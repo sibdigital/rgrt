@@ -3,8 +3,6 @@ import {
 	AlignmentType,
 	Document,
 	HeadingLevel,
-	Indent,
-	Numbering,
 	Packer,
 	PageOrientation,
 	Paragraph,
@@ -17,6 +15,16 @@ import moment from 'moment';
 
 import { Agendas } from '../../../models';
 
+function constructPersonFIO(responsible) {
+	if (!responsible || typeof responsible !== 'object') {
+		return responsible;
+	}
+	if (!responsible.surname && !responsible.name && !responsible.patronymic) {
+		return responsible;
+	}
+	return [responsible.surname ?? '', ' ', responsible.name?.substr(0, 1) ?? '', '.', responsible.patronymic?.substr(0, 1) ?? '', '.'].join('');
+}
+
 Meteor.methods({
 	async downloadAgenda({ _id, dateString = null }) {
 		if (!_id) {
@@ -24,8 +32,6 @@ Meteor.methods({
 		}
 
 		const agenda = await Agendas.findOne({ _id });
-
-		// const persons = Persons.find({ _id: { $in: council.invitedPersons.map((iPerson) => iPerson._id) } }) || [];
 
 		if (!agenda) {
 			throw new Meteor.Error('error-the-field-is-required', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadAgenda', field: 'agenda' });
@@ -80,109 +86,103 @@ Meteor.methods({
 			}),
 		];
 
-		const getSectionChildren = (section, speakers) => {
-			const arr = [
-				new Paragraph({
-					text: 'Пункт',
-					children: [
-						new TextRun({
-							text: `${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' }`,
-							color: '000000',
-						}),
-					],
-				}),
-				new Paragraph({
-					text: 'Рассматриваемый вопрос',
-					children: [
-						new TextRun({
-							text: `${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.item : 'Рассматриваемый вопрос' } `,
-							color: '000000',
-						}),
-					],
-				}),
-				new Paragraph({
-					text: 'Инициатор',
-					children: [
-						new TextRun({
-							text: `${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : 'Инициатор' }`,
-							color: '000000',
-						}),
-					],
-				}),
-				// new TextRun({
-				// 	text: `     ${ section.item && section.item.trim() !== '' ? section.item : 'Пункт' } `,
-				// 	color: '000000',
-				// }),
-				// new TextRun({
-				// 	text: `     ${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.issueConsideration : 'Вопрос' } `,
-				// 	color: '000000',
-				// }),
-				// new TextRun({
-				// 	text: `     ${ section.initiatedBy && section.initiatedBy.value ? section.initiatedBy.value : '' } `,
-				// 	color: '000000',
-				// }),
-			];
-
-			if (!speakers || typeof speakers !== 'object' || speakers.length <= 0) {
-				return arr;
-			}
-
-			const result = [];
-
-			speakers.forEach((speaker) => {
-				result.push(new TextRun({
-					text: `     ${ speaker.value }, `,
-					color: '000000',
-				}));
+		let sectionsRows = [
+			new TableRow({
+				tableHeader: true,
+				children: [
+					new TableCell({
+						children: [new Paragraph({ text: 'Пункт', bold: true, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						width: {
+							size: 5,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: 'Рассматриваемый вопрос', bold: true, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						width: {
+							size: 45,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: 'Ответственный', bold: true, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						width: {
+							size: 20,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: 'Выступающие', bold: true, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						width: {
+							size: 30,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+				],
+			}),
+		];
+		sectionsRows = sectionsRows.concat(agenda?.sections?.map((value, index) => {
+			return new TableRow({
+				children: [
+					new TableCell({
+						children: [new Paragraph({ text: `${ value.item ?? index + 1 }`, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						alignment: AlignmentType.CENTER,
+						width: {
+							size: 5,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: `${ value.issueConsideration ?? '' }`.trim(), alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						alignment: AlignmentType.CENTER,
+						width: {
+							size: 45,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: `${ value.initiatedBy?.value ?? '' }`, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						alignment: AlignmentType.CENTER,
+						width: {
+							size: 20,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+					new TableCell({
+						children: [new Paragraph({ text: `${ value.speakers?.map((speaker) => constructPersonFIO(speaker)).join(' ') ?? '' }`, alignment: AlignmentType.CENTER })],
+						verticalAlign: VerticalAlign.CENTER,
+						alignment: AlignmentType.CENTER,
+						width: {
+							size: 30,
+							type: WidthType.PERCENTAGE,
+						},
+					}),
+				],
 			});
-
-			return [...arr, ...result];
-		};
-
-		const sectionsRow = agenda?.sections?.map((section) => new Paragraph({
-			children: getSectionChildren(section, section.speakers),
-
-				// new Paragraph({
-				// 	children: [new TextRun({
-				// 		text: `${ section.item && section.item.trim() !== '' ? section.item :  'Пункт' }`,
-				// 	})],
-				// 	heading: HeadingLevel.HEADING_5,
-				// 	indent: { left: 100 },
-				// }),
-				// new Paragraph({
-				// 	children: [new TextRun({
-				// 		text: `${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.issueConsideration :  'Пункт' }`,
-				// 	})],
-				// 	heading: HeadingLevel.HEADING_5,
-				// 	indent: { left: 100 },
-				// }),
-				// new Paragraph({
-				// 	text: `${ section.issueConsideration && section.issueConsideration.trim() !== '' ? section.issueConsideration :  'Пункт' }`,
-				// 	indent: { left: 100 },
-				// 	heading: HeadingLevel.HEADING_5,
-				// }),
-				// new Paragraph({
-				// 	text: `${ section.item && section.item.trim() !== '' ? section.item :  'Пункт' }`,
-				// 	indent: { left: 100 },
-				// }),
-				// new Paragraph({
-				// 	text: `${ section.item && section.item.trim() !== '' ? section.item :  'Пункт' }`,
-				// 	indent: { left: 100 },
-				// }),
-				// new Paragraph({
-				// 	text: `${ section.item && section.item.trim() !== '' ? section.item :  'Пункт' }`,
-				// 	indent: { left: 100 },
-				// }),
-			// ],
-			heading: HeadingLevel.HEADING_4,
-			alignment: AlignmentType.LEFT,
-		}) ) || [];
+		}));
 
 		doc.addSection({
 			size: {
 				orientation: PageOrientation.LANDSCAPE,
 			},
-			children: [...agendaRow, ...sectionsRow],
+			children: [
+				...agendaRow,
+				new Table({
+					rows: sectionsRows,
+					width: {
+						size: 100,
+						type: WidthType.PERCENTAGE,
+					},
+					cantSplit: true,
+				})
+			],
 		});
 
 		const buffer = await Packer.toBuffer(doc);

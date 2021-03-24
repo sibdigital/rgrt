@@ -29,7 +29,6 @@ import { EditAgenda } from './EditAgenda';
 import { Proposals } from './Proposals';
 import { EditProposalsForTheAgenda } from './EditProposalsForTheAgenda';
 import { ProposalsForTheAgendaPage } from './ProposalsForTheAgenda';
-import { downloadAgenda } from './testDownload';
 
 registerLocale('ru', ru);
 
@@ -144,8 +143,6 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		setProposalsList(agenda.proposals ?? []);
 	};
 
-	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
-
 	useEffect(() => {
 		if (agendaData && agendaData.success) {
 			console.log(agendaData);
@@ -158,12 +155,12 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				setContext('new');
 			}
 		}
-	}, [agendaData, insertOrUpdateAgenda]);
+	}, [agendaData]);
 
 	const deleteAgendaSection = useMethod('deleteAgendaSection');
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
 	const updateProposalStatus = useMethod('updateProposalStatus');
-	// const downloadAgenda = useMethod('downloadAgenda');
+	const downloadAgenda = useMethod('downloadAgenda');
 
 	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setContext(''); }, []);
 
@@ -298,7 +295,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const onAgendaDownloadClick = useCallback(async (e) => {
 		e.preventDefault();
 		try {
-			const res = await downloadAgenda({ _id: agendaId, agendaData, dateString: new Date() });
+			const res = await downloadAgenda({ _id: agendaId, agendaData, dateString: moment(new Date(agendaData.ts)).format('DD MMMM YYYY') });
 			const fileName = [t('Agenda'), ' ', moment(new Date(agendaData.ts)).format('DD MMMM YYYY'), '.docx'].join('');
 			console.log({ docx: res });
 			if (res) {
