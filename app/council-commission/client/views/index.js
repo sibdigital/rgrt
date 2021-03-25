@@ -13,8 +13,8 @@ import { useEndpointData } from '/client/hooks/useEndpointData';
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQueryPerson = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
-	query: JSON.stringify({ workingGroup: "Состав комиссии" }),
-	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, workingGroup: 1, avatarSource: 1 }),
+	query: JSON.stringify({ 'group.title': 'Состав комиссии' }),
+	fields: JSON.stringify({ name: 1, organization: 1, position: 1, email: 1, surname: 1, group: 1, patronymic: 1, phone: 1, username: 1, avatarSource: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction), surnames: column === 'surname' ? sortDir(direction) : undefined }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
@@ -32,11 +32,10 @@ export function CouncilCommission() {
 	const queryPerson = useQueryPerson(debouncedParams, debouncedSort);
 
 	const { data: personsData } = useEndpointDataExperimental('persons.list', queryPerson) || { };
-	console.log(personsData)
+
 	useEffect(() => {
 		if (personsData && personsData.persons) {
 			setPersons(personsData.persons);
-			console.log(personsData);
 		}
 	}, [personsData]);
 
@@ -50,13 +49,13 @@ export function CouncilCommissionPage(
 
 	const [cache, setCache] = useState();
 
-	const mediaQuery = useMediaQuery('(min-width: 890px)');
+	const mediaQuery = useMediaQuery('(min-width: 559px)');
 
 	const RenderBox = ({person, index}) => {
 		const { _id, name, surname, patronymic, email, phone, organization, position, username, avatarSource} = person;
 
 		if (index === 0) {
-			return <Box className={'commission-person-block'} position={'relative'} flexBasis='33.333%' height='x700'>
+			return <Box className={`commission-person-block--${index}`} position='relative'>
 			<img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/>
 			<Box className={'imgSide-bg gradient'} w='100%' >
 				<Box className={'imgSide-inf'}>
@@ -64,15 +63,18 @@ export function CouncilCommissionPage(
 						<Box>{surname}</Box>
 						<Box>{name} {patronymic}</Box>
 					</Box>
-					<Box lineHeight={'x24'} fontSize={mediaQuery ? 'x18': 'x12'} mb='x12'>{position}</Box>
+					<Box lineHeight={'x24'} fontSize='x18' mbs='x12'>{position}</Box>
 				</Box>
 			</Box>
 		</Box>;
 		}
-		return  <Box className={'commission-person-block'} flexBasis='33.333%' display={'flex'} mb='x32' height='x334'>
+		return  <Box className={`commission-person-block`} display='flex'>
 			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/></Box>
 			<Box flexBasis='60%' pi={'x16'} pb={'x24'} backgroundColor={'whitesmoke'}>
-				<Box fontSize={'x24'}>{surname} {name}{"\n" + patronymic}</Box>
+				<Box fontSize='x24'>
+					<Box>{surname} {name}</Box>
+					<Box>{patronymic}</Box>
+				</Box>
 				<Box lineHeight={'x24'} fontSize={'x16'} mb='x12'>{position}</Box>
 			</Box>
 		</Box>;
@@ -80,10 +82,10 @@ export function CouncilCommissionPage(
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
-				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+			<Page.Header display={mediaQuery ? 'flex' : 'block'}>
+				<Field width={'100%'} display={'block'} marginBlockStart={'15px'}>
 					<GoBackButton/>
-					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Commission of the State Council of the Russian Federation in the direction of \"Transport\"')}</Label>
+					<Label fontScale='h1'>{t('Commission of the State Council of the Russian Federation in the direction of \"Transport\"')}</Label>
 				</Field>
 			</Page.Header>
 			<Page.ScrollableContent>
@@ -96,7 +98,7 @@ export function CouncilCommissionPage(
 						person={person}
 						index={index}
 						/>)
-						: <Box>{'123'}</Box>}
+						: <Box/>}
 				</Box>
 				{/* <PersonsTable setParam={setParams} params={params}  personsData={persons} onEditClick={onEditClick} sort={sort}/> */}
 			</Page.ScrollableContent>

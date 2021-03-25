@@ -40,7 +40,7 @@ export function Requests({
 	], [mediaQuery]);
 
 	const renderRow = (request) => {
-		const { _id, number, ts, protocol, council } = request;
+		const { _id, number, ts, protocol, council, itemResponsible } = request;
 		const councilLabel = council?.d ? [t('Council'), ' от ', formatDate(council.d)].join('') : '';
 		const protocolLabel = protocol?.d && protocol?.itemNum && protocol?.num ? [t('Protocol_Item'), ' №', protocol.itemNum, ' протокола от ', formatDate(protocol.d), ' №', protocol.num].join('') : '';
 
@@ -52,7 +52,7 @@ export function Requests({
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>
 				{protocolLabel}
 			</Table.Cell>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{protocol?.itemResponsible}</Box></Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{itemResponsible}</Box></Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>

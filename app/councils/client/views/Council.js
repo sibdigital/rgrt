@@ -179,7 +179,7 @@ function Council({
 }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const [date, setDate] = useState(new Date());
 	const [description, setDescription] = useState('');
@@ -503,7 +503,8 @@ function Council({
 					if (validation.length === 0) {
 						protocolData.council = {
 							_id: councilId,
-							typename: councilType
+							typename: councilType,
+							d: date,
 						};
 						protocolData.sections = [];
 						if (agendaData?.sections) {
@@ -538,37 +539,31 @@ function Council({
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			<Page.Header display={mediaQuery ? 'flex' : 'block'}>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t('Council')} {isLoading && t('Loading')}</Label>
+					<Label fontScale='h1'>{t('Council')} {isLoading && t('Loading')}</Label>
 				</Field>
-				<ButtonGroup>
-					{/*{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Edit')} onClick={onEdit(councilId)}>*/}
-					{/*	{t('Edit')}*/}
-					{/*</Button>}*/}
-					{mode === 'edit' && <Button danger={!hasUnsavedChanges} primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
+				<ButtonGroup display={mediaQuery ? 'flex' : 'block'}>
+					{mode === 'edit' && <Button mbe='x8' danger={!hasUnsavedChanges} primary small aria-label={t('Save')} disabled={!hasUnsavedChanges || isLoading} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>}
-					{isSecretary && <Button disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
+					{isSecretary && <Button mbe='x8' disabled={isLoading} primary danger small aria-label={t('Delete')} onClick={onDeleteCouncilClick}>
 						{t('Delete')}
 					</Button>}
-					{(isSecretary || isAgendaData) && <Button primary small aria-label={t('Agenda')} onClick={goToAgenda}>
+					{(isSecretary || isAgendaData) && <Button mbe='x8' primary small aria-label={t('Agenda')} onClick={goToAgenda}>
 						{(isAgendaData || !isSecretary) ? t('Agenda') : t('Agenda_create')}
 					</Button>}
-					{!isSecretary && <Button disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
+					{!isSecretary && <Button mbe='x8' disabled={isLoading} danger={isUserJoin} small primary aria-label={t('Council_join')} onClick={joinToCouncil}>
 						{isUserJoin ? t('Council_decline_participation') : t('Council_join')}
 					</Button>}
-					{/*{!isSecretary && <Button primary small aria-label={t('Proposals_for_the_agenda')} onClick={goToProposalsForTheAgenda}>*/}
-					{/*	{t('Proposals_for_the_agenda')}*/}
-					{/*</Button>}*/}
-					{isSecretary && <Button disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
+					{isSecretary && <Button mbe='x8' disabled={isLoading} primary small aria-label={t('Protocol')} onClick={onOpenCouncilProtocol(protocolData, councilId)}>
 						{protocolData.protocol.length !== 0 ? t('Protocol') : t('Protocol_Create')}
 					</Button>}
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x16' display='flex' flexDirection='row'>
+				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
 					<Field mis='x4' display='flex' flexDirection='row'>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
 						<Field.Row width='-moz-available'>
@@ -600,12 +595,12 @@ function Council({
 						</Field.Row>
 					</Field>
 				</Field>
-				<Field mbe='x16' display='flex' flexDirection='row' alignItems='center' mis='x4'>
+				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row' alignItems='center' mis='x4'>
 					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
 						<Label maxWidth='100px' mie='x8'>{t('Council_Place')}</Label>
 						<TextInput mie='x12' fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
 					</Field>
-					{isSecretary && <Field display='flex' flexDirection='row' mie='x8'>
+					{isSecretary && <Field display={mediaQuery ? 'flex' : 'block'} flexDirection='row' mie='x8'>
 						<Label mie='x8'>{t('Council_invite_link')}</Label>
 						<a href={address} is='span' target='_blank'>{address}</a>
 					</Field>}
@@ -622,11 +617,11 @@ function Council({
 				</Tabs>
 				{tab !== 'files' && context === 'participants' && isSecretary
 				&& <Field mbe='x8'>
-					<Field.Row marginInlineStart='auto'>
-						<Button disabled={isLoading} marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
+					<Field.Row marginInlineStart='auto' display={mediaQuery ? 'flex' : 'block'}>
+						<Button mbe={mediaQuery ? 'x0' : 'x8'} disabled={isLoading} marginInlineEnd='10px' small primary onClick={onAddParticipantClick(councilId)} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
-						<Button disabled={isLoading} marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
+						<Button mbe={mediaQuery ? 'x0' : 'x8'} disabled={isLoading} marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
 							{t('Send_email')}
 						</Button>
 						<Button disabled={isLoading} small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
@@ -636,9 +631,6 @@ function Council({
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<ButtonGroup mis='auto' mie='x16'>
-						{/*<Button disabled={isLoading || currentMovedFiles.downIndex === currentMovedFiles.upIndex} onClick={saveFilesOrder} small primary aria-label={t('Save_Order')}>*/}
-						{/*	{t('Save_Order')}*/}
-						{/*</Button>*/}
 						<Button disabled={isLoading} onClick={fileUploadClick} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
 						</Button>
@@ -646,7 +638,6 @@ function Council({
 				</Field>}
 				{tab === 'persons' && isSecretary
 					&& ((context === 'participants'
-					// && <Persons councilId={councilId} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>
 					&& <CouncilPersons councilId={councilId} isSecretary={isSecretary}/>
 					)
 
@@ -680,7 +671,6 @@ function Council({
 					</Field>
 				}
 				{tab === 'files'
-					// && <GenericTable header={header} renderRow={renderRow} results={attachedFiles} total={attachedFiles.length} setParams={setParams} params={params}/>
 					&& <CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
 				}
 			</Page.Content>

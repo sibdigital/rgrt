@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ButtonGroup, Button, Field, Label, Icon } from '@rocket.chat/fuselage';
+import { ButtonGroup, Button, Field, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
@@ -7,10 +7,14 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
+import { useMethod } from '../../../../client/contexts/ServerContext';
+import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
+import { WarningModal } from '../../../utils/index';
 import { Persons } from './Persons';
 import { EditPerson } from './EditPerson';
-
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -28,7 +32,7 @@ export function PersonsPage() {
 	const routeName = 'persons';
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-	const [sort, setSort] = useState(['createdAt']);
+	const [sort, setSort] = useState(['weight']);
 	const [cache, setCache] = useState(new Date());
 	const [currentPerson, setCurrentPerson] = useState({});
 
@@ -38,29 +42,66 @@ export function PersonsPage() {
 	const query = useQuery(debouncedParams, debouncedSort, cache);
 
 	const data = useEndpointData('persons.list', query) || {};
+	const { data: workingGroupData, state: workingGroupState } = useEndpointDataExperimental('working-groups.list', useMemo(() => ({
+		query: JSON.stringify({ type: { $ne: 'subject' } }),
+	}), []));
 
 	const router = useRoute(routeName);
 
 	const context = useRouteParameter('context');
 	const id = useRouteParameter('id');
 
+	const setModal = useSetModal();
+
+	const dispatchToastMessage = useToastMessageDispatch();
+
+	const deletePerson = useMethod('deletePerson');
+
 	useMemo(() => console.log(data), [data]);
 
-	const onCLick = useCallback((_id, person = null) => () => {
-		setCurrentPerson(person);
+	const workingGroupOptions = useMemo(() => {
+		const res = [[null, t('Not_chosen')]];
+		if (workingGroupData && workingGroupData.workingGroups?.length > 0) {
+			return res.concat(workingGroupData.workingGroups.map((workingGroup) => [workingGroup._id, workingGroup.title]));
+		}
+		return res;
+	}, [workingGroupData]);
+
+	const onChange = useCallback(() => {
+		setCache(new Date());
+	}, []);
+
+	const onEditClick = useCallback((_id, person = null) => () => {
+		const personToEdit = { ...person };
+		person && !person.organization && Object.assign(personToEdit, { organization: '' });
+		person && !person.position && Object.assign(personToEdit, { position: '' });
+		person && !person.group && Object.assign(personToEdit, { group: { _id: '', title: '' } });
+		setCurrentPerson(personToEdit);
 		router.push({
 			context: 'edit',
 			id: _id,
 		});
 	}, [router]);
 
-	const onEditClick = useCallback((_id, person = null) => () => {
-		setCurrentPerson(person);
-		router.push({
-			context: 'edit',
-			id: _id,
-		});
-	}, [router]);
+	const delConfirm = useCallback(async(_id) => {
+		try {
+			console.log(_id)
+			await deletePerson(_id);
+			setModal(undefined)
+			onChange();
+			dispatchToastMessage({ type: 'success', message: t('Person_was_deleted_successful') });
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	}, [deletePerson, dispatchToastMessage, onChange])
+
+	const onDel = (_id) => () => {
+		delConfirm(_id);
+	};
+
+	const onDeleteClick = (_id) => () => setModal(
+		() => <WarningModal title={t('Are_you_sure')} contentText={t('Person_delete_warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>
+	);
 
 	const onAddClick = useCallback(() => () => {
 		router.push({
@@ -85,10 +126,6 @@ export function PersonsPage() {
 		router.push({});
 	}, [router]);
 
-	const onChange = useCallback(() => {
-		setCache(new Date());
-	}, []);
-
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header>
@@ -103,7 +140,7 @@ export function PersonsPage() {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Persons setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onCLick} onEditClick={onEditClick} sort={sort}/>
+				<Persons setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onEditClick} onEditClick={onEditClick} onDeleteClick={onDeleteClick} sort={sort}/>
 			</Page.Content>
 		</Page>
 		{ context
@@ -113,8 +150,8 @@ export function PersonsPage() {
 				{ context === 'new' && t('Person_add') }
 				<VerticalBar.Close onClick={close}/></VerticalBar.Header>
 			<VerticalBar.ScrollableContent mbe='x32'>
-				{context === 'edit' && <EditPerson person={currentPerson} close={close} onChange={onChange}/>}
-				{context === 'new' && <EditPerson person={null} close={close} onChange={onChange}/>}
+				{context === 'edit' && <EditPerson workingGroupOptions={workingGroupOptions} person={currentPerson} close={close} onChange={onChange}/>}
+				{context === 'new' && <EditPerson workingGroupOptions={workingGroupOptions} person={null} close={close} onChange={onChange}/>}
 			</VerticalBar.ScrollableContent>
 		</VerticalBar>}
 	</Page>;

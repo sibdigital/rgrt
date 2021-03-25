@@ -79,7 +79,7 @@
     font-size: 24px;
 }
 
-@media screen and (max-width: 780px) {
+@media screen and (max-width: 1367px) {
     .menu-bar {
         display: none;
     }

@@ -47,6 +47,7 @@ API.v1.addRoute('councils.findOne', { authRequired: true }, {
 	get() {
 		const { query, stockFields } = this.parseJsonQuery();
 		const cursor = Promise.await(findCouncil(query._id, { fields: stockFields ?? {} }));
+		console.log({ cursor, query });
 		return API.v1.success(cursor ?? {});
 	},
 });
@@ -95,7 +96,7 @@ API.v1.addRoute('councils.invitedPersons', { authRequired: true }, {
 					weight: 1,
 				},
 			},
-			{ $sort: { weight: 1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },
+			{ $sort: { weight: -1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },
 			{ $skip: offset },
 			{ $limit: count },
 		];

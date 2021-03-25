@@ -57,9 +57,9 @@ export function DocumentPage() {
 		}), [data]),
 	);
 
-	const { data: protocolItemsData, state: protocolItemsState } = useEndpointDataExperimental('protocols.getProtocolItemsByProtocolId',
+	const { data: protocolItemsData, state: protocolItemsState } = useEndpointDataExperimental('protocols.getProtocolItemsByItemsId',
 		useMemo(() => ({
-			query: JSON.stringify({ _id: data?.protocolId ?? '', protocolsItems: data?.protocolItemsId ?? [] }),
+			query: JSON.stringify({ _id: data?.protocolId ?? '', protocolItemsId: data?.protocolItemsId ?? [] }),
 		}), [data]),
 	);
 
@@ -129,7 +129,7 @@ export function DocumentPage() {
 		date,
 		council,
 		protocol,
-		protocolItemsId,
+		protocolItems,
 		itemResponsible,
 		mail,
 		description,
@@ -140,7 +140,7 @@ export function DocumentPage() {
 			date,
 			council,
 			protocol,
-			protocolItemsId,
+			protocolItemsId: protocolItems?.map((protocolItem) => protocolItem._id) ?? [],
 			itemResponsible,
 			mail,
 			desc: description,
@@ -158,12 +158,14 @@ export function DocumentPage() {
 
 	const handleSaveRequest = useCallback(async () => {
 		try {
+			const { protocol } = values;
+			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
 			await saveAction({
 				number: values.number,
 				date: values.date,
 				council: values.council,
-				protocol: values.protocol,
-				protocolItemsId: values.protocolItemsId,
+				protocol,
+				protocolItems: values.protocolItems,
 				itemResponsible: values.itemResponsible,
 				mail: values.mail,
 				description: values.description,

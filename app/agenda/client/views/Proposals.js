@@ -130,10 +130,8 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 		const { _id, item, issueConsideration, date, initiatedBy, status } = proposal;
 		const isProposalApproved = (proposal.status === t('Agenda_status_approved') || proposal.status === 'Agenda_status_approved');
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
-			{/*{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{item ?? ''}</Table.Cell>}*/}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' style={{ whiteSpace: 'normal' }} onClick={() => onProposalClick(proposal)}>{initiatedBy.value ?? ''}</Table.Cell>}
 			<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{issueConsideration}</Table.Cell>
-			{/*<Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{formatDateAndTime(date ?? new Date())}</Table.Cell>*/}
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default' onClick={() => onProposalClick(proposal)}>{status}</Table.Cell>}
 			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>
 				<Tooltip title={t('Decline')} arrow placement='top'>
@@ -143,7 +141,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 				</Tooltip>
 			</Table.Cell>}
 			{ mode === 'secretary' && <Table.Cell alignItems={'end'}>
-				<Tooltip title={t('Add')} arrow placement='top'>
+				<Tooltip title={t('Include_in_the_agenda')} arrow placement='top'>
 					<Button style={tableCellIconStyle} disabled={proposal.added} color={proposal.added ? '#e4e7ea' : 'green'} small aria-label={t('plus')} onClick={() => onAddProposalClick(proposal)}>
 						<Icon name='plus' size='x16'/>
 					</Button>

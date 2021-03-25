@@ -244,7 +244,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 
 	if ([councilState, invitedPersonsState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+		return <MailForm recipients={[]} mailSubject={''} mailBody={''} defaultEmails={''} emailsArray={[]}/>;
 	}
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails} emailsArray={emailsArray}/>;
@@ -330,7 +330,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 
 	if ([errandState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+		return <MailForm recipients={[]} mailSubject={''} mailBody={''} defaultEmails={''} emailsArray={[]}/>;
 	}
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails} emailsArray={mailsArray}/>;

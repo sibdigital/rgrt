@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
@@ -7,12 +6,12 @@ import {
 	Button,
 	ButtonGroup,
 	TextInput,
-	Icon,
 	Label,
 	Callout,
-	Tabs, Select,
+	Tabs,
+	Select,
 } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
@@ -118,6 +117,7 @@ export default AddCouncilPage;
 
 function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingGroupOptions }) {
 	const t = useTranslation();
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const [context, setContext] = useState('participants');
 	const [date, setDate] = useState(new Date());
@@ -138,6 +138,8 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 		}
 		return person;
 	}), [invitedPersonsIds, persons]);
+
+	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' }), []);
 
 	const insertOrUpdateCouncil = useMethod('insertOrUpdateCouncil');
 	const addCouncilToPersons = useMethod('addCouncilToPersons');
@@ -193,29 +195,30 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			<Page.Header display={mediaQuery ? 'flex' : 'block'}>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Council_Add')}</Label>
 				</Field>
-				<ButtonGroup>
+				<ButtonGroup display={mediaQuery ? 'flex' : 'block'}>
 					<Button primary small aria-label={t('Save')} disabled={!hasUnsavedChanges} onClick={handleSaveCouncil}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Field mbe='x8' display='flex' flexDirection='row'>
-					<Field mis='x4' >
-						<Field.Label>{t('Council_type')}</Field.Label>
-						<Field.Row>
-							<Select style={ { whiteSpace: 'normal' } } border='1px solid #4fb0fc' options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
+				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
+						<Field.Row width='-moz-available'>
+							<Select mie='x16' style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
 						</Field.Row>
 					</Field>
-					<Field mis='x4'>
-						<Field.Label>{t('Date')}</Field.Label>
-						<Field.Row>
+					<Field mis='x4' display='flex' flexDirection='row'>
+						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
+						<Field.Row width='-moz-available'>
 							<DatePicker
+								mie='x16'
 								dateFormat='dd.MM.yyyy HH:mm'
 								selected={date}
 								onChange={(newDate) => setDate(newDate)}
@@ -223,42 +226,35 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 								timeFormat='HH:mm'
 								timeIntervals={5}
 								timeCaption='Время'
-								customInput={<TextInput border='1px solid #4fb0fc'/>}
+								customInput={<TextInput style={ inputStyles } />}
 								locale='ru'
 								popperClassName='date-picker'/>
 						</Field.Row>
 					</Field>
 				</Field>
-				<Field mbe='x8'>
-					<Field.Label>{t('Council_Place')}</Field.Label>
-					<Field.Row>
-						<TextInput border='1px solid #4fb0fc' value={place} onChange={(e) => setPlace(e.currentTarget.value)} placeholder={t('Council_Place')} />
-					</Field.Row>
+				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row' alignItems='center' mis='x4'>
+					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
+						<Label maxWidth='100px' mie='x8'>{t('Council_Place')}</Label>
+						<TextInput mie='x12' fontScale='p1' placeholder={t('Council_Place')} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
+					</Field>
 				</Field>
-				<Field mbe='x8'>
+				<Field mbe='x8' mis='x4'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput style={ { whiteSpace: 'normal' } } rows='4' border='1px solid #4fb0fc' value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder={t('Description')} />
+						<TextAreaInput placeholder={t('Description')} style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} rows='5' fontScale='p1'/>
 					</Field.Row>
 				</Field>
+
 				<Tabs flexShrink={0} mbe='x8'>
 					<Tabs.Item selected={tab === 'persons'} onClick={handleTabClick('persons')}>{t('Council_Invited_Users')}</Tabs.Item>
-					{/*<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>*/}
 				</Tabs>
 				{context === 'participants' && tab === 'persons' && <Field mbe='x8'>
-					<Field.Row marginInlineStart='auto'>
+					<Field.Row marginInlineStart='auto' display={mediaQuery ? 'flex' : 'block'}>
 						<Button marginInlineEnd='10px' small primary onClick={onAddParticipantClick} aria-label={t('Add')}>
 							{t('Council_Add_Participant')}
 						</Button>
 					</Field.Row>
 				</Field>}
-				{/*{tab === 'files' && <Field mbe='x8'>*/}
-				{/*	<Field.Row marginInlineStart='auto'>*/}
-				{/*		<Button onClick={fileUploadClick} mie='10px' small primary aria-label={t('Add')}>*/}
-				{/*			{t('Upload_file_question')}*/}
-				{/*		</Button>*/}
-				{/*	</Field.Row>*/}
-				{/*</Field>}*/}
 				{context === 'participants' && <Persons councilId={null} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>}
 				{context === 'addParticipants' && <AddPerson councilId={null} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>}
 				{context === 'newParticipants' && <CreateParticipant councilId={null} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} workingGroupOptions={workingGroupOptions}/>}

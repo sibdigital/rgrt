@@ -10,3 +10,4 @@ import './methods/moveSection';
 import './methods/moveItem';
 import './methods/getMaxProtocolNum';
 import './methods/getMaxProtocolSectionNum';
+import './methods/getProtocolByCouncilId';
