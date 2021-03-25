@@ -8,11 +8,9 @@ import {
 	Button,
 	Label,
 	Field,
-	Tabs,
-	TextAreaInput,
-	ButtonGroup,
 } from '@rocket.chat/fuselage';
 import { useMediaQuery, useSafely } from '@rocket.chat/fuselage-hooks';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
@@ -22,110 +20,13 @@ import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
-import { EditErrandContextBar } from './EditErrand';
-import { modal } from '../../../../ui-utils/client';
+import { useMethod } from '../../../../../client/contexts/ServerContext';
+import { SuccessModal, WarningModal } from '../../../../utils/index';
+import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
-import { useUserId } from '../../../../../client/contexts/UserContext';
-import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../../client/hooks/useEndpointDataExperimental';
 import { settings } from '../../../../settings';
-import VerticalBar from '../../../../../client/components/basic/VerticalBar';
-
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
-
-const FilterByText = ({ setFilter, ...props }) => {
-	const _t = useTranslation();
-	const [text, setText] = useState('');
-	const handleChange = useCallback((event) => setText(event.currentTarget.value), []);
-
-	useEffect(() => {
-		setFilter({ text });
-	}, [text]);
-
-	return <Box flexShrink={0} mb='x16' is='form' display='flex' flexDirection='row' {...props}>
-		<TextInput flexShrink={0} placeholder={_t('Errand_Search_Charged_to')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
-		<TextInput flexShrink={0} placeholder={_t('Errand_Search_Initiated_by')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
-		<TextInput flexShrink={0} placeholder={_t('Errand_Search_Expired_date')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
-		<TextInput flexShrink={0} placeholder={_t('Errand_Search_Created_at')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
-		<TextInput flexShrink={0} placeholder={_t('Errand_Search_Status')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
-	</Box>;
-};
-
-function renderRequestModal({ onCancel, request, formatDateAndTime, ...props }) {
-	const t = useTranslation();
-	// const formatDate = useFormatDate();
-
-	const goToSendAnswer = () => {
-		window.open([settings.get('Site_Url'), 'd/', request.inviteLink].join(''), '_blank');
-	};
-
-	return <Modal {...props}>
-		<Modal.Header>
-			<Modal.Title>{t('Working_group_request')}</Modal.Title>
-			<Modal.Close onClick={onCancel}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			<VerticalBar.ScrollableContent is='form'>
-				<Field>
-					<Field.Label>{t('Number')}</Field.Label>
-					<Field.Row>
-						<TextInput disabled value={request.number} key='number' placeholder={t('Number')} />
-					</Field.Row>
-				</Field>
-				<Field>
-					<Field.Label>{t('Description')}</Field.Label>
-					<Field.Row>
-						<TextAreaInput rows='3' disabled value={request.desc} key='desc' placeholder={t('Description')} />
-					</Field.Row>
-				</Field>
-				<Field>
-					<Field.Label>{t('Date')}</Field.Label>
-					<Field.Row>
-						{/*<TextInput disabled value={formatDate(request.date)} key='date' placeholder={t('Date')} />*/}
-						<TextInput disabled value={formatDateAndTime(request.date)} key='date' placeholder={t('Date')} />
-					</Field.Row>
-				</Field>
-				<Field>
-					<ButtonGroup>
-						<Button flexGrow={1} onClick={onCancel}>{t('Cancel')}</Button>
-						<Button primary mie='none' flexGrow={1} onClick={goToSendAnswer}>{t('Send_request_answer')}</Button>
-					</ButtonGroup>
-				</Field>
-			</VerticalBar.ScrollableContent>
-		</Modal.Content>
-	</Modal>;
-}
-
-function renderEditModal({ onCancel, erid, onChange, ...props }) {
-	const t = useTranslation();
-	return <Modal {...props}>
-		<Modal.Header>
-			<Modal.Title>{t('Errand_details')}</Modal.Title>
-			<Modal.Close onClick={onCancel}/>
-		</Modal.Header>
-		<Modal.Content fontScale='p1'>
-			<EditErrandContextBar erid={erid} onChange={onChange} onClose={onCancel}/>
-		</Modal.Content>
-	</Modal>;
-}
-
-function renderAddErrandModal({ onChange }) {
-	const t = useTranslation();
-	modal.open({
-		title: t('Errand_title'),
-		modifier: 'modal',
-		content: 'CreateErrand',
-		data: {
-			onCreate() {
-				modal.close();
-				onChange();
-			},
-		},
-		confirmOnEnter: false,
-		showConfirmButton: false,
-		showCancelButton: false,
-	});
-}
 
 function Errands({
 	type,
@@ -133,90 +34,79 @@ function Errands({
 	sort,
 	onClick,
 	onHeaderClick,
+	onChange,
 	setParams,
 	params,
 }) {
 	const _t = useTranslation();
+	const dispatchToastMessage = useToastMessageDispatch();
+	const formatDate = useFormatDate();
+
+	const setModal = useSetModal();
+
+	const deleteErrand = useMethod('deleteErrand');
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
+	const onDeleteConfirm = useCallback(async (_id) => {
+		try {
+			await deleteErrand(_id);
+			setModal(() => <SuccessModal title={_t('Deleted')} contentText={_t('Errand_Has_Been_Deleted')} onClose={() => { setModal(undefined); onChange(); }}/>);
+		} catch (error) {
+			dispatchToastMessage({ type: 'error', message: error });
+		}
+	}, [deleteErrand, dispatchToastMessage, onChange]);
+
+	const onDel = (_id) => () => { onDeleteConfirm(_id); };
+
+	const onDeleteClick = (_id) => () => setModal(() => <WarningModal title={_t('Are_you_sure')} contentText={_t('Errand_Delete_Warning')} onDelete={onDel(_id)} onCancel={() => setModal(undefined)}/>);
+
 	const header = useMemo(() => [
-		type === 'initiated_by_me' || <Th key={'initiatedBy.username'} direction={sort[1]} active={sort[0] === 'initiatedBy.username'} onClick={onHeaderClick} sort='initiatedBy.username' color='default'>{_t('Errand_Initiated_by')}</Th>,
-		type === 'charged_to_me' || <Th key={'chargedToUser.username'} direction={sort[1]} active={sort[0] === 'chargedToUser.username'} onClick={onHeaderClick} sort='chargedToUser.username' color='default'>{_t('Errand_Charged_to')}</Th>,
-		mediaQuery && <Th key={'desc'} direction={sort[1]} active={sort[0] === 'desc'} onClick={onHeaderClick} sort='desc' color='default'>{_t('Description')}</Th>,
-		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '150px' }} color='default'>{_t('Started_At')}</Th>,
-		<Th key={'expireAt'} direction={sort[1]} active={sort[0] === 'expireAt'} onClick={onHeaderClick} sort='expireAt' style={{ width: '150px' }} color='default'>{_t('Errand_Expired_date')}</Th>,
-		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t' color='default'>{_t('Status')}</Th>,
+		type === 'initiated_by_me' || <Th key={'initiatedBy._id'} color='default'>{_t('Errand_Initiated_by')}</Th>,
+		type === 'charged_to_me' || <Th key={'chargedTo._id'} color='default'>{_t('Errand_Charged_to')}</Th>,
+		mediaQuery && <Th key={'base'} color='default'>{_t('Errand_Base')}</Th>,
+		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '150px' }} color='default'>{_t('Errand_Created_At')}</Th>,
+		mediaQuery && <Th key={'expireAt'} direction={sort[1]} active={sort[0] === 'expireAt'} onClick={onHeaderClick} sort='expireAt' style={{ width: '150px' }} color='default'>{_t('Errand_Expired_date')}</Th>,
+		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t' style={{ width: '100px' }} color='default'>{_t('Status')}</Th>,
+		mediaQuery && <Th w='x40' key='delete'/>,
 	].filter(Boolean), [type, sort, mediaQuery]);
 
-	const formatDate = useFormatDate();
-	const renderRow = useCallback((item) => <Table.Row key={item._id} onKeyDown={onClick(item.initiatedBy.username)} onClick={onClick(item)} role='link' action>
-		{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' style={style} color='default'>
-			{item.initiatedBy.username}
-		</Table.Cell> }
-		{type === 'charged_to_me' || <Table.Cell fontScale='p1' style={style} color='default'>
-			{item.chargedToUser.username}
-		</Table.Cell> }
-		{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
-			{item.desc}
-		</Table.Cell> }
-		{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
-			{formatDate(item.ts)}
-		</Table.Cell>}
-		<Table.Cell fontScale='p1' style={style} color='default'>
-			{formatDate(item.expireAt)}
-		</Table.Cell>
-		<Table.Cell fontScale='p1' style={style} color='default'>
-			{_t(item.t)}
-		</Table.Cell>
-	</Table.Row>
-	, [mediaQuery]);
+	const renderRow = (item) => {
+		const baseUrl = item.protocol ? [ 'protocol/', item.protocol._id ].join('') : undefined;
+		const baseTitle = item.protocol ? _t('Protocol') + ' от ' + formatDate(item.protocol.d) + ' № ' + item.protocol.num : undefined;
+		return <Table.Row key={item._id} role='link' action>
+			{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
+				{item.initiatedBy.surname + ' ' + item.initiatedBy.name + ' ' + item.initiatedBy.patronymic}
+			</Table.Cell> }
+			{type === 'charged_to_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
+				{item.chargedTo.surname + ' ' + item.chargedTo.name + ' ' + item.chargedTo.patronymic}
+			</Table.Cell> }
+			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
+				{ baseUrl ? <a href={baseUrl}>{baseTitle}</a> : '' }
+			</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
+				{formatDate(item.ts)}
+			</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
+				{formatDate(item.expireAt)}
+			</Table.Cell>}
+			<Table.Cell fontScale='p1' style={style} onClick={onClick(item._id)} color='default'>
+				{_t(item.t)}
+			</Table.Cell>
+			{ mediaQuery && <Table.Cell alignItems={'end'}>
+				<Button small aria-label={_t('Delete')} onClick={onDeleteClick(item._id)}>
+					<Icon name='trash'/>
+				</Button>
+			</Table.Cell>}
+		</Table.Row>;
+	}
 
 	return <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={data.result} total={data.total} setParams={setParams} params={params} />;
-}
-
-function Requests({
-	data,
-	sort,
-	onClick,
-	onHeaderClick,
-	setParams,
-	params,
-}) {
-	const _t = useTranslation();
-
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
-
-	const formatDate = useFormatDate();
-
-	const header = useMemo(() => [
-		mediaQuery && <Th key={'number'} onClick={onHeaderClick} color='default'>{_t('Number')}</Th>,
-		mediaQuery && <Th key={'desc'} onClick={onHeaderClick} color='default'>{_t('Description')}</Th>,
-		mediaQuery && <Th key={'date'} onClick={onHeaderClick} style={{ width: '150px' }} color='default'>{_t('Date')}</Th>,
-	].filter(Boolean), [sort, mediaQuery]);
-
-	const renderRow = useCallback((item) =>
-		<Table.Row key={item._id} onClick={onClick(item)} role='link' action>
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
-				{item.number}
-			</Table.Cell> }
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
-				{item.desc}
-			</Table.Cell> }
-			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
-				{formatDate(item.date)}
-			</Table.Cell>}
-		</Table.Row>
-	, [mediaQuery]);
-
-	return <GenericTable key='RequestsTable' header={header} renderRow={renderRow} results={data.requests} total={data.total} setParams={setParams} params={params} />;
 }
 
 export function ErrandPage() {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
-	const userId = useUserId();
-	const setModal = useSetModal();
 
 	const type = useRouteParameter('type');
 
@@ -248,20 +138,7 @@ export function ErrandPage() {
 		...params.current && { offset: params.current },
 	}), [params.itemsPerPage, params.current, sort, type, params.text, cache]);
 
-	const currentUserPersonData = useEndpointData('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
 	const data = useEndpointData('errands', query) || { result: [], total: 0 };
-
-	const currentUserPersonQuery = useMemo(() => currentUserPersonData || { _id: '' }, [currentUserPersonData]);
-	const { data: resData, state: resState } = useEndpointDataExperimental('protocolItemsPersonsResponsible.list', useMemo(() => ({
-		query: JSON.stringify({ persons: { $elemMatch: { _id: currentUserPersonQuery._id } } }),
-		fields: JSON.stringify({ persons: 0 }),
-	}), [currentUserPersonQuery]));
-
-	const requestsQuery = useMemo(() => resData?.protocolItemsPersonsResponsible?.map((protocol) => protocol.itemId) || [], [resData]);
-	const { data: requests, state } = useEndpointDataExperimental('working-groups-requests.list', useMemo(() => ({
-		query: JSON.stringify({ answers: { $elemMatch: { sectionItemsId: { $elemMatch : { _id: { $in: requestsQuery } } } } } }),
-		fields: JSON.stringify({ answers: 0 }),
-	}), [requestsQuery]));
 
 	const onHeaderClick = useCallback((id) => {
 		const [sortBy, sortDirection] = sort;
@@ -274,22 +151,12 @@ export function ErrandPage() {
 	}, [sort]);
 
 	const onChange = useCallback(() => {
-		setModal(undefined);
 		setCache(new Date());
 	}, []);
 
-	const cancelModal = useCallback(() => setModal(undefined), []);
-
-	const onClick = useCallback((errand) => () => setModal(() => renderEditModal({ onCancel: cancelModal, erid: errand._id, onChange, key: 'modal-errand' })), []);
-
-	const onRequestClick = useCallback((request) => () => setModal(() => renderRequestModal({ onCancel: cancelModal, request, formatDateAndTime, key: 'modal-request' })), []);
-
-	const addErrand = useCallback(() => () => setModal(() => renderAddErrandModal({ onChange })), []);
-
-	if ([state, resState].includes(ENDPOINT_STATES.LOADING)) {
-		console.log('loading');
-		return <Field>{t('Loading')}</Field>;
-	}
+	const onClick = (_id) => () => {
+		FlowRouter.go(`/errand/${ _id }`);
+	};
 
 	const onSendRequestAnswer = () => {
 		window.open([settings.get('Site_Url'), 'd/all'].join(''), '_blank');
@@ -302,21 +169,15 @@ export function ErrandPage() {
 					<GoBackButton/>
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t(title)}</Label>
 				</Field>
-				{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={addErrand()} aria-label={t('Add')}>
+				{/*{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={} aria-label={t('Add')}>
 					{ t('Add') }
-				</Button> }
+				</Button> }*/}
 				{ title === 'Tasks_for_me' && <Button width='x160' primary small onClick={onSendRequestAnswer} aria-label={t('Send_request_answer')}>
 					{ t('Send_request_answer') }
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				{/*{type === 'charged_to_me' && <Tabs flexShrink={0} mbe='x8'>*/}
-				{/*	/!*<Tabs.Item selected={tab === 'errands'} onClick={() => setTab('errands')}>{t('Errands_for_me')}</Tabs.Item>*!/*/}
-				{/*	<Tabs.Item selected={tab === 'requests'} onClick={() => setTab('requests')}>{t('Working_group_requests')}</Tabs.Item>*/}
-				{/*</Tabs>}*/}
-				{/*{tab === 'errands' && <Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>}*/}
-				{/*{tab === 'requests' && <Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={requests} onClick={onRequestClick} sort={sort}/>}*/}
-				<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} sort={sort}/>
+				<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
 	</Page>;

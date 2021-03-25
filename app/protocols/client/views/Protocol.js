@@ -263,6 +263,9 @@ export function ProtocolPage() {
 		FlowRouter.go(`/working-groups-request/add/new-protocols-item-request/${ protocolsItemId }`);
 	};
 
+	const openErrand = (sectionId, itemId) => () => {
+		FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
+	};
 
 	const onItemMenuClick = useCallback((event) => {
 		const items = [
@@ -289,6 +292,10 @@ export function ProtocolPage() {
 			{
 				name: t('Working_group_request'),
 				action: openWorkingGroupRequest(event.currentTarget.dataset.item)
+			},
+			event.currentTarget.dataset.responsible === 'true' && {
+				name: t('Errand'),
+				action: openErrand(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
 			}
 		]
 		const config = {

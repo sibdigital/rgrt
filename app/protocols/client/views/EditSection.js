@@ -20,6 +20,8 @@ import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
 import { romanize, deromanize } from '../../../utils/lib/romanNumeralConverter';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -53,6 +55,7 @@ export function EditSection({ protocolId, _id, cache, onChange, ...props }) {
 function EditSectionWithData({ close, onChange, protocol, sectionId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const section = protocol.sections.find(s => s._id === sectionId);
 
@@ -129,7 +132,7 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+					{ isAllowedEdit && <Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>}
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

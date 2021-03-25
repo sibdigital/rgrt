@@ -29,6 +29,7 @@ import { constructPersonFIO } from '../../../utils/client/methods/constructPerso
 import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
+import { hasPermission } from '../../../authorization';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -75,7 +76,7 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, itemId, currentUserPersonId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
-
+	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
 	const personsData = useEndpointData('persons.listToAutoComplete', useMemo(() => ({ }), [])) || { persons: [] };
 
@@ -222,7 +223,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 			<Field.Row>
 				<ButtonGroup stretch w='full'>
 					<Button onClick={close}>{t('Cancel')}</Button>
-					<Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>
+					{ isAllowedEdit && <Button primary onClick={handleSave} disabled={!hasUnsavedChanges}>{t('Save')}</Button>}
 				</ButtonGroup>
 			</Field.Row>
 		</Field>

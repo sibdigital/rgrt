@@ -123,6 +123,16 @@ FlowRouter.route('/errands/:type?', {
 	}],
 });
 
+FlowRouter.route('/errand/:id', {
+	name: 'errand',
+	action: () => {
+		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/EditErrand'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/i/:id/:step?', {
 	name: 'council-invite',
 	action: () => {
@@ -261,6 +271,16 @@ FlowRouter.route('/protocol/:id/:context?/:sectionId?/:itemId?', {
 	name: 'protocol',
 	action: () => {
 		renderRouteComponent(() => import('../app/protocols/client/views/Protocol'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/protocol/:id/item/:sectionId/:itemId/new-errand', {
+	name: 'protocol-errand-add',
+	action: () => {
+		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/AddErrandByProtocolItem'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');

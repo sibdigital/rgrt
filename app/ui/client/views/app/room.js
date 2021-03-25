@@ -832,27 +832,6 @@ Template.room.events({
 		openProfileTabOrOpenDM(e, instance, this.user.username);
 	},
 
-	'click .user-errand-initiated-card-message'(e, instance) {
-		const { err } = messageArgs(this);
-		if (!Meteor.userId()) {
-			return;
-		}
-		const { username } = err.initiatedBy;
-
-		openProfileTabOrOpenDM(e, instance, username);
-	},
-
-	'click .user-errand-charged-card-message'(e, instance) {
-		const { err } = messageArgs(this);
-		if (!Meteor.userId()) {
-			return;
-		}
-
-		const { username } = err.chargedToUser;
-
-		openProfileTabOrOpenDM(e, instance, username);
-	},
-
 	'scroll .wrapper': _.throttle(function(e, t) {
 		const $roomLeader = $('.room-leader');
 		if ($roomLeader.length) {

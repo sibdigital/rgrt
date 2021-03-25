@@ -25,72 +25,19 @@ export class Errands extends Base {
 		this.tryEnsureIndex({ desc: 'text' });
 	}
 
-	// INSERT
-	createWithRoomIdMessageIdDescriptionEndDateAndUsers(roomId, messageId, description, endDate, initiatedByUser, chargedToUser) {
-		const record = {
-			t: 'opened',
-			rid: roomId,
-			mid: messageId,
-			ts: new Date(),
-			desc: description,
-			initiatedBy: {
-				_id: initiatedByUser._id,
-				username: initiatedByUser.username,
-				name: initiatedByUser.name,
-			},
-			chargedToUser: {
-				_id: chargedToUser._id,
-				username: chargedToUser.username,
-				name: chargedToUser.name,
-			},
-			expireAt: endDate,
-			groupable: false,
-		};
-		record._id = this.insertOrUpsert(record);
-		if(roomId != null){
-			Rooms.incErrandCountById(roomId, 1);
-		}
-		return record;
+	create(data) {
+		return this.insert(data);
 	}
 
-	createWithDescriptionAndDataAndUsers(roomId, messageId, description, endDate, initiatedByUser, chargedToUser) {
-		const record = {
-			t: 'opened',
-			rid: roomId,
-			mid: messageId,
-			ts: new Date(),
-			desc: description,
-			initiatedBy: {
-				_id: initiatedByUser._id,
-				username: initiatedByUser.username,
-				name: initiatedByUser.name,
-			},
-			chargedToUser: {
-				_id: chargedToUser._id,
-				username: chargedToUser.username,
-				name: chargedToUser.name,
-			},
-			expireAt: endDate,
-			groupable: false,
-		};
-		record._id = this.insertOrUpsert(record);
-		return record;
+	// REMOVE
+	removeById(_id) {
+		return this.remove({ _id });
 	}
 
 	// UPDATE
 	updateErrand(_id, newData) {
 		newData._updatedAt = new Date();
-		this.update({ _id }, { $set: { ...newData } });
-		const update = this.findOne({ _id });
-		return update;
-	}
-
-	findByRoomId(rid, options) {
-		const query = {
-			rid,
-		};
-
-		return this.find(query, options);
+		return this.update({ _id }, { $set: { ...newData } });
 	}
 
 	findByInitiatedUserId(userId) {
