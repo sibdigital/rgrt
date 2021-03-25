@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Box, Button, Chip, Field, Margins, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
+import _ from 'underscore';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
@@ -16,25 +17,49 @@ import { ProtocolChoose } from './ProtocolChoose';
 import { ItemsChoose } from './ItemsChoose';
 import { settings } from '../../../settings/client';
 
-export function useDefaultRequestForm({ defaultValues = null }) {
-	const defaultFields = {
-		number: '',
-		date: new Date(),
-		council: '',
-		protocol: '',
-		protocolItems: [],
-		itemResponsible: '',
-		mail: '',
-		description: '',
-	};
+require('react-datepicker/dist/react-datepicker.css');
 
+export const defaultRequestFields = {
+	number: '',
+	date: new Date(),
+	council: '',
+	protocol: '',
+	protocolItems: [],
+	itemResponsible: '',
+	mail: '',
+	description: '',
+};
+
+export function getRequestFormFields({ request = null, onGetAllFieldsFromPrevAnswer = false }) {
+	if (!request || typeof request !== 'object' || _.isArray(request)) {
+		return defaultRequestFields;
+	}
+
+	const requestValues = { ...request };
+
+	const defaultRequestFieldsKeys = Object.keys(defaultRequestFields);
+
+	const requestKeys = Object.keys(request);
+
+	defaultRequestFieldsKeys.forEach((key) => {
+		if (!requestKeys.includes(key)) {
+			requestValues[key] = defaultRequestFields[key];
+		}
+	});
+	requestValues.date = requestValues.date ? new Date(requestValues.date) : new Date();
+
+	console.dir({ requestValues });
+	return requestValues;
+}
+
+export function useDefaultRequestForm({ defaultValues = null }) {
 	const {
 		values,
 		handlers,
 		reset,
 		commit,
 		hasUnsavedChanges,
-	} = useForm(defaultValues ?? defaultFields);
+	} = useForm(defaultValues ?? defaultRequestFields);
 
 	// const allFieldAreFilled = useMemo(() => Object.values(values).filter((val) => {
 	// 	if (typeof val === 'string' && val.trim() !== '') { return false; }
