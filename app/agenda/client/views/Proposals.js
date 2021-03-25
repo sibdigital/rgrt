@@ -23,8 +23,9 @@ export const ProposalStatusEnum = Object.freeze({
 export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddProposal, mode = '' }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
-	const mediaQuery = useMediaQuery('(min-width: 769px)');
 	const dispatchToastMessage = useToastMessageDispatch();
+
+	const mediaQuery = useMediaQuery('(min-width: 769px)');
 
 	const [cache, setCache] = useState(new Date());
 	const [proposalsList, setProposalsList] = useState([]);
