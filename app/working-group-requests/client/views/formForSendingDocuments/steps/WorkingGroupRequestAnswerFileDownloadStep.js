@@ -387,24 +387,24 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								{/*{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}*/}
 							</Field.Row>
 						</Field>}
-						{answerTypeContext === 'protocol' && <Field>
-							<Field.Row height='40px'>
-								<Label>
-									{t('Working_group_request_invite_select_sections')}
-									{sectionSelected
-									&& <ClearButton onClick={() => handleClearSelectOptions()}/>
-									}
-									{protocolSelected && <Button
-										onClick={() => setVerticalContext('protocolSectionSelect')}
-										backgroundColor='transparent'
-										borderColor='transparent'
-										style={{ whiteSpace: 'normal' }}>
-										{t('Choose')}
-									</Button>}
-								</Label>
-							</Field.Row>
-							<TextInput disabled={!protocolSelected} readOnly value={protocolSectionSelectLabel} placeholder={t('Working_group_request_invite_select_sections')}/>
-						</Field>}
+						{/*{answerTypeContext === 'protocol' && <Field>*/}
+						{/*	<Field.Row height='40px'>*/}
+						{/*		<Label>*/}
+						{/*			{t('Working_group_request_invite_select_sections')}*/}
+						{/*			{sectionSelected*/}
+						{/*			&& <ClearButton onClick={() => handleClearSelectOptions()}/>*/}
+						{/*			}*/}
+						{/*			{protocolSelected && <Button*/}
+						{/*				onClick={() => setVerticalContext('protocolSectionSelect')}*/}
+						{/*				backgroundColor='transparent'*/}
+						{/*				borderColor='transparent'*/}
+						{/*				style={{ whiteSpace: 'normal' }}>*/}
+						{/*				{t('Choose')}*/}
+						{/*			</Button>}*/}
+						{/*		</Label>*/}
+						{/*	</Field.Row>*/}
+						{/*	<TextInput disabled={!protocolSelected} readOnly value={protocolSectionSelectLabel} placeholder={t('Working_group_request_invite_select_sections')}/>*/}
+						{/*</Field>}*/}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
