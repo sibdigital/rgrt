@@ -39,7 +39,7 @@ API.v1.addRoute('errands', { authRequired: true }, {
 
 		const userId = Meteor.userId();
 
-		const person = Persons.findOne({ userId: userId});
+		const person = Persons.findOne({ userId: userId });
 
 		const formedQuery = {};
 
@@ -48,7 +48,7 @@ API.v1.addRoute('errands', { authRequired: true }, {
 				formedQuery['initiatedBy._id'] = `${ userId }`;
 				break;
 			case 'charged_to_me':
-				formedQuery['chargedTo._id'] = `${ person._id }`;
+				formedQuery['chargedTo.person._id'] = `${ person._id }`;
 				break;
 		}
 

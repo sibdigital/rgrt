@@ -49,7 +49,7 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 				required: newData.phone.required,
 			},
 			email: {
-				value: userInfo.emails[0]?.address ?? '',
+				value: userInfo.email ?? '',
 				required: newData.email.required,
 			},
 		};

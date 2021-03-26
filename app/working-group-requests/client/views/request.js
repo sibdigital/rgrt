@@ -110,7 +110,8 @@ export function DocumentPage() {
 
 	const answers = useMemo(() => data?.answers ?? [], [data]);
 
-	const address = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
+	const address = useMemo(() => [settings.get('Site_Url'), `working-groups-requests/${ requestId }/new_answer`].join(''), [requestId]);
+	const addressLabel = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -186,7 +187,6 @@ export function DocumentPage() {
 		}
 	}, [saveAction, values, protocolsItemId, t, dispatchToastMessage]);
 
-
 	if (!hasPermission('manage-working-group-requests', useUserId())) {
 		console.log('Permissions_access_missing');
 		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
@@ -213,7 +213,7 @@ export function DocumentPage() {
 				<Field mbe='x16'>
 					<Field.Label>{t('Working_group_request_invite_link')}</Field.Label>
 					<Field.Row>
-						<a href={address} is='span' target='_blank'>{address}</a>
+						<a href={address} is='span' target='_blank'>{addressLabel}</a>
 					</Field.Row>
 				</Field>
 				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>

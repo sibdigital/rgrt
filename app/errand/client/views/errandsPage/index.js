@@ -1,16 +1,13 @@
+import { FlowRouter } from 'meteor/kadira:flow-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-	Box,
 	Icon,
 	Table,
-	TextInput,
-	Modal,
 	Button,
 	Label,
 	Field,
 } from '@rocket.chat/fuselage';
 import { useMediaQuery, useSafely } from '@rocket.chat/fuselage-hooks';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
@@ -25,6 +22,7 @@ import { SuccessModal, WarningModal } from '../../../../utils/index';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
+import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -74,24 +72,27 @@ function Errands({
 	const renderRow = (item) => {
 		const baseUrl = item.protocol ? [ 'protocol/', item.protocol._id ].join('') : undefined;
 		const baseTitle = item.protocol ? _t('Protocol') + ' от ' + formatDate(item.protocol.d) + ' № ' + item.protocol.num : undefined;
+		const initiatedBy = constructPersonFullFIO(item.initiatedBy ?? '');
+		const chargedTo = constructPersonFullFIO(item.chargedTo ?? '');
+
 		return <Table.Row key={item._id} role='link' action>
 			{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
-				{item.initiatedBy.surname + ' ' + item.initiatedBy.name + ' ' + item.initiatedBy.patronymic}
+				{initiatedBy}
 			</Table.Cell> }
 			{type === 'charged_to_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
-				{item.chargedTo.surname + ' ' + item.chargedTo.name + ' ' + item.chargedTo.patronymic}
+				{chargedTo}
 			</Table.Cell> }
 			{ mediaQuery && <Table.Cell fontScale='p1' style={style} color='default'>
 				{ baseUrl ? <a href={baseUrl}>{baseTitle}</a> : '' }
 			</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
-				{formatDate(item.ts)}
+				{item.ts && formatDate(item.ts)}
 			</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
-				{formatDate(item.expireAt)}
+				{item.expireAt && formatDate(item.expireAt)}
 			</Table.Cell>}
 			<Table.Cell fontScale='p1' style={style} onClick={onClick(item._id)} color='default'>
-				{_t(item.t)}
+				{_t(item.t ?? '')}
 			</Table.Cell>
 			{ mediaQuery && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={_t('Delete')} onClick={onDeleteClick(item._id)}>
@@ -112,7 +113,7 @@ export function ErrandPage() {
 
 	const [sort, setSort] = useState(['ts', 'asc']);
 	const [params, setParams] = useState({ type, current: 0, itemsPerPage: 100 });
-	const [cache, setCache] = useState();
+	const [cache, setCache] = useState(new Date());
 	const [tab, setTab] = useState('errands');
 
 	const mediaQuery = useMediaQuery('(min-width: 520px)');
@@ -136,7 +137,7 @@ export function ErrandPage() {
 		sort: JSON.stringify({ [sort[0]]: sort[1] === 'asc' ? 1 : -1 }),
 		...params.itemsPerPage && { count: params.itemsPerPage },
 		...params.current && { offset: params.current },
-	}), [params.itemsPerPage, params.current, sort, type, params.text, cache]);
+	}), [type, sort, params]);
 
 	const data = useEndpointData('errands', query) || { result: [], total: 0 };
 
@@ -164,14 +165,11 @@ export function ErrandPage() {
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
+			<Page.Header title=''>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t(title)}</Label>
 				</Field>
-				{/*{ title === 'Errands_from_me' && <Button width='200px' primary small onClick={} aria-label={t('Add')}>
-					{ t('Add') }
-				</Button> }*/}
 				{ title === 'Tasks_for_me' && <Button width='x160' primary small onClick={onSendRequestAnswer} aria-label={t('Send_request_answer')}>
 					{ t('Send_request_answer') }
 				</Button>}

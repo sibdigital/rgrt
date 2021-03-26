@@ -17,16 +17,16 @@ Meteor.methods({
 
 		const userId = Meteor.userId();
 
-		const person = Persons.findOne({ userId: userId })
+		const person = Persons.findOne({ userId });
 
 		const initiatedBy = {
 			_id: userId,
 			surname: person.surname,
 			name: person.name,
 			patronymic: person.patronymic,
-		}
+		};
 
-		const chargedTo = { ...errandData.chargedTo };
+		const chargedTo = { person: { ...errandData.chargedTo } };
 
 		const createErrand = {
 			t: 'opened',
@@ -35,6 +35,7 @@ Meteor.methods({
 			chargedTo,
 			desc: errandData.desc,
 			expireAt: errandData.expireAt,
+			errandType: { state: 1, title: 'Пункт протокла' },
 		};
 
 		if (errandData.protocol) {

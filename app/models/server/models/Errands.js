@@ -26,6 +26,7 @@ export class Errands extends Base {
 	}
 
 	create(data) {
+		data.createdAt = new Date();
 		return this.insert(data);
 	}
 

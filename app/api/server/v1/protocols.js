@@ -6,7 +6,7 @@ import { Persons } from '../../../models';
 API.v1.addRoute('protocols.list', { authRequired: true }, {
 	get() {
 		// if (!hasPermission(this.userId, 'manage-protocols')) {
-		// 	return API.v1.unauthorized();
+		// 	return API.v1.unauth1orized();
 		// }
 
 		const { offset, count } = this.getPaginationItems();

@@ -17,7 +17,7 @@ import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
-import { useRouteParameter } from "/client/contexts/RouterContext";
+import { useRouteParameter } from '../../../../../client/contexts/RouterContext';
 import { useForm } from '../../../../../client/hooks/useForm';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { useUserId } from '../../../../../client/contexts/UserContext';
@@ -25,6 +25,7 @@ import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../cli
 import { errandStatuses } from '../../../utils/statuses';
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
+import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -126,9 +127,11 @@ function EditErrand({ errand, currentPerson }) {
 		FlowRouter.go(`/manual-mail-sender/errand/${ _id }`);
 	};
 
-	const protocolUrl = protocol ? [ settings.get('Site_Url'), 'protocol/', protocol._id ].join('') : '';
-	const protocolItemUrl = protocol ? [ settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId ].join('') : '';
+	const protocolUrl = protocol ? [settings.get('Site_Url'), 'protocol/', protocol._id].join('') : '';
+	const protocolItemUrl = protocol && protocol.sectionId && protocol.itemId ? [settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId].join('') : protocolUrl;
 	const protocolTitle = protocol ? _t('Protocol') + ' от ' + formatDate(protocol.d) + ' № ' + protocol.num : '';
+
+	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' }), []);
 
 	const availableStatuses = errandStatuses.map((value) => [value, _t(value)]);
 
@@ -155,13 +158,13 @@ function EditErrand({ errand, currentPerson }) {
 					{useMemo(() => <Field>
 						<Field.Label>{_t('Errand_Initiated_by')}</Field.Label>
 						<Field.Row>
-							<TextInput flexGrow={1} value={initiatedBy.surname + ' ' + initiatedBy.name + ' ' + initiatedBy.patronymic}/>
+							<TextInput flexGrow={1} value={constructPersonFullFIO(initiatedBy ?? '')}/>
 						</Field.Row>
 					</Field>, [_t, initiatedBy])}
 					{useMemo(() => <Field>
 						<Field.Label>{_t('Errand_Charged_to')}</Field.Label>
 						<Field.Row>
-							<TextInput flexGrow={1} value={chargedTo.surname + ' ' + chargedTo.name + ' ' + chargedTo.patronymic}/>
+							<TextInput flexGrow={1} value={constructPersonFullFIO(chargedTo?.person ?? '')}/>
 						</Field.Row>
 					</Field>, [_t, chargedTo])}
 					{useMemo(() => <Field>
@@ -185,7 +188,7 @@ function EditErrand({ errand, currentPerson }) {
 						<Field>
 							<Field.Label>{_t('Status')}</Field.Label>
 							<Field.Row>
-								<SelectFiltered options={availableStatuses} value={t} key='status' onChange={handleT} placeholder={_t('Status')}/>
+								<SelectFiltered style={inputStyles} options={availableStatuses} value={t} key='status' onChange={handleT} placeholder={_t('Status')}/>
 							</Field.Row>
 						</Field>
 					</Field>, [_t, expireAt, t, handleT])}
@@ -206,7 +209,7 @@ function EditErrand({ errand, currentPerson }) {
 					{useMemo(() => <Field>
 						<Field.Label>{_t('Description')}</Field.Label>
 						<Field.Row>
-							<TextAreaInput rows={3} flexGrow={1} value={desc}/>
+							<TextAreaInput style={inputStyles} rows={3} flexGrow={1} value={desc}/>
 						</Field.Row>
 					</Field>, [_t, desc])}
 					{useMemo(() => <Field>
