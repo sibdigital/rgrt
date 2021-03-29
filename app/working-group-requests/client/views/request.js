@@ -91,21 +91,21 @@ export function DocumentPage() {
 	}, [data]);
 
 	useEffect(() => {
-		if (councilData) {
+		if (councilData && councilData._id) {
 			console.dir({ councilData });
 			handleCouncil && handleCouncil(councilData ?? {});
 		}
 	}, [councilData]);
 
 	useEffect(() => {
-		if (protocolData) {
+		if (protocolData && protocolData._id) {
 			console.dir({ protocolData });
 			handleProtocol && handleProtocol(protocolData ?? {});
 		}
 	}, [protocolData]);
 
 	useEffect(() => {
-		if (protocolItemsData) {
+		if (protocolItemsData && protocolItemsData.items && protocolItemsData.items.length > 0) {
 			handleProtocolItems && handleProtocolItems(protocolItemsData.items ?? []);
 		}
 	}, [protocolItemsData]);
