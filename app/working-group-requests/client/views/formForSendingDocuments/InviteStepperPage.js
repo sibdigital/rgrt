@@ -31,14 +31,15 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 	const [workingGroupRequestData, setWorkingGroupRequestData] = useState(workingGroupRequest);
 
 	useEffect(() => {
-		if (workingGroupRequestProtocol) {
+		// console.dir({ workingGroupRequestProtocol });
+		if (workingGroupRequestProtocol && workingGroupRequestProtocol._id) {
 			setProtocol(workingGroupRequestProtocol);
 			setProtocolId(workingGroupRequestProtocol._id);
 		}
 	}, [workingGroupRequestProtocol]);
 
 	useEffect(() => {
-		if (workingGroupRequest && workingGroupRequest.protocolItemsId && workingGroupRequest.protocolItemsId.length > 0 && workingGroupRequestProtocol && workingGroupRequestProtocol.sections) {
+		if (workingGroupRequest && workingGroupRequestProtocol._id && workingGroupRequest.protocolItemsId && workingGroupRequest.protocolItemsId.length > 0 && workingGroupRequestProtocol && workingGroupRequestProtocol.sections) {
 			workingGroupRequestProtocol.sections.forEach((section) => section?.items?.forEach((item) => item._id === workingGroupRequest.protocolItemsId[0] && setProtocolItemsId([item])));
 		}
 	}, [workingGroupRequest, workingGroupRequestProtocol]);

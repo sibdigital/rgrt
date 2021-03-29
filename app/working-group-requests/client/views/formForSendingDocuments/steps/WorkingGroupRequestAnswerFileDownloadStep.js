@@ -21,10 +21,9 @@ import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { filesValidation } from '../../../../../ui/client/lib/fileUpload';
-import GenericTable, { Th } from '../../../../../../client/components/GenericTable';
 import { ClearButton } from '../../../../../utils/client/views/ClearButton';
 import { preProcessingProtocolItems } from '../../lib';
-import { ProtocolItemsField } from '../../RequestForm';
+import { ProtocolItemsField, defaultRequestTypeState } from '../../RequestForm';
 import './reactTooltip.css';
 
 registerLocale('ru', ru);
@@ -163,18 +162,32 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
 
 	useEffect(() => {
+		if (workingGroupRequest && workingGroupRequest._id) {
+			try {
+				if (workingGroupRequest.requestType?.state === defaultRequestTypeState.MAIL.state) {
+					workingGroupRequest.mail && setCustomAnswerMailLabel(workingGroupRequest.mail);
+					setAnswerTypeContext('mail');
+				} else if (workingGroupRequest.requestType?.state === defaultRequestTypeState.REQUEST.state) {
+					setAnswerTypeContext('protocol');
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	}, [workingGroupRequest]);
+
+	useEffect(() => {
 		// if (protocolSelectLabel === '') {
 		// 	setProtocolSelectLabel(t('Working_group_request_invite_select_protocol'));
 		// }
 		// setProtocolsFindData(protocolsData ?? []);
-		workingGroupRequest.mail && setCustomAnswerMailLabel(workingGroupRequest.mail);
 		// workingGroupRequest.number && workingGroupRequest.date && setAnswerMailLabel(['#', workingGroupRequest.number, ' от ', formatDate(workingGroupRequest.date)].join(''));
-		console.log({ protocol });
-		if (protocolSelected) {
+		console.dir({ protocolSelected });
+		if (protocolSelected && protocolSelected._id) {
 			const protocolLabel = [t('Protocol'), '№', protocolSelected.num, 'от', formatDate(protocolSelected.d)].join(' ');
 			setProtocolSelectLabel(protocolLabel);
 		}
-	}, [t, workingGroupRequest, protocolSelected]);
+	}, [t, protocolSelected, formatDate]);
 
 	useEffect(() => {
 		if (sectionSelected) {
@@ -282,6 +295,8 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 			dataToSend.protocol = {
 				_id: protocolSelected?._id ?? '',
 				title: protocolSelected ? [t('Protocol'), '№', protocolSelected.num, t('Date_From'), formatDate(protocolSelected.d)].join(' ') : '',
+				num: protocolSelected ? protocolSelected.num : '',
+				d: protocolSelected ? protocolSelected.d : '',
 				section: {
 					_id: sectionSelected?._id ?? '',
 					title: sectionSelected ? [sectionSelected.num ?? '', ': ', sectionSelected.name ? preProcessingProtocolItems(sectionSelected.name) : ''].join('') : '',
@@ -358,18 +373,18 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 						{answerTypeContext === 'mail' && <Field>
 							<Field.Row height='40px'>
 								<Label>
-									{t('Working_group_mail')}
+									{t('Working_group_request_select_mail')}
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								<TextInput placeholder={t('Working_group_mail')} onChange={(event) => setCustomAnswerMailLabel(event.currentTarget.value)} value={customAnswerMailLabel}/>
+								<TextInput placeholder={t('Working_group_request_select_mail')} onChange={(event) => setCustomAnswerMailLabel(event.currentTarget.value)} value={customAnswerMailLabel}/>
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_protocol')}
-									{protocolSelected
+									{protocolSelected && protocolSelected._id
 									&& <ClearButton onClick={() => handleClearProtocol()}/>}
 									<Button
 										onClick={() => setVerticalContext('protocolSelect')}
@@ -387,24 +402,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								{/*{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}*/}
 							</Field.Row>
 						</Field>}
-						{/*{answerTypeContext === 'protocol' && <Field>*/}
-						{/*	<Field.Row height='40px'>*/}
-						{/*		<Label>*/}
-						{/*			{t('Working_group_request_invite_select_sections')}*/}
-						{/*			{sectionSelected*/}
-						{/*			&& <ClearButton onClick={() => handleClearSelectOptions()}/>*/}
-						{/*			}*/}
-						{/*			{protocolSelected && <Button*/}
-						{/*				onClick={() => setVerticalContext('protocolSectionSelect')}*/}
-						{/*				backgroundColor='transparent'*/}
-						{/*				borderColor='transparent'*/}
-						{/*				style={{ whiteSpace: 'normal' }}>*/}
-						{/*				{t('Choose')}*/}
-						{/*			</Button>}*/}
-						{/*		</Label>*/}
-						{/*	</Field.Row>*/}
-						{/*	<TextInput disabled={!protocolSelected} readOnly value={protocolSectionSelectLabel} placeholder={t('Working_group_request_invite_select_sections')}/>*/}
-						{/*</Field>}*/}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
