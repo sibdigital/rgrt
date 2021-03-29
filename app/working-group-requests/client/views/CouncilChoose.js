@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Table } from '@rocket.chat/fuselage';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -7,16 +8,30 @@ import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpoin
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+
+const useQuery = ({ itemsPerPage, current }, [column, direction], councilsFields) => useMemo(() => ({
+	// query: JSON.stringify({}),
+	fields: JSON.stringify(councilsFields),
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [councilsFields, column, direction, itemsPerPage, current]);
+
 export function CouncilChoose({ setCouncilId, setCouncil, setProtocol, close }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['d']);
+	const [refCouncilsFields, setRefCouncilsFields] = useState({ place: 1, d: 1, type: 1 });
 
-	const { data: councilData } = useEndpointDataExperimental('councils.list', useMemo(() => ({
-		fields: JSON.stringify({ place: 1, d: 1, type: 1 }),
-		sort: JSON.stringify({ d: -1 }),
-	}), []));
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const query = useQuery(debouncedParams, debouncedSort, refCouncilsFields);
+
+	const { data: councilData } = useEndpointDataExperimental('councils.list', query);
 
 	const getProtocolByCouncilId = useMethod('getProtocolByCouncilId');
 
