@@ -5,6 +5,7 @@ import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 
 export function Requests({
 	data,
@@ -43,6 +44,7 @@ export function Requests({
 		const { _id, number, ts, protocol, council, itemResponsible } = request;
 		const councilLabel = council?.d ? [t('Council'), ' от ', formatDate(council.d)].join('') : '';
 		const protocolLabel = protocol?.d && protocol?.itemNum && protocol?.num ? [t('Protocol_Item'), ' №', protocol.itemNum, ' протокола от ', formatDate(protocol.d), ' №', protocol.num].join('') : '';
+		const responsible = typeof itemResponsible === 'object' ? constructPersonFIO(itemResponsible) : itemResponsible;
 
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{number ?? '???'}</Table.Cell>
@@ -52,7 +54,7 @@ export function Requests({
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>
 				{protocolLabel}
 			</Table.Cell>
-			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{itemResponsible}</Box></Table.Cell>
+			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{responsible}</Box></Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>

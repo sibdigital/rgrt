@@ -1,3 +1,5 @@
+import { defaultRequestTypeState, getRequestTypeByState } from './RequestForm';
+
 export function validate(workingGroupData) {
 	const errors = [];
 
@@ -81,9 +83,13 @@ export function createWorkingGroupRequestData({
 	protocol = {},
 	council = {},
 	itemResponsible = null,
+	requestType = null,
 }) {
 	const workingGroupRequestData = {
 	};
+
+	const _requestType = requestType ? getRequestTypeByState({ state: requestType?.state ?? requestType }) : null;
+	console.dir({ requestType, newRequestType: _requestType });
 
 	if (previousData && previousData._id) {
 		workingGroupRequestData._id = previousData._id;
@@ -92,15 +98,18 @@ export function createWorkingGroupRequestData({
 	workingGroupRequestData.number = number;
 	workingGroupRequestData.desc = desc;
 	workingGroupRequestData.date = date;
-	workingGroupRequestData.mail = mail;
 
-	protocol && Object.assign(workingGroupRequestData, { protocol });
-	council && Object.assign(workingGroupRequestData, { council });
-	protocolsItemId && Object.assign(workingGroupRequestData, { protocolsItemId });
-	councilId && Object.assign(workingGroupRequestData, { councilId });
-	protocolId && Object.assign(workingGroupRequestData, { protocolId });
-	protocolItemsId && Object.assign(workingGroupRequestData, { protocolItemsId });
+	protocol && _requestType && _requestType.state === defaultRequestTypeState.REQUEST.state && Object.assign(workingGroupRequestData, { protocol });
+	council && _requestType && _requestType.state === defaultRequestTypeState.REQUEST.state && Object.assign(workingGroupRequestData, { council });
+	protocolsItemId && _requestType && _requestType.state === defaultRequestTypeState.REQUEST.state && Object.assign(workingGroupRequestData, { protocolsItemId });
+	councilId && _requestType && _requestType.state === defaultRequestTypeState.REQUEST.state && Object.assign(workingGroupRequestData, { councilId });
+	protocolId && _requestType && _requestType.state === defaultRequestTypeState.REQUEST.state && Object.assign(workingGroupRequestData, { protocolId });
+	protocolItemsId && _requestType && _requestType.state === defaultRequestTypeState.REQUEST.state && Object.assign(workingGroupRequestData, { protocolItemsId });
+
+	mail && _requestType && _requestType.state === defaultRequestTypeState.MAIL.state && Object.assign(workingGroupRequestData, { mail });
+
 	itemResponsible && Object.assign(workingGroupRequestData, { itemResponsible });
+	_requestType && Object.assign(workingGroupRequestData, { requestType: _requestType });
 
 	return workingGroupRequestData;
 }

@@ -74,6 +74,7 @@ export function DocumentPage() {
 		handleCouncil,
 		handleProtocol,
 		handleProtocolItems,
+		handleRequestType,
 	} = handlers;
 
 	useEffect(() => {
@@ -84,6 +85,7 @@ export function DocumentPage() {
 			handleItemResponsible && handleItemResponsible(data.itemResponsible ?? '');
 			handleMail && handleMail(data.mail ?? '');
 			handleProtocolItems && handleProtocolItems(data.protocolItems ?? []);
+			handleRequestType && handleRequestType(data.requestType ?? 1);
 			data.protocolsItemId && setProtocolsItemId(data.protocolsItemId);
 		}
 	}, [data]);
@@ -135,6 +137,7 @@ export function DocumentPage() {
 		mail,
 		description,
 		protocolsItemId,
+		requestType,
 	}) => {
 		const requestData = createWorkingGroupRequestData({
 			number,
@@ -147,6 +150,7 @@ export function DocumentPage() {
 			desc: description,
 			protocolsItemId,
 			previousData: { _id: requestId },
+			requestType,
 		});
 		console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
@@ -155,12 +159,13 @@ export function DocumentPage() {
 			await insertOrUpdateWorkingGroupRequest(requestData);
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [insertOrUpdateWorkingGroupRequest, t]);
+	}, [insertOrUpdateWorkingGroupRequest, requestId, t]);
 
 	const handleSaveRequest = useCallback(async () => {
 		try {
 			const { protocol } = values;
 			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
+
 			await saveAction({
 				number: values.number,
 				date: values.date,
@@ -171,6 +176,7 @@ export function DocumentPage() {
 				mail: values.mail,
 				description: values.description,
 				protocolsItemId,
+				requestType: values.requestType,
 			});
 
 			dispatchToastMessage({

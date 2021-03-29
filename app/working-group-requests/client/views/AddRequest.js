@@ -18,7 +18,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
-import RequestForm, { useDefaultRequestForm, WorkingGroupRequestVerticalChooseBar } from './RequestForm';
+import RequestForm, { useDefaultRequestForm, WorkingGroupRequestVerticalChooseBar, defaultRequestTypeState, getRequestTypeByState } from './RequestForm';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -66,7 +66,6 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 					itemNum: protocolItem?.num ?? '',
 					itemResponsible: itemResponsiblePerson,
 				});
-				handlers && handlers.handleNumber && handlers.handleNumber(protocolData.protocol[0].num ?? '');
 				itemResponsiblePerson && handlers.handleItemResponsible && handlers.handleItemResponsible(itemResponsiblePerson);
 				handlers.handleProtocolItems && protocolData.sections.forEach((section) => section.items?.forEach((item) => item._id === protocolsItemId && handlers.handleProtocolItems([item])));
 			}
@@ -115,6 +114,7 @@ function NewAddRequest() {
 		protocolsItemId,
 		councilId,
 		protocolId,
+		requestType,
 	}) => {
 		const requestData = createWorkingGroupRequestData({
 			number,
@@ -128,6 +128,7 @@ function NewAddRequest() {
 			protocolsItemId,
 			councilId,
 			protocolId,
+			requestType,
 		});
 		console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
@@ -142,7 +143,7 @@ function NewAddRequest() {
 		try {
 			const { protocol } = values;
 			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
-			console.log({ protocol, items: values.protocolItems, check: values.protocolItems?.length > 0 && values.protocolItems[0].num });
+
 			await saveAction({
 				number: values.number,
 				date: values.date,
@@ -155,6 +156,7 @@ function NewAddRequest() {
 				protocolsItemId,
 				councilId: values.council?._id,
 				protocolId: values.protocol?._id,
+				requestType: values.requestType,
 			});
 
 			dispatchToastMessage({
@@ -169,7 +171,7 @@ function NewAddRequest() {
 				message: error,
 			});
 		}
-	}, [saveAction, values, protocolsItemId, t, dispatchToastMessage]);
+	}, [values, saveAction, protocolsItemId, dispatchToastMessage, t]);
 
 	return <Page flexDirection='row'>
 		<Page>

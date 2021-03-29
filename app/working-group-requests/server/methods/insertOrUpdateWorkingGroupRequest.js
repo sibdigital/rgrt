@@ -26,7 +26,6 @@ Meteor.methods({
 				protocolsItemId: workingGroupRequestData.protocolsItemId,
 				inviteLink,
 				protocolItemsId: workingGroupRequestData.protocolItemsId ?? [],
-				mail: workingGroupRequestData.mail ?? [],
 			};
 
 			workingGroupRequestData.itemResponsible && Object.assign(createWorkingGroupRequest, { itemResponsible: workingGroupRequestData.itemResponsible });
@@ -34,6 +33,8 @@ Meteor.methods({
 			workingGroupRequestData.council && Object.assign(createWorkingGroupRequest, { council: workingGroupRequestData.council });
 			workingGroupRequestData.councilId && Object.assign(createWorkingGroupRequest, { councilId: workingGroupRequestData.councilId });
 			workingGroupRequestData.protocolId && Object.assign(createWorkingGroupRequest, { protocolId: workingGroupRequestData.protocolId });
+			workingGroupRequestData.requestType && Object.assign(createWorkingGroupRequest, { requestType: workingGroupRequestData.requestType });
+			workingGroupRequestData.mail && Object.assign(createWorkingGroupRequest, { mail: workingGroupRequestData.mail });
 
 			const _id = WorkingGroupsRequests.create(createWorkingGroupRequest);
 
