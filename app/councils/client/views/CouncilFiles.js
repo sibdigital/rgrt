@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button, Icon, Callout, Table } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -37,7 +37,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	// const [sort, setSort] = useState(['title', 'asc']);
 	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
-	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
+	const [filesArray, setFilesArray] = useState([]);
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
@@ -48,6 +48,12 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 	}), [councilId, cache, isReload]);
 
 	const { data, state } = useEndpointDataExperimental('councils.findOne', query) || {};
+
+	useEffect(() => {
+		if (data && data.documents) {
+			setFilesArray(data.documents);
+		}
+	}, [data]);
 
 	const updateCouncilFilesOrder = useMethod('updateCouncilFilesOrder');
 	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
@@ -82,7 +88,6 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		console.log(fileId);
 		try {
 			await deleteFileFromCouncil(councilId, fileId);
-			setMaxOrderFileIndex(data.documents.length);
 
 			const arr = await updateCouncilFilesOrder(councilId, data.documents.filter((file) => file._id !== fileId));
 			// setAttachedFiles(arr);
@@ -166,7 +171,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data?.documents ?? []} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>;
+	return <GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>;
 }
 
 CouncilFiles.displayName = 'CouncilFiles';
