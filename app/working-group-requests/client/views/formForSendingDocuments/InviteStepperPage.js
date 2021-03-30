@@ -120,7 +120,7 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 					</Scrollable>
 				</Box>
 				{context
-				&& <VerticalBar className='contextual-bar' style={{ flex: 'auto' }} width='x80' qa-context-name={`admin-user-and-room-context-${ context }`}>
+				&& <VerticalBar className='contextual-bar' style={{ flex: 'auto' }} width={!small ? 'x80' : '100%'} qa-context-name={`admin-user-and-room-context-${ context }`}>
 					<VerticalBar.Header>
 						{ context === 'protocolSelect' && t('Protocol_Choose') }
 						{ context === 'protocolSectionSelect' && t('Protocol_Section_Choose') }
