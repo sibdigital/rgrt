@@ -1,16 +1,10 @@
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
 	Box,
 	Button,
 	ButtonGroup,
 	Field,
 	Icon,
-	Skeleton,
-	Throbber,
-	InputBox,
-	TextInput,
-	Select,
-	Modal,
 } from '@rocket.chat/fuselage';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -19,7 +13,7 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useFileInput } from '../../../../client/hooks/useFileInput';
 import { validate, createPerson } from './lib';
 import { uploadPersonAvatar } from './uploadPersonAvatar';
-import PersonForm, { useDefaultPersonForm } from './PersonForm';
+import PersonForm, { useDefaultPersonForm, getPersonFormFields } from './PersonForm';
 
 export function EditPerson({ workingGroupOptions, person, onChange, close, ...props }) {
 	const t = useTranslation();
@@ -28,7 +22,7 @@ export function EditPerson({ workingGroupOptions, person, onChange, close, ...pr
 	const [picturePreview, setPicturePreview] = useState({});
 	const [avatarSource, setAvatarSource] = useState({});
 
-	const { values, handlers, hasUnsavedChanges, allFieldAreFilled } = useDefaultPersonForm({ defaultValues: person && person._id ? person : null });
+	const { values, handlers, hasUnsavedChanges, allFieldAreFilled } = useDefaultPersonForm({ defaultValues: person && person._id ? getPersonFormFields({ person }) : null });
 
 	const insertOrUpdatePerson = useMethod('insertOrUpdatePerson');
 
