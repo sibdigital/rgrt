@@ -1,6 +1,7 @@
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
+import { Session } from 'meteor/session';
 
 import { settings } from '../../../../settings';
 import { t } from '../../../../utils';
@@ -329,6 +330,9 @@ Template.gridOfIcons.helpers({
 
 Template.gridOfIcons.onCreated(function() {
 	this.context = new ReactiveVar('home');
+	let contextPath = Session.get('gridOfIcons/context');
+
+	contextPath && Template.instance().context.set(contextPath);
 });
 
 Template.gridOfIcons.events({

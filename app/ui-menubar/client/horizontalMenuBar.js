@@ -1,5 +1,6 @@
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
+import { Session } from 'meteor/session';
 
 import { t } from '../../utils';
 import { AccountBox, menu } from '../../ui-utils';
@@ -11,6 +12,7 @@ const menuItems = () => [
 		name: t('Home'),
 		icon: 'home',
 		action: () => {
+			Session.set('gridOfIcons/context', 'home');
 			FlowRouter.go('/');
 		},
 	},
@@ -48,52 +50,10 @@ const menuItems = () => [
 	},
 	{
 		name: t('Interaction'),
-		subItems: [
-			{
-				name: t('Send_email'),
-				action: () => {
-					FlowRouter.go('manual-mail-sender');
-				},
-			},
-			{
-				name: t('Create_new') + ' ' + t('Channel'),
-				action: (e) => {
-					e.preventDefault();
-					modal.open({
-						title: t('Create_A_New_Channel'),
-						content: 'createChannel',
-						data: {
-							onCreate() {
-								modal.close();
-							},
-						},
-						modifier: 'modal',
-						showConfirmButton: false,
-						showCancelButton: false,
-						confirmOnEnter: false,
-					}, () => {});
-				},
-			},
-			{
-				name: t('Create_new') + ' ' + t('Direct_Messages'),
-				action: (e) => {
-					return createInteractionActions('Direct_Messages', 'CreateDirectMessage')(e);
-				},
-			},
-			{
-				name: t('Create_new') + ' ' + t('Discussion'),
-
-				action: (e) => {
-					return createInteractionActions('Discussion_title', 'CreateDiscussion')(e);
-				},
-			},
-			{
-				name: t('Directory'),
-				action: () => {
-					FlowRouter.go('directory');
-				},
-			},
-		],
+		action: () => {
+			Session.set('gridOfIcons/context', 'interaction');
+			FlowRouter.go('/');
+		},
 	},
 	{
 		name: t('Council Commission \"Transport\"'),
@@ -104,83 +64,10 @@ const menuItems = () => [
 	{
 		name: t('Administration'),
 		condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-		subItems: [
-			{
-				name: t('Info'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'info' });
-				},
-			},
-			{
-				name: t('Import'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'import' });
-				},
-			},
-			{
-				name: t('Users'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'users' });
-				},
-			},
-			{
-				name: t('Rooms'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'rooms' });
-				},
-			},
-			{
-				name: t('Invites'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'invites' });
-				},
-			},
-			{
-				name: t('Custom_Sounds'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'custom-sounds' });
-				},
-			},
-			{
-				name: t('Apps'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'apps' });
-				},
-			},
-			{
-				name: t('Permissions'),
-				condition: () => AccountBox.getItems().length || hasAtLeastOnePermission(['manage-emoji', 'manage-oauth-apps', 'manage-outgoing-integrations', 'manage-incoming-integrations', 'manage-own-outgoing-integrations', 'manage-own-incoming-integrations', 'manage-selected-settings', 'manage-sounds', 'view-logs', 'view-privileged-setting', 'view-room-administration', 'view-statistics', 'view-user-administration', 'access-setting-permissions']),
-				action: () => {
-					FlowRouter.go('admin', { group: 'permissions' });
-				},
-			},
-			// {
-			// 	name: t('Working_group'),
-			// 	action: () => {
-			// 		FlowRouter.go('working-group');
-			// 	},
-			// },
-			{
-				name: t('Working_group_composition'),
-				condition: () => hasPermission('manage-working-group'),
-				action: () => {
-					FlowRouter.go('composition-of-the-working-group');
-				},
-			},
-			{
-				name: t('Persons'),
-				action: () => {
-					FlowRouter.go('persons');
-				},
-			},
-		]
+		action: () => {
+			Session.set('gridOfIcons/context', 'administration');
+			FlowRouter.go('/');
+		},
 	},
 ]
 
@@ -191,33 +78,7 @@ Template.menuBar.helpers({
 })
 
 Template.menuBar.events({
-	'click .goToSection'(e, instance) {
-		console.log(this);
-
+	'click .nav-item'(e, instance) {
 		return this.action && this.action.apply(this, [e]);
 	},
-
-	'click .submenu-link'(e, instance) {
-		console.log(this);
-
-		return this.action && this.action.apply(this, [e]);
-	},
-
-	'click .icon' (e, instance) {
-		let x = document.getElementById('main-menu');
-
-		if (x.className	===	'menu')	{
-			x.className	+=	' responsive';
-		} else {
-			x.className	= 'menu';
-		}
-	},
-
-	'click .menu.responsive a'(e, instance) {
-		let x = document.getElementById('main-menu');
-
-		if (x.className	===	'menu responsive') {
-			x.className	= 'menu';
-		}
-	}
 });
