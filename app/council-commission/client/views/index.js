@@ -63,7 +63,14 @@ export function CouncilCommissionPage(
 						<Box>{surname}</Box>
 						<Box>{name} {patronymic}</Box>
 					</Box>
-					<Box lineHeight='x24' fontSize='x18' mbs='x12'>{position}</Box>
+					<Box fontSize={mediaQuery ? 'x18' : 'x16'} mbs='x16' lineHeight='x24'>
+						<Box>{position}</Box>
+						<Box>{organization}</Box>
+					</Box>
+					<Box fontSize={mediaQuery ? 'x18' : 'x16'} mbs='x12' lineHeight='x24'>
+						<Box>{phone}</Box>
+						<Box>{email}</Box>
+					</Box>
 				</Box>
 			</Box>
 		</Box>;
@@ -75,8 +82,10 @@ export function CouncilCommissionPage(
 					<Box>{surname} {name}</Box>
 					<Box>{patronymic}</Box>
 				</Box>
-				<Box mbs='x16'>{position}</Box>
-				<Box mbs={mediaQuery ? 'x8' : 'x4'}>{organization}</Box>
+				<Box mbs='x8' lineHeight={mediaQuery ? 'x24' : 'x20'}>
+					<Box>{position}</Box>
+					<Box>{organization}</Box>
+				</Box>
 				<Box position='absolute' style={{bottom:'16px'}}>
 					<Box mbe='x4'>{phone}</Box>
 					<Box>{email}</Box>
