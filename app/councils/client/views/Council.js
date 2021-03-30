@@ -564,9 +564,9 @@ function Council({
 			</Page.Header>
 			<Page.Content>
 				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
-					<Field mis='x4' display='flex' flexDirection='row'>
+					<Field mis='x4' display='flex' flexDirection='row' mbe={!mediaQuery && 'x16'}>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
-						<Field.Row width='-moz-available'>
+						<Field.Row width='inherit'>
 							{mode !== 'edit'
 							&& <TextInput mie='x16' readOnly value={councilType ?? t('Council_type_meeting')}/>}
 							{mode === 'edit'
@@ -576,7 +576,7 @@ function Council({
 					</Field>
 					<Field mis='x4' display='flex' flexDirection='row'>
 						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
-						<Field.Row width='-moz-available'>
+						<Field.Row width='inherit' mis={!mediaQuery ? 'x60' : ''} mie={!mediaQuery ? 'x16' : ''}>
 							{mode !== 'edit' && <TextInput mie='x16' readOnly is='span' fontScale='p1'>{formatDateAndTime(data?.d ?? new Date())}</TextInput>}
 							{mode === 'edit'
 								&& <DatePicker
@@ -596,9 +596,9 @@ function Council({
 					</Field>
 				</Field>
 				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row' alignItems='center' mis='x4'>
-					<Field display='flex' flexDirection='row' mie='x8' alignItems='center'>
+					<Field display='flex' flexDirection='row' mie='x8' alignItems='center' mbe={!mediaQuery && 'x16'}>
 						<Label maxWidth='100px' mie='x8'>{t('Council_Place')}</Label>
-						<TextInput mie='x12' fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
+						<TextInput mie={!mediaQuery ? 'x16' : 'x12'} fontScale='p1' readOnly={mode !== 'edit'} value={place} onChange={(e) => setPlace(e.currentTarget.value)} style={inputStyles} />
 					</Field>
 					{isSecretary && <Field display={mediaQuery ? 'flex' : 'block'} flexDirection='row' mie='x8'>
 						<Label mie='x8'>{t('Council_invite_link')}</Label>
