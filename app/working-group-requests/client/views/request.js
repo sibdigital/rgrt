@@ -27,6 +27,7 @@ export function DocumentPage() {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const formatDateAndTime = useFormatDateAndTime();
+	const canSaveRequest = hasPermission('manage-working-group-requests', useUserId());
 
 	const [cache, setCache] = useState(new Date());
 	const [context, setContext] = useState('');
@@ -193,11 +194,6 @@ export function DocumentPage() {
 		}
 	}, [saveAction, values, protocolsItemId, t, dispatchToastMessage]);
 
-	if (!hasPermission('manage-working-group-requests', useUserId())) {
-		console.log('Permissions_access_missing');
-		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	}
-
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
@@ -206,9 +202,9 @@ export function DocumentPage() {
 					<Label fontScale='h1'>{t('Working_group_request')}</Label>
 				</Field>
 				<ButtonGroup>
-					<Button disabled={!hasUnsavedChanges} primary small aria-label={t('Save')} onClick={handleSaveRequest}>
+					{ canSaveRequest && <Button disabled={!hasUnsavedChanges} primary small aria-label={t('Save')} onClick={handleSaveRequest}>
 						{t('Save')}
-					</Button>
+					</Button>}
 				</ButtonGroup>
 			</Page.Header>
 			<Page.ScrollableContent padding='x24'>
