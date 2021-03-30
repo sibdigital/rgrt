@@ -7,21 +7,44 @@ import { isEmail } from '../../../utils';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
 import { checkNumber } from '../../../utils/client/methods/checkNumber';
+import _ from 'underscore';
 
 const DEFAULT_WEIGHT_PERSON = 100;
 
+export const defaultPersonFields = {
+	weight: DEFAULT_WEIGHT_PERSON,
+	surname: '',
+	name: '',
+	patronymic: '',
+	phone: '',
+	email: '',
+	organization: '',
+	position: '',
+	group: '',
+};
+
+export function getPersonFormFields({ person = null, onGetAllFieldsFromPrevAnswer = false }) {
+	if (!person || typeof person !== 'object' || _.isArray(person)) {
+		return defaultPersonFields;
+	}
+
+	const personValues = { ...person };
+
+	const defaultPersonFieldsKeys = Object.keys(defaultPersonFields);
+
+	const personKeys = Object.keys(person);
+
+	defaultPersonFieldsKeys.forEach((key) => {
+		if (!personKeys.includes(key)) {
+			personValues[key] = defaultPersonFields[key];
+		}
+	});
+
+	console.dir({ personValues });
+	return personValues;
+}
+
 export function useDefaultPersonForm({ defaultValues = null, isContactPerson = false }) {
-	const defaultFields = {
-		weight: DEFAULT_WEIGHT_PERSON,
-		surname: '',
-		name: '',
-		patronymic: '',
-		phone: '',
-		email: '',
-		organization: '',
-		position: '',
-		group: '',
-	};
 	const contactFields = {
 		surname: '',
 		name: '',
@@ -30,8 +53,8 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 		email: '',
 	};
 
-	const fields = useMemo(() => isContactPerson ? contactFields : defaultValues ?? defaultFields, [isContactPerson, defaultValues]);
-	// useMemo(() => console.log({ fields }), [fields]);
+	const fields = useMemo(() => (isContactPerson ? contactFields : defaultValues ?? defaultPersonFields), [isContactPerson, defaultValues]);
+
 	const {
 		values,
 		handlers,
@@ -140,7 +163,7 @@ function PersonForm({
 				<Field.Label>{t('Phone_number')}</Field.Label>
 				<Field.Row>
 					<PhoneInput
-						inputStyle={{ width: '100%', borderWidth: '0.125rem', borderRadius: '0' }} value={phone} onChange={(val) => handlePhone(val )} country={'ru'}
+						inputStyle={{ width: '100%', borderWidth: '0.125rem', borderRadius: '0' }} value={phone} onChange={(val) => handlePhone(val)} country={'ru'}
 						countryCodeEditable={false} placeholder={'+7 (123)-456-78-90'}/>
 				</Field.Row>
 			</Field>, [t, phone, handlePhone])}
@@ -167,13 +190,13 @@ function PersonForm({
 			</Field>, [t, organization, handleOrganization])}
 
 			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
-					<Field.Label>{t('Group')}</Field.Label>
-					<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />
-				</Field>, [t, group, handleGroup, workingGroupOptions])}
-			
+				<Field.Label>{t('Group')}</Field.Label>
+				<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />
+			</Field>, [t, group, handleGroup, workingGroupOptions])}
+
 			{onShowCancelAndSaveButtons && <ButtonGroup mb='x16'>
 				<Button flexGrow={1} onClick={() => !!onCancel && onCancel()}>{t('Cancel')}</Button>
-				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Send_request_answer')}</Button>
+				<Button primary mie='none' flexGrow={1} disabled={!allFieldAreFilled} onClick={() => !!onSave && onSave(values)}>{t('Save')}</Button>
 			</ButtonGroup>}
 		</Margins>
 	</Box>;

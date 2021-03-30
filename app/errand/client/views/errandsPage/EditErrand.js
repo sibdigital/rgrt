@@ -1,39 +1,54 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, ButtonGroup, Field, SelectFiltered, Skeleton, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import {
+	Box,
+	Button,
+	ButtonGroup, Callout,
+	Field, FieldGroup,
+	Label,
+	SelectFiltered,
+	Skeleton,
+	TextAreaInput,
+	TextInput
+} from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
-registerLocale('ru', ru);
-import moment from 'moment';
-import _ from 'underscore';
 
+import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
-import { useEndpointAction } from '../../../../../client/hooks/useEndpointAction';
-import VerticalBar from '../../../../../client/components/basic/VerticalBar';
-import { errandStatuses } from '../../../utils/statuses';
-import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
+import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
+import { useMethod } from '../../../../../client/contexts/ServerContext';
+import { useRouteParameter } from '../../../../../client/contexts/RouterContext';
+import { useForm } from '../../../../../client/hooks/useForm';
+import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { useUserId } from '../../../../../client/contexts/UserContext';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../client/hooks/useEndpointDataExperimental';
+import { errandStatuses } from '../../../utils/statuses';
+import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
+import { settings } from '../../../../settings';
+import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
 
-
+registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
-export function EditErrandContextBar({ erid, onChange, onClose }) {
-	return <EditErrandWithData erid={erid} onChange={onChange} onClose={onClose}/>;
-}
+export function EditErrandPage() {
+	const t = useTranslation();
 
-function EditErrandWithData({ erid, onChange, onClose }) {
+	const id = useRouteParameter('id');
+	const userId = useUserId();
+
 	const query = useMemo(() => ({
 		query: JSON.stringify({
-			_id: erid,
+			_id: id,
 		}),
 		sort: JSON.stringify({ ts: -1 }),
 		count: 1,
 		offset: 0,
-	}), [erid]);
+	}), [id]);
 
-	const { data = {}, state, error } = useEndpointDataExperimental('errands', query);
+	const { data, state, error } = useEndpointDataExperimental('errands', query);
+	const { data: personData, state: personState, error: personError } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
 
-	if (state === ENDPOINT_STATES.LOADING) {
+	if ([state, personState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box w='full' pb='x24'>
 			<Skeleton mbe='x4'/>
 			<Skeleton mbe='x8' />
@@ -44,146 +59,171 @@ function EditErrandWithData({ erid, onChange, onClose }) {
 		</Box>;
 	}
 
-	if (state === ENDPOINT_STATES.ERROR) {
-		return error.message;
+	if (error || personError) {
+		return <Callout m='x16' type='danger'>{error}</Callout>;
 	}
 
-	return <EditErrand errand={data.result[0]} onChange={onChange} onClose={onClose}/>;
+	return <EditErrand errand={data.result[0]} currentPerson={personData}/>;
 }
 
-function EditErrand({ errand, onChange, onClose }) {
+const getInitialValue = (data) => {
+	const value = {
+		_id: data._id,
+		t: data.t,
+		ts: data.ts,
+		initiatedBy: data.initiatedBy,
+		chargedTo: data.chargedTo,
+		desc: data.desc,
+		expireAt: data.expireAt ?? '',
+		comment: data.comment ?? '',
+	}
+	if (data.protocol) {
+		value.protocol = data.protocol;
+	}
+	return value;
+};
+
+function EditErrand({ errand, currentPerson }) {
 	const _t = useTranslation();
-	errand.expireAt = new Date(errand.expireAt);
-	const [newData, setNewData] = useState({});
+	const dispatchToastMessage = useToastMessageDispatch();
+	const formatDate = useFormatDate();
 
+	const updateErrand = useMethod('editErrand');
 
-	const hasUnsavedChanges = useMemo(() => Object.values(newData).filter((current) => current === null).length < Object.keys(newData).length, [JSON.stringify(newData)]);
-	const saveQuery = useMemo(() => ({ _id: errand._id, ...Object.fromEntries(Object.entries(newData).filter(([, value]) => value !== null)) }), [errand._id, newData]);
+	const { values, handlers, reset, hasUnsavedChanges } = useForm(getInitialValue(errand));
 
-	const saveAction = useEndpointAction('POST', 'errands.update', saveQuery, _t('Errand_updated_successfully'));
+	const {
+		_id,
+		t,
+		ts,
+		initiatedBy,
+		chargedTo,
+		desc,
+		expireAt,
+		protocol,
+		comment,
+	} = values;
 
-	const areEqual = (a, b) => a === b || !(a || b);
+	const {
+		handleT,
+		handleComment,
+	} = handlers;
 
-	const handleChange = (field, currentValue, getValue = (e) => e.currentTarget.value) => (e) => {
-		setNewData({ ...newData, [field]: areEqual(getValue(e), currentValue) ? null : getValue(e) });
-	};
+	const saveQuery = useMemo(() => values, [JSON.stringify(values)]);
 
-	const handleChangeDate = (date) => {
-		if (areEqual(errand.expireAt, date)) { return; }
-		setNewData({
-			...newData,
-			expireAt: date,
-		});
-	};
+	const saveAction = useCallback(async (errandData) => {
+		const _id = await updateErrand(errandData);
+		return _id;
+	}, [updateErrand]);
 
+	const handleSave = useCallback(async () => {
+		const result = await saveAction(saveQuery);
+		dispatchToastMessage({ type: 'success', message: _t('Errand_Updated_Successfully') });
+		// FlowRouter.go(`/errand/${ _id }`);
+	}, [dispatchToastMessage, saveAction, saveQuery, _t]);
 
-	/* const handleChangeUser = (field, previousValue) => (_id) => {
-		console.log(e);
-		/!*if (areEqual(errand[field], date)) { return; }
-		if (newData.chargedToUser) {
-			newData.chargedToUser = _.findWhere(users.items, {
-				_id: newData.chargedToUser,
-			});
-			setNewData(newData);
-		}*!/
-	};*/
-
-	const userQuery = useMemo(() => ({
-		query: JSON.stringify({
-			rid: errand.rid,
-		}),
-	}), [errand.rid]);
-
-	let stringQuery = '';
-
-	if (errand.rid == null) {
-		stringQuery = 'users.all';
-	} else {
-		stringQuery = 'users.autocomplete.by_room';
-	}
-	const users = useEndpointData(stringQuery, userQuery) || { items: [] };
-	const curUser = _.findWhere(users.items, { _id: errand.chargedToUser._id });
-	!curUser && users.items.push(errand.chargedToUser);
-	const availableUsers = useMemo(() => users.items.map((item) => [item._id, item.username]), [users, users.items]);
-	
 	const onEmailSendClick = () => {
-		onClose();
-		FlowRouter.go(`/manual-mail-sender/errand/${ errand._id }`);
+		// onClose();
+		FlowRouter.go(`/manual-mail-sender/errand/${ _id }`);
 	};
 
-	const handleSave = async () => {
-		await Promise.all([hasUnsavedChanges && saveAction()].filter(Boolean));
-		if (newData.chargedToUser) {
-			const newUser = _.findWhere(users.items, { _id: newData.chargedToUser });
-			console.log('newUser', newUser);
-			newData.chargedToUser = newUser;
-		}
-		onChange();
-	};
+	const protocolUrl = protocol ? [settings.get('Site_Url'), 'protocol/', protocol._id].join('') : '';
+	const protocolItemUrl = protocol && protocol.sectionId && protocol.itemId ? [settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId].join('') : protocolUrl;
+	const protocolTitle = protocol ? _t('Protocol') + ' от ' + formatDate(protocol.d) + ' № ' + protocol.num : '';
 
-	let chargedToUser = newData.chargedToUser ?? errand.chargedToUser;
-	chargedToUser = typeof chargedToUser === 'string' ? chargedToUser : chargedToUser._id || '';
-	const expireAt = newData.expireAt ?? errand.expireAt;
-	const description = newData.desc ?? errand.desc;
+	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' }), []);
 
-	const errandStatus = newData.t ?? errand.t;
 	const availableStatuses = errandStatuses.map((value) => [value, _t(value)]);
-	const userId = useUserId();
-	const isCurrentUsesInitiator = () => errand.initiatedBy._id === userId;
 
-	const isCurrentUsesResponsible = () => errand.chargedToUser._id === userId;
+	const chargedToCurrentUser = currentPerson._id === chargedTo._id;
 
-	return <VerticalBar.ScrollableContent is='form' onSubmit={useCallback((e) => e.preventDefault(), [])}>
-		<Field>
-			<Field.Label>{_t('Errand_Initiated_by')}</Field.Label>
-			<Field.Row>
-				<TextInput disabled={true} value={errand.initiatedBy.username} flexGrow={1}/>
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{_t('Errand_Charged_to')}</Field.Label>
-			<Field.Row>
-				<SelectFiltered disabled={!isCurrentUsesInitiator()} options={availableUsers} value={chargedToUser} key='chargedUser' onChange={handleChange('chargedToUser', errand.chargedToUser, (value) => value, areEqual)} placeholder={_t('Errand_Charged_to')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{_t('Description')}</Field.Label>
-			<Field.Row>
-				<TextAreaInput disabled={!isCurrentUsesInitiator()} value={description} onChange={handleChange('desc', errand.desc)} flexGrow={1}/>
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{_t('Started_At')}</Field.Label>
-			<Field.Row>
-				<TextInput disabled={true} value={moment(errand.ts).format(moment.localeData().longDateFormat('L'))} flexGrow={1}/>
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{_t('Errand_Expired_date')}</Field.Label>
-			<Field.Row>
+	const commentField = chargedToCurrentUser ? <TextAreaInput rows={3} flexGrow={1} value={comment} onChange={handleComment}/> : <TextAreaInput rows={3} flexGrow={1} value={comment}/>
 
-				<DatePicker
-					disabled={!isCurrentUsesInitiator()}
-					dateFormat={'dd.MM.yyyy'}
-					selected={expireAt}
-					onChange={handleChangeDate}
-					customInput={<TextInput />}
-					locale='ru'
-				/>
-
-			</Field.Row>
-		</Field>
-		<Field>
-			<Field.Label>{_t('Status')}</Field.Label>
-			<Field.Row>
-				<SelectFiltered disabled={!isCurrentUsesResponsible() && !isCurrentUsesInitiator()} options={availableStatuses} value={errandStatus} key='status' onChange={handleChange('t', errand.t, (value) => value, areEqual)} placeholder={_t('Status')} />
-			</Field.Row>
-		</Field>
-		<Field>
-			<ButtonGroup>
-				<Button flexGrow={1} onClick={onEmailSendClick}>{_t('Send_email')}</Button>
-				<Button mie='none' flexGrow={1} disabled={!hasUnsavedChanges || (!isCurrentUsesResponsible() && !isCurrentUsesInitiator())} onClick={handleSave}>{_t('Save')}</Button>
-			</ButtonGroup>
-		</Field>
-	</VerticalBar.ScrollableContent>;
+	return <Page flexDirection='row'>
+		<Page>
+			<Page.Header title=''>
+				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+					<GoBackButton/>
+					<Label fontScale='h1'>{_t('Errand')}</Label>
+				</Field>
+				<ButtonGroup mis='auto'>
+					{ !chargedToCurrentUser && <Button primary small aria-label={_t('Save')} onClick={onEmailSendClick}>{_t('Send_email')}</Button>}
+					<Button disabled={!hasUnsavedChanges} primary small aria-label={_t('Save')} onClick={handleSave}>
+						{_t('Save')}
+					</Button>
+				</ButtonGroup>
+			</Page.Header>
+			<Page.ScrollableContent padding='x24'>
+				<FieldGroup>
+					{useMemo(() => <Field>
+						<Field.Label>{_t('Errand_Initiated_by')}</Field.Label>
+						<Field.Row>
+							<TextInput flexGrow={1} value={constructPersonFullFIO(initiatedBy ?? '')}/>
+						</Field.Row>
+					</Field>, [_t, initiatedBy])}
+					{useMemo(() => <Field>
+						<Field.Label>{_t('Errand_Charged_to')}</Field.Label>
+						<Field.Row>
+							<TextInput flexGrow={1} value={constructPersonFullFIO(chargedTo?.person ?? '')}/>
+						</Field.Row>
+					</Field>, [_t, chargedTo])}
+					{useMemo(() => <Field>
+						<Field.Label>{_t('Errand_Created_At')}</Field.Label>
+						<Field.Row>
+							<TextInput flexGrow={1} value={formatDate(ts)}/>
+						</Field.Row>
+					</Field>, [_t, chargedTo])}
+					{useMemo(() => <Field display='flex' flexDirection='row'>
+						<Field mie='x8'>
+							<Field.Label>{_t('Errand_Expired_date')}</Field.Label>
+							<Field.Row>
+								<DatePicker
+									dateFormat='dd.MM.yyyy'
+									selected={new Date(expireAt)}
+									customInput={<TextInput />}
+									locale='ru'
+								/>
+							</Field.Row>
+						</Field>
+						<Field>
+							<Field.Label>{_t('Status')}</Field.Label>
+							<Field.Row>
+								<SelectFiltered style={inputStyles} options={availableStatuses} value={t} key='status' onChange={handleT} placeholder={_t('Status')}/>
+							</Field.Row>
+						</Field>
+					</Field>, [_t, expireAt, t, handleT])}
+					{protocol && useMemo(() => <Field display='flex' flexDirection='row'>
+						<Field mie='x8'>
+							<Field.Label>{_t('Protocol')}</Field.Label>
+							<Field.Row>
+								<a href={protocolUrl}>{protocolTitle}</a>
+							</Field.Row>
+						</Field>
+						<Field>
+							<Field.Label>{_t('Protocol_Item')}</Field.Label>
+							<Field.Row>
+								<a href={protocolItemUrl}>{protocolTitle}</a>
+							</Field.Row>
+						</Field>
+					</Field>, [_t, protocol])}
+					{useMemo(() => <Field>
+						<Field.Label>{_t('Description')}</Field.Label>
+						<Field.Row>
+							<TextAreaInput style={inputStyles} rows={3} flexGrow={1} value={desc}/>
+						</Field.Row>
+					</Field>, [_t, desc])}
+					{useMemo(() => <Field>
+						<Field.Label>{_t('Commentary')}</Field.Label>
+						<Field.Row>
+							{commentField}
+						</Field.Row>
+					</Field>, [_t, comment, handleComment])}
+				</FieldGroup>
+			</Page.ScrollableContent>
+		</Page>
+	</Page>;
 }
+
+EditErrandPage.displayName = 'EditErrandPage';
+
+export default EditErrandPage;

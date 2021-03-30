@@ -57,9 +57,9 @@ export function DocumentPage() {
 		}), [data]),
 	);
 
-	const { data: protocolItemsData, state: protocolItemsState } = useEndpointDataExperimental('protocols.getProtocolItemsByProtocolId',
+	const { data: protocolItemsData, state: protocolItemsState } = useEndpointDataExperimental('protocols.getProtocolItemsByItemsId',
 		useMemo(() => ({
-			query: JSON.stringify({ _id: data?.protocolId ?? '', protocolsItems: data?.protocolItemsId ?? [] }),
+			query: JSON.stringify({ _id: data?.protocolId ?? '', protocolItemsId: data?.protocolItemsId ?? [] }),
 		}), [data]),
 	);
 
@@ -110,7 +110,8 @@ export function DocumentPage() {
 
 	const answers = useMemo(() => data?.answers ?? [], [data]);
 
-	const address = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
+	const address = useMemo(() => [settings.get('Site_Url'), `working-groups-requests/${ requestId }/new_answer`].join(''), [requestId]);
+	const addressLabel = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
@@ -129,7 +130,7 @@ export function DocumentPage() {
 		date,
 		council,
 		protocol,
-		protocolItemsId,
+		protocolItems,
 		itemResponsible,
 		mail,
 		description,
@@ -140,7 +141,7 @@ export function DocumentPage() {
 			date,
 			council,
 			protocol,
-			protocolItemsId,
+			protocolItemsId: protocolItems?.map((protocolItem) => protocolItem._id) ?? [],
 			itemResponsible,
 			mail,
 			desc: description,
@@ -158,12 +159,14 @@ export function DocumentPage() {
 
 	const handleSaveRequest = useCallback(async () => {
 		try {
+			const { protocol } = values;
+			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
 			await saveAction({
 				number: values.number,
 				date: values.date,
 				council: values.council,
-				protocol: values.protocol,
-				protocolItemsId: values.protocolItemsId,
+				protocol,
+				protocolItems: values.protocolItems,
 				itemResponsible: values.itemResponsible,
 				mail: values.mail,
 				description: values.description,
@@ -183,7 +186,6 @@ export function DocumentPage() {
 			});
 		}
 	}, [saveAction, values, protocolsItemId, t, dispatchToastMessage]);
-
 
 	if (!hasPermission('manage-working-group-requests', useUserId())) {
 		console.log('Permissions_access_missing');
@@ -211,7 +213,7 @@ export function DocumentPage() {
 				<Field mbe='x16'>
 					<Field.Label>{t('Working_group_request_invite_link')}</Field.Label>
 					<Field.Row>
-						<a href={address} is='span' target='_blank'>{address}</a>
+						<a href={address} is='span' target='_blank'>{addressLabel}</a>
 					</Field.Row>
 				</Field>
 				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>

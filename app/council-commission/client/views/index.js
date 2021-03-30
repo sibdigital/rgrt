@@ -57,25 +57,30 @@ export function CouncilCommissionPage(
 		if (index === 0) {
 			return <Box className={`commission-person-block--${index}`} position='relative'>
 			<img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/>
-			<Box className={'imgSide-bg gradient'} w='100%' >
-				<Box className={'imgSide-inf'}>
+			<Box className='imgSide-bg gradient' w='100%' >
+				<Box className='imgSide-inf'>
 					<Box fontSize={mediaQuery ? 'x32' : 'x24'}>
 						<Box>{surname}</Box>
 						<Box>{name} {patronymic}</Box>
 					</Box>
-					<Box lineHeight={'x24'} fontSize='x18' mbs='x12'>{position}</Box>
+					<Box lineHeight='x24' fontSize='x18' mbs='x12'>{position}</Box>
 				</Box>
 			</Box>
 		</Box>;
 		}
 		return  <Box className={`commission-person-block`} display='flex'>
 			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/></Box>
-			<Box flexBasis='60%' pi={'x16'} pb={'x24'} backgroundColor={'whitesmoke'}>
-				<Box fontSize='x24'>
+			<Box position='relative' fontSize={mediaQuery ? 'x16' : 'x14'} flexBasis='60%' pi={mediaQuery ? 'x16' : 'x12'} pb={mediaQuery ? 'x24' : 'x8'} backgroundColor='whitesmoke'>
+				<Box fontSize={mediaQuery ?'x24' : 'x20'}>
 					<Box>{surname} {name}</Box>
 					<Box>{patronymic}</Box>
 				</Box>
-				<Box lineHeight={'x24'} fontSize={'x16'} mb='x12'>{position}</Box>
+				<Box mbs='x16'>{position}</Box>
+				<Box mbs={mediaQuery ? 'x8' : 'x4'}>{organization}</Box>
+				<Box position='absolute' style={{bottom:'16px'}}>
+					<Box mbe='x4'>{phone}</Box>
+					<Box>{email}</Box>
+				</Box>
 			</Box>
 		</Box>;
 	};
@@ -89,7 +94,7 @@ export function CouncilCommissionPage(
 				</Field>
 			</Page.Header>
 			<Page.ScrollableContent>
-				<Box className={'council-commission-grid'} pi='x32'>
+				<Box className={'council-commission-grid'} pi={mediaQuery ? 'x32' : '0'}>
 				{/* display={mediaQuery ? 'flex' : 'unset'} flexWrap={'wrap'} justifyContent={'flex-start'} maxWidth='x1800' w='full' alignSelf='center' fontSize='x16' */}
 					{persons 
 						? persons.persons.map((person, index) => 

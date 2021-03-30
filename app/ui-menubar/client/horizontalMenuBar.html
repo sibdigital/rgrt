@@ -1,26 +1,13 @@
 <template name="menuBar">
     <nav class="menu-bar">
-		<a href="javascript:void(0);" class="icon">
-			<i class="icon-menu"></i>
-		</a>
-		<ul class="menu" id="main-menu">
-			{{#each menuItems}}
-				<li class="menu-link"><a class="goToSection">
-					{{#if icon}}
-						{{> icon block="sidebar__toolbar-button-icon" icon=icon }}
-					{{else}}
-						{{name}}
-					{{/if}}
-				</a>
-					{{#if subItems}}
-						<ul class="submenu">
-							{{#each subItems}}
-								<li class="submenu-link"><a>{{name}}</a></li>
-							{{/each}}
-						</ul>
-					{{/if}}
-				</li>
-			{{/each}}
-		</ul>
+		{{#each menuItems}}
+			<span class="nav-item">
+				{{#if icon}}
+					{{> icon block="sidebar__toolbar-button-icon" icon=icon}}
+				{{else}}
+					{{name}}
+				{{/if}}
+			</span>
+		{{/each}}
     </nav>
 </template>

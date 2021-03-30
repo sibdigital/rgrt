@@ -38,7 +38,6 @@ import { fileUpload } from '../../lib/fileUpload';
 import { isURL } from '../../../../utils/lib/isURL';
 import { mime } from '../../../../utils/lib/mimeTypes';
 import { openUserCard } from '../../lib/UserCard';
-import { messageBox} from "/app/ui-utils/client/lib/messageBox";
 
 export const chatMessages = {};
 
@@ -833,27 +832,6 @@ Template.room.events({
 		openProfileTabOrOpenDM(e, instance, this.user.username);
 	},
 
-	'click .user-errand-initiated-card-message'(e, instance) {
-		const { err } = messageArgs(this);
-		if (!Meteor.userId()) {
-			return;
-		}
-		const { username } = err.initiatedBy;
-
-		openProfileTabOrOpenDM(e, instance, username);
-	},
-
-	'click .user-errand-charged-card-message'(e, instance) {
-		const { err } = messageArgs(this);
-		if (!Meteor.userId()) {
-			return;
-		}
-
-		const { username } = err.chargedToUser;
-
-		openProfileTabOrOpenDM(e, instance, username);
-	},
-
 	'scroll .wrapper': _.throttle(function(e, t) {
 		const $roomLeader = $('.room-leader');
 		if ($roomLeader.length) {
@@ -1082,48 +1060,6 @@ Template.room.events({
 		const { msg: { drid } } = messageArgs(this);
 		FlowRouter.goToRoomById(drid);
 	},
-	'click .js-open-window-errand'(event) {
-		event.preventDefault();
-
-
-		const { msg: { errand } } = messageArgs(this);
-		console.log( messageArgs(errand))
-
-		modal.open({
-			title: t('Errands'),
-			modifier: 'modal',
-			content: 'ErrandOnMessageDialog',
-			data: {
-				errand,
-				onCreate() {
-					modal.close();
-				},
-			},
-			showConfirmButton: false,
-			showCancelButton: false,
-			confirmOnEnter: false,
-		});
-
-		/*modal.open({
-			title: t('Errands'),
-			modifier: 'modal',
-			content: 'ErrandOnMessageDialog',
-			data: {
-				errand,
-				onCreate() {
-					modal.close();
-				}
-				},
-			confirmOnEnter: false,
-			showConfirmButton: false,
-			showCancelButton: false,
-
-		});*/
-		/*
-		FlowRouter.goToRoomById(drid);*/
-	},
-
-
 });
 
 

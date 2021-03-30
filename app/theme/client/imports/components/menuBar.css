@@ -1,92 +1,54 @@
 .horizontal-menu-bar {
+    display: flex;
+    flex-wrap: nowrap;
+
+    height: 55px;
     background-color: var(--sidebar-background);
+
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: -ms-autohiding-scrollbar;    
+}
+
+.horizontal-menu-bar::-webkit-scrollbar {
+    display: none;
 }
 
 .menu-bar {
-    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
 }
 
-.menu {
-    position: relative;
-    left: 50%;
-    /* float: left; */
+.nav-item {
+    color: white;
+    border-right: 2px solid #4e4a59;
+
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+
+    width: auto;
+    max-width: 195px;
+    padding: 8px 16px 12px;
+    flex: 0 0 auto;
+
+    cursor: pointer;
 }
 
-.menu .menu-link:first-child {
+.nav-item:first-child {
     border-left: 2px solid #4e4a59;
 }
 
-.menu .menu-link {
-    position: relative;
-    left: -50%;
-    border-right: 2px solid #4e4a59;
-    float: left;
-}
-
-.menu .menu-link .goToSection {
-    height: 55px;
-    max-width: 195px;
-    display: block;
-    color: white;
-    word-break: normal;
-    white-space: normal;
-    text-align: center;
-    padding: 10px 16px;
-    text-decoration: none;
-    text-transform: uppercase;
-}
-
-.menu .menu-link a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-
-.menu .menu-link .submenu {
-    display: none;
-    position: absolute;
-    background-color: var(--sidebar-background);
-    z-index: 100;
-}
-
-.menu .menu-link:hover .submenu {
-    display: block;
-}
-
-.menu .menu-link:hover {
+.nav-item:hover {
     background-color: var(--rc-color-primary-darkest);
 }
 
-.menu .menu-link .submenu .submenu-link {
-    display: block;
-}
-
-.menu-bar .icon {
-    padding: 14px 16px;
-    height: 50px;
-    color: white;
-    display: none;
-}
-
-.menu-bar .icon:hover,
-.menu .submenu-link:hover {
-    background-color: var(--rc-color-primary-darkest);
-}
-
-.menu-bar i:before {
-    font-size: 24px;
-}
-
-@media screen and (max-width: 780px) {
-    .menu-bar {
-        display: none;
+@media screen and (max-width:1510px) {
+    .horizontal-menu-bar {
+        height: 48px;
     }
-}
 
-.imgRerenderer {
-    object-fit: cover;
-	image-rendering: -webkit-optimize-contrast;
-	image-rendering: optimizeQuality;
+    .nav-item {
+        padding: 6px 10px 12px;
+    }
 }

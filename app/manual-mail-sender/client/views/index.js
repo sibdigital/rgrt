@@ -244,7 +244,7 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 
 	if ([councilState, invitedPersonsState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+		return <MailForm recipients={[]} mailSubject={''} mailBody={''} defaultEmails={''} emailsArray={[]}/>;
 	}
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails} emailsArray={emailsArray}/>;
@@ -257,6 +257,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 	const errandQuery = useErrandQuery(debouncedParams, debouncedSort, id);
 
 	const { data: errandData, state: errandState } = useEndpointDataExperimental('errands.findOne', errandQuery);
+	const { data: personData, state: personState } = useEndpointDataExperimental('persons.findOne', useMemo(() => ({query: JSON.stringify({_id: errandData?.chargedTo._id})}), [errandData]));
 
 	const [recipients, setRecipients] = useState([]);
 	const [defaultEmails, setDefaultEmails] = useState('');
@@ -280,9 +281,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 		const errand = errandData || {};
 		const workingGroups = workingGroupsData.workingGroups || [];
 		if (errandData) {
-			const userToSendEmail = users.find((user) =>
-				(currentUser._id === errand.initiatedBy._id && user._id === errand.chargedToUser._id)
-				|| (currentUser._id === errand.chargedToUser._id && user._id === errand.initiatedBy._id)) || {};
+			const userToSendEmail = personData;
 
 			const recipients = [{
 				label: 'Все пользователи',
@@ -302,7 +301,7 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 			}];
 
 			if (userToSendEmail) {
-				const email = userToSendEmail.emails ? userToSendEmail.emails[0].address : '';
+				const email = userToSendEmail.email;
 				const name = [userToSendEmail.surname ?? '', userToSendEmail.name ?? '', userToSendEmail.patronymic ?? ''].join(' ');
 
 				const child = {
@@ -326,11 +325,11 @@ function MailSenderWithErrand({ workingGroupsData, usersData, debouncedParams, d
 			setRecipients(recipients);
 			assignObjectPaths(recipients);
 		}
-	}, [workingGroupsData, usersData, errandData]);
+	}, [workingGroupsData, usersData, errandData, personData]);
 
 	if ([errandState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{t('Loading...')}</Callout>;
+		return <MailForm recipients={[]} mailSubject={''} mailBody={''} defaultEmails={''} emailsArray={[]}/>;
 	}
 
 	return <MailForm recipients={recipients} mailSubject={mailSubject} mailBody={mailBody} defaultEmails={defaultEmails} emailsArray={mailsArray}/>;

@@ -235,6 +235,7 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		const fields = {
+			_id: 1,
 			userId: 1,
 			surname: 1,
 			name: 1,

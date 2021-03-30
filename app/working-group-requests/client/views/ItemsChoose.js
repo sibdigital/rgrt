@@ -5,6 +5,7 @@ import { css } from '@rocket.chat/css-in-js';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { preProcessingProtocolItems } from './lib';
 
 const clickable = css`
@@ -15,7 +16,7 @@ const clickable = css`
 		}
 	`;
 
-export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems = [], setProtocolItemsId, close }) {
+export function ItemsChoose({ protocolId = '', setItemResponsible, setProtocolItems, protocolItems = [], setProtocolItemsId, close }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 
@@ -33,10 +34,15 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 	};
 
 	const handleSave = useCallback((protocolItem) => {
+		console.dir({ protocolItems, protocolItem });
+		if (protocolItem.responsible && protocolItem.responsible.length > 0) {
+			console.dir({ protocolItem });
+			setItemResponsible(constructPersonFIO(protocolItem.responsible[0]));
+		}
 		setProtocolItems && setProtocolItems([...protocolItems, { ...protocolItem, name: preProcessingProtocolItems(protocolItem.name) }]);
 		setProtocolItemsId && setProtocolItemsId([protocolItem.id]);
 		protocolData?.protocolItems?.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
-	}, [protocolData, protocolItems, setProtocolItems, setProtocolItemsId]);
+	}, [protocolData, protocolItems, setItemResponsible, setProtocolItems, setProtocolItemsId]);
 
 	const ProtocolItem = (protocolItem) => <Box
 		pb='x4'

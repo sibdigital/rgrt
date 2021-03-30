@@ -98,6 +98,7 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 function RequestsTable({ onClick }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
+
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['date']);
 
@@ -130,5 +131,12 @@ function RequestsTable({ onClick }) {
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data?.requests ?? []} total={data?.total ?? 0} setParams={setParams} params={params}/>;
+	const onSubmit = useCallback((event) => {
+		event.preventDefault();
+		event.stopPropagation();
+	}, []);
+
+	return <Box is='form' onSubmit={onSubmit}>
+		<GenericTable header={header} renderRow={renderRow} results={data?.requests ?? []} total={data?.total ?? 0} setParams={setParams} params={params}/>
+	</Box>;
 }

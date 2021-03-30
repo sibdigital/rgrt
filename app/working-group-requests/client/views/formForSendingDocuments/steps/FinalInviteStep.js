@@ -19,8 +19,9 @@ function FinalInviteStep({ fileDownloadInfo = null }) {
 					{t('Working_group_request_your_information_accepted',
 						workingGroupRequestState?.data?.number ? ['№', workingGroupRequestState.data.number].join('') : '',
 						formatDateAndTime(workingGroupRequestState?.data?.date ?? new Date()),
-						fileDownloadInfo?.workingGroupRequestAnswer?.protocol?.title ? ['по ', fileDownloadInfo.workingGroupRequestAnswer.protocol.title].join('') : '',
+						fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'protocol' && fileDownloadInfo?.workingGroupRequestAnswer?.protocol?.title ? ['по ', fileDownloadInfo.workingGroupRequestAnswer.protocol.title].join('') : '',
 					)}
+					{fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'mail' && [' По письму ', fileDownloadInfo?.workingGroupRequestAnswer?.mailAnswer ?? ''].join('')}
 				</Box>
 			</Box>
 		</Tile>

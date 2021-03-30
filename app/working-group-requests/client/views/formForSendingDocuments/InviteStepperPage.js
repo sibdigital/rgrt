@@ -16,7 +16,7 @@ import VerticalBar from '../../../../../client/components/basic/VerticalBar';
 import { ProtocolChoose } from '../ProtocolChoose';
 import { ItemsChoose, SectionChoose } from '../ItemsChoose';
 
-function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingGroupRequestProtocol = null, protocolsData = [], userInfo = null }) {
+function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingGroupRequestProtocol = null, userInfo = null }) {
 	useWipeInitialPageLoading();
 	const t = useTranslation();
 	const small = useMediaQuery('(max-width: 760px)');
@@ -97,7 +97,6 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 									active={currentStep === 2}
 									workingGroupRequest={workingGroupRequestData}
 									protocol={workingGroupRequestProtocol}
-									protocolsData={protocolsData}
 									setInfo={setInfo}
 									setVerticalContext={setContext}
 									protocolSelected={protocol}

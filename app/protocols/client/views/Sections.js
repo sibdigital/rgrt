@@ -61,6 +61,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick, isAllowedE
 				{ item.expireAt && <Box mbe='x4'>{t('Item_ExpireAt')}: {formatDate(item.expireAt)}</Box> }
 			</Box>
 			{ isAllowedEdit && <Box pi='x4' style={{ cursor: 'pointer' }} data-item={item._id} data-section={item.sectionId}
+				data-responsible={item.responsible.length !== 0}
 				data-first={item.first}
 				data-last={item.last} onClick={onItemMenuClick}>
 				<Icon name='menu'/>

@@ -2,11 +2,22 @@
     &--primary {
         border-color: var(--rc-color-primary-button-border-color) !important;
         background-color: var(--rc-color-primary-button-color) !important;
+
+        border-radius: 0.25rem !important;
+        opacity: 0.9 !important;
         /* height: 40px !important; */
         &-danger {
+            border-radius: 0.25rem !important;
             /* height: 40px !important; */
         }
+        &:not([disabled]):hover {
+            opacity: 1 !important;
+        }
     }
+}
+
+.rcx-vertical-bar .rcx-button {
+    border-radius: 0.25rem !important;
 }
 
 .rcx-check-box__input:checked + .rcx-check-box__fake {
@@ -19,7 +30,7 @@
     border-bottom-color: var(--rc-color-primary-button-border-color) !important;
 }
 
-.toast-error {
+.toast {
     background-color: var(--color-gray) !important;
 }
 
@@ -27,6 +38,10 @@
     position: relative !important;
 }
 
-.toast-error {
-    background-color: var(--color-gray) !important;
+@media screen and (max-width: 520px) {
+    .rcx-button-group > .rcx-button-group__item {
+        margin-inline: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0.5rem !important;
+    }
 }

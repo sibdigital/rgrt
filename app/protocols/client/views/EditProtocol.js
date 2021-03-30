@@ -132,6 +132,7 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 		query: JSON.stringify({ _id: council._id }),
 		fields: JSON.stringify({ d: 1, type: 1 }),
 	}) : undefined;
+	const councilTitle = councilData ? councilData.type.title + ' от ' + formatDate(councilData.d) : '';
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
@@ -200,7 +201,7 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 		{ councilData && <Field>
 			<Field.Label>{t('Council')}</Field.Label>
 			<Field.Row>
-				<a href={councilUrl}>{councilData.type.title} от {formatDate(councilData.d)}</a>
+				<a href={councilUrl}>{councilTitle}</a>
 			</Field.Row>
 		</Field>}
 		<Field>

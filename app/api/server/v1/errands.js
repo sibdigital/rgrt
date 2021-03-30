@@ -5,9 +5,7 @@ import _ from 'underscore';
 import { API } from '../api';
 import { findErrands, findErrand } from '../lib/errands';
 
-import { saveCustomFields, saveUser } from '/app/lib';
-
-import { Errands, Users } from '../../../models/server';
+import { Errands, Users, Persons } from '../../../models/server';
 import { hasPermission } from '../../../authorization';
 
 
@@ -41,6 +39,8 @@ API.v1.addRoute('errands', { authRequired: true }, {
 
 		const userId = Meteor.userId();
 
+		const person = Persons.findOne({ userId: userId });
+
 		const formedQuery = {};
 
 		switch (query.type) {
@@ -48,7 +48,7 @@ API.v1.addRoute('errands', { authRequired: true }, {
 				formedQuery['initiatedBy._id'] = `${ userId }`;
 				break;
 			case 'charged_to_me':
-				formedQuery['chargedToUser._id'] = `${ userId }`;
+				formedQuery['chargedTo.person._id'] = `${ person._id }`;
 				break;
 		}
 
@@ -87,55 +87,5 @@ API.v1.addRoute('errands.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findErrand(query._id)));
-	},
-});
-
-API.v1.addRoute('errands.update', { authRequired: true }, {
-	post() {
-		/* check(this.bodyParams, {
-			data: Match.ObjectIncluding({
-				email: Match.Maybe(String),
-				name: Match.Maybe(String),
-				password: Match.Maybe(String),
-				username: Match.Maybe(String),
-				bio: Match.Maybe(String),
-				statusText: Match.Maybe(String),
-				active: Match.Maybe(Boolean),
-				roles: Match.Maybe(Array),
-				joinDefaultChannels: Match.Maybe(Boolean),
-				requirePasswordChange: Match.Maybe(Boolean),
-				sendWelcomeEmail: Match.Maybe(Boolean),
-				verified: Match.Maybe(Boolean),
-				customFields: Match.Maybe(Object),
-			}),
-		});*/
-
-
-		const formedQuery = this.bodyParams;
-		if (formedQuery.chargedToUser) {
-			formedQuery.chargedToUser = Users.findOne({ _id: formedQuery.chargedToUser }, {
-				fields: {
-					_id: 1,
-					username: 1,
-					name: 1,
-				},
-			});
-		}
-
-		const oldErrand = Errands.findOne({ _id: formedQuery._id });
-
-		const newErrand = { ...oldErrand, ...formedQuery };
-
-
-
-		Meteor.runAsUser(this.userId, () => Meteor.call('editErrand', {
-			_id: newErrand._id,
-			chargedUsers: newErrand.chargedToUser,
-			errandDescription: newErrand.desc,
-			expired_at: newErrand.expireAt,
-			status: newErrand.t }));
-
-
-		return API.v1.success({ errand: Errands.findOne({ _id: formedQuery._id }) });
 	},
 });

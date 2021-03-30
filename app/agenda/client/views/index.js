@@ -10,6 +10,7 @@ import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import s from 'underscore.string';
 import moment from 'moment';
+import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -47,13 +48,8 @@ export function AgendaPage() {
 
 	if ([agendaState, personsState, userState].includes(ENDPOINT_STATES.LOADING)) {
 		console.log('loading');
-		return <Callout m='x16' type='danger'>{ t('Loading') }</Callout>;
+		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
-
-	// if (!isAllow) {
-	// 	console.log('Permissions_access_missing');
-	// 	return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	// }
 
 	return <Agenda agendaData={agendaData} personsData={personsData} userData={userData} isAllowEdit={isAllow}/>;
 }
@@ -65,6 +61,8 @@ export default AgendaPage;
 function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const t = useTranslation();
 	const id = useRouteParameter('id');
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const [cache, setCache] = useState(new Date());
 	const [proposalsCache, setProposalsCache] = useState(new Date());
@@ -148,8 +146,6 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 		setProposalsList(agenda.proposals ?? []);
 	};
 
-	const insertOrUpdateAgenda = useMethod('insertOrUpdateAgenda');
-
 	useEffect(() => {
 		if (agendaData && agendaData.success) {
 			console.log(agendaData);
@@ -162,7 +158,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				setContext('new');
 			}
 		}
-	}, [agendaData, insertOrUpdateAgenda]);
+	}, [agendaData]);
 
 	const deleteAgendaSection = useMethod('deleteAgendaSection');
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
@@ -302,7 +298,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const onAgendaDownloadClick = useCallback(async (e) => {
 		e.preventDefault();
 		try {
-			const res = await downloadAgenda({ _id: agendaId });
+			const res = await downloadAgenda({ _id: agendaId, agendaData, dateString: moment(new Date(agendaData.ts)).format('DD MMMM YYYY') });
 			const fileName = [t('Agenda'), ' ', moment(new Date(agendaData.ts)).format('DD MMMM YYYY'), '.docx'].join('');
 			console.log({ docx: res });
 			if (res) {
@@ -315,14 +311,14 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 
 	return <Page flexDirection='row'>
 		<Page>
-			<Page.Header>
-				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
+			<Page.Header title='' display={mediaQuery ? 'flex' : 'block'}>
+				<Field width='100%' display='block' marginBlock={'15px'}>
 					<GoBackButton/>
 					<Label fontScale='h1'>{t('Agenda')}</Label>
 				</Field>
 				{ context === '' && tab === 'agenda' && isAllowEdit
-				&& <ButtonGroup>
-					{ !isNew && <Button mbe='x8' disabled small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
+				&& <ButtonGroup display={mediaQuery ? 'flex' : 'block'}>
+					{ !isNew && <Button mbe='x8' small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
 						{t('Agenda_download')}
 					</Button>}
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>
@@ -342,7 +338,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				<Tabs flexShrink={0} mbe='x16'>
+				<Tabs flexShrink={0} mbe='x16' flexDirection={mediaQuery ? 'column' : 'row'}>
 					<Tabs.Item selected={tab === 'agenda'} onClick={handleTabClick('agenda')}>{t('Agenda')}</Tabs.Item>
 					<Tabs.Item selected={tab === 'proposals'} onClick={handleTabClick('proposals')}>{t('Proposals_for_the_agenda')}</Tabs.Item>
 				</Tabs>
@@ -369,7 +365,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 			</Page.Content>
 		</Page>
 		{ context
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0} zIndex='1044'>
 			<VerticalBar.Header>
 				{ context === 'new' && t('Agenda_added') }
 				{ context === 'edit' && t('Agenda_edited') }

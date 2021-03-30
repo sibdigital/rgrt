@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
 	Button,
 	Field,
@@ -8,6 +8,7 @@ import {
 	TextInput,
 	TextAreaInput,
 	Tabs,
+	Select,
 	Box,
 	Skeleton, Callout,
 } from '@rocket.chat/fuselage';
@@ -24,6 +25,12 @@ import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import AnswerForm, { useDefaultAnswerForm, getAnswerFormFields } from './AnswerForm';
+
+export const answerStatusState = Object.freeze({
+	RECEIVED: { state: 1, title: 'Received' },
+	ACCEPTED: { state: 2, title: 'Accepted' },
+});
 
 export function AnswerPage() {
 	const t = useTranslation();
@@ -33,9 +40,9 @@ export function AnswerPage() {
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: requestId, mailId, answerId }),
-	}), [mailId]);
+	}), [answerId, mailId, requestId]);
 
-	const data = useEndpointData('working-groups-requests.findAnswerOneById', query) || { documents: [] };
+	const data = useEndpointData('working-groups-requests.findAnswerOneById', query);
 
 	const filesQuery = useMemo(() => ({ query: JSON.stringify({ _id: data ? { $in: data.documents?.map((doc) => doc._id ?? '') } : {} }) }), [data]);
 
@@ -60,7 +67,7 @@ export function AnswerPage() {
 	}
 
 	if (state === ENDPOINT_STATES.ERROR) {
-		return error.message;
+		return <Callout m='x16' type='danger'>{t(error.message)}</Callout>;
 	}
 
 	return <AnswerWithData answer={data} files={files.files} requestId={requestId} mailId={mailId} answerId={answerId}/>;
@@ -73,16 +80,18 @@ export default AnswerPage;
 function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 	const t = useTranslation();
 
-	// const router = useRoute(`/working-groups-request/${ requestId }/mail/${ mailId }/answer/${ answerId }/:tab`);
-	// const tab = useRouteParameter('tab');
+	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [tab, setTab] = useState('info');
+	const [answerStatusOptions, setAnswerStatusOptions] = useState([]);
 
-	// const handleTabClick = useCallback((selectedTab) => () => router.push({ requestid: requestId, mailid: mailId, answerid: answerId, tab: selectedTab }), [router]);
-	// const handleTabClick = useCallback((selectedTab) => () => setTab());
+	const answerForm = getAnswerFormFields({ answer });
 
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
+	const { values, handlers } = useDefaultAnswerForm({ defaultValues: answerForm });
+
+	// useEffect(() => {
+	// }, [answer]);
 
 	const onDownloadClick = (file) => async (e) => {
 		e.preventDefault();
@@ -123,24 +132,32 @@ function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 		</Table.Row>;
 	};
 
+	useMemo(() => console.dir({ answerStatusState, tar: answerStatusState.ACCEPTED }), []);
+
 	return <Page>
-		<Page.Header>
+		<Page.Header title=''>
 			<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 				<GoBackButton/>
 				<Label fontScale='h1'>{t('Working_group_received_answer')}</Label>
 			</Field>
 		</Page.Header>
-		<Tabs flexShrink={0} mbe='x8'>
-			{/*<Tabs.Item selected={tab === 'info'} onClick={handleTabClick('info')}>{t('Info')}</Tabs.Item>*/}
-			{/*<Tabs.Item selected={tab === 'files'} onClick={handleTabClick('files')}>{t('Files')}</Tabs.Item>*/}
-			<Tabs.Item selected={tab === 'info'} onClick={() => setTab('info')}>{t('Info')}</Tabs.Item>
-			<Tabs.Item selected={tab === 'files'} onClick={() => setTab('files')}>{t('Files')}</Tabs.Item>
-		</Tabs>
-		<Page.Content>
-			{ (tab === 'info' && <InfoData answer={answer}/>)
+		<Box display='flex' flexDirection='row'>
+			<Tabs flexShrink={0} mbe='x8'>
+				<Tabs.Item selected={tab === 'info'} onClick={() => setTab('info')}>{t('Info')}</Tabs.Item>
+				<Tabs.Item selected={tab === 'files'} onClick={() => setTab('files')}>{t('Files')}</Tabs.Item>
+				<Tabs.Item selected={tab === 'answer'} onClick={() => setTab('answer')}>{t('Answer')}</Tabs.Item>
+			</Tabs>
+			<Box mis='auto'>
+				<Select options={answerStatusOptions} onChange={(value) => setAnswerStatusOptions(value)}/>
+			</Box>
+		</Box>
+		<Page.ScrollableContent>
+			{
+				(tab === 'answer' && <AnswerForm defaultValues={values} defaultHandlers={handlers}/>)
 				|| (tab === 'files' && <GenericTable header={header} renderRow={renderRow} results={files ?? []} total={files?.length || 0} setParams={setParams} params={params}/>)
+				|| (tab === 'info' && <AnswerForm defaultValues={values} defaultHandlers={handlers} onReadOnly={true}/>)
 			}
-		</Page.Content>
+		</Page.ScrollableContent>
 	</Page>;
 }
 

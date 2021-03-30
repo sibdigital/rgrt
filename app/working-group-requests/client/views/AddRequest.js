@@ -46,13 +46,27 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 
 	useEffect(() => {
 		if (protocolData) {
-			if (protocolData.sections && protocolData.protocol) {
-				const protocolItem = protocolData.sections.map((section) => section.items.filter((item) => item._id === protocolsItemId)[0])[0];
-				const itemDesc = $(protocolItem?.name).text();
-				const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0]);
+			if (protocolData.sections && protocolData.protocol && protocolData.protocol[0]) {
+				let protocolItem = null;
+				protocolData.sections.forEach((section) => {
+					const it = section.items.find((item) => item._id === protocolsItemId);
+					if (it) {
+						protocolItem = it;
+					}
+				});
+				const itemDesc = $(protocolItem?.name ?? '').text();
+				const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0] ?? '');
+				console.log({ protocolsItemId, protocolItem, itemDesc });
 
 				itemDesc && handlers.handleDescription && handlers.handleDescription(itemDesc);
-				protocolData && handlers.handleProtocol && handlers.handleProtocol({ _id: protocolData.protocol[0]?._id, d: protocolData.protocol[0]?.d, num: protocolData.protocol[0]?.num, itemNum: protocolItem.num, itemResponsible: itemResponsiblePerson });
+				protocolData && handlers.handleProtocol && handlers.handleProtocol({
+					_id: protocolData.protocol[0]?._id,
+					d: protocolData.protocol[0]?.d ?? new Date(),
+					num: protocolData.protocol[0]?.num ?? '',
+					itemNum: protocolItem?.num ?? '',
+					itemResponsible: itemResponsiblePerson,
+				});
+				handlers && handlers.handleNumber && handlers.handleNumber(protocolData.protocol[0].num ?? '');
 				itemResponsiblePerson && handlers.handleItemResponsible && handlers.handleItemResponsible(itemResponsiblePerson);
 				handlers.handleProtocolItems && protocolData.sections.forEach((section) => section.items?.forEach((item) => item._id === protocolsItemId && handlers.handleProtocolItems([item])));
 			}
@@ -126,11 +140,14 @@ function NewAddRequest() {
 
 	const handleSaveRequest = useCallback(async () => {
 		try {
+			const { protocol } = values;
+			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
+			console.log({ protocol, items: values.protocolItems, check: values.protocolItems?.length > 0 && values.protocolItems[0].num });
 			await saveAction({
 				number: values.number,
 				date: values.date,
 				council: values.council,
-				protocol: values.protocol,
+				protocol,
 				protocolItems: values.protocolItems,
 				itemResponsible: values.itemResponsible,
 				mail: values.mail,

@@ -30,7 +30,7 @@ function RenderNewPersonCreateModal({ onCancel, onSave, ...props }) {
 
 	return <Modal {...props}>
 		<Modal.Header>
-			<Modal.Title>{t('Errand_details')}</Modal.Title>
+			<Modal.Title>{t('Participant_Creating')}</Modal.Title>
 			<Modal.Close onClick={onCancel}/>
 		</Modal.Header>
 		<Modal.Content fontScale='p1' mb='x24'>

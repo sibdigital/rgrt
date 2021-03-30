@@ -1,28 +1,42 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Flex, Skeleton, Table } from '@rocket.chat/fuselage';
+import { Table } from '@rocket.chat/fuselage';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
+import { useMethod } from '../../../../client/contexts/ServerContext';
 
-export function CouncilChoose({ setCouncilId, setCouncil, close }) {
+export function CouncilChoose({ setCouncilId, setCouncil, setProtocol, close }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 
-	const { data: councilData, state: councilState } = useEndpointDataExperimental('councils.list', useMemo(() => ({
+	const { data: councilData } = useEndpointDataExperimental('councils.list', useMemo(() => ({
 		fields: JSON.stringify({ place: 1, d: 1, type: 1 }),
 		sort: JSON.stringify({ d: -1 }),
 	}), []));
 
-	const onCouncilClick = useCallback((council) => {
-		console.log({ council });
+	const getProtocolByCouncilId = useMethod('getProtocolByCouncilId');
+
+	const getProtocolFunc = useCallback(async (id) => {
+		try {
+			const data = await getProtocolByCouncilId(id, { fields: { place: 1, d: 1, num: 1 } });
+			return data;
+		} catch (error) {
+			console.dir({ error });
+			return {};
+		}
+	}, [getProtocolByCouncilId]);
+
+	const onCouncilClick = useCallback(async (council) => {
 		setCouncilId && setCouncilId(council._id);
 		setCouncil && setCouncil({ ...council, label: [t('Council'), t('Date_to'), formatDateAndTime(council.d)].join(' ') });
+		const protocol = await getProtocolFunc(council._id);
+		protocol && protocol._id && setProtocol(protocol);
 		close();
-	}, [setCouncilId, setCouncil, t, formatDateAndTime, close]);
+	}, [setCouncilId, setCouncil, t, formatDateAndTime, getProtocolFunc, setProtocol, close]);
 
 	const header = useMemo(() => [
 		<Th w='x200' key={'Council_place'} color='default'>
@@ -45,26 +59,7 @@ export function CouncilChoose({ setCouncilId, setCouncil, close }) {
 		</Table.Row>;
 	};
 
-	if ([councilState].includes(ENDPOINT_STATES.LOADING)) {
-		return <Table.Row>
-			<Table.Cell>
-				<Box display='flex'>
-					<Flex.Item>
-						<Skeleton variant='rect' height={40} width={40} />
-					</Flex.Item>
-					<Box mi='x8' flexGrow={1}>
-						<Skeleton width='100%' />
-						<Skeleton width='100%' />
-					</Box>
-				</Box>
-			</Table.Cell>
-			{ Array.from({ length: 10 }, (_, i) => <Table.Cell key={i}>
-				<Skeleton width='100%' />
-			</Table.Cell>)}
-		</Table.Row>;
-	}
-
-	return <GenericTable header={header} renderRow={renderRow} results={councilData.councils} total={councilData.total} setParams={setParams} params={params}/>;
+	return <GenericTable header={header} renderRow={renderRow} results={councilData?.councils ?? []} total={councilData?.total ?? 0} setParams={setParams} params={params}/>;
 }
 
 export default CouncilChoose;

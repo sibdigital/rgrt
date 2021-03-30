@@ -115,7 +115,10 @@ Template.loginForm.helpers({
 		return settings.get('Accounts_RegistrationForm') === 'Public' || (validSecretUrl && validSecretUrl.get());
 	},
 	linkReplacementText() {
-		return settings.get('Accounts_RegistrationForm_LinkReplacementText');
+		if (settings.get('Accounts_RegistrationForm_LinkReplacementText') !== '') {
+			return 'Регистрация нового пользователя на данный момент отключена';
+		}
+		return null;
 	},
 	passwordResetAllowed() {
 		return settings.get('Accounts_PasswordReset');

@@ -119,7 +119,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	active,
 	workingGroupRequest,
 	protocol,
-	protocolsData,
 	setInfo,
 	setVerticalContext,
 	protocolSelected,
@@ -160,7 +159,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const documentsHelpTooltipLabel = useMemo(() => 'Загрузите не пустые файлы', []);
-	const protocolsOptions = useMemo(() => protocolsData?.map((protocol, index) => [index, protocol.num ?? '']) || [], [protocolsData]);
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0 && attachedFile.length > 0, [newData, attachedFile]);
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
 
@@ -176,7 +174,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 			const protocolLabel = [t('Protocol'), '№', protocolSelected.num, 'от', formatDate(protocolSelected.d)].join(' ');
 			setProtocolSelectLabel(protocolLabel);
 		}
-	}, [t, protocolsData, workingGroupRequest, protocolSelected]);
+	}, [t, workingGroupRequest, protocolSelected]);
 
 	useEffect(() => {
 		if (sectionSelected) {
@@ -200,30 +198,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const handleChange = (field, getValue = (e) => e.currentTarget.value) => (e) => {
 		setNewData({ ...newData, [field]: { value: getValue(e), required: newData[field].required } });
 	};
-
-	const handleChangeSelect = useCallback((field) => (val) => {
-		console.log('handle change select');
-		// console.log(field, val);
-		const updateData = Object.assign({}, newData);
-
-		if (field === 'protocol' && val !== newData.protocol.value) {
-			const options = protocolsData[val]?.sections?.map((section, index) => [index, [section.num ?? '', ': ', section.name ? preProcessingProtocolItems(section.name) : ''].join('')]) || [];
-			setSectionOptions(options);
-			setSectionItemsOptions([]);
-			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
-			updateData.section = { value: '', required: newData.section.required };
-		}
-		if (field === 'section' && val !== newData.section.value) {
-			const options = protocolsData[newData.protocol.value]?.sections[val]?.items?.map((item, index) => [index, [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join('')]) || [];
-			console.log(val);
-			console.log(options);
-			setSectionItemsOptions(options);
-			updateData.sectionItem = { value: '', required: newData.sectionItem.required };
-		}
-		updateData[field] = { value: val, required: newData[field].required };
-		// console.log(updateData);
-		setNewData(updateData);
-	}, [newData, protocolsData]);
 
 	const handleClearSelectItemsOptions = useCallback(() => {
 		setProtocolItemsId([]);
@@ -300,7 +274,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 		dataToSend.answerType = answerTypeContext;
 
 		if (answerTypeContext === 'protocol') {
-			console.log({ protocolsData, newData });
+			console.log({ newData });
 			console.log({ protocolSelected, sectionSelected, protocolItemsId });
 			protocolSelected && Object.assign(dataToSend, { protocolId: protocolSelected._id });
 			sectionSelected && Object.assign(dataToSend, { sectionId: sectionSelected._id });
@@ -407,30 +381,30 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								{mediaQuery
-									&& <TextInput readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
+								{
+									<TextInput readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
 								}
-								{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}
+								{/*{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}*/}
 							</Field.Row>
 						</Field>}
-						{answerTypeContext === 'protocol' && <Field>
-							<Field.Row height='40px'>
-								<Label>
-									{t('Working_group_request_invite_select_sections')}
-									{sectionSelected
-									&& <ClearButton onClick={() => handleClearSelectOptions()}/>
-									}
-									{protocolSelected && <Button
-										onClick={() => setVerticalContext('protocolSectionSelect')}
-										backgroundColor='transparent'
-										borderColor='transparent'
-										style={{ whiteSpace: 'normal' }}>
-										{t('Choose')}
-									</Button>}
-								</Label>
-							</Field.Row>
-							<TextInput disabled={!protocolSelected} readOnly value={protocolSectionSelectLabel} placeholder={t('Working_group_request_invite_select_sections')}/>
-						</Field>}
+						{/*{answerTypeContext === 'protocol' && <Field>*/}
+						{/*	<Field.Row height='40px'>*/}
+						{/*		<Label>*/}
+						{/*			{t('Working_group_request_invite_select_sections')}*/}
+						{/*			{sectionSelected*/}
+						{/*			&& <ClearButton onClick={() => handleClearSelectOptions()}/>*/}
+						{/*			}*/}
+						{/*			{protocolSelected && <Button*/}
+						{/*				onClick={() => setVerticalContext('protocolSectionSelect')}*/}
+						{/*				backgroundColor='transparent'*/}
+						{/*				borderColor='transparent'*/}
+						{/*				style={{ whiteSpace: 'normal' }}>*/}
+						{/*				{t('Choose')}*/}
+						{/*			</Button>}*/}
+						{/*		</Label>*/}
+						{/*	</Field.Row>*/}
+						{/*	<TextInput disabled={!protocolSelected} readOnly value={protocolSectionSelectLabel} placeholder={t('Working_group_request_invite_select_sections')}/>*/}
+						{/*</Field>}*/}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
@@ -490,29 +464,3 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 }
 
 export default WorkingGroupRequestAnswerFileDownloadStep;
-
-function ProtocolsTable({ protocolsData, onRowClick }) {
-	const t = useTranslation();
-	const formatDate = useFormatDate();
-
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
-
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
-
-	const headerProtocol = useMemo(() => [
-		mediaQuery && <Th key={'Number'} color='default'>{t('Number')}</Th>,
-		mediaQuery && <Th key={'Section_Name'} color='default'>{t('Section_Name')}</Th>,
-		mediaQuery && <Th key={'Date'} color='default'>{t('Date')}</Th>,
-	], [mediaQuery, t]);
-
-	const renderProtocolRow = (protocol) => {
-		const { _id, d, num, place } = protocol;
-		return <Table.Row tabIndex={0} onClick={onRowClick('protocol', _id)} style={{ wordWrap: 'break-word' }} role='link' action>
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{num}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{place}</Table.Cell>}
-			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDate(d)}</Table.Cell>}
-		</Table.Row>;
-	};
-
-	return <GenericTable header={headerProtocol} renderRow={renderProtocolRow} results={protocolsData} total={protocolsData.length} setParams={setParams} params={params} />;
-}
