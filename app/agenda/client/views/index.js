@@ -310,7 +310,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	}, [agendaId, downloadAgenda]);
 
 	return <Page flexDirection='row'>
-		<Page>
+		<Page width={!context ? '100%' : ''}>
 			<Page.Header title='' display={mediaQuery ? 'flex' : 'block'}>
 				<Field width='100%' display='block' marginBlock={'15px'}>
 					<GoBackButton/>
@@ -338,7 +338,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				<Tabs flexShrink={0} mbe='x16' flexDirection={mediaQuery ? 'column' : 'row'}>
+				<Tabs style={{ display: context ? 'none' : '' }} flexShrink={0} mbe='x16' flexDirection={mediaQuery ? 'column' : 'row'}>
 					<Tabs.Item selected={tab === 'agenda'} onClick={handleTabClick('agenda')}>{t('Agenda')}</Tabs.Item>
 					<Tabs.Item selected={tab === 'proposals'} onClick={handleTabClick('proposals')}>{t('Proposals_for_the_agenda')}</Tabs.Item>
 				</Tabs>
@@ -364,25 +364,27 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				)}
 			</Page.Content>
 		</Page>
-		{ context
-		&& <VerticalBar className='contextual-bar' width='x380' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0} zIndex='1044'>
-			<VerticalBar.Header>
-				{ context === 'new' && t('Agenda_added') }
-				{ context === 'edit' && t('Agenda_edited') }
-				{ context === 'section-add' && t('Agenda_item_added') }
-				{ context === 'section-edit' && t('Agenda_item_edited') }
-				{ context === 'proposal_for_the_agenda_edit' && t('Proposal_for_the_agenda_edited')}
-				{ context === 'proposal_for_the_agenda_new' && t('Proposal_for_the_agenda_added')}
-				<VerticalBar.Close onClick={close}/>
-			</VerticalBar.Header>
-			<VerticalBar.ScrollableContent>
-				{context === 'new' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} onChange={onChange}/>}
-				{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={currentAgendaData} onChange={onChange}/>}
-				{context === 'section-add' && <EditSection agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
-				{context === 'section-edit' && <EditSection data={currentSection} agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
-				{context === 'proposal_for_the_agenda_edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaId} userData={userData.user}/>}
-				{context === 'proposal_for_the_agenda_new' && <EditProposalsForTheAgenda onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaData._id} userData={userData.user}/>}
-			</VerticalBar.ScrollableContent>
-		</VerticalBar>}
+		<Page style={{ display: !context ? 'none' : '' }}>
+			{ context
+				&& <VerticalBar style={{ zIndex: '1111', overflow: 'visible' }} className='contextual-bar' width='100%' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
+					<VerticalBar.Header>
+						{ context === 'new' && t('Agenda_added') }
+						{ context === 'edit' && t('Agenda_edited') }
+						{ context === 'section-add' && t('Agenda_item_added') }
+						{ context === 'section-edit' && t('Agenda_item_edited') }
+						{ context === 'proposal_for_the_agenda_edit' && t('Proposal_for_the_agenda_edited')}
+						{ context === 'proposal_for_the_agenda_new' && t('Proposal_for_the_agenda_added')}
+						<VerticalBar.Close onClick={close}/>
+					</VerticalBar.Header>
+					<VerticalBar.ScrollableContent>
+						{context === 'new' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} onChange={onChange}/>}
+						{context === 'edit' && <EditAgenda councilId={id} onEditDataClick={onEditAgendaDataClick} close={close} data={currentAgendaData} onChange={onChange}/>}
+						{context === 'section-add' && <EditSection agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
+						{context === 'section-edit' && <EditSection data={currentSection} agendaId={agendaId} councilId={id} onEditDataClick={onEditSectionDataClick} close={close} onChange={onChange} personsOptions={personsData.persons}/>}
+						{context === 'proposal_for_the_agenda_edit' && <EditProposalsForTheAgenda data={currentProposal} onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaId} userData={userData.user}/>}
+						{context === 'proposal_for_the_agenda_new' && <EditProposalsForTheAgenda onEditDataClick={onEditProposalDataClick} close={close} agendaId={agendaData._id} userData={userData.user}/>}
+					</VerticalBar.ScrollableContent>
+				</VerticalBar>}
+		</Page>
 	</Page>;
 }

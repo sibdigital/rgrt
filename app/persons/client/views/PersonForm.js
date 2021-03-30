@@ -1,5 +1,6 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, Margins, TextInput, Select } from '@rocket.chat/fuselage';
+import _ from 'underscore';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -7,7 +8,7 @@ import { isEmail } from '../../../utils';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
 import { checkNumber } from '../../../utils/client/methods/checkNumber';
-import _ from 'underscore';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 
 const DEFAULT_WEIGHT_PERSON = 100;
 
@@ -23,7 +24,7 @@ export const defaultPersonFields = {
 	group: '',
 };
 
-export function getPersonFormFields({ person = null, onGetAllFieldsFromPrevAnswer = false }) {
+export function getPersonFormFields({ person = null }) {
 	if (!person || typeof person !== 'object' || _.isArray(person)) {
 		return defaultPersonFields;
 	}
@@ -77,6 +78,38 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 		hasUnsavedChanges,
 		allFieldAreFilled,
 	};
+}
+
+export function PersonWorkingGroupField({ handleGroup, group, fieldMarginBlock, fieldWidth }) {
+	const t = useTranslation();
+
+	const [groups, setGroups] = useState([]);
+
+	const query = useMemo(() => ({
+		query: JSON.stringify({ type: { $ne: 'subject' } }),
+		fields: JSON.stringify({ title: 1 }),
+	}), []);
+
+	const { data: groupsData } = useEndpointDataExperimental('working-groups.list', query);
+
+	useEffect(() => {
+		if (groupsData && groupsData.workingGroups) {
+			setGroups(groupsData.workingGroups.map((group) => [group._id, group.title]));
+		}
+	}, [groupsData]);
+
+	const handleChange = useCallback((_id) => {
+		const group = groupsData?.workingGroups?.find((group) => group._id === _id);
+		console.log({ _id, group });
+		if (group) {
+			handleGroup(group);
+		}
+	}, [groupsData, handleGroup]);
+
+	return useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
+		<Field.Label>{t('Group')}</Field.Label>
+		<Select flexGrow={1} value={group?._id} onChange={(val) => handleChange(val)} options={groups} />
+	</Field>, [fieldMarginBlock, fieldWidth, t, group, groups, handleGroup]);
 }
 
 function PersonForm({
@@ -189,10 +222,11 @@ function PersonForm({
 				</Field.Row>
 			</Field>, [t, organization, handleOrganization])}
 
-			{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>
-				<Field.Label>{t('Group')}</Field.Label>
-				<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />
-			</Field>, [t, group, handleGroup, workingGroupOptions])}
+			<PersonWorkingGroupField fieldMarginBlock={fieldMarginBlock} fieldWidth={fieldWidth} handleGroup={handleGroup} group={group}/>
+			{/*{useMemo(() => <Field mb={ fieldMarginBlock } width={ fieldWidth }>*/}
+			{/*	<Field.Label>{t('Group')}</Field.Label>*/}
+			{/*	<Select flexGrow={1} value={group?._id} onChange={(val) => handleGroup(val)} options={workingGroupOptions} />*/}
+			{/*</Field>, [t, group, handleGroup, workingGroupOptions])}*/}
 
 			{onShowCancelAndSaveButtons && <ButtonGroup mb='x16'>
 				<Button flexGrow={1} onClick={() => !!onCancel && onCancel()}>{t('Cancel')}</Button>
