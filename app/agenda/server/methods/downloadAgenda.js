@@ -57,15 +57,15 @@ Meteor.methods({
 				heading: HeadingLevel.HEADING_1,
 				alignment: AlignmentType.CENTER,
 			}),
-			new Paragraph({
-				children: [
-					new TextRun({
-						text: `От ${ dateString ?? moment(agenda.ts).format('DD MMMM YYYY, HH:mm') }`,
-					}),
-				],
-				heading: HeadingLevel.HEADING_2,
-				alignment: AlignmentType.CENTER,
-			}),
+			// new Paragraph({
+			// 	children: [
+			// 		new TextRun({
+			// 			text: `От ${ dateString ?? moment(agenda.ts).format('DD MMMM YYYY, HH:mm') }`,
+			// 		}),
+			// 	],
+			// 	heading: HeadingLevel.HEADING_2,
+			// 	alignment: AlignmentType.CENTER,
+			// }),
 			new Paragraph({
 				children: [
 					new TextRun({

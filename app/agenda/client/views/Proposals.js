@@ -113,7 +113,7 @@ export function Proposals({ onEditProposal, agendaId, proposalsListData, onAddPr
 		mediaQuery && <Th w='x200' key={'Agenda_initiated_by'} color='default'>
 			{ t('Agenda_initiated_by') }
 		</Th>,
-		<Th w='x300' key={'Agenda_issue_consideration'} color='default'>
+		<Th w={mediaQuery ? 'x300' : 'x200'} key={'Agenda_issue_consideration'} color='default'>
 			{ t('Agenda_issue_consideration') }
 		</Th>,
 		// <Th w='x150' key={'Date'} color='default'>
