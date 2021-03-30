@@ -6,6 +6,8 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
+import { useUserId } from '../../../../client/contexts/UserContext';
+import { hasPermission } from '../../../authorization';
 
 export function Requests({
 	data,
@@ -16,8 +18,10 @@ export function Requests({
 	setParams,
 	params,
 }) {
+	const userId = useUserId();
 	const t = useTranslation();
 	const formatDate = useFormatDate();
+	const canAddRequest = hasPermission('manage-working-group-requests', userId);
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
@@ -37,8 +41,8 @@ export function Requests({
 		<Th key={'Created_at'} color='default'>
 			{t('Created_at')}
 		</Th>,
-		<Th w='x40' key='edit'/>,
-	], [mediaQuery]);
+		canAddRequest && <Th w='x40' key='edit'/>,
+	], [canAddRequest, t]);
 
 	const renderRow = (request) => {
 		const { _id, number, ts, protocol, council, itemResponsible } = request;
@@ -56,11 +60,11 @@ export function Requests({
 			</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{responsible}</Box></Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>
-			<Table.Cell alignItems={'end'}>
+			{canAddRequest && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
 				</Button>
-			</Table.Cell>
+			</Table.Cell>}
 		</Table.Row>;
 	};
 

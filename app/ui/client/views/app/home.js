@@ -32,7 +32,7 @@ const toolbarButtons = () => [
 		name: t('Working_group_requests'),
 		icon: 'working_group',
 		context: 'home',
-		condition: () => hasPermission('manage-working-group-requests'),
+		// condition: () => hasPermission('manage-working-group-requests'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('working-groups-requests');

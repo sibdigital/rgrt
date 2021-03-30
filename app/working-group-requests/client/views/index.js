@@ -8,7 +8,6 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { Requests } from './requests';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
@@ -18,6 +17,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 export const useQuery = ({ itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	query: JSON.stringify({ _id: { $regex: '', $options: 'i' } }),
 	sort: JSON.stringify({ ts: sortDir(direction) }),
+	fields: JSON.stringify({ answers: 0 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction, cache]);
@@ -26,6 +26,7 @@ export function WorkingGroupRequestsPage() {
 	const t = useTranslation();
 	const routeName = 'working-groups-requests';
 	const userId = useUserId();
+	const canAddRequest = hasPermission('manage-working-group-requests', userId);
 	console.log('working-groups-requests');
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
@@ -93,10 +94,10 @@ export function WorkingGroupRequestsPage() {
 		FlowRouter.go('home');
 	};
 
-	if (!hasPermission('manage-working-group-requests', userId)) {
-		console.log('Permissions_access_missing');
-		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
-	}
+	// if (!hasPermission('manage-working-group-requests', userId)) {
+	// 	console.log('Permissions_access_missing');
+	// 	return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	// }
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -109,7 +110,7 @@ export function WorkingGroupRequestsPage() {
 						{context === 'edit' && t('Working_group_request_edit')}
 					</Label>
 				</Field>
-				{(context === undefined || context === 'requests') && <ButtonGroup>
+				{(context === undefined || context === 'requests') && canAddRequest && <ButtonGroup>
 					<Button small primary aria-label={t('Add')} onClick={handleHeaderButtonClick}>
 						{t('Add')}
 					</Button>

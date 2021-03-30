@@ -28,7 +28,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Working_group_requests'),
-		condition: () => hasPermission('manage-working-group-requests'),
+		// condition: () => hasPermission('manage-working-group-requests'),
 		action: () => {
 			FlowRouter.go('working-groups-requests');
 		},
@@ -199,7 +199,7 @@ Template.menuBar.events({
 
 	'click .submenu-link'(e, instance) {
 		console.log(this);
-		
+
 		return this.action && this.action.apply(this, [e]);
 	},
 

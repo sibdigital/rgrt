@@ -3,12 +3,33 @@ import { Meteor } from 'meteor/meteor';
 
 import { API } from '../api';
 import { FileUpload } from '../../../file-upload';
+import { Persons, Users } from '../../../models/server/index';
 import { findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId, findWorkingGroupRequestByProtocolsItemId } from '../lib/working-groups-requests';
 
 API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query, stockFields } = this.parseJsonQuery();
+
+		const userId = Meteor.userId();
+		const userRoles = Users.findOneById(userId, { fields: { roles: 1 }	});
+		const isUser = userRoles?.roles?.includes('admin') || userRoles?.roles?.includes('secretary');
+
+		console.log({ userRoles, isUser });
+		if (!isUser) {
+			const person = Promise.await(Persons.findOne({ userId }, { fields: { _id: 1 } }));
+
+			console.log({ person });
+			return API.v1.success(Promise.await(findWorkingGroupsRequests({
+				query: { 'itemResponsible._id': person?._id ?? '' },
+				fields: stockFields,
+				pagination: {
+					offset,
+					count,
+					sort,
+				},
+			})));
+		}
 
 		return API.v1.success(Promise.await(findWorkingGroupsRequests({
 			query,

@@ -6,6 +6,7 @@ import {
 	ButtonGroup,
 	Field,
 	Label,
+	Callout,
 } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -16,8 +17,10 @@ import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
-import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
+import { hasPermission } from '../../../authorization';
+import { useUserId } from '../../../../client/contexts/UserContext';
+import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
 import RequestForm, { useDefaultRequestForm, WorkingGroupRequestVerticalChooseBar, defaultRequestTypeState, getRequestTypeByState } from './RequestForm';
 
 registerLocale('ru', ru);
@@ -83,6 +86,7 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 
 function NewAddRequest() {
 	console.log('ADD REQUEST');
+	const userId = useUserId();
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -172,6 +176,11 @@ function NewAddRequest() {
 			});
 		}
 	}, [values, saveAction, protocolsItemId, dispatchToastMessage, t]);
+
+	if (!hasPermission('manage-working-group-requests', userId)) {
+		console.log('Permissions_access_missing');
+		return <Callout m='x16' type='danger'>{t('Permissions_access_missing')}</Callout>;
+	}
 
 	return <Page flexDirection='row'>
 		<Page>
