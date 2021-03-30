@@ -68,6 +68,7 @@ export function EditPerson({ workingGroupOptions, person, onChange, close, ...pr
 		// console.dir({ personValues });
 		personValues.group = currentGroup;
 
+
 		const personData = createPerson({ personToSave: { ...personValues, avatarSource } }, { previousData: { _id: previousPersonId } });
 		const validation = validate(personData);
 		if (validation.length === 0) {
@@ -107,7 +108,8 @@ export function EditPerson({ workingGroupOptions, person, onChange, close, ...pr
 					<Button primary onClick={handleSave} disabled={
 						person?._id 
 						? !hasUnsavedChanges && picturePreview?.url === undefined && avatarSource?.url !== undefined 
-						: !allFieldAreFilled}>{t('Save')}</Button>
+						: !allFieldAreFilled}>{t('Save')}
+					</Button>
 				</ButtonGroup>
 			</Field.Row>
 		</Field>
