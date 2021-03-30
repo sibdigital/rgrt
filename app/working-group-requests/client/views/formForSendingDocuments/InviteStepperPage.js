@@ -31,14 +31,15 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 	const [workingGroupRequestData, setWorkingGroupRequestData] = useState(workingGroupRequest);
 
 	useEffect(() => {
-		if (workingGroupRequestProtocol) {
+		// console.dir({ workingGroupRequestProtocol });
+		if (workingGroupRequestProtocol && workingGroupRequestProtocol._id) {
 			setProtocol(workingGroupRequestProtocol);
 			setProtocolId(workingGroupRequestProtocol._id);
 		}
 	}, [workingGroupRequestProtocol]);
 
 	useEffect(() => {
-		if (workingGroupRequest && workingGroupRequest.protocolItemsId && workingGroupRequest.protocolItemsId.length > 0 && workingGroupRequestProtocol && workingGroupRequestProtocol.sections) {
+		if (workingGroupRequest && workingGroupRequestProtocol._id && workingGroupRequest.protocolItemsId && workingGroupRequest.protocolItemsId.length > 0 && workingGroupRequestProtocol && workingGroupRequestProtocol.sections) {
 			workingGroupRequestProtocol.sections.forEach((section) => section?.items?.forEach((item) => item._id === workingGroupRequest.protocolItemsId[0] && setProtocolItemsId([item])));
 		}
 	}, [workingGroupRequest, workingGroupRequestProtocol]);
@@ -119,7 +120,7 @@ function InviteStepperPage({ currentStep = 1, workingGroupRequest = {}, workingG
 					</Scrollable>
 				</Box>
 				{context
-				&& <VerticalBar className='contextual-bar' style={{ flex: 'auto' }} width='x80' qa-context-name={`admin-user-and-room-context-${ context }`}>
+				&& <VerticalBar className='contextual-bar' style={{ flex: 'auto' }} width={!small ? 'x80' : '100%'} qa-context-name={`admin-user-and-room-context-${ context }`}>
 					<VerticalBar.Header>
 						{ context === 'protocolSelect' && t('Protocol_Choose') }
 						{ context === 'protocolSectionSelect' && t('Protocol_Section_Choose') }

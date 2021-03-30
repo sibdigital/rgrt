@@ -2,14 +2,16 @@ import { Box, Tile, Icon } from '@rocket.chat/fuselage';
 import React from 'react';
 
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
+import { useFormatDate } from '../../../../../../client/hooks/useFormatDate';
 import { useInvitePageContext } from '../InvitePageState';
-import { useFormatDateAndTime } from '../../../../../../client/hooks/useFormatDateAndTime';
 
 function FinalInviteStep({ fileDownloadInfo = null }) {
 	const { workingGroupRequestState } = useInvitePageContext();
-	const formatDateAndTime = useFormatDateAndTime();
+	const formatDate = useFormatDate();
 	const t = useTranslation();
 	console.log({ fileDownloadInfo, workingGroupRequestState });
+	const protocolLabel = fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'protocol' ? ['По протоколу ', '№', fileDownloadInfo.workingGroupRequestAnswer.protocol?.num, t('Date_From'), formatDate(fileDownloadInfo.workingGroupRequestAnswer.protocol?.d)].join(' ') : '';
+	const mailLabel = fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'mail' && ['По письму ', fileDownloadInfo.workingGroupRequestAnswer.mailAnswer ?? ''].join('');
 
 	return <Box is='section' width='full' maxWidth='x480' margin='auto'>
 		<Tile is='main' padding='x40'>
@@ -18,10 +20,9 @@ function FinalInviteStep({ fileDownloadInfo = null }) {
 					<Icon color='success' name='checkmark-circled' size={20} mie='x16'/>
 					{t('Working_group_request_your_information_accepted',
 						workingGroupRequestState?.data?.number ? ['№', workingGroupRequestState.data.number].join('') : '',
-						formatDateAndTime(workingGroupRequestState?.data?.date ?? new Date()),
-						fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'protocol' && fileDownloadInfo?.workingGroupRequestAnswer?.protocol?.title ? ['по ', fileDownloadInfo.workingGroupRequestAnswer.protocol.title].join('') : '',
+						formatDate(workingGroupRequestState?.data?.date ?? new Date()),
+						fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'protocol' ? protocolLabel : mailLabel,
 					)}
-					{fileDownloadInfo?.workingGroupRequestAnswer?.answerType === 'mail' && [' По письму ', fileDownloadInfo?.workingGroupRequestAnswer?.mailAnswer ?? ''].join('')}
 				</Box>
 			</Box>
 		</Tile>

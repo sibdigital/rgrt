@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Field, Icon, Table, TextInput } from '@rocket.chat/fuselage';
-import { useDebouncedValue, useMutableCallback } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery, useMutableCallback } from '@rocket.chat/fuselage-hooks';
 import DatePicker from 'react-datepicker';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -116,6 +116,7 @@ const useQuery = ({ text, startDate, endDate, itemsPerPage, current }, [column, 
 export function ProtocolChoose({ setProtocolId, setProtocol, setCouncil, close, protocolsFields = null }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
+	const mediaQuery = useMediaQuery('(max-width: 560px)');
 
 	const [params, setParams] = useState({ text: '', startDate: '', endDate: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d']);
@@ -144,7 +145,7 @@ export function ProtocolChoose({ setProtocolId, setProtocol, setCouncil, close, 
 		<Th w='x160' key={'Date'} color='default'>
 			{ t('Date') }
 		</Th>,
-		<Th w='x200' key={'Protocol_Place'} color='default'>
+		!mediaQuery && <Th w='x200' key={'Protocol_Place'} color='default'>
 			{ t('Protocol_Place') }
 		</Th>,
 	], [t]);
@@ -154,7 +155,7 @@ export function ProtocolChoose({ setProtocolId, setProtocol, setCouncil, close, 
 		return <Table.Row key={_id} tabIndex={0} role='link' action onClick={() => onProtocolClick(protocol)}>
 			<Table.Cell fontScale='p1' color='default'>{num ?? ''}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{formatDate(d ?? '')}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{place ?? ''}</Table.Cell>
+			{!mediaQuery && <Table.Cell fontScale='p1' color='default'>{place ?? ''}</Table.Cell>}
 		</Table.Row>;
 	};
 

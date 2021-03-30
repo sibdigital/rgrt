@@ -1,9 +1,9 @@
-import { Box, Field, Margins, TextInput, TextAreaInput, Table, Accordion } from '@rocket.chat/fuselage';
+import { Box, Field, Margins, TextInput, TextAreaInput, Table, Accordion, Icon } from '@rocket.chat/fuselage';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import s from 'underscore.string';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { useDebouncedValue, useMediaQuery, useMutableCallback } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../../../client/contexts/TranslationContext';
 import { Pager } from '../../../../../../client/views/setupWizard/Pager';
@@ -86,20 +86,52 @@ function WorkingGroupRequestInfoStep({ stepStyle, step, title, active, setWorkin
 
 export default WorkingGroupRequestInfoStep;
 
+const FilterByNumberAndDesc = ({ setFilter, ...props }) => {
+	const t = useTranslation();
+	const [desc, setDesc] = useState('');
+	const [number, setNumber] = useState('');
+
+	const handleDescChange = useMutableCallback((event) => setDesc(event.currentTarget.value));
+	const handleNumberChange = useMutableCallback((event) => setNumber(event.currentTarget.value));
+	const onSubmit = useMutableCallback((e) => e.preventDefault());
+
+	useEffect(() => {
+		setFilter({ desc, number });
+	}, [setFilter, number, desc]);
+
+	return <Box mb='x16' onSubmit={onSubmit} display='flex' flexDirection='column' {...props}>
+		<Box mb='x16' onSubmit={onSubmit} display='flex' flexDirection='column' {...props}>
+			<Field.Label>{t('Working_group_request_invite_find_by_number')}</Field.Label>
+			<TextInput flexShrink={0} placeholder={t('Working_group_request_invite_find_by_number')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleNumberChange} value={number} />
+		</Box>
+		<Box mb='x16' onSubmit={onSubmit} display='flex' flexDirection='column' {...props}>
+			<Field.Label>{t('Working_group_request_invite_find_by_desc')}</Field.Label>
+			<TextInput flexShrink={0} placeholder={t('Working_group_request_invite_find_by_desc')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleDescChange} value={desc} />
+		</Box>
+	</Box>;
+};
+
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+const useQuery = ({ number, desc, itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	query: JSON.stringify({
+		$and: [
+			number !== '' ? { number: { $regex: number || '', $options: 'i' } } : {},
+			desc !== '' ? { desc: { $regex: desc || '', $options: 'i' } } : {},
+		],
+	}),
 	fields: JSON.stringify({ number: 1, desc: 1, date: 1, ts: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
-}), [itemsPerPage, current, column, direction]);
+}), [number, desc, column, direction, itemsPerPage, current]);
 
 function RequestsTable({ onClick }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
+	const mediaQuery = useMediaQuery('(max-width: 660px)');
 
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
+	const [params, setParams] = useState({ number: '', desc: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['date']);
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -113,21 +145,21 @@ function RequestsTable({ onClick }) {
 		<Th key={'Number'} color='default'>
 			{t('Number')}
 		</Th>,
-		<Th key={'Description'} color='default'>
+		!mediaQuery && <Th key={'Description'} color='default'>
 			{ t('Description') }
 		</Th>,
-		<Th w='x200' key={'Date'} color='default'>
+		!mediaQuery && <Th w='x200' key={'Date'} color='default'>
 			{ t('Date') }
 		</Th>,
-	], []);
+	], [t, mediaQuery]);
 
 	const renderRow = (request) => {
 		const { _id, number, desc, date, ts } = request;
 
 		return <Table.Row key={_id} tabIndex={0} role='link' action onClick={() => onClick(request)}>
 			<Table.Cell fontScale='p1' color='default'>{number}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{desc}</Table.Cell>
-			<Table.Cell fontScale='p1' color='default'>{formatDate(new Date(date ?? ts))}</Table.Cell>
+			{!mediaQuery && <Table.Cell fontScale='p1' color='default'>{desc}</Table.Cell>}
+			{!mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDate(new Date(date ?? ts))}</Table.Cell>}
 		</Table.Row>;
 	};
 
@@ -137,6 +169,6 @@ function RequestsTable({ onClick }) {
 	}, []);
 
 	return <Box is='form' onSubmit={onSubmit}>
-		<GenericTable header={header} renderRow={renderRow} results={data?.requests ?? []} total={data?.total ?? 0} setParams={setParams} params={params}/>
+		<GenericTable FilterComponent={FilterByNumberAndDesc} header={header} renderRow={renderRow} results={data?.requests ?? []} total={data?.total ?? 0} setParams={setParams} params={params}/>
 	</Box>;
 }
