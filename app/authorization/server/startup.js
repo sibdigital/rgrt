@@ -129,7 +129,7 @@ Meteor.startup(function() {
 		{ _id: 'handbooks-home-page',           	 roles: ['admin, secretary'] },
 		{ _id: 'administration-home-page',           roles: ['admin, secretary'] },
 		{ _id: 'manage-persons',           			 roles: ['admin, secretary'] },
-		{ _id: 'manage-errands-from-me',			 roles: ['secretary','user'] }
+		{ _id: 'manage-errands-from-me',			 roles: ['secretary', 'admin'] },
 	];
 
 	for (const permission of permissions) {
