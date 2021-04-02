@@ -1397,6 +1397,8 @@
   "Entertainment": "Развлечения",
   "Errand_Added_Successfully": "Поручение успешно добавлено",
   "Errand_Base": "Основание",
+  "Errand_by_protocol_item": "Поручение по пункту протокола",
+  "Errand_by_request": "Поручение по ответу на запрос",
   "Errand_Created_At": "Создано",
   "Errand_name": "Название обсуждения",
   "Errand_Updated_Successfully": "Поручение успешно обновлено",
