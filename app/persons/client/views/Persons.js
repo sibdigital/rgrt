@@ -31,9 +31,12 @@ export function Persons({
 		mediaQuery && <Th key={'Organization'} style={{ width: '190px' }} color='default'>
 			{t('Organization')}
 		</Th>,
+		mediaQuery && <Th key={'Group'} style={{ width: '190px' }} color='default'>
+			{t('Group')}
+		</Th>,
 		mediaQuery && <Th key={'Position'} color='default'>
-		{t('Position')}
-	</Th>,
+			{t('Position')}
+		</Th>,
 		<Th w='x40' key='edit'/>,
 		<Th w='x40' key='delete'/>,
 	], [sort, mediaQuery]);
@@ -46,6 +49,7 @@ export function Persons({
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{phone}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'><Box withTruncatedText>{email}</Box></Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{organization}</Table.Cell>}
+			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{group?.title}</Table.Cell>}
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id, person)} color='default'>{position}</Table.Cell>}
 			<Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id, person)} aria-label={t('Edit')}>

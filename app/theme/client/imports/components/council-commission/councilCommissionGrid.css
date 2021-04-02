@@ -20,6 +20,7 @@
     position: absolute;
     left: 32px;
     bottom: 32px;
+    right: 32px;
 
     color: white;
 }
@@ -63,6 +64,12 @@
 
 @media screen and (max-width: 559px) {
     .council-commission-grid {
-        grid-auto-rows: 245px;
+        grid-auto-rows: 290px;
+    }
+    
+    .imgSide-inf {
+        left: 24px;
+        bottom: 24px;
+        right: 24px;
     }
 }

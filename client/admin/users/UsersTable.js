@@ -74,11 +74,14 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 	...current && { offset: current },
 }), [text, itemsPerPage, current, column, direction]);
 
-export function UsersTable() {
+export function UsersTable({cache, ...props}) {
 	const t = useTranslation();
 
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['name', 'asc']);
+	const [cacheTable, setCacheTable] = useState(new Date());
+
+	useMemo(() => setCacheTable(cache), [cache]);
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);

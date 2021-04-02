@@ -12,13 +12,15 @@ import {
 	FieldGroup,
 	Select,
 } from '@rocket.chat/fuselage';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 import { useTranslation } from '../../contexts/TranslationContext';
 import { isEmail } from '../../../app/utils/lib/isEmail.js';
 import VerticalBar from '../../components/basic/VerticalBar';
 import CustomFieldsForm from '../../components/CustomFieldsForm';
 
-export default function UserForm({ formValues, formHandlers, availableRoles, workingGroups, append, prepend, ...props }) {
+export default function UserForm({ formValues, formHandlers, availableRoles, persons, workingGroups, append, prepend, ...props }) {
 	const t = useTranslation();
 	const [hasCustomFields, setHasCustomFields] = useState(false);
 
@@ -34,6 +36,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, wor
 		position,
 		phone,
 		bio,
+		personId,
 		workingGroup,
 		nickname,
 		password,
@@ -57,6 +60,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, wor
 		handlePosition,
 		handlePhone,
 		handleBio,
+		handlePersonId,
 		handleWorkingGroup,
 		handleNickname,
 		handlePassword,
@@ -78,6 +82,15 @@ export default function UserForm({ formValues, formHandlers, availableRoles, wor
 		}
 		return res;
 	}, [workingGroups]);
+
+	const personsOptions = useMemo(() => {
+		const res = [["", t('Not_chosen')]];
+		if (persons?.persons?.length > 0) {
+			return res.concat(persons?.persons.map((person) => [person._id, person.surname + ' ' + person.name + ' ' + person.patronymic]));
+		}
+		return res;
+	}, [persons]);
+
 	// const workingGroupOptions = useMemo(() => [
 	// 	['Не выбрано', t('Not_chosen')],
 	// 	['Члены рабочей группы', 'Члены рабочей группы'],
@@ -127,7 +140,9 @@ export default function UserForm({ formValues, formHandlers, availableRoles, wor
 			{useMemo(() => <Field>
 				<Field.Label>{t('Phone_number')}</Field.Label>
 				<Field.Row>
-					<TextInput flexGrow={1} value={phone} onChange={handlePhone}/>
+					<PhoneInput
+						inputStyle={{ width: '100%', borderWidth: '0.125rem', borderRadius: '0' }} value={phone} onChange={(val) => handlePhone(val)} country={'ru'}
+						countryCodeEditable={false} placeholder={'+7 (123)-456-78-90'}/>
 				</Field.Row>
 			</Field>, [t, phone, handlePhone])}
 			{useMemo(() => <Field>
@@ -147,6 +162,12 @@ export default function UserForm({ formValues, formHandlers, availableRoles, wor
 					<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
 				</Field.Row>
 			</Field>, [t, workingGroup, handleWorkingGroup])}
+			{useMemo(() => <Field>
+				<Field.Label>{t('Person')}</Field.Label>
+				<Field.Row>
+					<Select options={personsOptions} onChange={handlePersonId} value={personId} selected={personId}/>
+				</Field.Row>
+			</Field>, [t, personId, handlePersonId])}
 			{useMemo(() => <Field>
 				<Field.Label>{t('StatusMessage')}</Field.Label>
 				<Field.Row>

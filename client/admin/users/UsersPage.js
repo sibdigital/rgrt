@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Icon } from '@rocket.chat/fuselage';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
 import Page from '../../components/basic/Page';
 import VerticalBar from '../../components/basic/VerticalBar';
@@ -14,6 +14,8 @@ import UsersTable from './UsersTable';
 function UsersPage() {
 	const t = useTranslation();
 
+	const [cache, setCache] = useState(new Date())
+
 	const usersRoute = useRoute('admin-users');
 
 	const handleVerticalBarCloseButtonClick = () => {
@@ -27,6 +29,10 @@ function UsersPage() {
 	const handleInviteButtonClick = () => {
 		usersRoute.push({ context: 'invite' });
 	};
+
+	const onChange = useCallback(() => {
+		setCache(new Date());
+	}, [cache]);
 
 	const context = useRouteParameter('context');
 	const id = useRouteParameter('id');
@@ -44,7 +50,7 @@ function UsersPage() {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<UsersTable />
+				<UsersTable cache={cache} />
 			</Page.Content>
 		</Page>
 		{context && <VerticalBar className={'contextual-bar'}>
@@ -57,7 +63,7 @@ function UsersPage() {
 			</VerticalBar.Header>
 
 			{context === 'info' && <UserInfoWithData uid={id}/>}
-			{context === 'edit' && <EditUserWithData uid={id}/>}
+			{context === 'edit' && <EditUserWithData uid={id} onChange={onChange}/>}
 			{context === 'new' && <AddUser/>}
 			{context === 'invite' && <InviteUsers/>}
 

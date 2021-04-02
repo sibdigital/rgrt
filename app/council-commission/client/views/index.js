@@ -63,13 +63,13 @@ export function CouncilCommissionPage(
 						<Box>{surname}</Box>
 						<Box>{name} {patronymic}</Box>
 					</Box>
-					<Box fontSize={mediaQuery ? 'x18' : 'x16'} mbs='x16' lineHeight='x24'>
+					<Box fontSize={mediaQuery ? 'x18' : 'x16'} mbs='x16' lineHeight={mediaQuery ? 'x24' : 'x18'}>
 						<Box>{position}</Box>
 						<Box>{organization}</Box>
 					</Box>
-					<Box fontSize={mediaQuery ? 'x18' : 'x16'} mbs='x12' lineHeight='x24'>
+					<Box fontSize={mediaQuery ? 'x18' : 'x16'} mbs='x12' lineHeight={mediaQuery ? 'x24' : 'x18'}>
 						<Box>{phone}</Box>
-						<Box>{email}</Box>
+						<Box style={{wordBreak:'break-word'}}>{email}</Box>
 					</Box>
 				</Box>
 			</Box>
@@ -77,16 +77,16 @@ export function CouncilCommissionPage(
 		}
 		return  <Box className={`commission-person-block`} display='flex'>
 			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/></Box>
-			<Box position='relative' fontSize={mediaQuery ? 'x16' : 'x14'} flexBasis='60%' pi={mediaQuery ? 'x16' : 'x12'} pb={mediaQuery ? 'x24' : 'x8'} backgroundColor='whitesmoke'>
-				<Box fontSize={mediaQuery ?'x24' : 'x20'}>
+			<Box position='relative' fontSize={mediaQuery ? 'x16' : 'x14'} flexBasis='60%' pi={mediaQuery ? 'x16' : 'x12'} pb={mediaQuery ? 'x20' : 'x8'} backgroundColor='whitesmoke'>
+				<Box fontSize={mediaQuery ? 'x24' : 'x16'}>
 					<Box>{surname} {name}</Box>
 					<Box>{patronymic}</Box>
 				</Box>
-				<Box mbs='x8' lineHeight={mediaQuery ? 'x24' : 'x20'}>
+				<Box mbs={mediaQuery ? 'x8' : 'x4'} lineHeight={mediaQuery ? 'x24' : 'x18'}>
 					<Box>{position}</Box>
 					<Box>{organization}</Box>
 				</Box>
-				<Box position='absolute' style={{bottom:'16px'}}>
+				<Box position='absolute' style={mediaQuery ? {bottom:'16px'} : {bottom:'10px'}}>
 					<Box mbe='x4'>{phone}</Box>
 					<Box>{email}</Box>
 				</Box>
