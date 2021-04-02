@@ -105,6 +105,7 @@ export function UsersTable() {
 
 	const mediaQuery = useMediaQuery('(min-width: 1024px)');
 
+	console.dir({ translater: t });
 	return <GenericTable
 		FilterComponent={FilterByText}
 		header={<>
