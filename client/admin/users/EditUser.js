@@ -11,21 +11,22 @@ import { useForm } from '../../hooks/useForm';
 import UserForm from './UserForm';
 import { FormSkeleton } from './Skeleton';
 
-export function EditUserWithData({ uid, ...props }) {
+export function EditUserWithData({ uid, onChange, ...props }) {
 	const t = useTranslation();
 	const { data: roleData, state: roleState, error: roleError } = useEndpointDataExperimental('roles.list', '') || {};
 	const { data, state, error } = useEndpointDataExperimental('users.info', useMemo(() => ({ userId: uid }), [uid]));
 	const { data: workingGroupsData, state: workingGroupState, error: workingGroupError } = useEndpointDataExperimental('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
+	const { data: persons, state: personsState, error: personsError } = useEndpointDataExperimental('persons.list',useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }),[])) || { persons: [] };
 
-	if ([state, roleState, workingGroupState].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, roleState, workingGroupState, personsState].includes(ENDPOINT_STATES.LOADING)) {
 		return <FormSkeleton/>;
 	}
 
-	if (error || roleError || workingGroupError) {
+	if (error || roleError || workingGroupError || personsError) {
 		return <Callout m='x16' type='danger'>{t('User_not_found')}</Callout>;
 	}
 
-	return <EditUser data={data.user} roles={roleData.roles} workingGroups={workingGroupsData.workingGroups} {...props}/>;
+	return <EditUser data={data.user} onChange={onChange} roles={roleData.roles} workingGroups={workingGroupsData.workingGroups} persons={persons} {...props}/>;
 }
 
 const getInitialValue = (data) => ({
@@ -40,6 +41,7 @@ const getInitialValue = (data) => ({
 	position: data.position,
 	phone: data.phone ?? '',
 	workingGroup: data.workingGroup ?? '',
+	personId: data.personId ?? '',
 	bio: data.bio ?? '',
 	nickname: data.nickname ?? '',
 	email: (data.emails && data.emails[0].address) || '',
@@ -50,7 +52,7 @@ const getInitialValue = (data) => ({
 	statusText: data.statusText ?? '',
 });
 
-export function EditUser({ data, roles, workingGroups, ...props }) {
+export function EditUser({ data, onChange, roles, workingGroups, persons, ...props }) {
 	const t = useTranslation();
 
 	const [avatarObj, setAvatarObj] = useState();
@@ -98,13 +100,14 @@ export function EditUser({ data, roles, workingGroups, ...props }) {
 
 	const handleSave = useCallback(async () => {
 		const result = await saveAction();
+		onChange();
 		if (result.success) {
 			if (avatarObj) {
 				await updateAvatar();
 			}
 			goToUser(data._id);
 		}
-	}, [avatarObj, data._id, goToUser, saveAction, updateAvatar]);
+	}, [avatarObj, data._id, goToUser, saveAction, updateAvatar, onChange]);
 
 	const availableRoles = roles.map(({ _id, description }) => [_id, description || _id]);
 
@@ -123,5 +126,5 @@ export function EditUser({ data, roles, workingGroups, ...props }) {
 		</Field.Row>
 	</Field>, [handleSave, canSaveOrReset, reset, t]);
 
-	return <UserForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} workingGroups={workingGroups} prepend={prepend} append={append} {...props}/>;
+	return <UserForm formValues={values} formHandlers={handlers} availableRoles={availableRoles} workingGroups={workingGroups} persons={persons} prepend={prepend} append={append} {...props}/>;
 }
