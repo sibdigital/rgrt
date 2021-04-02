@@ -33,7 +33,7 @@ export function ResponsibleChoose({
 }) {
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname']);
-	const [refProtocolsFields, setRefProtocolsFields] = useState(personFields ?? { surname: 1, name: 1, patronymic: 1 });
+	const [refProtocolsFields, setRefProtocolsFields] = useState(personFields ?? { surname: 1, name: 1, patronymic: 1, userId: 1 });
 	const [refPrevResponsiblesId, setRefPrevResponsiblesId] = useState(prevResponsiblesId ?? []);
 
 	const [personsList, setPersonsList] = useState([]);

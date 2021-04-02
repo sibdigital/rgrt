@@ -120,7 +120,7 @@ function CouncilField({ council, handleCouncil, chooseButtonStyles, handleChoose
 	, [chooseButtonStyles, flexDirection, handleChoose, handleCouncil, label, t]);
 }
 
-function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
+export function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const label = useMemo(() => (!protocol.d && !protocol.num ? '' : [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('')), [protocol, formatDate, t]);
@@ -136,7 +136,6 @@ function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseBu
 					? <TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>
 					: <Box display='flex' alignItems='center' borderWidth='0' padding='x8'><a href={address} target='_blank'>{label}</a></Box>
 				}
-				{/*<TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>*/}
 				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{t('Choose')}</Button>
 			</Box>
 		</Field>
