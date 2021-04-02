@@ -144,6 +144,7 @@ export function getErrandFieldsForSave({ errand, errandType = ErrandTypes.defaul
 		newErrand.documents = errand.documents.value?.filter((doc) => doc._id);
 	}
 
+	newErrand.status = { ...newErrand.status, i18nLabel: t(newErrand.status.i18nLabel) };
 	newErrand.errandType = { key: newErrand.errandType.key, state: newErrand.errandType.state, title: newErrand.errandType.title, i18nLabel: t(newErrand.errandType.i18nLabel) };
 	errand.expireAt?.value && Object.assign(newErrand, { expireAt: new Date(errand.expireAt.value) });
 	errand.ts?.value && Object.assign(newErrand, { ts: new Date(errand.ts.value) });

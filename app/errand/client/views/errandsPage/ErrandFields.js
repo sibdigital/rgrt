@@ -111,7 +111,7 @@ function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
 
 function DescriptionField({ desc, ...props }) {
 	const t = useTranslation();
-	const renderInput = useMemo(() => <TextAreaInput placeholder={t('Description')} rows='3' flexGrow={1} value={desc ?? ''}/>, [desc, t]);
+	const renderInput = useMemo(() => <TextAreaInput style={{ wordBreak: 'break-word', whiteSpace: 'break-spaces' }} placeholder={t('Description')} rows='5' flexGrow={1} value={desc ?? ''}/>, [desc, t]);
 
 	return useMemo(() => <DefaultField title={t('Description')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
