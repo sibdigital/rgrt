@@ -62,6 +62,8 @@ Meteor.startup(function() {
 		{ _id: 'manage-own-incoming-integrations',   roles: ['admin'] },
 		{ _id: 'manage-oauth-apps',                  roles: ['admin'] },
 		{ _id: 'manage-protocols',					 roles: ['admin', 'secretary'] },
+		{ _id: 'manage-persons',           			 roles: ['admin', 'secretary'] },
+		{ _id: 'manage-persons-user',           	 roles: ['user', 'secretary'] },
 		{ _id: 'manage-selected-settings', 	         roles: ['admin'] },
 		{ _id: 'manage-tags',			 			 roles: ['admin'] },
 		{ _id: 'manage-working-group',	 			 roles: ['admin', 'secretary', 'working-group-member', 'working-group-leader'] },
@@ -126,9 +128,8 @@ Meteor.startup(function() {
 		{ _id: 'edit-livechat-room-customfields',    roles: ['livechat-manager', 'livechat-agent', 'admin'] },
 		{ _id: 'send-omnichannel-chat-transcript',   roles: ['livechat-manager', 'admin'] },
 		{ _id: 'mail-messages',                      roles: ['admin'] },
-		{ _id: 'handbooks-home-page',           	 roles: ['admin, secretary'] },
-		{ _id: 'administration-home-page',           roles: ['admin, secretary'] },
-		{ _id: 'manage-persons',           			 roles: ['admin, secretary'] },
+		{ _id: 'handbooks-home-page',           	 roles: ['admin', 'secretary'] },
+		{ _id: 'administration-home-page',           roles: ['admin', 'secretary'] },
 		{ _id: 'manage-errands-from-me',			 roles: ['secretary','user'] }
 	];
 

@@ -37,7 +37,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Errands_from_me'),
-		condition: () => !hasPermission('manage-errands-from-me'),
+		condition: () => hasPermission('manage-errands-from-me'),
 		action: () => {
 			FlowRouter.go('/errands/initiated_by_me');
 		},

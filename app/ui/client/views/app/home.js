@@ -43,7 +43,7 @@ const toolbarButtons = () => [
 		name: t('Errands_from_me'),
 		icon: 'errands_from_me',
 		context: 'home',
-		condition: () => !hasPermission('manage-errands-from-me'),
+		condition: () => hasPermission('manage-errands-from-me'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/initiated_by_me');
