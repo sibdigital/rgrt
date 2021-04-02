@@ -27,7 +27,9 @@ export class Errands extends Base {
 
 	create(data) {
 		data.createdAt = new Date();
-		return this.insert(data);
+		this.insert(data);
+		const errand = this.findOne({ createdAt: data.createdAt }, { fields: { _id: 1 } });
+		return errand?._id ?? '';
 	}
 
 	// REMOVE
@@ -39,6 +41,18 @@ export class Errands extends Base {
 	updateErrand(_id, newData) {
 		newData._updatedAt = new Date();
 		return this.update({ _id }, { $set: { ...newData } });
+	}
+
+	addErrandDocument(errandId, fileData) {
+		const data = this.findOne({ _id: errandId });
+
+		data._updatedAt = new Date();
+		if (data.documents) {
+			data.documents.push(fileData);
+		} else {
+			data.documents = [fileData];
+		}
+		return this.update({ _id: errandId }, { $set: { ...data } });
 	}
 
 	findByInitiatedUserId(userId) {
