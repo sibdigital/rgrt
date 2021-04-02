@@ -145,16 +145,16 @@ function AnswerWithData({ answer, files, requestId, mailId, answerId }) {
 			<Tabs flexShrink={0} mbe='x8'>
 				<Tabs.Item selected={tab === 'info'} onClick={() => setTab('info')}>{t('Info')}</Tabs.Item>
 				<Tabs.Item selected={tab === 'files'} onClick={() => setTab('files')}>{t('Files')}</Tabs.Item>
-				<Tabs.Item selected={tab === 'answer'} onClick={() => setTab('answer')}>{t('Answer')}</Tabs.Item>
+				{/*<Tabs.Item selected={tab === 'answer'} onClick={() => setTab('answer')}>{t('Answer')}</Tabs.Item>*/}
 			</Tabs>
-			<Box mis='auto'>
-				<Select options={answerStatusOptions} onChange={(value) => setAnswerStatusOptions(value)}/>
-			</Box>
+			{/*<Box mis='auto'>*/}
+			{/*	<Select options={answerStatusOptions} onChange={(value) => setAnswerStatusOptions(value)}/>*/}
+			{/*</Box>*/}
 		</Box>
 		<Page.ScrollableContent>
 			{
-				(tab === 'answer' && <AnswerForm defaultValues={values} defaultHandlers={handlers}/>)
-				|| (tab === 'files' && <GenericTable header={header} renderRow={renderRow} results={files ?? []} total={files?.length || 0} setParams={setParams} params={params}/>)
+				// (tab === 'answer' && <AnswerForm defaultValues={values} defaultHandlers={handlers}/>)
+				(tab === 'files' && <GenericTable header={header} renderRow={renderRow} results={files ?? []} total={files?.length || 0} setParams={setParams} params={params}/>)
 				|| (tab === 'info' && <AnswerForm defaultValues={values} defaultHandlers={handlers} onReadOnly={true}/>)
 			}
 		</Page.ScrollableContent>
