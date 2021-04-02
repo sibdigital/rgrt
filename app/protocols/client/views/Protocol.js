@@ -265,6 +265,7 @@ export function ProtocolPage() {
 
 	const openErrand = (sectionId, itemId) => () => {
 		FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
+		// FlowRouter.go(`/errand/add&byProtocolItem&${ protocolId }&${ sectionId }&${ itemId }`);
 	};
 
 	const onItemMenuClick = useCallback((event) => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, ButtonGroup, Callout, Field, Icon, Label, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup, Box, Field, Label } from '@rocket.chat/fuselage';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
@@ -218,7 +218,9 @@ export function DocumentPage() {
 						<a href={address} is='span' target='_blank'>{addressLabel}</a>
 					</Field.Row>
 				</Field>
-				<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>
+				<Box displa='flex' maxHeight='600px'>
+					<Answers mail={data} onClick={onMailClick} editData={answers} onChange={onChange}/>
+				</Box>
 			</Page.ScrollableContent>
 		</Page>
 
