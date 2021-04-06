@@ -28,7 +28,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const UserRow = ({ emails, _id, username, surname, name, patronymic, organization, position, phone, roles, status, avatarETag, onClick, mediaQuery, active }) => {
 	const t = useTranslation();
-	const getShortFio = (surname, name, patronymic) => [surname, name.charAt(0).toUpperCase(), patronymic ? patronymic.charAt(0).toUpperCase() : ''].join(' ');
+	const getShortFio = (surname, name, patronymic) => [surname ?? '', name?.charAt(0)?.toUpperCase() ?? '', patronymic?.charAt(0)?.toUpperCase() ?? ''].join(' ');
 	const statusText = active ? t(capitalize(status)) : t('Disabled');
 	return <Table.Row onKeyDown={onClick(_id)} onClick={onClick(_id)} tabIndex={0} role='link' action qa-user-id={_id}>
 		<Table.Cell style={style}>

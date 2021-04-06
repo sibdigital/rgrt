@@ -210,13 +210,13 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
 					<Field mis='x4' display='flex' flexDirection='row'>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
-						<Field.Row width='-moz-available'>
+						<Field.Row width='inherit'>
 							<Select mie='x16' style={inputStyles} options={councilTypeOptions} onChange={(val) => setCouncilType(val)} value={councilType} placeholder={t('Council_type')}/>
 						</Field.Row>
 					</Field>
-					<Field mis='x4' display='flex' flexDirection='row'>
+					<Field mis='x4' display='flex' flexDirection='row' mie='x16'>
 						<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
-						<Field.Row width='-moz-available'>
+						<Field.Row width='inherit'>
 							<DatePicker
 								mie='x16'
 								dateFormat='dd.MM.yyyy HH:mm'

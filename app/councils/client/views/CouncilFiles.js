@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Button, Icon, Callout, Table } from '@rocket.chat/fuselage';
+import { Button, Icon, Callout, Table, Box } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 
@@ -171,7 +171,9 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>;
+	return <Box maxHeight='500px' overflowY='auto' overflowX='hidden'>
+		<GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>
+	</Box>;
 }
 
 CouncilFiles.displayName = 'CouncilFiles';
