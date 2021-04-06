@@ -37,8 +37,9 @@ export function AddErrandByProtocolItemPage() {
 	const itemId = useRouteParameter('itemId');
 
 	const { data: _protocolData, state, error } = useEndpointDataExperimental('protocols.findByItemId', useMemo(() => ({ query: JSON.stringify({ _id: itemId }) }), [itemId]));
+	const { data: personData, state: personState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
 
-	if ([state].includes(ENDPOINT_STATES.LOADING)) {
+	if ([state, personState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box w='full' pb='x24'>
 			<Skeleton mbe='x8'/>
 			<Skeleton mbe='x4'/>
@@ -60,10 +61,10 @@ export function AddErrandByProtocolItemPage() {
 
 	const errand = {
 		initiatedBy: {
-			_id: itemResponsible._id,
-			surname: itemResponsible.surname,
-			name: itemResponsible.name,
-			patronymic: itemResponsible.patronymic,
+			_id: personData._id,
+			surname: personData.surname,
+			name: personData.name,
+			patronymic: personData.patronymic,
 		},
 		status: ErrandStatuses.OPENED,
 		chargedTo: {

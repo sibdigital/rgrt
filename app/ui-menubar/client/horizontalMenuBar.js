@@ -1,11 +1,12 @@
+import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 
 import { t } from '../../utils';
-import { AccountBox, menu } from '../../ui-utils';
-import { createInteractionActions } from '../../utils/client/views/createInteractionActions';
-import { hasAtLeastOnePermission, hasPermission } from '../../authorization';
+import { AccountBox } from '../../ui-utils';
+import { hasAtLeastOnePermission } from '../../authorization';
+import { Users } from '../../models';
 
 const menuItems = () => [
 	{
@@ -37,7 +38,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Errands_from_me'),
-		// condition: () => hasPermission('manage-errands-from-me'),
+		condition: () => Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		action: () => {
 			FlowRouter.go('/errands/initiated_by_me');
 		},

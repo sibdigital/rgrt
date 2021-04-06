@@ -32,6 +32,8 @@ Meteor.methods({
 		}
 
 		const agenda = await Agendas.findOne({ _id });
+		const isHaveProposals = agenda?.sections?.filter((_agenda) => _agenda.initiatedBy?._id).length > 0;
+		console.dir({ isHaveProposals });
 
 		if (!agenda) {
 			throw new Meteor.Error('error-the-field-is-required', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadAgenda', field: 'agenda' });
@@ -102,11 +104,11 @@ Meteor.methods({
 						children: [new Paragraph({ text: 'Рассматриваемый вопрос', bold: true, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						width: {
-							size: 45,
+							size: 45 + isHaveProposals ? 0 : 20,
 							type: WidthType.PERCENTAGE,
 						},
 					}),
-					new TableCell({
+					isHaveProposals && new TableCell({
 						children: [new Paragraph({ text: 'Ответственный', bold: true, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						width: {
@@ -142,11 +144,11 @@ Meteor.methods({
 						verticalAlign: VerticalAlign.CENTER,
 						alignment: AlignmentType.CENTER,
 						width: {
-							size: 45,
+							size: 45 + isHaveProposals ? 0 : 20,
 							type: WidthType.PERCENTAGE,
 						},
 					}),
-					new TableCell({
+					isHaveProposals && new TableCell({
 						children: [new Paragraph({ text: `${ value.initiatedBy?.value ?? '' }`, alignment: AlignmentType.CENTER })],
 						verticalAlign: VerticalAlign.CENTER,
 						alignment: AlignmentType.CENTER,

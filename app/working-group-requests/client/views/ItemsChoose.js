@@ -26,7 +26,7 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.getProtocolItemsByProtocolId', useMemo(() => ({
 		query: JSON.stringify({ _id: protocolId, protocolItems: protocolItemsState }),
-		fields: JSON.stringify({ expireAt: 1, num: 1 }),
+		fields: JSON.stringify({ expireAt: 1, num: 1, name: 1 }),
 	}), [protocolId, protocolItemsState]));
 
 	const getLog = (protocolItem) => {
@@ -35,7 +35,7 @@ export function ItemsChoose({ protocolId = '', setProtocolItems, protocolItems =
 
 	const handleSave = useCallback((protocolItem) => {
 		console.dir({ protocolItems, protocolItem });
-		setProtocolItems && setProtocolItems([...protocolItems, { ...protocolItem, name: preProcessingProtocolItems(protocolItem.name) }]);
+		setProtocolItems && setProtocolItems([...protocolItems, { ...protocolItem, itemNum: protocolItem.num, itemName: $(protocolItem.name).text() }]);
 		setProtocolItemsId && setProtocolItemsId([protocolItem.id]);
 		protocolData?.protocolItems?.filter((_protocolItem) => protocolItem._id === _protocolItem._id);
 	}, [protocolData, protocolItems, setProtocolItems, setProtocolItemsId]);

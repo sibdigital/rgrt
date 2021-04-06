@@ -23,6 +23,9 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
+import { useUserId } from '/client/contexts/UserContext';
+import { hasPermission } from '/app/authorization';
+import { Meteor } from "meteor/meteor";
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -108,6 +111,9 @@ function Errands({
 export function ErrandPage() {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
+	const reactUserId = useUserId();
+	const meteorUserId = Meteor.userId();
+	console.dir({ react: hasPermission('manage-errands-from-me', reactUserId), meteor: hasPermission('manage-errands-from-me', meteorUserId) });
 
 	const type = useRouteParameter('type');
 

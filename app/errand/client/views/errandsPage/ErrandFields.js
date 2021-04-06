@@ -30,9 +30,18 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { mime } from '../../../../utils';
 import { getErrandFieldsForSave } from './ErrandForm';
 
-function DefaultField({ title, renderInput,flexDirection = 'row', ...props }) {
+function DefaultField({ title, renderInput,flexDirection = 'row', required = false, ...props }) {
 	return <Field display='flex' flexDirection={flexDirection} mie={flexDirection === 'row' && 'x16'} {...props}>
-		<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf={flexDirection === 'row' && 'center'} mbe={flexDirection === 'column' && 'x16'} mie='x16' width='max-content'>{title}</Field.Label>
+		<Field.Label
+			style={{ flex: '0 0 0px', whiteSpace: 'pre' }}
+			alignSelf={flexDirection === 'row' && 'center'}
+			mbe={flexDirection === 'column' && 'x16'}
+			mie='x16'
+			width='max-content'
+		>
+			{title}
+			{required && <span style={{ color: 'red' }}>*</span>}
+		</Field.Label>
 		{renderInput}
 	</Field>;
 }
@@ -74,7 +83,7 @@ function ExpireAtField({ expireAt, handleExpireAt, inputStyles, ...props }) {
 			popperClassName='date-picker'/>
 	, [expireAt, handleExpireAt, inputStyles]);
 
-	return useMemo(() => <DefaultField title={t('Errand_Expired_date')} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Errand_Expired_date')} required={true} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
 }
 
 function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
@@ -106,7 +115,7 @@ function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
 		<SelectFiltered style={inputStyles} options={availableStatuses} value={statusValue} key='status' onChange={handleChange} placeholder={t('Status')}/>
 	, [availableStatuses, handleChange, inputStyles, statusValue, t]);
 
-	return useMemo(() => <DefaultField title={t('Status')} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Status')} required={true} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
 }
 
 function DescriptionField({ desc, ...props }) {
@@ -120,7 +129,7 @@ function CommentaryField({ commentary, inputStyles, handleCommentary, ...props }
 	const t = useTranslation();
 	const renderInput = useMemo(() => <TextAreaInput style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, t]);
 
-	return useMemo(() => <DefaultField title={t('Commentary')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Commentary')} required={true} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
 function ProtocolField({ protocol, ...props }) {
@@ -129,31 +138,32 @@ function ProtocolField({ protocol, ...props }) {
 
 	const protocolUrl = useMemo(() => (protocol && protocol._id ? [settings.get('Site_Url'), 'protocol/', protocol._id].join('') : ''), [protocol]);
 	const protocolItemUrl = useMemo(() => (protocol && protocol.sectionId && protocol.itemId ? [settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId].join('') : protocolUrl), [protocol, protocolUrl]);
-	const protocolTitle = useMemo(() => (protocol ? [t('Protocol'), ' от ', formatDate(protocol.d), ' № ', protocol.num].join('') : ''), [formatDate, protocol, t]);
+	const protocolLabel = useMemo(() => (protocol ? [t('Protocol'), ' от ', formatDate(protocol.d), ' № ', protocol.num].join('') : ''), [formatDate, protocol, t]);
+	const protocolItemLabel = useMemo(() => (protocol && protocol.sectionId && protocol.itemId
+		? [t('Protocol_item'), ' №', protocol.itemNum, ', ', protocol.itemName ?? ''].join('')
+		: protocolUrl)
+	, [protocol, protocolUrl, t]);
 
 	return useMemo(() => (protocol && protocol._id
 		? <Field display='flex' flexDirection='row' {...props}>
-			<Field mie='x16' display='flex' flexDirection='row'>
-				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol')}</Field.Label>
-				<Field.Row>
-					<a href={protocolUrl}>{protocolTitle}</a>
-				</Field.Row>
-			</Field>
 			<Field display='flex' flexDirection='row'>
+				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol')}</Field.Label>
+				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mie='x16' mis='x8'>
+					<a style={{ maxWidth: 'max-content' }} href={protocolUrl}>{protocolLabel}</a>
+				</Field>
+			</Field>
+			<Field display='flex' flexDirection='row' mie='x16'>
 				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol_Item')}</Field.Label>
-				<Field.Row>
-					<a href={protocolItemUrl}>{protocolTitle}</a>
-				</Field.Row>
+				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mis='x8'>
+					<a href={protocolItemUrl}>{protocolItemLabel}</a>
+				</Field>
 			</Field>
 		</Field>
 		: <></>)
-	, [props, protocol, protocolItemUrl, protocolTitle, protocolUrl, t]);
+	, [protocol, props, t, protocolUrl, protocolLabel, protocolItemUrl, protocolItemLabel]);
 }
 
-export function DefaultErrandFields({ inputStyles, marginBlockEnd, values, handlers }) {
-	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
-
+export function DefaultErrandFields({ inputStyles, values, handlers }) {
 	const {
 		status,
 		ts,
@@ -242,6 +252,7 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 
 	const {
 		initiatedBy,
+		chargedTo,
 		desc,
 		protocol,
 		documents,
@@ -249,6 +260,7 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 
 	const {
 		handleDesc,
+		handleChargedTo,
 		handleInitiatedBy,
 		handleProtocol,
 		handleDocuments,
@@ -256,8 +268,8 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 
 	useEffect(() => {
 		console.dir({ request });
-		if (request && request._id && request.itemResponsible && request.itemResponsible._id && !initiatedBy._id) {
-			handleInitiatedBy({ ...initiatedBy, value: request.itemResponsible });
+		if (request && request._id && request.itemResponsible && request.itemResponsible._id && !chargedTo?._id) {
+			handleChargedTo({ ...chargedTo, value: { person: request.itemResponsible } });
 		}
 
 		if (request && request._id && request.desc && desc.value === '') {

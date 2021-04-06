@@ -67,7 +67,7 @@ export function EditErrandPage() {
 	// console.dir({ idParams });
 	// console.dir(idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]] } : null);
 
-	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], chargedTo: { userId, person: personData } } : data ?? null} request={requestData ?? null}/>;
+	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: personData } : data ?? null} request={requestData ?? null}/>;
 }
 
 export function NewErrand({ errand, request }) {

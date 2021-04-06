@@ -12,6 +12,7 @@ import {
 import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
 import { Autocomplete, createFilterOptions } from '@material-ui/lab';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -39,6 +40,22 @@ function RenderNewPersonCreateModal({ onCancel, onSave, ...props }) {
 	</Modal>;
 }
 
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+
+const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMemo(() => ({
+	query: JSON.stringify({
+		$or: [{
+			surname: { $regex: text || '', $options: 'i' },
+			name: { $regex: text || '', $options: 'i' },
+			patronymic: { $regex: text || '', $options: 'i' },
+		}],
+	}),
+	fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [text, column, direction, itemsPerPage, current]);
+
 export function EditSection({ agendaId = null, councilId, onEditDataClick, close, onChange, personsOptions, data = null, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -51,10 +68,20 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		// date: new Date(),
 		speakers: [],
 	});
+	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
+	const [sort, setSort] = useState(['surname']);
+
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const personsQuery = useQuery(debouncedParams, debouncedSort);
 
 	const { data: numberCountData, state: numberCountState } = useEndpointDataExperimental('agendas.itemNumberCount', useMemo(() => ({
 		query: JSON.stringify({ _id: agendaId }),
 	}), [agendaId]));
+
+
+	const { data: personsData } = useEndpointDataExperimental('persons.list', personsQuery);
 
 	useEffect(() => {
 		if (data) {
@@ -164,7 +191,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 			<Autocomplete
 				multiple
 				id='tags-standard'
-				options={personsOptions}
+				options={personsData?.persons ?? []}
 				value={editData.speakers ?? []}
 				forcePopupIcon={false}
 				getOptionLabel={(userData) => [constructPersonFIO(userData), `, ${ userData.organization ?? '' }`].join('')}
@@ -182,6 +209,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 						{...params}
 						variant='outlined'
 						placeholder={t('Agenda_speakers')}
+						onChange={(e) => setParams({ ...params, text: e.currentTarget.value }) }
 					/>
 				)}
 				noOptionsText={
@@ -196,6 +224,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 						{ t('Participant_Create') }
 					</Button>
 				}
+				onClose={(event, reason) => setParams({ ...params, text: '' }) }
 			/>
 		</Field>
 		<Field>
