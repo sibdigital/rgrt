@@ -33,11 +33,12 @@ const Pagination = ({
 	itemsPerPage,
 	count,
 	onSetCurrent,
+	onLoadMore,
 }) => {
 	const t = useTranslation();
 
 	return <Box display='flex' flexDirection='row'>
-		{current !== count && <Button width='100%' onClick={() => onSetCurrent(current + itemsPerPage)}>
+		{current !== count && <Button width='100%' onClick={() => { onSetCurrent(current + itemsPerPage); onLoadMore(); }}>
 			{t('Load_more')}
 		</Button>}
 	</Box>;
@@ -49,9 +50,10 @@ export const GenericList = forwardRef(function GenericTable({
 	total,
 	renderRow: RenderRow,
 	setParams = () => { },
-	params: paramsDefault = '',
+	params: paramsDefault = {},
 	FilterComponent = () => null,
 	layout = 'row',
+	onLoadMore = () => { },
 	...props
 }, ref) {
 	const t = useTranslation();
@@ -61,15 +63,14 @@ export const GenericList = forwardRef(function GenericTable({
 	const [itemsPerPage, setItemsPerPage] = useState(paramsDefault?.itemsPerPage ?? 50);
 	// const [itemsPerPage, setItemsPerPage] = useState(5);
 
-	const [current, setCurrent] = useState(0);
+	// const [current, setCurrent] = useState(0);
 
 	const params = useDebouncedValue(filter, 500);
 
-	useMemo(() => console.log({ paramsDefault }), [itemsPerPage]);
-
 	useEffect(() => {
-		setParams({ ...params, current, itemsPerPage });
-	}, [params, current, itemsPerPage, setParams]);
+		console.dir({ params });
+		setParams({ ...params, current: params.current, itemsPerPage });
+	}, [params, itemsPerPage, setParams]);
 
 	const Loading = useCallback(() => Array.from({ length: 10 }, (_, i) => <LoadingRow key={i} />), []);
 
@@ -88,10 +89,11 @@ export const GenericList = forwardRef(function GenericTable({
 								: <Loading/>
 						)}
 						{results && results.length < total && <Pagination
-							current={current}
+							current={params.current}
 							itemsPerPage={itemsPerPage}
 							count={total || 0}
-							onSetCurrent={setCurrent}
+							onSetCurrent={(cur) => setParams({ ...params, current: cur })}
+							onLoadMore={onLoadMore}
 						/>}
 					</Box>
 				</Scrollable>

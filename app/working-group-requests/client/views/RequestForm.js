@@ -120,7 +120,7 @@ function CouncilField({ council, handleCouncil, chooseButtonStyles, handleChoose
 	, [chooseButtonStyles, flexDirection, handleChoose, handleCouncil, label, t]);
 }
 
-function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
+export function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const label = useMemo(() => (!protocol.d && !protocol.num ? '' : [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('')), [protocol, formatDate, t]);
@@ -136,7 +136,6 @@ function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseBu
 					? <TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>
 					: <Box display='flex' alignItems='center' borderWidth='0' padding='x8'><a href={address} target='_blank'>{label}</a></Box>
 				}
-				{/*<TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>*/}
 				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{t('Choose')}</Button>
 			</Box>
 		</Field>
@@ -164,7 +163,7 @@ export function ProtocolItemsField({
 	return useMemo(() =>
 		<Box display='flex' flexDirection='row' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
 			{onShowLabelAndTooltip
-			&& <Field.Label display='flex' flexDirection='row' alignItems='center'>
+			&& <Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' display='flex' flexDirection='row' alignItems='center'>
 				{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}
 			</Field.Label>
 			}
@@ -271,14 +270,14 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			handleNumber(value);
 		}
 	};
-	console.dir({ defaultValues });
+	// console.dir({ defaultValues });
 
 	return <Box display='flex' flexDirection='column'>
 
 		<Select
 			border={inputStyles.border}
 			// style={{ marginInlineStart: 'auto !important', marginBlockEnd: '1rem !important' }}
-			mis='auto'
+			mie='auto'
 			mbe='x16'
 			width='max-content'
 			maxHeight='40px'
@@ -311,17 +310,17 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 				</Field>
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
-				{useMemo(() => requestType === defaultRequestTypeState.REQUEST.state
+				{useMemo(() => requestType.state === defaultRequestTypeState.REQUEST.state
 					&& <CouncilField flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} council={council} handleCouncil={handleCouncil} handleChoose={handleChoose}/>
 				, [chooseButtonStyles, council, handleChoose, handleCouncil, requestType])}
-				{useMemo(() => requestType === defaultRequestTypeState.REQUEST.state
+				{useMemo(() => requestType.state === defaultRequestTypeState.REQUEST.state
 					&& <ProtocolField flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleProtocol={handleProtocol} handleProtocolItems={handleProtocolItems} handleChoose={handleChoose}/>
 				, [requestType, chooseButtonStyles, protocol, handleProtocol, handleProtocolItems, handleChoose])}
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
 				{
 					useMemo(() =>
-						requestType === defaultRequestTypeState.REQUEST.state && protocol._id && protocol._id !== ''
+						requestType.state === defaultRequestTypeState.REQUEST.state && protocol._id && protocol._id !== ''
 						&& <SlideAnimation>
 							<ProtocolItemsField
 								protocolId={protocol?._id ?? null}
@@ -336,7 +335,7 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 				}
 			</Field>
 
-			{useMemo(() => (requestType === defaultRequestTypeState.MAIL.state || requestType.state === defaultRequestTypeState.MAIL.state)
+			{useMemo(() => (requestType.state === defaultRequestTypeState.MAIL.state || requestType.state === defaultRequestTypeState.MAIL.state)
 				&& <Field mbe='x16' display='flex' flexDirection='row'>
 					<Field.Label alignSelf='center' mie='x16' style={{ whiteSpace: 'pre' }}>{t('Working_group_request_select_mail')}</Field.Label>
 					<Field.Row width='inherit'>
@@ -352,7 +351,7 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			<Field mbe='x16'>
 				<Field.Label>{t('Description')}</Field.Label>
 				<Field.Row>
-					<TextAreaInput style={ inputStyles } rows='3' value={description} onChange={(event) => onChangeField(event, handleDescription)} placeholder={t('Description')} fontScale='p1'/>
+					<TextAreaInput style={ inputStyles } rows='5' value={description} onChange={(event) => onChangeField(event, handleDescription)} placeholder={t('Description')} fontScale='p1'/>
 				</Field.Row>
 			</Field>
 

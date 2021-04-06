@@ -9,12 +9,15 @@ import { Step } from '../../../../../../client/views/setupWizard/Step';
 import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { constructPersonFullFIO } from '../../../../../utils/client/methods/constructPersonFIO';
-import { fileUploadToWorkingGroupRequestAnswer } from '../../../../../ui/client/lib/fileUpload';
+import { fileUploadToErrand } from '../../../../../ui/client/lib/fileUpload';
 import { useMethod } from '../../../../../../client/contexts/ServerContext';
+import { getErrandFieldsForSave, getDefaultErrandFields } from '../../../../../errand/client/views/errandsPage/ErrandForm';
+import { ErrandTypes } from '../../../../../errand/client/utils/ErrandTypes';
 
 function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInfo, fileDownloadInfo }) {
-	const { goToPreviousStep, goToFinalStep } = useInvitePageContext();
+	const { goToPreviousStep, goToFinalStep, workingGroupRequestState } = useInvitePageContext();
 	const t = useTranslation();
+	const { data } = workingGroupRequestState;
 
 	const [committing, setCommitting] = useState(false);
 	const [newData, setNewData] = useState({
@@ -27,6 +30,7 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 	});
 
 	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
+	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
 
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [newData]);
 
@@ -118,11 +122,40 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 			setCommitting(true);
 			const dataToSave = packNewData();
 			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
-			await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {
-				_id: fileDownloadInfo.workingGroupRequestId,
-				mailId: newMailId === '' ? fileDownloadInfo.mailId : newMailId,
-				answerId,
+			// await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {
+			// 	_id: fileDownloadInfo.workingGroupRequestId,
+			// 	mailId: newMailId === '' ? fileDownloadInfo.mailId : newMailId,
+			// 	answerId,
+			// });
+
+			console.log('HEREERERE');
+			console.dir({ data });
+			console.dir({ kekw: { ...fileDownloadInfo, ...dataToSave } });
+
+			const dataToErrand = { ...dataToSave };
+
+			dataToSave.sender._id && Object.assign(dataToErrand, { chargedTo: dataToSave.sender });
+			data.desc && Object.assign(dataToErrand, { desc: data.desc });
+			data.itemResponsible?._id && Object.assign(dataToErrand, { initiatedBy: data.itemResponsible });
+			dataToSave.protocol && Object.assign(dataToErrand, {
+				protocol: {
+					_id: dataToSave.protocol._id,
+					d: dataToSave.protocol.d,
+					num: dataToSave.protocol.num,
+					itemNum: dataToSave.protocol.itemNum,
+					itemId: dataToSave.protocol.itemId,
+					sectionId: dataToSave.protocol.sectionId,
+				},
 			});
+
+			const errand = getDefaultErrandFields({ errand: dataToErrand, errandType: ErrandTypes.byRequestAnswer });
+			const errandToSave = getErrandFieldsForSave({ errand, errandType: ErrandTypes.byRequestAnswer });
+			console.dir({ errand, errandToSave });
+
+			const errandId = await insertOrUpdateErrand(errandToSave);
+			if (fileDownloadInfo.attachedFile.length > 0) {
+				await fileUploadToErrand(fileDownloadInfo.attachedFile, { _id: errandId });
+			}
 			setCommitting(false);
 			goToFinalStep();
 		} catch (error) {

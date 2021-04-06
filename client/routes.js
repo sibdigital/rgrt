@@ -290,7 +290,7 @@ FlowRouter.route('/protocol/:id/item/:sectionId/:itemId/new-errand', {
 FlowRouter.route('/working-groups-requests/:requestid/new_answer', {
 	name: 'working-groups-requests_new_answer',
 	action: () => {
-		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/EditAnswerErrand'), { template: 'main', region: 'center' });
+		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/EditErrand'), { template: 'main', region: 'center' });
 	},
 	triggersExit: [function() {
 		$('.main-content').addClass('rc-old');

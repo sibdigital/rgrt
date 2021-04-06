@@ -92,7 +92,7 @@ function Errands({
 				{item.expireAt && formatDate(item.expireAt)}
 			</Table.Cell>}
 			<Table.Cell fontScale='p1' style={style} onClick={onClick(item._id)} color='default'>
-				{_t(item.t ?? '')}
+				{item.status?.i18nLabel ?? _t(item.t ?? '')}
 			</Table.Cell>
 			{ mediaQuery && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={_t('Delete')} onClick={onDeleteClick(item._id)}>

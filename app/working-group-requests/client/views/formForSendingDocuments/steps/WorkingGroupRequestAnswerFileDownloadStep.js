@@ -301,6 +301,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 					_id: sectionSelected?._id ?? '',
 					title: sectionSelected ? [sectionSelected.num ?? '', ': ', sectionSelected.name ? preProcessingProtocolItems(sectionSelected.name) : ''].join('') : '',
 				},
+				itemNum: protocolItemsId.length > 0 ? protocolItemsId[0].num : '',
+				sectionId: protocolItemsId.length > 0 ? protocolItemsId[0].sectionId : '',
+				itemId: protocolItemsId.length > 0 ? protocolItemsId[0]._id : '',
 				sectionItem: protocolItemsId?.map((item) => ({
 					_id: item._id,
 					title: [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join(''),

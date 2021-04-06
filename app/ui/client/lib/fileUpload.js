@@ -354,6 +354,71 @@ export const uploadFileWithWorkingGroupRequestAnswer = async (workingGroupReques
 	}
 };
 
+export const uploadFileWithErrand = async (errandId, { fileName, file }) => {
+	const data = new FormData();
+	data.append('file', file, fileName);
+
+	const uploads = Session.get('uploading') || [];
+
+	const upload = {
+		id: Random.id(),
+		name: fileName,
+		percentage: 0,
+	};
+
+	uploads.push(upload);
+	Session.set('uploading', uploads);
+
+	const { xhr, promise } = await APIClient.upload(`v1/errands.upload/${ errandId }`, {}, data, {
+		progress(progress) {
+			const uploads = Session.get('uploading') || [];
+
+			if (progress === 100) {
+				return;
+			}
+			uploads.filter((u) => u.id === upload.id).forEach((u) => {
+				u.percentage = Math.round(progress) || 0;
+			});
+			Session.set('uploading', uploads);
+		},
+		error(error) {
+			const uploads = Session.get('uploading') || [];
+			uploads.filter((u) => u.id === upload.id).forEach((u) => {
+				u.error = error.message;
+				u.percentage = 0;
+			});
+			Session.set('uploading', uploads);
+		},
+	});
+
+	Tracker.autorun((computation) => {
+		const isCanceling = Session.get(`uploading-cancel-${ upload.id }`);
+		if (!isCanceling) {
+			return;
+		}
+		computation.stop();
+		Session.delete(`uploading-cancel-${ upload.id }`);
+
+		xhr.abort();
+
+		const uploads = Session.get('uploading') || {};
+		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
+	});
+
+	try {
+		await promise;
+		const uploads = Session.get('uploading') || [];
+		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
+		return { id: promise.responseJSON._id };
+	} catch (error) {
+		const uploads = Session.get('uploading') || [];
+		uploads.filter((u) => u.id === upload.id).forEach((u) => {
+			u.error = (error.xhr && error.xhr.responseJSON && error.xhr.responseJSON.error) || error.message;
+			u.percentage = 0;
+		});
+		Session.set('uploading', uploads);
+	}
+};
 
 const showUploadPreview = (file, callback) => {
 	// If greater then 10MB don't try and show a preview
@@ -480,6 +545,51 @@ const getUploadPreview = async (file, preview) => {
 const getFileExtension = (fileName) => fileName.slice((fileName.lastIndexOf('.') - 1 >>> 0) + 2);
 
 const getFileNameWithoutExtension = (fileName) => fileName.replace(/\..+$/, '');
+
+export const fileUploadToErrand = async (files, { _id }) => {
+	files = [].concat(files);
+
+	const uploadNextFile = () => {
+		const file = files.pop();
+		if (!file) {
+			modal.close();
+			return;
+		}
+
+		if (!fileUploadIsValidContentType(file.file.type)) {
+			modal.open({
+				title: t('FileUpload_MediaType_NotAccepted'),
+				text: file.file.name,
+				type: 'error',
+				timer: 20000,
+			});
+			uploadNextFile();
+			return;
+		}
+
+		if (file.file.size === 0) {
+			modal.open({
+				title: t('FileUpload_File_Empty'),
+				text: file.file.name,
+				type: 'error',
+				timer: 20000,
+			});
+			uploadNextFile();
+			return;
+		}
+
+		const upload = async () => {
+			await uploadFileWithErrand(_id, {
+				fileName: file.name,
+				file: file.file,
+			});
+			uploadNextFile();
+		};
+		upload();
+	};
+
+	uploadNextFile();
+};
 
 export const fileUploadToWorkingGroupRequestAnswer = async (files, { _id, mailId, answerId }) => {
 	files = [].concat(files);

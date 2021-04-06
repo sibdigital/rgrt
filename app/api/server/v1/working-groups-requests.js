@@ -46,7 +46,8 @@ API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 API.v1.addRoute('working-groups-requests.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findWorkingGroupRequest(query._id)));
+		const cursor = Promise.await(findWorkingGroupRequest(query._id));
+		return API.v1.success(cursor ?? {});
 	},
 });
 

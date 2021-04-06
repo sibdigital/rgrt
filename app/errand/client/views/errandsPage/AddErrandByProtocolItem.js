@@ -21,16 +21,22 @@ import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../../cli
 import { useForm } from '../../../../../client/hooks/useForm';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
+import { useUserId } from '../../../../../client/contexts/UserContext';
+import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
+import { ErrandTypes } from '../../utils/ErrandTypes';
+import { ErrandStatuses } from '../../utils/ErrandStatuses';
+import { NewErrand } from './EditErrand';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
 
 export function AddErrandByProtocolItemPage() {
 	const t = useTranslation();
+	const userId = useUserId();
 
 	const itemId = useRouteParameter('itemId');
 
-	const { data: protocolData, state, error } = useEndpointDataExperimental('protocols.findByItemId', useMemo(() => ({ query: JSON.stringify({ _id: itemId }) }), [itemId]));
+	const { data: _protocolData, state, error } = useEndpointDataExperimental('protocols.findByItemId', useMemo(() => ({ query: JSON.stringify({ _id: itemId }) }), [itemId]));
 
 	if ([state].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box w='full' pb='x24'>
@@ -46,16 +52,56 @@ export function AddErrandByProtocolItemPage() {
 	if (error) {
 		return <Callout m='x16' type='danger'>{t('Item_not_found')}</Callout>;
 	}
+	const protocolData = _protocolData.protocol[0];
 
-	return <AddErrandByProtocolItem protocolData={protocolData.protocol[0]} itemId={itemId}/>;
+	const section = protocolData.sections.filter((section) => section.items.find((item) => item._id === itemId))[0];
+	const item = section.items.find(item => item._id === itemId);
+	const itemResponsible = item?.responsible[0];
+
+	const errand = {
+		initiatedBy: {
+			_id: itemResponsible._id,
+			surname: itemResponsible.surname,
+			name: itemResponsible.name,
+			patronymic: itemResponsible.patronymic,
+		},
+		status: ErrandStatuses.OPENED,
+		chargedTo: {
+			userId,
+			person: {
+				_id: itemResponsible._id,
+				surname: itemResponsible.surname,
+				name: itemResponsible.name,
+				patronymic: itemResponsible.patronymic,
+			},
+		},
+		desc: $(item?.name).text(),
+		expireAt: new Date(),
+		ts: new Date(),
+		protocol: {
+			_id: protocolData._id,
+			num: protocolData.num,
+			d: protocolData.d,
+			sectionId: section._id,
+			itemId: item._id,
+			itemName: item.name ? $(item?.name).text() : '',
+		},
+		errandType: ErrandTypes.byProtocolItem,
+		protocolItemId: itemId,
+	};
+
+	return <NewErrand errand={errand} request={null}/>;
+	// return <AddErrandByProtocolItem protocolData={protocolData.protocol[0]} itemId={itemId}/>;
 }
 
 function AddErrandByProtocolItem({ protocolData, itemId }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const formatDate = useFormatDate();
+	const userId = useUserId();
 
 	const createErrand = useMethod('createErrand');
+	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
 
 	const section = protocolData.sections.filter((section) => section.items.find((item) => item._id === itemId))[0];
 	const item = section.items.find(item => item._id === itemId);
@@ -67,21 +113,33 @@ function AddErrandByProtocolItem({ protocolData, itemId }) {
 		reset,
 		hasUnsavedChanges,
 	} = useForm({
-		chargedTo: {
+		initiatedBy: {
 			_id: itemResponsible._id,
 			surname: itemResponsible.surname,
 			name: itemResponsible.name,
 			patronymic: itemResponsible.patronymic,
 		},
+		status: ErrandStatuses.OPENED,
+		chargedTo: {
+			userId,
+			person: {
+				_id: itemResponsible._id,
+				surname: itemResponsible.surname,
+				name: itemResponsible.name,
+				patronymic: itemResponsible.patronymic,
+			},
+		},
 		desc: $(item?.name).text(),
-		expireAt: '',
+		expireAt: new Date(),
+		ts: new Date(),
 		protocol: {
 			_id: protocolData._id,
 			num: protocolData.num,
 			d: protocolData.d,
 			sectionId: section._id,
 			itemId: item._id,
-		}
+			itemName: item.name ?? '',
+		},
 	});
 
 	const {
@@ -100,9 +158,10 @@ function AddErrandByProtocolItem({ protocolData, itemId }) {
 	const saveQuery = useMemo(() => values, [JSON.stringify(values)]);
 
 	const saveAction = useCallback(async (errandData) => {
-		const _id = await createErrand(errandData);
+		// const _id = await createErrand(errandData);
+		const _id = await insertOrUpdateErrand({ ...errandData, errandType: ErrandTypes.byProtocolItem, protocolItemId: itemId });
 		return _id;
-	}, [createErrand]);
+	}, [insertOrUpdateErrand]);
 
 	const handleSave = useCallback(async () => {
 		try {
@@ -132,7 +191,7 @@ function AddErrandByProtocolItem({ protocolData, itemId }) {
 					{useMemo(() => <Field>
 						<Field.Label>{t('Errand_Charged_to')}</Field.Label>
 						<Field.Row>
-							<TextInput flexGrow={1} value={chargedTo.surname + ' ' + chargedTo.name + ' ' + chargedTo.patronymic}/>
+							<TextInput flexGrow={1} value={constructPersonFullFIO(chargedTo?.person ?? '')}/>
 						</Field.Row>
 					</Field>, [t, chargedTo])}
 					{useMemo(() => <Field>
@@ -142,7 +201,7 @@ function AddErrandByProtocolItem({ protocolData, itemId }) {
 								dateFormat='dd.MM.yyyy'
 								selected={expireAt}
 								onChange={handleExpireAt}
-								customInput={<TextInput />}
+								customInput={<TextInput border='1px solid #4fb0fc'/>}
 								locale='ru'
 							/>
 						</Field.Row>
@@ -164,7 +223,7 @@ function AddErrandByProtocolItem({ protocolData, itemId }) {
 					{useMemo(() => <Field>
 						<Field.Label>{t('Description')}</Field.Label>
 						<Field.Row>
-							<TextAreaInput rows={3} flexGrow={1} value={desc} onChange={handleDesc}/>
+							<TextAreaInput border='1px solid #4fb0fc' rows={3} flexGrow={1} value={desc} onChange={handleDesc}/>
 						</Field.Row>
 					</Field>, [t, desc, handleDesc])}
 				</FieldGroup>
