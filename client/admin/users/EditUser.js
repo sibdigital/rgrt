@@ -11,7 +11,7 @@ import { useForm } from '../../hooks/useForm';
 import UserForm from './UserForm';
 import { FormSkeleton } from './Skeleton';
 
-export function EditUserWithData({ uid, onChange, ...props }) {
+export function EditUserWithData({ uid, ...props }) {
 	const t = useTranslation();
 	const { data: roleData, state: roleState, error: roleError } = useEndpointDataExperimental('roles.list', '') || {};
 	const { data, state, error } = useEndpointDataExperimental('users.info', useMemo(() => ({ userId: uid }), [uid]));
@@ -26,7 +26,7 @@ export function EditUserWithData({ uid, onChange, ...props }) {
 		return <Callout m='x16' type='danger'>{t('User_not_found')}</Callout>;
 	}
 
-	return <EditUser data={data.user} onChange={onChange} roles={roleData.roles} workingGroups={workingGroupsData.workingGroups} persons={persons} {...props}/>;
+	return <EditUser data={data.user} roles={roleData.roles} workingGroups={workingGroupsData.workingGroups} persons={persons} {...props}/>;
 }
 
 const getInitialValue = (data) => ({
@@ -52,7 +52,7 @@ const getInitialValue = (data) => ({
 	statusText: data.statusText ?? '',
 });
 
-export function EditUser({ data, onChange, roles, workingGroups, persons, ...props }) {
+export function EditUser({ data, roles, workingGroups, persons, ...props }) {
 	const t = useTranslation();
 
 	const [avatarObj, setAvatarObj] = useState();
@@ -100,14 +100,13 @@ export function EditUser({ data, onChange, roles, workingGroups, persons, ...pro
 
 	const handleSave = useCallback(async () => {
 		const result = await saveAction();
-		onChange();
 		if (result.success) {
 			if (avatarObj) {
 				await updateAvatar();
 			}
 			goToUser(data._id);
 		}
-	}, [avatarObj, data._id, goToUser, saveAction, updateAvatar, onChange]);
+	}, [avatarObj, data._id, goToUser, saveAction, updateAvatar]);
 
 	const availableRoles = roles.map(({ _id, description }) => [_id, description || _id]);
 
