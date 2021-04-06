@@ -77,17 +77,17 @@ export function CouncilCommissionPage(
 		}
 		return  <Box className={`commission-person-block`} display='flex'>
 			<Box flexBasis='40%'><img width='100%' height='100%' className='imgRerenderer' src={avatarSource?.url}/></Box>
-			<Box position='relative' fontSize={mediaQuery ? 'x16' : 'x14'} flexBasis='60%' pi={mediaQuery ? 'x16' : 'x12'} pb={mediaQuery ? 'x20' : 'x8'} backgroundColor='whitesmoke'>
-				<Box fontSize={mediaQuery ? 'x24' : 'x16'}>
+			<Box className='right-elem'>
+				<Box className='fio'>
 					<Box>{surname} {name}</Box>
 					<Box>{patronymic}</Box>
 				</Box>
-				<Box mbs={mediaQuery ? 'x8' : 'x4'} lineHeight={mediaQuery ? 'x24' : 'x18'}>
+				<Box className='pos-org'>
 					<Box>{position}</Box>
 					<Box>{organization}</Box>
 				</Box>
-				<Box position='absolute' style={mediaQuery ? {bottom:'16px'} : {bottom:'10px'}}>
-					<Box mbe='x4'>{phone}</Box>
+				<Box className='contact-info'>
+					<Box>{phone}</Box>
 					<Box>{email}</Box>
 				</Box>
 			</Box>
@@ -103,7 +103,7 @@ export function CouncilCommissionPage(
 				</Field>
 			</Page.Header>
 			<Page.ScrollableContent>
-				<Box className={'council-commission-grid'} pi={mediaQuery ? 'x32' : '0'}>
+				<Box className={'council-commission-grid'}>
 				{/* display={mediaQuery ? 'flex' : 'unset'} flexWrap={'wrap'} justifyContent={'flex-start'} maxWidth='x1800' w='full' alignSelf='center' fontSize='x16' */}
 					{persons 
 						? persons.persons.map((person, index) => 
