@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
 	Field,
 	TextInput,
@@ -91,6 +91,30 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 		return res;
 	}, [persons]);
 
+	const person = persons?.persons.filter((person) => person._id === personId)[0];
+	
+	const autofillDataFromPerson = (person) => {
+		handleSurname(person.surname);
+		handleName(person.name);
+		handlePatronymic(person.patronymic);
+		handlePersonId(person._id);
+		handlePosition(person.position);
+		handleOrganization(person.organization);
+	}
+
+	const resetFilledData = (person) => {
+		handleSurname("");
+		handleName("");
+		handlePatronymic("");
+		handlePersonId("");
+		handlePosition("");
+		handleOrganization("");
+	}
+
+	useEffect(() => {
+		person?._id ? autofillDataFromPerson(person) : resetFilledData(person);
+	}, [person]);
+
 	// const workingGroupOptions = useMemo(() => [
 	// 	['Не выбрано', t('Not_chosen')],
 	// 	['Члены рабочей группы', 'Члены рабочей группы'],
@@ -101,6 +125,12 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 	return <VerticalBar.ScrollableContent is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} { ...props }>
 		<FieldGroup>
 			{ prepend }
+			{useMemo(() => <Field>
+				<Field.Label>{t('Person')}</Field.Label>
+				<Field.Row>
+					<Select options={personsOptions} onChange={handlePersonId} value={personId} selected={personId}/>
+				</Field.Row>
+			</Field>, [t, personId, handlePersonId])}
 			{useMemo(() => <Field>
 				<Field.Label>{t('Surname')}</Field.Label>
 				<Field.Row>
@@ -162,12 +192,6 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 					<Select options={workingGroupOptions} onChange={handleWorkingGroup} value={workingGroup} selected={workingGroup}/>
 				</Field.Row>
 			</Field>, [t, workingGroup, handleWorkingGroup])}
-			{useMemo(() => <Field>
-				<Field.Label>{t('Person')}</Field.Label>
-				<Field.Row>
-					<Select options={personsOptions} onChange={handlePersonId} value={personId} selected={personId}/>
-				</Field.Row>
-			</Field>, [t, personId, handlePersonId])}
 			{useMemo(() => <Field>
 				<Field.Label>{t('StatusMessage')}</Field.Label>
 				<Field.Row>
