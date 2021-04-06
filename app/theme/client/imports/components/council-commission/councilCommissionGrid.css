@@ -144,7 +144,7 @@
 @media screen and (max-width: 880px) {
     .council-commission-grid {
         grid-template-columns: repeat(1, 1fr);
-        grid-auto-rows: minmax(27%, 27.5vmax);
+        grid-auto-rows: minmax(12%, 27.5vmax);
         width: 550px;
         align-self: center;
         padding-inline: 5%;
