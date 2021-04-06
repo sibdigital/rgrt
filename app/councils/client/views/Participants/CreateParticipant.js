@@ -25,6 +25,8 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 		phone: '',
 		email: '',
 		group: '',
+		organization: '',
+		position: '',
 	});
 
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -47,12 +49,13 @@ export function CreateParticipant({ goTo, close, onChange, councilId, invitedPer
 			phone: person.phone,
 			email: person.email,
 			group: { _id: group[0], title: group[1] },
+			organization: person.organization,
+			position: person.position,
 		};
 	};
 
 	const handleSave = useCallback(async () => {
-		// const personId = '123';
-		console.log(constructPerson(values));
+		console.dir({ toSave: constructPerson(values) });
 		const personId = await insertOrUpdatePerson(constructPerson(values));
 		if (personId) {
 			const person = values;

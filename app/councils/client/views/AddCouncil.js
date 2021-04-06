@@ -241,7 +241,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 				<Field mbe='x8' mis='x4'>
 					<Field.Label>{t('Description')}</Field.Label>
 					<Field.Row>
-						<TextAreaInput placeholder={t('Description')} style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} rows='5' fontScale='p1'/>
+						<TextAreaInput mie='x20' placeholder={t('Description')} style={ inputStyles } value={description} onChange={(e) => setDescription(e.currentTarget.value)} rows='5' fontScale='p1'/>
 					</Field.Row>
 				</Field>
 

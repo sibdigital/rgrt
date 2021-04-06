@@ -20,6 +20,8 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 		phone,
 		email,
 		group,
+		organization,
+		position,
 	} = formValues;
 
 	const {
@@ -29,6 +31,8 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 		handlePhone,
 		handleEmail,
 		handleGroup,
+		handleOrganization,
+		handlePosition,
 	} = formHandlers;
 
 	return <Scrollable { ...props }>
@@ -57,6 +61,16 @@ export default function ParticipantForm({ formValues, formHandlers, availableRol
 					<TextInput mis='x8' flexGrow={1} value={email} error={!isEmail(email) && email.length > 0 ? 'error' : undefined} onChange={handleEmail} addon={<Icon name='mail' size='x20'/>}/>
 				</Field>
 			</Field.Row>, [t, phone, handlePhone, email, handleEmail])}
+			{useMemo(() => <Field.Row mb='x4' width='98%'>
+				<Field mb='x8' width='49%'>
+					<Field.Label>{t('Organization')} <span style={{ color: 'red' }}>*</span></Field.Label>
+					<TextInput mis='x8' flexGrow={1} value={organization} onChange={handleOrganization}/>
+				</Field>
+				<Field mb='x8' width='49%'>
+					<Field.Label>{t('Position')} <span style={{ color: 'red' }}>*</span></Field.Label>
+					<TextInput mis='x8' flexGrow={1} value={position} onChange={handlePosition}/>
+				</Field>
+			</Field.Row>, [t, organization, handleOrganization, position, handlePosition])}
 			{useMemo(() => <Field.Row mb='x4' width='98%'>
 				<Field mb='x8'>
 					<Field.Label>{t('Group')} <span style={{ color: 'red' }}>*</span></Field.Label>

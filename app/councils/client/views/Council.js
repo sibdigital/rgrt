@@ -562,7 +562,7 @@ function Council({
 					</Button>}
 				</ButtonGroup>
 			</Page.Header>
-			<Page.Content>
+			<Page.ScrollableContent margin='x8'>
 				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
 					<Field mis='x4' display='flex' flexDirection='row' mbe={!mediaQuery && 'x16'}>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
@@ -637,17 +637,26 @@ function Council({
 					</ButtonGroup>
 				</Field>}
 				{tab === 'persons' && isSecretary
-					&& ((context === 'participants'
-					&& <CouncilPersons councilId={councilId} isSecretary={isSecretary}/>
-					)
+					&& <Box maxHeight='500px'>
+						{ context === 'participants'
+						&& <CouncilPersons councilId={ councilId } isSecretary={ isSecretary }/>
+						}
 
-					|| (context === 'addParticipants'
-					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
-					)
+						{ context === 'addParticipants'
+						&& <AddPerson
+							councilId={ councilId } onChange={ onChange } close={ onClose } persons={ persons }
+							invitedPersons={ invitedPersons } setInvitedPersons={ setInvitedPersonsIds }
+							onNewParticipant={ onParticipantClick }/>
+						}
 
-					|| (context === 'newParticipants'
-					&& <CreateParticipant workingGroupOptions={workingGroupOptions} councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
-					))
+						{ context === 'newParticipants'
+						&& <CreateParticipant
+							workingGroupOptions={ workingGroupOptions } councilId={ councilId }
+							goTo={ onCreatePersonsClick } close={ onClose } onChange={ onChange }
+							invitedPersons={ invitedPersonsIds }
+							setInvitedPersons={ setInvitedPersonsIds }/>
+						}
+					</Box>
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
@@ -671,9 +680,11 @@ function Council({
 					</Field>
 				}
 				{tab === 'files'
-					&& <CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
+					&& <Box maxHeight='500px'>
+						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
+					</Box>
 				}
-			</Page.Content>
+			</Page.ScrollableContent>
 		</Page>
 	</Page>;
 }

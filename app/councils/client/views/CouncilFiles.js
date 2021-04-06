@@ -144,7 +144,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 
 		const style = getStyle(document.index);
 
-		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
+		return <Table.Row width='99%' key={_id} tabIndex={0} role='link' action style={style}>
 			<Table.Cell fontScale='p1' color='default'>{document.index + 1}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			{mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>}
@@ -171,9 +171,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		</Table.Row>;
 	};
 
-	return <Box maxHeight='500px' overflowY='auto' overflowX='hidden'>
-		<GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>
-	</Box>;
+	return <Box overflowX='hidden'><GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/></Box>;
 }
 
 CouncilFiles.displayName = 'CouncilFiles';
