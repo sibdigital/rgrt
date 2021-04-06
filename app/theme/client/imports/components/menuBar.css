@@ -52,3 +52,9 @@
         padding: 6px 10px 12px;
     }
 }
+
+@media screen and (max-width: 525px) {
+    .horizontal-menu-bar {
+        display: none;
+    }
+}
