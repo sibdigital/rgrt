@@ -54,6 +54,14 @@ API.v1.addRoute('protocols.findOne', { authRequired: true }, {
 	},
 });
 
+API.v1.addRoute('protocols.inviteFindOne', { authRequired: false }, {
+	get() {
+		const { query, stockFields } = this.parseJsonQuery();
+		const cursor = Promise.await(findProtocol(query._id, { fields: stockFields ?? {} }));
+		return API.v1.success(cursor ?? {});
+	},
+});
+
 API.v1.addRoute('protocols.findByItemId', { authRequired: true }, {
 	get() {
 		const { query, stockFields } = this.parseJsonQuery();
@@ -64,7 +72,7 @@ API.v1.addRoute('protocols.findByItemId', { authRequired: true }, {
 API.v1.addRoute('protocols.findByCouncilId', {authRequired: true}, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findProtocolByCouncilId(query._id)))
+		return API.v1.success(Promise.await(findProtocolByCouncilId(query._id)));
 	}
 });
 

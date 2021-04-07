@@ -447,6 +447,7 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Table.Row>;
 	};
 
+	console.dir({ filesInErrandFields: files, documents });
 	return <Box display='flex' flexDirection='column'>
 		{/*<Margins inline='x8'>*/}
 		<Button mis='x16' mbe='x16' small primary width='max-content' onClick={fileUploadClick}>{t('Upload_file')}</Button>

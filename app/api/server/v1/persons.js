@@ -49,8 +49,13 @@ API.v1.addRoute('persons.listToAutoComplete', { authRequired: true }, {
 	},
 });
 
-API.v1.addRoute('persons.findOne', { authRequired: true }, {
+API.v1.addRoute('persons.findOne', { authRequired: false }, {
 	get() {
+		const userId = Meteor.userId();
+		if (!userId) {
+			return API.v1.success({});
+		}
+
 		const { query, stockFields } = this.parseJsonQuery();
 		const cursor = Promise.await(findPerson(query, { fields: stockFields }));
 		console.log({ cursor });

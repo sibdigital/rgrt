@@ -1,22 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Button, Chip, Field, Margins, Select, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import { Box, Field, Margins, Select, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import { useFormatDate } from '../../../../client/hooks/useFormatDate';
-import { getAnimation } from '../../../utils';
-import { ClearButton } from '../../../utils/client/views/ClearButton';
-import { constructPersonFullFIO } from '../../../utils/client/methods/constructPersonFIO';
-import { CouncilChoose } from './CouncilChoose';
-import { ProtocolChoose } from './ProtocolChoose';
-import { ItemsChoose } from './ItemsChoose';
-import { settings } from '../../../settings/client';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -25,16 +15,16 @@ export const AnswerTypeEnum = Object.freeze({
 	MAIL: 2,
 });
 
-export const answerStatusState = Object.freeze({
-	RECEIVED: { state: 1, title: 'Received' },
-	ACCEPTED: { state: 2, title: 'Accepted' },
+export const AnswerTypes = Object.freeze({
+	PROTOCOL: { state: 1, title: 'Working_group_request_for_protocol_item', i18nLabel: 'Working_group_request_for_protocol_item', key: 'Protocol' },
+	MAIL: { state: 2, title: 'Working_group_request_for_mail', i18nLabel: 'Working_group_request_for_mail', key: 'Mail' },
 });
 
 export const defaultAnswerFields = {
 	sender: {},
 	unread: false,
 	ts: new Date(),
-	answerType: {},
+	answerType: AnswerTypes.MAIL,
 	protocolId: '',
 	sectionItemsId: [],
 	protocol: {},
@@ -180,7 +170,7 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 	const values = useMemo(() => defaultValues ?? newValues, [defaultValues, newValues]);
 	const handlers = useMemo(() => defaultHandlers ?? newHandlers, [defaultHandlers, newHandlers]);
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
-	const statusAnswerOptions = useMemo(() => [[answerStatusState.ACCEPTED.state, t(answerStatusState.ACCEPTED.title)], [answerStatusState.RECEIVED.state, t(answerStatusState.RECEIVED.title)]], [t]);
+	// const statusAnswerOptions = useMemo(() => [[answerStatusState.ACCEPTED.state, t(answerStatusState.ACCEPTED.title)], [answerStatusState.RECEIVED.state, t(answerStatusState.RECEIVED.title)]], [t]);
 
 	const {
 		sender,

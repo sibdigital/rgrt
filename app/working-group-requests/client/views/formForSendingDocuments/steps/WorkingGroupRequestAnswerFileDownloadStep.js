@@ -404,7 +404,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								{
 									<TextInput readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
 								}
-								{/*{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}*/}
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
@@ -424,7 +423,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 									</Button>}
 								</Label>
 							</Field.Row>
-							{/*<TextInput disabled={!protocolSelected} readOnly value={protocolSelectItemLabel} placeholder={t('Working_group_request_invite_select_sections_items')}/>*/}
 							<ProtocolItemsField protocolItems={protocolItemsId} handleProtocolItems={setProtocolItemsId} protocolId={protocol?._id ?? ''} onShowChooseButton={false} onShowLabelAndTooltip={false}/>
 						</Field>}
 						<Field>

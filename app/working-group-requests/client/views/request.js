@@ -7,8 +7,7 @@ import ru from 'date-fns/locale/ru';
 import { settings } from '../../../settings/client';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { Answers } from './Answers';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
@@ -19,6 +18,7 @@ import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from '
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import RequestForm, { useDefaultRequestForm, WorkingGroupRequestVerticalChooseBar } from './RequestForm';
+import { ErrandTypes } from '../../../errand/client/utils/ErrandTypes';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -113,15 +113,15 @@ export function DocumentPage() {
 
 	const answers = useMemo(() => data?.answers ?? [], [data]);
 
-	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&byRequestAnswer&${ requestId }`].join(''), [requestId]);
+	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&${ ErrandTypes.byRequestAnswer.key }&${ requestId }`].join(''), [requestId]);
 	const addressLabel = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
 	}, []);
 
-	const onMailClick = useCallback((curMail) => () => {
-		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ curMail._id }`);
+	const onMailClick = useCallback((errandId) => () => {
+		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ errandId }`);
 	}, [requestId]);
 
 	const goBack = () => {
@@ -215,7 +215,7 @@ export function DocumentPage() {
 				<Field mbe='x16'>
 					<Field.Label>{t('Working_group_request_invite_link')}</Field.Label>
 					<Field.Row>
-						<a href={address} is='span' target='_blank'>{addressLabel}</a>
+						<a href={address} is='span'>{addressLabel}</a>
 					</Field.Row>
 				</Field>
 				<Box displa='flex' maxHeight='600px'>

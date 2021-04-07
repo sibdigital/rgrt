@@ -15,11 +15,9 @@ API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 		const userRoles = Users.findOneById(userId, { fields: { roles: 1 }	});
 		const isUser = userRoles?.roles?.includes('admin') || userRoles?.roles?.includes('secretary');
 
-		console.log({ userRoles, isUser });
 		if (!isUser) {
 			const person = Promise.await(Persons.findOne({ userId }, { fields: { _id: 1 } }));
 
-			console.log({ person });
 			return API.v1.success(Promise.await(findWorkingGroupsRequests({
 				query: { 'itemResponsible._id': person?._id ?? '' },
 				fields: stockFields,
@@ -34,6 +32,23 @@ API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 		return API.v1.success(Promise.await(findWorkingGroupsRequests({
 			query,
 			fields: stockFields,
+			pagination: {
+				offset,
+				count,
+				sort,
+			},
+		})));
+	},
+});
+
+API.v1.addRoute('working-groups-requests.inviteList', { authRequired: false }, {
+	get() {
+		const { offset, count } = this.getPaginationItems();
+		const { sort, query } = this.parseJsonQuery();
+
+		return API.v1.success(Promise.await(findWorkingGroupsRequests({
+			query,
+			fields: { number: 1, desc: 1, date: 1, ts: 1 },
 			pagination: {
 				offset,
 				count,
@@ -75,7 +90,7 @@ API.v1.addRoute('working-groups-requests.findAnswerOneById', { authRequired: tru
 API.v1.addRoute('working-groups-requests.getOneByInviteLink', { authRequired: false }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findOneWorkingGroupRequestByInviteLink(query.inviteLink)));
+		return API.v1.success(Promise.await(findOneWorkingGroupRequestByInviteLink(query.inviteLink, { fields: { requestType: 1, mail: 1, protocolItemsId: 1 } })));
 	},
 });
 

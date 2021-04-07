@@ -50,7 +50,7 @@ function InvitePageState() {
 	const userId = useUserId();
 	const currentUser = useUser();
 
-	const endPoint = workingGroupRequestId === 'all' ? 'working-groups-requests.list' : 'working-groups-requests.getOneByInviteLink';
+	const endPoint = workingGroupRequestId === 'all' ? 'working-groups-requests.inviteList' : 'working-groups-requests.getOneByInviteLink';
 	const query = useMemo(() => {
 		if (workingGroupRequestId !== 'all') {
 			return {
@@ -63,7 +63,7 @@ function InvitePageState() {
 	}, [workingGroupRequestId]);
 
 	const { data, state, error } = useEndpointDataExperimental(endPoint, query);
-	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.findOne', useMemo(() => ({
+	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.inviteFindOne', useMemo(() => ({
 		query: JSON.stringify({ _id: workingGroupRequestId === 'all' ? '' : data?.protocolId ?? '' }),
 	}), [data, workingGroupRequestId]));
 	const { data: userInfo, state: userState } = useEndpointDataExperimental('persons.findOne', useMemo(() => ({
@@ -100,7 +100,7 @@ function InvitePageState() {
 		console.log('loading');
 		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
-	console.dir({ data, currentUser });
+	console.dir({ data, currentUser, userId });
 
 	if (currentStep !== errorStep) {
 		try {

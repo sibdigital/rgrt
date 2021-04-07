@@ -20,8 +20,8 @@ export async function findWorkingGroupsRequests({ query = {}, fields = {}, pagin
 	};
 }
 
-export async function findOneWorkingGroupRequestByInviteLink(inviteLink) {
-	const cursor = await WorkingGroupsRequests.findWorkingGroupRequestByInviteLink({ inviteLink }, {});
+export async function findOneWorkingGroupRequestByInviteLink(inviteLink, options = {}) {
+	const cursor = await WorkingGroupsRequests.findWorkingGroupRequestByInviteLink({ inviteLink }, options);
 	return cursor;
 }
 export async function findWorkingGroupRequest(_id) {
