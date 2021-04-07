@@ -45,6 +45,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Errands_for_me'),
+		condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		action: () => {
 			FlowRouter.go('/errands/charged_to_me');
 		},
