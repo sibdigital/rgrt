@@ -91,17 +91,13 @@ API.v1.addRoute('errands.list', { authRequired: true }, {
 			return API.v1.failure('This method support only one "sort" parameter');
 		}
 
-		const result = Promise.await(findErrands({ query, options: { offset, count, sort } })).toArray();
-
-		if (!result) {
-			return API.v1.failure('Please verify the parameters');
-		}
+		const result = Promise.await(findErrands({ query, options: { offset, count, sort } }));
 
 		return API.v1.success({
-			result,
-			count: result.length,
+			errands: result?.errands ?? [],
+			count: result?.length ?? 0,
 			offset,
-			total: result.total,
+			total: result?.total ?? 0,
 		});
 	},
 });

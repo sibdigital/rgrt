@@ -64,13 +64,13 @@ export function DocumentPage() {
 		}), [data]),
 	);
 
-	// const { data: errandsData } = useEndpointDataExperimental('errands.list',
-	// 	useMemo(() => ({
-	// 		query: JSON.stringify({ workingGroupRequestId: requestId }),
-	// 	}), [requestId]),
-	// );
-	//
-	// useMemo(() => console.dir({ errandsData }), [errandsData]);
+	const { data: errandsData } = useEndpointDataExperimental('errands.list',
+		useMemo(() => ({
+			query: JSON.stringify({ workingGroupRequestId: requestId }),
+		}), [requestId]),
+	);
+
+	useMemo(() => console.dir({ errandsData }), [errandsData]);
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
 
 	const {
@@ -118,7 +118,8 @@ export function DocumentPage() {
 		}
 	}, [protocolItemsData]);
 
-	const answers = useMemo(() => data?.answers ?? [], [data]);
+	// const answers = useMemo(() => data?.answers ?? [], [data]);
+	const answers = useMemo(() => errandsData?.errands ?? [], [errandsData]);
 
 	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&${ ErrandTypes.byRequestAnswer.key }&${ requestId }`].join(''), [requestId]);
 	const addressLabel = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
@@ -128,8 +129,9 @@ export function DocumentPage() {
 	}, []);
 
 	const onMailClick = useCallback((errandId) => () => {
-		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ errandId }`);
-	}, [requestId]);
+		// FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ errandId }`);
+		FlowRouter.go(`/errand/${ errandId }`);
+	}, []);
 
 	const goBack = () => {
 		FlowRouter.go('working-groups-requests');

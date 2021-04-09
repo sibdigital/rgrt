@@ -52,11 +52,11 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 	], [mediaQuery]);
 
 	const renderRow = (answer) => {
-		const { sender, commentary, unread, ts, errandId } = answer;
+		const { sender, commentary, unread, ts, _id } = answer;
 		const organization = sender.organization ?? '';
 		const phone = sender.phone ?? '';
 		const email = sender.email ?? '';
-		return <Table.Row onClick={onClick(errandId)} onMouseEnter={() => onMouseEnter(answer)} style={{ borderLeft: unread ? '1px solid #4fb0fc' : '' }} tabIndex={0} role='link' action>
+		return <Table.Row onClick={onClick(_id)} onMouseEnter={() => onMouseEnter(answer)} style={{ borderLeft: unread ? '1px solid #4fb0fc' : '' }} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' color='default'>{organization}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default' style={{ wordBreak: 'break-all' }}>{commentary}</Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' color='default'>{phone}</Table.Cell>}
