@@ -53,7 +53,6 @@ export function getDefaultErrandFields({ errand, errandType = ErrandTypes.defaul
 	if (!errand || typeof errand !== 'object' || errand.length) {
 		return fields;
 	}
-	console.dir({ errand, fields, errandType });
 
 	const newErrand = { ...errand };
 
@@ -126,9 +125,9 @@ export function getErrandFieldsForSave({ errand, errandType = ErrandTypes.defaul
 		default:
 			break;
 	}
-	console.dir({ fieldsGet: fields, errand });
+	// console.dir({ fieldsGet: fields, errand });
 
-	const newErrand = { ...errand };
+	const newErrand = { ...errand, createdAt: new Date(errand.createdAt && errand.createdAt) };
 
 	const errandKeys = Object.keys(errand);
 	const fieldsKeys = Object.keys(fields);
@@ -146,6 +145,8 @@ export function getErrandFieldsForSave({ errand, errandType = ErrandTypes.defaul
 
 	newErrand.status = { ...newErrand.status, i18nLabel: t(newErrand.status.i18nLabel) };
 	newErrand.errandType = { key: newErrand.errandType.key, state: newErrand.errandType.state, title: newErrand.errandType.title, i18nLabel: t(newErrand.errandType.i18nLabel) };
+	newErrand.answerType && Object.assign(newErrand, { answerType: { ...newErrand.answerType, i18nLabel: t(newErrand.answerType.i18nLabel) } });
+	newErrand.chargedTo && Object.assign(newErrand, { chargedTo: { person: { ...newErrand.chargedTo } } });
 	errand.expireAt?.value && Object.assign(newErrand, { expireAt: new Date(errand.expireAt.value) });
 	errand.ts?.value && Object.assign(newErrand, { ts: new Date(errand.ts.value) });
 
@@ -175,7 +176,6 @@ function ErrandForm({
 
 	let view = <DefaultErrandFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values}/>;
 
-	console.dir({ errandType });
 	switch (errandType) {
 		case ErrandTypes.default:
 			break;

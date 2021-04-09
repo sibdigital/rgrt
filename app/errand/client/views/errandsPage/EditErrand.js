@@ -44,7 +44,10 @@ export function EditErrandPage() {
 	}), [id, idParams]);
 
 	const { data, state, error } = useEndpointDataExperimental('errands.findOne', query);
-	const { data: personData, state: personState, error: personError } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
+	const { data: personData, state: personState, error: personError } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({
+		query: JSON.stringify({ userId }),
+		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
+	}), [userId]));
 	const { data: requestData, state: requestState } = useEndpointDataExperimental('working-groups-requests.findOne', useMemo(() => ({
 		query: JSON.stringify({ _id: idParams[0] === 'add' ? idParams[2] : data?.workingGroupRequestId ?? '' }),
 	}), [data, idParams]));
@@ -67,7 +70,7 @@ export function EditErrandPage() {
 	// console.dir({ idParams });
 	// console.dir(idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]] } : null);
 
-	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: personData } : data ?? null} request={requestData ?? null}/>;
+	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, _id: userId } } : data ?? null} request={requestData ?? null}/>;
 }
 
 export function NewErrand({ errand, request }) {
@@ -111,6 +114,9 @@ export function NewErrand({ errand, request }) {
 		const files = errandType === ErrandTypes.byRequestAnswer ? values.documents?.value?.filter((doc) => doc.file) : [];
 		const errandToSave = getErrandFieldsForSave({ errand: values, errandType });
 
+		if (errand?.errandType?.key === ErrandTypes.byRequestAnswer.key) {
+			request?._id && Object.assign(errandToSave, { workingGroupRequestId: request._id });
+		}
 		// console.log({ errandType, errandToSave, files });
 		await saveAction(errandToSave, files);
 	}, [errand, values, saveAction]);

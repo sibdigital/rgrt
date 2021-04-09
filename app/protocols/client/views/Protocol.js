@@ -90,7 +90,8 @@ export function ProtocolPage() {
 	const data = useEndpointData('protocols.findOne', query) || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
-	const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
+	// const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
+	const title = useMemo(() => [t('Protocol'), [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
 
 	const deleteProtocol = useMethod('deleteProtocol');
 	const deleteSection = useMethod('deleteSection');
@@ -325,6 +326,7 @@ export function ProtocolPage() {
 		return res;
 	}, [workingGroups]);
 
+	console.dir({ title, toStr: title.toString() });
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header display={smallScreenWidth ? 'flex' : 'block'}>
@@ -350,7 +352,16 @@ export function ProtocolPage() {
 			<Page.ScrollableContent>
 				<Box maxWidth='x800' w='full' alignSelf='center' pi='x32' pb='x24' fontSize='x16' borderStyle='solid' borderWidth='x2' borderColor='hint'>
 					<Box mbe='x24' display='flex' flexDirection='column'>
-						<Box is='span' fontScale='h1' alignSelf='center'>{title}</Box>
+						{smallScreenWidth
+							? title?.map((_title, index) => (
+								<Box is='span' fontScale='h1' key={index} alignSelf='center'>
+									{_title}
+								</Box>
+							))
+							: <Box is='span' fontScale='h1' alignSelf='center'>
+								{title.toString()}
+							</Box>
+						}
 					</Box>
 					<Box mbe='x16' display='flex' flexDirection='column'>
 						<Box is='span' alignSelf='center'>{data.place}</Box>

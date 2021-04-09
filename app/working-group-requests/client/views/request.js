@@ -64,6 +64,13 @@ export function DocumentPage() {
 		}), [data]),
 	);
 
+	// const { data: errandsData } = useEndpointDataExperimental('errands.list',
+	// 	useMemo(() => ({
+	// 		query: JSON.stringify({ workingGroupRequestId: requestId }),
+	// 	}), [requestId]),
+	// );
+	//
+	// useMemo(() => console.dir({ errandsData }), [errandsData]);
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
 
 	const {

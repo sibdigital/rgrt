@@ -91,9 +91,6 @@ export function EditProtocol({ _id, cache, onChange, ...props }) {
 				<Button disabled><Throbber inheritColor/></Button>
 				<Button primary disabled><Throbber inheritColor/></Button>
 			</ButtonGroup>
-			{/*<ButtonGroup stretch w='full' mbs='x8'>
-				<Button primary danger disabled><Throbber inheritColor/></Button>
-			</ButtonGroup>*/}
 		</Box>;
 	}
 
@@ -110,13 +107,15 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	const formatDate = useFormatDate();
 	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
 
-	const { _id, d: previousDate, num: previousNumber, place: previousPlace, council } = protocol || {};
+	const { _id, d: previousDate, num: previousNumber, place: previousPlace } = protocol || {};
 	const previousProtocol = protocol || {};
 
 	const [date, setDate] = useState(new Date(previousDate));
 	const [number, setNumber] = useState(previousNumber);
 	const [place, setPlace] = useState(previousPlace);
 	const setModal = useSetModal();
+
+	const council = useMemo(() => protocol?.council, [protocol]);
 
 	useEffect(() => {
 		setDate(new Date(previousDate) || '');
@@ -127,12 +126,12 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 	const deleteProtocol = useMethod('deleteProtocol');
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 
-	const councilUrl = council ? [ settings.get('Site_Url'), 'council/', council._id ].join('') : '';
-	const councilData = council ? useEndpointData('councils.findOne', {
-		query: JSON.stringify({ _id: council._id }),
+	const councilUrl = council ? [settings.get('Site_Url'), 'council/', council._id].join('') : '';
+	const councilData = useEndpointData('councils.findOne', useMemo(() => ({
+		query: JSON.stringify({ _id: council?._id }),
 		fields: JSON.stringify({ d: 1, type: 1 }),
-	}) : undefined;
-	const councilTitle = councilData ? councilData.type.title + ' от ' + formatDate(councilData.d) : '';
+	}), [council]));
+	const councilTitle = useMemo(() => (councilData ? [councilData.type.title, ' от ', formatDate(councilData.d)].join('') : ''), [councilData, formatDate]);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {

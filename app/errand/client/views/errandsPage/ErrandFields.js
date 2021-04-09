@@ -20,8 +20,8 @@ import { constructPersonFullFIO } from '../../../../utils/client/methods/constru
 import { ErrandStatuses } from '../../utils/ErrandStatuses';
 import { settings } from '../../../../settings/client';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
-import AnswerForm from '../../../../working-group-requests/client/views/AnswerForm';
-import { ProtocolField as ProtocolChoose, ProtocolItemsField } from '../../../../working-group-requests/client/views/RequestForm';
+import AnswerForm, { AnswerTypes } from '../../../../working-group-requests/client/views/AnswerForm';
+import { ProtocolField as ProtocolChoose, ProtocolItemsField, MailField } from '../../../../working-group-requests/client/views/RequestForm';
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { ErrandTypes } from '../../utils/ErrandTypes';
 import { deCapitalize } from '../../../../../client/helpers/capitalize';
@@ -256,6 +256,8 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 		desc,
 		protocol,
 		documents,
+		answerType,
+		mail,
 	} = values;
 
 	const {
@@ -264,6 +266,8 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 		handleInitiatedBy,
 		handleProtocol,
 		handleDocuments,
+		handleMail,
+		handleAnswerType,
 	} = handlers;
 
 	useEffect(() => {
@@ -276,6 +280,12 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			handleDesc({ ...desc, value: request.desc });
 		}
 	},[request]);
+
+	useMemo(() => {
+		if (!answerType?.value?.state) {
+			handleAnswerType({ ...answerType, value: AnswerTypes.PROTOCOL });
+		}
+	}, [answerType]);
 
 	const chooseButtonStyles = useMemo(() => ({ backgroundColor: 'transparent', borderColor: 'var(--rc-color-primary-button-color)', borderRadius: '0.7rem', borderWidth: '1.5px' }), []);
 
@@ -296,6 +306,7 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			handlers[handler]({ value, required: values[key].required ?? false });
 		}
 	}, [handlers, values]);
+	console.dir({ valuesInErrandFields: values });
 
 	return <Box display='flex' flexDirection='column' mbe='x16'>
 
@@ -312,8 +323,16 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 		{ tab === 'answer'
 			&& <><AnswerForm defaultValues={answerValues} defaultHandlers={handlers} onAnswerErrand={true} onErrandHandle={onChangeField}/>
 				<Margins all='x8'>
-					<ProtocolChoose flexDirection={'row'} protocol={protocol.value} handleProtocol={handleProtocol} inputStyles={inputStyles} handleChoose={setContext} chooseButtonStyles={chooseButtonStyles}/>
-					<ProtocolItemsField handleProtocolItems={setItems} protocolItems={items} protocolId={protocol?.value?._id ?? null} chooseButtonStyles={chooseButtonStyles} handleChoose={setContext}/>
+					{
+						answerType.value.key === AnswerTypes.PROTOCOL.key
+						&& <><ProtocolChoose flexDirection={'row'} protocol={protocol.value} handleProtocol={handleProtocol} inputStyles={inputStyles} handleChoose={setContext} chooseButtonStyles={chooseButtonStyles}/>
+							<ProtocolItemsField handleProtocolItems={setItems} protocolItems={items} protocolId={protocol?.value?._id ?? null} chooseButtonStyles={chooseButtonStyles} handleChoose={setContext}/></>
+					}
+					{
+						answerType.value.key === AnswerTypes.MAIL.key
+						&& <MailField inputStyles={inputStyles} requestType={answerType.value} mail={mail.value} handleMail={(val) => handleMail({ ...mail, value: val.currentTarget.value })}/>
+					}
+
 				</Margins>
 			</>
 		}
@@ -326,7 +345,6 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 function AnswerFilesTable({ files, documents, handleDocuments }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const [context, setContext] = useState('');
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
@@ -447,9 +465,8 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Table.Row>;
 	};
 
-	console.dir({ filesInErrandFields: files, documents });
+	// console.dir({ filesInErrandFields: files, documents });
 	return <Box display='flex' flexDirection='column'>
-		{/*<Margins inline='x8'>*/}
 		<Button mis='x16' mbe='x16' small primary width='max-content' onClick={fileUploadClick}>{t('Upload_file')}</Button>
 		{context === 'uploadFiles' && currentUploadedFiles?.length > 0
 		&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
@@ -473,6 +490,5 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Field>
 		}
 		<GenericTable header={header} renderRow={renderRow} results={files ?? []} total={files?.length || 0}/>
-		{/*</Margins>*/}
 	</Box>;
 }

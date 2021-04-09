@@ -82,6 +82,30 @@ API.v1.addRoute('errands', { authRequired: true }, {
 	},
 });
 
+API.v1.addRoute('errands.list', { authRequired: true }, {
+	get() {
+		const { offset, count } = this.getPaginationItems();
+		const { sort, query } = this.parseJsonQuery();
+
+		if (sort && Object.keys(sort).length > 1) {
+			return API.v1.failure('This method support only one "sort" parameter');
+		}
+
+		const result = Promise.await(findErrands({ query, options: { offset, count, sort } })).toArray();
+
+		if (!result) {
+			return API.v1.failure('Please verify the parameters');
+		}
+
+		return API.v1.success({
+			result,
+			count: result.length,
+			offset,
+			total: result.total,
+		});
+	},
+});
+
 API.v1.addRoute('errands.findOne', { authRequired: true }, {
 	get() {
 		const { query } = this.parseJsonQuery();

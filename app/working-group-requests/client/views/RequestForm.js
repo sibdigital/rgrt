@@ -185,6 +185,20 @@ export function ProtocolItemsField({
 	, [t, protocolItems, protocolId, chooseButtonStyles, handleProtocolItems, formatDate, handleProtocolItemChipClick, handleChoose]);
 }
 
+export function MailField({ requestType, mail, inputStyles, handleMail }) {
+	const t = useTranslation();
+
+	return useMemo(() =>
+		(requestType.state === defaultRequestTypeState.MAIL.state || requestType.state === defaultRequestTypeState.MAIL.state)
+			&& <Field mbe='x16' display='flex' flexDirection='row'>
+				<Field.Label alignSelf='center' mie='x16' style={{ whiteSpace: 'pre' }}>{t('Working_group_request_select_mail')}</Field.Label>
+				<Field.Row width='inherit'>
+					<TextInput style={ inputStyles } placeholder={t('Working_group_request_select_mail')} value={mail} onChange={(event) => handleMail(event)} fontScale='p1'/>
+				</Field.Row>
+			</Field>
+	, [handleMail, inputStyles, mail, requestType, t]);
+}
+
 function ResponsibleField({
 	chooseButtonStyles,
 	handleChoose,
