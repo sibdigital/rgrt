@@ -193,7 +193,7 @@ function Council({
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [isSecretary, setIsSecretary] = useState(false);
 	const [isUserJoin, setIsUserJoin] = useState(false);
-	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
+	const [newAddedFiles, setNewAddedFiles] = useState([]);
 	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
 	const [isCouncilFilesReload, setIsCouncilFilesReload] = useState(true);
 
@@ -334,7 +334,6 @@ function Council({
 	const handleTabClick = useMemo(() => (tab) => () => {
 		setTab(tab);
 		tab === 'persons' && setContext('participants');
-		setCurrentMovedFiles({ downIndex: -1, upIndex: - 1 });
 		tab === 'files' && currentUploadedFiles.length > 0 && setContext('uploadFiles');
 	}, [currentUploadedFiles]);
 
@@ -399,7 +398,6 @@ function Council({
 
 	const fileUpload = async () => {
 		let validationArray = [];
-		console.log(currentUploadedFiles);
 		if (currentUploadedFiles.length > 0) {
 			validationArray = await filesValidation(currentUploadedFiles);
 			if (validationArray.length > 0) {
@@ -418,6 +416,7 @@ function Council({
 				await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
+				setNewAddedFiles(currentUploadedFiles);
 				setCurrentUploadedFiles([]);
 				onChange();
 				setIsCouncilFilesReload(!isCouncilFilesReload);
@@ -445,21 +444,13 @@ function Council({
 		}
 	};
 
-	const resetData = () => {
-		window.history.back();
-		// setDate(new Date(data.d));
-		// setDescription(data.desc);
-		// setCouncilType(data.type ?? '');
-		// onChange();
-	};
-
 	const onAddParticipantClick = (_id) => () => {
 		setContext('addParticipants');
 	};
 
 	const onParticipantClick = useCallback((context) => () => {
 		setContext(context);
-	}, [context]);
+	}, []);
 
 	const onEmailSendClick = (_id) => () => {
 		FlowRouter.go(`/manual-mail-sender/council/${ _id }`);
@@ -681,7 +672,7 @@ function Council({
 				}
 				{tab === 'files'
 					&& <Box maxHeight='500px'>
-						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
+						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload} onNewFileAdded={newAddedFiles}/>
 					</Box>
 				}
 			</Page.ScrollableContent>

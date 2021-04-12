@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Button, Icon, Callout, Table, Box } from '@rocket.chat/fuselage';
+import { Button, Icon, Table, Box } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
+import _ from 'underscore';
 
-import { hasPermission } from '../../../authorization';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -26,9 +26,8 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction]);
 
-export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false }) {
+export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false, onNewFileAdded }) {
 	const t = useTranslation();
-	const userId = useUserId();
 	const formatDateAndTime = useFormatDateAndTime();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const setModal = useSetModal();
@@ -54,6 +53,12 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 			setFilesArray(data.documents);
 		}
 	}, [data]);
+
+	useMemo(() => {
+		if (onNewFileAdded && _.isArray(onNewFileAdded)) {
+			setFilesArray(filesArray.concat(onNewFileAdded));
+		}
+	}, [onNewFileAdded]);
 
 	const updateCouncilFilesOrder = useMethod('updateCouncilFilesOrder');
 	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
