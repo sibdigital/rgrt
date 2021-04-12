@@ -289,30 +289,30 @@ export function ProtocolPage() {
 			{
 				// icon: 'edit',
 				name: t('Item_Delete'),
-				action: openConfirmDeleteItem(event.currentTarget.dataset.section, event.currentTarget.dataset.item)
+				action: openConfirmDeleteItem(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
 			},
 			{
 				name: t('Working_group_request'),
-				action: openWorkingGroupRequest(event.currentTarget.dataset.item)
+				action: openWorkingGroupRequest(event.currentTarget.dataset.item),
 			},
 			event.currentTarget.dataset.responsible === 'true' && {
 				name: t('Errand'),
 				action: openErrand(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
-			}
-		]
+			},
+		];
 		const config = {
 			columns: [
 				{
 					groups: [
-						{ items }
-					]
-				}
+						{ items },
+					],
+				},
 			],
 			currentTarget: event.currentTarget,
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [])
+	}, [onEditItemClick, onMoveItemClick, openConfirmDeleteItem, openErrand, t]);
 
 	const goBack = () => {
 		FlowRouter.go('/protocols');
@@ -326,7 +326,6 @@ export function ProtocolPage() {
 		return res;
 	}, [workingGroups]);
 
-	console.dir({ title, toStr: title.toString() });
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header display={smallScreenWidth ? 'flex' : 'block'}>
@@ -352,7 +351,7 @@ export function ProtocolPage() {
 			<Page.ScrollableContent>
 				<Box maxWidth='x800' w='full' alignSelf='center' pi='x32' pb='x24' fontSize='x16' borderStyle='solid' borderWidth='x2' borderColor='hint'>
 					<Box mbe='x24' display='flex' flexDirection='column'>
-						{smallScreenWidth
+						{!smallScreenWidth
 							? title?.map((_title, index) => (
 								<Box is='span' fontScale='h1' key={index} alignSelf='center'>
 									{_title}
