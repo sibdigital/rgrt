@@ -11,11 +11,9 @@ import {
 } from '@rocket.chat/fuselage';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import ReactTooltip from 'react-tooltip';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
 import { ErrandStatuses } from '../../utils/ErrandStatuses';
 import { settings } from '../../../../settings/client';
@@ -25,7 +23,7 @@ import { ProtocolField as ProtocolChoose, ProtocolItemsField, MailField } from '
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { ErrandTypes } from '../../utils/ErrandTypes';
 import { deCapitalize } from '../../../../../client/helpers/capitalize';
-import { filesValidation, fileUploadToCouncil } from '../../../../ui/client/lib/fileUpload';
+import { filesValidation } from '../../../../ui/client/lib/fileUpload';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { mime } from '../../../../utils';
 import { getErrandFieldsForSave } from './ErrandForm';
@@ -125,11 +123,11 @@ function DescriptionField({ desc, ...props }) {
 	return useMemo(() => <DefaultField title={t('Description')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
-function CommentaryField({ commentary, inputStyles, handleCommentary, ...props }) {
+function CommentaryField({ commentary, required, inputStyles, handleCommentary, ...props }) {
 	const t = useTranslation();
 	const renderInput = useMemo(() => <TextAreaInput style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, t]);
 
-	return useMemo(() => <DefaultField title={t('Commentary')} required={true} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Commentary')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
 function ProtocolField({ protocol, ...props }) {
@@ -140,7 +138,7 @@ function ProtocolField({ protocol, ...props }) {
 	const protocolItemUrl = useMemo(() => (protocol && protocol.sectionId && protocol.itemId ? [settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId].join('') : protocolUrl), [protocol, protocolUrl]);
 	const protocolLabel = useMemo(() => (protocol ? [t('Protocol'), ' от ', formatDate(protocol.d), ' № ', protocol.num].join('') : ''), [formatDate, protocol, t]);
 	const protocolItemLabel = useMemo(() => (protocol && protocol.sectionId && protocol.itemId
-		? [t('Protocol_item'), ' №', protocol.itemNum, ', ', protocol.itemName ?? ''].join('')
+		? ['№', protocol.itemNum, ', ', protocol.itemName ?? ''].join('')
 		: protocolUrl)
 	, [protocol, protocolUrl, t]);
 
@@ -197,7 +195,7 @@ export function DefaultErrandFields({ inputStyles, values, handlers }) {
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
 			</Box>
-			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
+			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} required={commentary.required} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
 
 		</Margins>
 	</Box>;
@@ -239,7 +237,7 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
 			</Box>
-			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
+			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} required={commentary.required} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
 
 		</Margins>
 	</Box>;

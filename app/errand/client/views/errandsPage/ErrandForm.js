@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import 'react-phone-input-2/lib/style.css';
 
 import { useForm } from '../../../../../client/hooks/useForm';
@@ -10,25 +10,26 @@ import { t } from '../../../../utils';
 require('react-datepicker/dist/react-datepicker.css');
 
 export const defaultErrandFields = Object.freeze({
-	errandType: { value: ErrandTypes.default, required: false },
+	errandType: { value: ErrandTypes.default, required: true },
 	status: { value: ErrandStatuses.OPENED, required: true },
 	ts: { value: new Date(), required: true },
-	initiatedBy: { value: {}, required: true },
-	chargedTo: { value: {}, required: true },
-	desc: { value: '', required: true },
+	initiatedBy: { value: {}, required: false },
+	chargedTo: { value: {}, required: false },
+	desc: { value: '', required: false },
 	expireAt: { value: new Date(), required: true },
-	commentary: { value: '', required: true },
+	commentary: { value: '', required: false },
 });
 
 export const defaultErrandByProtocolItemFields = Object.freeze({
 	...defaultErrandFields,
-	errandType: { value: ErrandTypes.byProtocolItem, required: false },
+	errandType: { value: ErrandTypes.byProtocolItem, required: true },
 	protocol: { value: {}, required: true },
 });
 
 export const defaultErrandByRequestFields = {
 	...defaultErrandFields,
-	errandType: { value: ErrandTypes.byRequestAnswer, required: false },
+	errandType: { value: ErrandTypes.byRequestAnswer, required: true },
+	commentary: { value: '', required: true },
 	sender: { value: {}, required: true },
 	answerType: { value: {}, required: true },
 	protocol: { value: {}, required: true },
@@ -89,12 +90,14 @@ export function useDefaultErrandForm({ defaultValues = null, errandType = Errand
 	const allFieldAreFilled = useMemo(() => Object.entries(values).filter((val) => {
 		const [key, _value] = val;
 		const { value, required } = _value;
+		// console.log({ _value });
 
 		if (!required) { return false; }
 		if (typeof value === 'string' && value.trim() !== '') { return false; }
 		if (typeof value === 'object' && value.length > 0) { return false; }
 		return value?.toString().trim() === '';
 	}).length === 0, [values]);
+	// console.dir({ allFieldInErrandForm: allFieldAreFilled });
 
 	return {
 		values,
