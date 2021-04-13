@@ -88,7 +88,7 @@ export function NewErrand({ errand, request }) {
 
 	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
 
-	const { values, handlers, hasUnsavedChanges } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
+	const { values, handlers, hasUnsavedChanges, allFieldAreFilled, allRequiredFieldAreFilled } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
 
 	const saveAction = useCallback(async (errandToSave, files) => {
 		try {
@@ -135,7 +135,7 @@ export function NewErrand({ errand, request }) {
 		}
 	}, [handlers, values]);
 
-	// console.dir({ valuesInEditErrand: values });
+	console.dir({ allFieldAreFilledInEditErrand: allFieldAreFilled, allRequiredFieldAreFilledInEditErrand: allRequiredFieldAreFilled });
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
@@ -145,7 +145,7 @@ export function NewErrand({ errand, request }) {
 				</Field>
 				<ButtonGroup mis='auto'>
 					{/*{ !chargedToCurrentUser && <Button primary small aria-label={_t('Save')} onClick={onEmailSendClick}>{t('Send_email')}</Button>}*/}
-					<Button disabled={!hasUnsavedChanges} primary small aria-label={t('Save')} onClick={handleSave}>
+					<Button disabled={!hasUnsavedChanges || !allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSave}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>

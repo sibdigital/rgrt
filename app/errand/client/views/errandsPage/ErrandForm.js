@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import 'react-phone-input-2/lib/style.css';
+import _ from 'underscore';
 
 import { useForm } from '../../../../../client/hooks/useForm';
 import { ErrandTypes } from '../../utils/ErrandTypes';
@@ -12,7 +13,7 @@ require('react-datepicker/dist/react-datepicker.css');
 export const defaultErrandFields = Object.freeze({
 	errandType: { value: ErrandTypes.default, required: true },
 	status: { value: ErrandStatuses.OPENED, required: true },
-	ts: { value: new Date(), required: true },
+	ts: { value: new Date(), required: false },
 	initiatedBy: { value: {}, required: false },
 	chargedTo: { value: {}, required: false },
 	desc: { value: '', required: false },
@@ -26,16 +27,16 @@ export const defaultErrandByProtocolItemFields = Object.freeze({
 	protocol: { value: {}, required: true },
 });
 
-export const defaultErrandByRequestFields = {
+export const defaultErrandByRequestFields = Object.freeze({
 	...defaultErrandFields,
 	errandType: { value: ErrandTypes.byRequestAnswer, required: true },
 	commentary: { value: '', required: true },
-	sender: { value: {}, required: true },
+	sender: { value: { group: '', organization: '', phone: '', email: '' }, required: true },
 	answerType: { value: {}, required: true },
-	protocol: { value: {}, required: true },
-	mail: { value: '', required: true },
+	protocol: { value: {}, required: false },
+	mail: { value: '', required: false },
 	documents: { value: [], required: true },
-};
+});
 
 export function getDefaultErrandFields({ errand, errandType = ErrandTypes.default }) {
 	let fields = defaultErrandFields;
@@ -94,10 +95,21 @@ export function useDefaultErrandForm({ defaultValues = null, errandType = Errand
 
 		if (!required) { return false; }
 		if (typeof value === 'string' && value.trim() !== '') { return false; }
-		if (typeof value === 'object' && value.length > 0) { return false; }
+		if (typeof value === 'object' && value !== undefined && value !== null) { return false; }
+		if (value && _.isArray(value) && value.length > 0) { return false; }
 		return value?.toString().trim() === '';
 	}).length === 0, [values]);
-	// console.dir({ allFieldInErrandForm: allFieldAreFilled });
+
+	const senderFieldAreFilled = useMemo(() => (errandType === ErrandTypes.byRequestAnswer ? Object.entries(values?.sender ?? {}).filter((val) => {
+		const [key, value] = val;
+
+		console.dir({ key, value });
+
+		if (typeof value === 'string' && value.trim() !== '') { return false; }
+		if (typeof value === 'object' && value !== undefined && value !== null) { return false; }
+		if (value && _.isArray(value) && value.length > 0) { return false; }
+		return value?.toString().trim() === '';
+	}) : true), [errandType, values.sender]);
 
 	return {
 		values,
@@ -106,6 +118,7 @@ export function useDefaultErrandForm({ defaultValues = null, errandType = Errand
 		commit,
 		hasUnsavedChanges,
 		allFieldAreFilled,
+		allRequiredFieldAreFilled: senderFieldAreFilled,
 	};
 }
 
