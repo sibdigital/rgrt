@@ -19,7 +19,7 @@ import { ErrandStatuses } from '../../utils/ErrandStatuses';
 import { settings } from '../../../../settings/client';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
 import AnswerForm, { AnswerTypes } from '../../../../working-group-requests/client/views/AnswerForm';
-import { ProtocolField as ProtocolChoose, ProtocolItemsField, MailField } from '../../../../working-group-requests/client/views/RequestForm';
+import { ProtocolField as ProtocolChoose, ProtocolItemsField, MailField, defaultRequestTypeState, ResponsibleField } from '../../../../working-group-requests/client/views/RequestForm';
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { ErrandTypes } from '../../utils/ErrandTypes';
 import { deCapitalize } from '../../../../../client/helpers/capitalize';
@@ -161,7 +161,7 @@ function ProtocolField({ protocol, ...props }) {
 	, [protocol, props, t, protocolUrl, protocolLabel, protocolItemUrl, protocolItemLabel]);
 }
 
-export function DefaultErrandFields({ inputStyles, values, handlers }) {
+export function DefaultErrandFields({ inputStyles, values, handlers, setContext }) {
 	const {
 		status,
 		ts,
@@ -176,6 +176,7 @@ export function DefaultErrandFields({ inputStyles, values, handlers }) {
 		handleStatus,
 		handleExpireAt,
 		handleCommentary,
+		handleChargedTo,
 	} = handlers;
 
 	const onChangeField = useCallback((val, field, handler) => {
@@ -190,8 +191,9 @@ export function DefaultErrandFields({ inputStyles, values, handlers }) {
 				<CreatedAtField ts={ts.value} />
 			</Box>
 			<DescriptionField desc={desc.value}/>
+			<ResponsibleField flexDirection='row' handleChoose={setContext} itemResponsible={chargedTo.value.person ?? {}} handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}/>
 			<Box display='flex' flexDirection='row'>
-				<ChargedToField chargedTo={chargedTo.value}/>
+				{/*<ChargedToField chargedTo={chargedTo.value}/>*/}
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
 			</Box>
@@ -243,13 +245,12 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 	</Box>;
 }
 
-export function ErrandByRequestFields({ inputStyles, values, handlers, request, setContext, items, setItems }) {
+export function ErrandByRequestFields({ inputStyles, values, handlers, request, setContext, items, setItems, errandId }) {
 	const t = useTranslation();
 
 	const [tab, setTab] = useState('errand');
 
 	const {
-		initiatedBy,
 		chargedTo,
 		desc,
 		protocol,
@@ -261,7 +262,6 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 	const {
 		handleDesc,
 		handleChargedTo,
-		handleInitiatedBy,
 		handleProtocol,
 		handleDocuments,
 		handleMail,
@@ -269,15 +269,43 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 	} = handlers;
 
 	useEffect(() => {
-		console.dir({ request });
-		if (request && request._id && request.itemResponsible && request.itemResponsible._id && !chargedTo?._id) {
-			handleChargedTo({ ...chargedTo, value: { person: request.itemResponsible } });
-		}
+		if (request && request._id && !errandId) {
+			if (request.itemResponsible && request.itemResponsible._id && !chargedTo?._id) {
+				handleChargedTo({ ...chargedTo, value: { person: request.itemResponsible } });
+			}
 
-		if (request && request._id && request.desc && desc.value === '') {
-			handleDesc({ ...desc, value: request.desc });
+			if (request.desc && desc.value === '') {
+				handleDesc({ ...desc, value: request.desc });
+			}
+
+			if (request.requestType && request.requestType.state === defaultRequestTypeState.REQUEST.state && request.protocol) {
+				handleProtocol({ required: protocol.required,
+					value: {
+						_id: request.protocol._id ?? '',
+						num: request.protocol.num ?? '',
+						d: request.protocol.d ? new Date(request.protocol.d) : new Date(),
+						itemNum: request.protocol.itemNum ?? '',
+						itemName: request.protocol.itemName ?? '',
+						itemId: request.protocol.itemId ?? '',
+						sectionId: request.protocol.sectionId ?? '',
+					},
+				});
+				setItems([{
+					_id: request.protocol.itemId,
+					itemNum: request.protocol.itemNum ?? '',
+					num: request.protocol.itemNum ?? '',
+					itemName: request.protocol.itemName ?? '',
+					name: request.protocol.itemName ?? '',
+					sectionId: request.protocol.sectionId ?? '',
+				}]);
+			}
+
+			if (request.requestType && request.requestType.state === defaultRequestTypeState.MAIL.state && request.mail) {
+				handleAnswerType({ required: true, value: AnswerTypes.MAIL });
+				handleMail({ required: true, value: request.mail });
+			}
 		}
-	},[request]);
+	}, [request, errandId]);
 
 	useMemo(() => {
 		if (!answerType?.value?.state) {
@@ -316,7 +344,7 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			</Tabs>
 		</Box>
 		{ tab === 'errand'
-			&& <DefaultErrandFields inputStyles={inputStyles} handlers={handlers} values={values}/>
+			&& <DefaultErrandFields inputStyles={inputStyles} handlers={handlers} values={values} setContext={setContext}/>
 		}
 		{ tab === 'answer'
 			&& <><AnswerForm defaultValues={answerValues} defaultHandlers={handlers} onAnswerErrand={true} onErrandHandle={onChangeField}/>

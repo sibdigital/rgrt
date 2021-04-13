@@ -174,7 +174,9 @@ export function DocumentPage() {
 	const handleSaveRequest = useCallback(async () => {
 		try {
 			const { protocol } = values;
-			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
+			values.protocolItems?.length > 0 && values.protocolItems[0].num && console.dir({ itemInSave: values.protocolItems[0] });
+			values.protocolItems?.length > 0 && values.protocolItems[0].num
+			&& Object.assign(protocol, { sectionId: values.protocolItems[0].sectionId ?? '', itemId: values.protocolItems[0]._id, itemName: values.protocolItems[0].name, itemNum: values.protocolItems[0].num });
 
 			await saveAction({
 				number: values.number,

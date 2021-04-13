@@ -126,6 +126,9 @@ export function NewErrand({ errand, request }) {
 		if (handlers[handleField]) {
 			handlers[handleField]({ value: { ...values[field].value, num: val.num, d: val.d, _id: val._id }, required: values[field].required });
 		}
+		if (handleField === 'handleChargedTo') {
+			handlers.handleChargedTo({ value: { person: val }, required: values.chargedTo.required });
+		}
 		if (handleField === 'handleProtocolItems') {
 			handlers.handleProtocol({ value: { ...values.protocol.value, itemNum: val[0].num, sectionId: val[0].sectionId, itemId: val[0]._id }, required: values.protocol.required });
 			setItems([...val]);
@@ -148,10 +151,10 @@ export function NewErrand({ errand, request }) {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.ScrollableContent padding='x24'>
-				<ErrandForm defaultValues={values} defaultHandlers={handlers} onReadOnly={false} errandType={ErrandTypes[errand?.errandType?.key ?? 'default']} request={request} setItems={setItems} items={items} setContext={setContext}/>
+				<ErrandForm errandId={errand?._id} defaultValues={values} defaultHandlers={handlers} onReadOnly={false} errandType={ErrandTypes[errand?.errandType?.key ?? 'default']} request={request} setItems={setItems} items={items} setContext={setContext}/>
 			</Page.ScrollableContent>
 		</Page>
-		<WorkingGroupRequestVerticalChooseBar protocolItems={items} protocolId={values.protocol?.value?._id ?? ''} handlers={{ handleProtocol: (val) => handleChoose(val, 'protocol', 'handleProtocol'), handleProtocolItems: (val) => handleChoose(val, 'protocolItems', 'handleProtocolItems') }} context={context} close={() => setContext('')}/>
+		<WorkingGroupRequestVerticalChooseBar protocolItems={items} protocolId={values.protocol?.value?._id ?? ''} handlers={{ handleItemResponsible: (val) => handleChoose(val, 'chargedTo', 'handleChargedTo'), handleProtocol: (val) => handleChoose(val, 'protocol', 'handleProtocol'), handleProtocolItems: (val) => handleChoose(val, 'protocolItems', 'handleProtocolItems') }} context={context} close={() => setContext('')}/>
 	</Page>;
 }
 

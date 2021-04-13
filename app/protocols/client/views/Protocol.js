@@ -326,7 +326,8 @@ export function ProtocolPage() {
 		return res;
 	}, [workingGroups]);
 
-	console.dir({ title, toStr: title.toString() });
+	// useMemo(() => console.dir({ personsWithLinkToUser }), [personsWithLinkToUser]);
+
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header display={smallScreenWidth ? 'flex' : 'block'}>

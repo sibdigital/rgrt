@@ -165,6 +165,7 @@ function ErrandForm({
 	setContext,
 	items,
 	setItems,
+	errandId,
 }) {
 	const {
 		newValues,
@@ -177,7 +178,7 @@ function ErrandForm({
 	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'pre-wrap', border: onReadOnly ? '' : '1px solid #4fb0fc' }), [onReadOnly]);
 	const marginBlockEnd = useMemo(() => ({ marginBlockEnd: '1rem !important' }), []);
 
-	let view = <DefaultErrandFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values}/>;
+	let view = <DefaultErrandFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} setContext={setContext}/>;
 
 	switch (errandType) {
 		case ErrandTypes.default:
@@ -186,7 +187,7 @@ function ErrandForm({
 			view = <ErrandByProtocolItemFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values}/>;
 			break;
 		case ErrandTypes.byRequestAnswer:
-			view = <ErrandByRequestFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} request={request} setItems={setItems} items={items} setContext={setContext}/>;
+			view = <ErrandByRequestFields errandId={errandId} inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} request={request} setItems={setItems} items={items} setContext={setContext}/>;
 			break;
 		default:
 			break;
