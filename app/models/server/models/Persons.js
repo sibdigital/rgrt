@@ -56,7 +56,7 @@ class Persons extends Base {
 			{ $sort: { weight: -1, lowerSurname: 1, lowerName: 1, lowerPatronymic: 1 } },
 		];
 		const persons = Promise.await(this.model.rawCollection().aggregate(aggregate).toArray());
-		console.dir({ persons });
+
 		return persons;
 	}
 }

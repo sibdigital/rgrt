@@ -28,8 +28,7 @@ Meteor.methods({
 
 		const council = await Councils.findOne({ _id });
 
-		const persons = Persons.find({ _id: { $in: council.invitedPersons.map((iPerson) => iPerson._id) } }) || [];
-		const sorted = Persons.findByIdSorted(council.invitedPersons.map((iPerson) => iPerson._id));
+		const persons = await Persons.findByIdSorted(council.invitedPersons.map((iPerson) => iPerson._id));
 
 		if (!council) {
 			throw new Meteor.Error('error-the-field-is-required', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadCouncilParticipants', field: '_id' });

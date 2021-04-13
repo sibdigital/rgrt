@@ -44,7 +44,7 @@ export function EditErrandPage() {
 	}), [id, idParams]);
 
 	const { data, state, error } = useEndpointDataExperimental('errands.findOne', query);
-	const { data: personData, state: personState, error: personError } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({
+	const { data: personData, state: personState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({
 		query: JSON.stringify({ userId }),
 		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
 	}), [userId]));
@@ -63,7 +63,7 @@ export function EditErrandPage() {
 		</Box>;
 	}
 
-	if (error || personError) {
+	if ([state, personState, requestState].includes(ENDPOINT_STATES.ERROR)) {
 		console.log('error');
 		return <Callout margin='x16' type='danger'>{error}</Callout>;
 	}
@@ -119,7 +119,7 @@ export function NewErrand({ errand, request }) {
 		}
 		// console.log({ errandType, errandToSave, files });
 		await saveAction(errandToSave, files);
-	}, [errand, values, saveAction]);
+	}, [errand, values, saveAction, request]);
 
 	const handleChoose = useCallback((val, field, handleField) => {
 		// console.log({ val, field, handleField });
