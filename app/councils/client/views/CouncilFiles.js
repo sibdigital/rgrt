@@ -176,7 +176,9 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		</Table.Row>;
 	};
 
-	return <Box overflowX='hidden'><GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/></Box>;
+	return <Box overflowX='hidden'>
+		<GenericTable header={header} renderRow={renderRow} results={filesArray} total={filesArray?.length ?? 0} setParams={setParams} params={params}/>
+	</Box>;
 }
 
 CouncilFiles.displayName = 'CouncilFiles';

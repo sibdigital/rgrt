@@ -413,13 +413,13 @@ function Council({
 				setAttachedFiles(attachedFilesBuf);
 				onChange();
 			} else {
-				await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
+				const ids = await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
-				setNewAddedFiles(currentUploadedFiles);
 				setCurrentUploadedFiles([]);
-				onChange();
-				setIsCouncilFilesReload(!isCouncilFilesReload);
+				setNewAddedFiles(currentUploadedFiles);
+				// setIsCouncilFilesReload(!isCouncilFilesReload);
+				console.dir({ filesIdKek: ids });
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
 		}
