@@ -504,7 +504,7 @@ function Council({
 								const itemNumber = 1;
 								const sectionData = createSectionData(sectionNumber, section.item);
 								sectionData.items = [];
-								const itemData = createItemData(itemNumber, section.issueConsideration);
+								const itemData = createItemData(itemNumber, section.issueConsideration, section.speakers ?? []);
 								sectionData.items.push(itemData);
 								protocolData.sections.push(sectionData);
 								sectionNumber++;
