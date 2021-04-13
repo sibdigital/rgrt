@@ -90,6 +90,18 @@ export function ProtocolPage() {
 	const data = useEndpointData('protocols.findOne', query) || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
+	// const getItemsResponsibles = useCallback((sections) => {
+	// 	const arr = [];
+	// 	sections?.forEach((section) => section.items?.forEach((item) => item.responsible && arr.concat(item.responsible.map((responsible) => responsible._id))));
+	// 	console.dir({ arr, sections });
+	// 	return arr;
+	// }, []);
+	//
+	// const personsWithLinkToUser = useEndpointData('users.list', useMemo(() => ({
+	// 	query: JSON.stringify({ personId: { $in: getItemsResponsibles(data?.sections ?? []) } }),
+	// 	fields: JSON.stringify({ personId: 1 }),
+	// }), [data, getItemsResponsibles]));
+
 	// const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
 	const title = useMemo(() => [t('Protocol'), [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
 

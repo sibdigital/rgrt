@@ -16,7 +16,7 @@ export function AddUser({ roles, ...props }) {
 
 	const roleData = useEndpointData('roles.list', '') || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
-	const persons = useEndpointData('persons.list',useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }),[])) || { persons: [] };
+	const persons = useEndpointData('persons.list', useMemo(() => ({ query: JSON.stringify({ }) }), [])) || { persons: [] };
 
 	const {
 		values,

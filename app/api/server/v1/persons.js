@@ -3,7 +3,7 @@ import Busboy from 'busboy';
 
 import { API } from '../api';
 import { findPersons, findPerson } from '../lib/persons';
-import { file } from '/mocha_end_to_end.opts';
+import { file } from '../../../../mocha_end_to_end.opts';
 import { FileUpload } from '../../../file-upload';
 
 API.v1.addRoute('persons.list', { authRequired: true }, {
