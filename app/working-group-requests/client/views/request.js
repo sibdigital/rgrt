@@ -147,6 +147,8 @@ export function DocumentPage() {
 		mail,
 		description,
 		protocolsItemId,
+		councilId,
+		protocolId,
 		requestType,
 	}) => {
 		const requestData = createWorkingGroupRequestData({
@@ -160,6 +162,8 @@ export function DocumentPage() {
 			desc: description,
 			protocolsItemId,
 			previousData: { _id: requestId },
+			councilId,
+			protocolId,
 			requestType,
 		});
 		console.log({ requestData });
@@ -188,6 +192,8 @@ export function DocumentPage() {
 				mail: values.mail,
 				description: values.description,
 				protocolsItemId,
+				councilId: values.council?._id,
+				protocolId: values.protocol?._id,
 				requestType: values.requestType,
 			});
 
