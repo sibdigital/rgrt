@@ -182,7 +182,7 @@ class Protocols extends Base {
 
 	getMaxProtocolSectionNum(protocolId) {
 		const data = this.findOne({ _id: protocolId });
-		if (data.sections && data.sections.length > 0) {
+		if (data && data.sections && data.sections.length > 0) {
 			return Math.max.apply(Math, data.sections.map(function(section) { return section.num; }));
 		}
 		return 0;
