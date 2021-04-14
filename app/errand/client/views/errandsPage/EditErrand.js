@@ -145,7 +145,7 @@ export function NewErrand({ errand, request }) {
 				</Field>
 				<ButtonGroup mis='auto'>
 					{/*{ !chargedToCurrentUser && <Button primary small aria-label={_t('Save')} onClick={onEmailSendClick}>{t('Send_email')}</Button>}*/}
-					<Button disabled={!hasUnsavedChanges || !allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSave}>
+					<Button disabled={!allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSave}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>

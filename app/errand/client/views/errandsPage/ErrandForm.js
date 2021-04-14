@@ -16,7 +16,7 @@ export const defaultErrandFields = Object.freeze({
 	ts: { value: new Date(), required: false },
 	initiatedBy: { value: {}, required: false },
 	chargedTo: { value: {}, required: false },
-	desc: { value: '', required: false },
+	desc: { value: '', required: true },
 	expireAt: { value: new Date(), required: true },
 	commentary: { value: '', required: false },
 });

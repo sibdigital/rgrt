@@ -28,7 +28,7 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { mime } from '../../../../utils';
 import { getErrandFieldsForSave } from './ErrandForm';
 
-function DefaultField({ title, renderInput,flexDirection = 'row', required = false, ...props }) {
+function DefaultField({ title, renderInput, flexDirection = 'row', required = false, ...props }) {
 	return <Field display='flex' flexDirection={flexDirection} mie={flexDirection === 'row' && 'x16'} {...props}>
 		<Field.Label
 			style={{ flex: '0 0 0px', whiteSpace: 'pre' }}
@@ -116,16 +116,16 @@ function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
 	return useMemo(() => <DefaultField title={t('Status')} required={true} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
 }
 
-function DescriptionField({ desc, ...props }) {
+function DescriptionField({ desc, required, inputStyles, handleDesc, ...props }) {
 	const t = useTranslation();
-	const renderInput = useMemo(() => <TextAreaInput style={{ wordBreak: 'break-word', whiteSpace: 'break-spaces' }} placeholder={t('Description')} rows='5' flexGrow={1} value={desc ?? ''}/>, [desc, t]);
+	const renderInput = useMemo(() => <TextAreaInput onChange={(e) => handleDesc(e.currentTarget.value) } style={{ ...inputStyles, wordBreak: 'break-word', whiteSpace: 'break-spaces' }} placeholder={t('Description')} rows='5' flexGrow={1} value={desc ?? ''}/>, [desc, handleDesc, inputStyles, t]);
 
-	return useMemo(() => <DefaultField title={t('Description')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Description')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
 function CommentaryField({ commentary, required, inputStyles, handleCommentary, ...props }) {
 	const t = useTranslation();
-	const renderInput = useMemo(() => <TextAreaInput style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, t]);
+	const renderInput = useMemo(() => <TextAreaInput style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, inputStyles, t]);
 
 	return useMemo(() => <DefaultField title={t('Commentary')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
@@ -177,6 +177,7 @@ export function DefaultErrandFields({ inputStyles, values, handlers, setContext 
 		handleExpireAt,
 		handleCommentary,
 		handleChargedTo,
+		handleDesc,
 	} = handlers;
 
 	const onChangeField = useCallback((val, field, handler) => {
@@ -190,7 +191,7 @@ export function DefaultErrandFields({ inputStyles, values, handlers, setContext 
 				<InitiatedByField initiatedBy={initiatedBy.value}/>
 				<CreatedAtField ts={ts.value} />
 			</Box>
-			<DescriptionField desc={desc.value}/>
+			<DescriptionField desc={desc.value} inputStyles={inputStyles} handleDesc={(val) => onChangeField(val, desc, handleDesc)} required={desc.required}/>
 			<ResponsibleField flexDirection='row' handleChoose={setContext} itemResponsible={chargedTo.value.person ?? {}} handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}/>
 			<Box display='flex' flexDirection='row'>
 				{/*<ChargedToField chargedTo={chargedTo.value}/>*/}
@@ -219,6 +220,7 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 		handleStatus,
 		handleCommentary,
 		handleExpireAt,
+		handleDesc,
 	} = handlers;
 
 	const onChangeField = useCallback((val, field, handler) => {
@@ -233,7 +235,7 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 				<CreatedAtField ts={ts.value} />
 			</Box>
 			<ProtocolField protocol={protocol.value}/>
-			<DescriptionField desc={desc.value}/>
+			<DescriptionField desc={desc.value} inputStyles={inputStyles} handleDesc={(val) => onChangeField(val, desc, handleDesc)} required={desc.required}/>
 			<Box display='flex' flexDirection='row'>
 				<ChargedToField chargedTo={chargedTo.value}/>
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
