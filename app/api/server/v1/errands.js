@@ -25,9 +25,9 @@ API.v1.addRoute('errands-on-message.list', { authRequired: true }, {
 
 API.v1.addRoute('errands', { authRequired: true }, {
 	get() {
-		if (!hasPermission(this.userId, 'view-c-room')) {
-			return API.v1.unauthorized();
-		}
+		// if (!hasPermission(this.userId, 'view-c-room')) {
+		// 	return API.v1.unauthorized();
+		// }
 
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
