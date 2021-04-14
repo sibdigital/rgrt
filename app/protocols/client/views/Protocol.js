@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, Label, Modal } from '@rocket.chat/fuselage';
 import { FlowRouter } from 'meteor/kadira:flow-router';
+import { useMediaQuery } from '@material-ui/core';
+import { css } from '@rocket.chat/css-in-js';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -21,10 +23,11 @@ import { CreateParticipant } from './participants/CreateParticipant';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
-import { EditProtocol } from '../../../protocols/client/views/EditProtocol';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
-import { useMediaQuery } from '@material-ui/core';
+import GenericList from '../../../../client/components/GenericList';
+import { romanize } from '../../../utils';
+import { EditProtocol } from './EditProtocol';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -235,15 +238,15 @@ export function ProtocolPage() {
 			columns: [
 				{
 					groups: [
-						{ items }
-					]
-				}
+						{ items },
+					],
+				},
 			],
 			currentTarget: event.currentTarget,
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [])
+	}, []);
 
 	const onDeleteItemConfirm = useCallback((sectionId, _id) => async () => {
 		try {
@@ -281,6 +284,15 @@ export function ProtocolPage() {
 		// FlowRouter.go(`/errand/add&byProtocolItem&${ protocolId }&${ sectionId }&${ itemId }`);
 	};
 
+	const onMoveItemToSection = useCallback((currentSectionId, itemId) => () => {
+		router.push({
+			id: protocolId,
+			context: 'move_item_to_section',
+			sectionId: currentSectionId,
+			itemId,
+		});
+	}, [protocolId, router]);
+
 	const onItemMenuClick = useCallback((event) => {
 		const items = [
 			{
@@ -297,6 +309,10 @@ export function ProtocolPage() {
 				// icon: 'edit',
 				name: t('Item_Move_Down'),
 				action: onMoveItemClick('down', event.currentTarget.dataset.section, event.currentTarget.dataset.item),
+			},
+			{
+				name: t('Item_Move_To_Section'),
+				action: onMoveItemToSection(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
 			},
 			{
 				// icon: 'edit',
@@ -324,7 +340,7 @@ export function ProtocolPage() {
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [onEditItemClick, onMoveItemClick, openConfirmDeleteItem, openErrand, t]);
+	}, [onEditItemClick, onMoveItemClick, openConfirmDeleteItem, t]);
 
 	const goBack = () => {
 		FlowRouter.go('/protocols');
@@ -394,6 +410,7 @@ export function ProtocolPage() {
 				{ context === 'participants' && t('Participants') }
 				{ context === 'add-participant' && t('Participant_Add') }
 				{ context === 'create-participant' && t('Participant_Create') }
+				{ context === 'move_item_to_section' && t('move_item_to_section') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'edit' && <EditProtocol _id={protocolId} close={close} onChange={onChange} cache={cache}/>}
@@ -404,6 +421,7 @@ export function ProtocolPage() {
 			{context === 'participants' && <Participants protocolId={protocolId} onAddParticipantClick={onAddParticipantClick} close={close}/>}
 			{context === 'add-participant' && <AddParticipant protocolId={protocolId} close={onParticipantsClick} onCreateParticipant={onAddParticipantClick}/>}
 			{context === 'create-participant' && <CreateParticipant goTo={onParticipantsClick} close={onParticipantsClick} workingGroupOptions={workingGroupOptions}/>}
+			{context === 'move_item_to_section' && <MoveItemToSectionField close={close} sections={data.sections}/>}
 		</VerticalBar>}
 	</Page>;
 }
@@ -411,3 +429,45 @@ export function ProtocolPage() {
 ProtocolPage.displayName = 'ProtocolPage';
 
 export default ProtocolPage;
+
+const clickable = css`
+		cursor: pointer;
+
+		&:hover, &:focus {
+			background: #F7F8FA;
+		}
+	`;
+
+function MoveItemToSectionField({ close, sections }) {
+	const t = useTranslation();
+	const sectionIdParam = useRouteParameter('sectionId');
+	const itemId = useRouteParameter('itemId');
+
+	const [currentSectionId, setCurrentSectionId] = useState(sectionIdParam);
+
+	const moveItemToSection = useMethod('moveItemToSection');
+
+	console.dir({ sectionIdParam, itemId });
+
+	const renderRow = (section) => {
+		const { num } = section;
+		return <Box
+			pb='x4'
+			color='default'
+			className={ clickable }
+			onClick={ () => setCurrentSectionId(section._id) }
+			backgroundColor={ section._id === currentSectionId && '#BBBBBB'}
+			pi={section._id === currentSectionId ? '1.5rem' : '1rem'}
+			fontSize='16px'
+			mbe='x8'
+			height='30px'
+		>
+			{[t('Section'), ' №', romanize(num)].join('')}
+		</Box>;
+	};
+
+	return <VerticalBar.ScrollableContent>
+		<Button primary disabled={currentSectionId === sectionIdParam} onClick={() => close()}>{t('Kek')}</Button>
+		<GenericList layout={'column'} renderRow={renderRow} results={sections} total={sections?.length ?? 0}/>
+	</VerticalBar.ScrollableContent>;
+}
