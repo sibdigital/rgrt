@@ -189,7 +189,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 						{...params}
 						variant='outlined'
 						placeholder={t('Item_Responsible')}
-						style={!isSecretary ? { cursor: 'not-allowed !important' } : {}}
+						style={!isSecretary ? { cursor: 'not-allowed !important', touchAction: 'none' } : { touchAction: 'none' }}
 					/>
 				)}
 			/>

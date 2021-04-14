@@ -318,7 +318,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				</Field>
 				{ context === '' && tab === 'agenda' && isAllowEdit
 				&& <ButtonGroup display={mediaQuery ? 'flex' : 'block'}>
-					{ !isNew && <Button mbe='x8' small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
+					{ !isNew && <Button style={{ touchAction: 'none' }} mbe='x8' small primary aria-label={t('Agenda_download')} onClick={onAgendaDownloadClick}>
 						{t('Agenda_download')}
 					</Button>}
 					{ isNew && <Button mbe='x8' small primary aria-label={t('Agenda_add')} onClick={onEditAgendaClick('new')}>

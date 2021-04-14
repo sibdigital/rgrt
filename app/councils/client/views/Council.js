@@ -350,7 +350,7 @@ function Council({
 		}
 	};
 
-	const fileUploadClick = async () => {
+	const fileUploadClick = () => {
 		if (!settings.get('FileUpload_Enabled')) {
 			console.log('!fileupload_enabled');
 			return null;
@@ -615,7 +615,7 @@ function Council({
 						<Button mbe={mediaQuery ? 'x0' : 'x8'} disabled={isLoading} marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
 							{t('Send_email')}
 						</Button>
-						<Button disabled={isLoading} small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+						<Button style={{ touchAction: 'none' }} disabled={isLoading} small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
 							{t('Download_Council_Participant_List')}
 						</Button>
 					</Field.Row>

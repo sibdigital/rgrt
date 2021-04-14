@@ -113,6 +113,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				renderInput={(params) => (
 					<TextField
 						{...params}
+						style={{ touchAction: 'none' }}
 						variant='outlined'
 						placeholder={t('Item_Responsible')}
 					/>
