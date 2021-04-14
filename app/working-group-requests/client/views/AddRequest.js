@@ -51,10 +51,12 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 		if (protocolData) {
 			if (protocolData.sections && protocolData.protocol && protocolData.protocol[0]) {
 				let protocolItem = null;
+				let sectionId = '';
 				protocolData.sections.forEach((section) => {
 					const it = section.items.find((item) => item._id === protocolsItemId);
 					if (it) {
 						protocolItem = it;
+						sectionId = section._id;
 					}
 				});
 				const itemDesc = $(protocolItem?.name ?? '').text();
@@ -66,6 +68,9 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 					_id: protocolData.protocol[0]?._id,
 					d: protocolData.protocol[0]?.d ?? new Date(),
 					num: protocolData.protocol[0]?.num ?? '',
+					sectionId,
+					itemId: protocolItem?._id ?? '',
+					itemName: protocolItem?.name ?? '',
 					itemNum: protocolItem?.num ?? '',
 					itemResponsible: itemResponsiblePerson,
 				});
