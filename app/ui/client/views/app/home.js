@@ -4,6 +4,7 @@ import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Session } from 'meteor/session';
 
+import { modal } from '../../../../ui-utils/client';
 import { settings } from '../../../../settings';
 import { t } from '../../../../utils';
 import { AccountBox, menu } from '../../../../ui-utils';
@@ -146,10 +147,10 @@ const toolbarButtons = () => [
 		},
 	},
 	{
-		name: t('Create_new') + ' ' + t('Channel'),
+		name: [t('Create_new'), t('Channel')].join(' '),
 		icon: 'hashtag',
 		context: 'interaction',
-		condition: () => hasAtLeastOnePermission(['administration-home-page', 'create-c', 'create-p', 'create-d', 'start-discussion', 'start-discussion-other-user']),
+		condition: () => Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		// hasPopup: true,
 		action: (e) => {
 			e.preventDefault();
@@ -179,7 +180,7 @@ const toolbarButtons = () => [
 		name: t('Create_new') + ' ' + t('Direct_Messages'),
 		icon: 'team',
 		context: 'interaction',
-		condition: () => hasAtLeastOnePermission(['create-c', 'create-p', 'create-d', 'start-discussion', 'start-discussion-other-user']),
+		condition: () => Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		// hasPopup: true,
 		action: (e) => {
 			return createInteractionActions('Direct_Messages', 'CreateDirectMessage')(e);
