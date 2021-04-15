@@ -219,16 +219,11 @@ function MailSenderWithCouncil({ workingGroupsData, usersData, debouncedParams, 
 			const child = invitedPersons ? {
 				label,
 				value: 'Council',
-				isDefaultValue: true,
+				checked: true,
 				children: !invitedPersons ? [] : getChildrens(invitedPersons),
 			} : null;
 
-			console.log(child);
-			// console.log(invitedUsers);
-			// console.log(usersData);
-
 			if (isChild) {
-				console.log('nule');
 				recipients[0].children.push(child);
 			}
 			const mailSubject = [t('Council'), 'От', formatDateAndTime(councilData.d)].join(' ');
