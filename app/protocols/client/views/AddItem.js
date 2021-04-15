@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Field, Button, InputBox, ButtonGroup, TextInput } from '@rocket.chat/fuselage';
+import { Field, Button, InputBox, ButtonGroup, TextInput, Box } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -100,6 +100,17 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				options={personsData.persons}
 				forcePopupIcon={false}
 				getOptionLabel={(option) => constructPersonFIO(option)}
+				renderOption={(option, state) =>
+					<Box
+						style={{ cursor: 'pointer' }}
+						zIndex='100'
+						width='100%'
+						height='100%'
+						onTouchStart={() => setResponsible([...responsible, option]) }
+					>
+						{constructPersonFIO(option)}
+					</Box>
+				}
 				filterSelectedOptions
 				freeSolo
 				filterOptions={createFilterOptions({ limit: 10 })}

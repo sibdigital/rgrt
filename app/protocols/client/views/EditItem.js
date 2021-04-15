@@ -173,8 +173,18 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 				forcePopupIcon={false}
 				options={personsData.persons}
 				getOptionLabel={(option) => constructPersonFIO(option)}
-				//getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname}
 				filterOptions={createFilterOptions({ limit: 10 })}
+				renderOption={(option, state) =>
+					<Box
+						style={{ cursor: 'pointer' }}
+						zIndex='100'
+						width='100%'
+						height='100%'
+						onTouchStart={() => setResponsible([...responsible, option]) }
+					>
+						{constructPersonFIO(option)}
+					</Box>
+				}
 				filterSelectedOptions
 				freeSolo
 				onChange={(event, value) => setResponsible(value)}
