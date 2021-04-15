@@ -77,7 +77,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 	const workingGroupOptions = useMemo(() => {
 		const res = [[null, t('Not_chosen')]];
 		if (workingGroups?.length > 0) {
-			return res.concat(workingGroups.map((workingGroup) => [workingGroup.title, workingGroup.title]));
+			return res.concat(workingGroups.map((workingGroup) => [workingGroup._id, workingGroup.title]));
 		}
 		return res;
 	}, [workingGroups]);
@@ -99,6 +99,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 		handlePersonId(person._id);
 		handlePosition(person.position);
 		handleOrganization(person.organization);
+		handleWorkingGroup(person.group?._id);
 	}
 
 	const resetFilledData = (person) => {
@@ -108,6 +109,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 		handlePersonId('');
 		handlePosition('');
 		handleOrganization('');
+		handleWorkingGroup('');
 	};
 
 	useEffect(() => {
