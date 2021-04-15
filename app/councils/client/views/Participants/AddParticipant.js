@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Field, Table, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery, useMutableCallback } from '@rocket.chat/fuselage-hooks';
 import Loading from 'react-loading-animation';
+import ReactLoading from 'react-loading';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
@@ -135,7 +136,7 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 				</Tile>
 			</>
 			: <Box display='flex' flexDirection='column'>
-				{<Loading height='200px' width='200px' margin='1rem 1rem' style={{ alignSelf: 'center', position: 'absolute', zIndex: '40' }} isLoading={isFetching}/>}
+				{isFetching && <ReactLoading type={'spinningBubbles'} color='#F7F8FA' style={{ margin: '1rem 1rem', alignSelf: 'center', position: 'absolute', zIndex: '40', width: '200px', height: '200px' }} />}
 				<SlideAnimation style={{ overflow: 'hidden auto' }}>
 					<PersonsTable invitedPersons={ findPersons } personsIdToAdd={ personsIdToAdd } handleAddPerson={ onAddClick } isFetching={ isFetching }/>
 				</SlideAnimation>
