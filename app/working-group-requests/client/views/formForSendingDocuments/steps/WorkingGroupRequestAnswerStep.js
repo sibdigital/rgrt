@@ -121,18 +121,18 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 		try {
 			setCommitting(true);
 			const dataToSave = packNewData();
-			const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
+			// const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
 			// await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {
 			// 	_id: fileDownloadInfo.workingGroupRequestId,
 			// 	mailId: newMailId === '' ? fileDownloadInfo.mailId : newMailId,
 			// 	answerId,
 			// });
 
-			console.log('HEREERERE');
+			// console.log('HEREERERE');
 			console.dir({ data });
-			console.dir({ kekw: { ...fileDownloadInfo, ...dataToSave } });
+			// console.dir({ kekw: { ...fileDownloadInfo, ...dataToSave } });
 
-			const dataToErrand = { ...dataToSave };
+			const dataToErrand = { ...dataToSave, workingGroupRequestId: data._id };
 
 			dataToSave.sender._id && Object.assign(dataToErrand, { chargedTo: dataToSave.sender });
 			data.desc && Object.assign(dataToErrand, { desc: data.desc });
