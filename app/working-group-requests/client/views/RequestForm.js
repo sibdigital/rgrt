@@ -155,7 +155,6 @@ export function ProtocolItemsField({
 	const formatDate = useFormatDate();
 
 	const handleProtocolItemChipClick = useCallback((index) => {
-		console.log('handleProtocolItemChipClick');
 		const arr = protocolItems.filter((chip, _index) => _index !== index);
 		handleProtocolItems(arr);
 	}, [handleProtocolItems, protocolItems]);
@@ -185,7 +184,21 @@ export function ProtocolItemsField({
 	, [t, protocolItems, protocolId, chooseButtonStyles, handleProtocolItems, formatDate, handleProtocolItemChipClick, handleChoose]);
 }
 
-function ResponsibleField({
+export function MailField({ requestType, mail, inputStyles, handleMail }) {
+	const t = useTranslation();
+
+	return useMemo(() =>
+		(requestType.state === defaultRequestTypeState.MAIL.state || requestType.state === defaultRequestTypeState.MAIL.state)
+			&& <Field mbe='x16' display='flex' flexDirection='row'>
+				<Field.Label alignSelf='center' mie='x16' style={{ whiteSpace: 'pre' }}>{t('Working_group_request_select_mail')}</Field.Label>
+				<Field.Row width='inherit'>
+					<TextInput style={ inputStyles } placeholder={t('Working_group_request_select_mail')} value={mail} onChange={(event) => handleMail(event)} fontScale='p1'/>
+				</Field.Row>
+			</Field>
+	, [handleMail, inputStyles, mail, requestType, t]);
+}
+
+export function ResponsibleField({
 	chooseButtonStyles,
 	handleChoose,
 	handleItemResponsible,
@@ -195,6 +208,7 @@ function ResponsibleField({
 }) {
 	const t = useTranslation();
 	const label = useMemo(() => constructPersonFullFIO(itemResponsible ?? ''), [itemResponsible]);
+	const _chooseButtonStyles = useMemo(() => chooseButtonStyles ?? { backgroundColor: 'transparent', borderColor: 'var(--rc-color-primary-button-color)', borderRadius: '0.7rem', borderWidth: '1.5px' }, [chooseButtonStyles]);
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
@@ -203,12 +217,12 @@ function ResponsibleField({
 			</Field.Label>
 			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
 				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Errand_Charged_to')}/>
-				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('responsibleChoose')} fontScale='p1'>
+				<Button mis='auto' mie='x8' alignSelf='center' style={_chooseButtonStyles} small onClick={() => handleChoose('responsibleChoose')} fontScale='p1'>
 					{t('Choose')}
 				</Button>
 			</Box>
 		</Field>
-	, [chooseButtonStyles, flexDirection, handleChoose, handleItemResponsible, itemResponsible, label, t]);
+	, [_chooseButtonStyles, flexDirection, handleChoose, handleItemResponsible, itemResponsible, label, t]);
 }
 
 const SlideAnimation = getAnimation({ type: 'slideInDown' });

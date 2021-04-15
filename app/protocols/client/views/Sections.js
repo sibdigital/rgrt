@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Box, Icon } from '@rocket.chat/fuselage';
 import { css } from '@rocket.chat/css-in-js';
 
@@ -6,6 +6,7 @@ import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
 import { constructPersonFIO } from '../../../utils/client/methods/constructPersonFIO';
 import { romanize } from '../../../utils/lib/romanNumeralConverter';
+import { useMethod } from '../../../../client/contexts/ServerContext';
 
 const clickable = css`
 		cursor: pointer;
@@ -26,6 +27,8 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick, isAllowedE
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 
+	const isHavePersonLinkToUser = useMethod('isHavePersonLinkToUser');
+
 	const getStatusIcon = (statusState) => {
 		let color = 'transparent';
 		switch (statusState) {
@@ -43,6 +46,12 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick, isAllowedE
 		}
 		return color;
 	};
+	const getHaveLinkToUser = useCallback(async (personId) => {
+		console.log(['here personId ', personId].join(''));
+		const user = await isHavePersonLinkToUser(personId);
+		console.dir({ user });
+		return !!(user && user._id);
+	}, [isHavePersonLinkToUser]);
 
 	const Item = (item) => <>
 		<Box
@@ -53,7 +62,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick, isAllowedE
 			className={clickable}>
 			<Box display='flex' flexDirection='row' is='span' pie='x8'>
 				<Box mie='x4' color={getStatusIcon(item.responsible.length > 0 ? item.status?.state ?? -1 : -1)}><Icon name='circle'/></Box>
-				<Box>{item.sectionNum ? [romanize(item.sectionNum), '.'].join('') : ''}{item.num}.</Box>
+				<Box>{item.num}.</Box>
 			</Box>
 			<Box flexGrow={1}>
 				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: item.name }} align='justify'/>

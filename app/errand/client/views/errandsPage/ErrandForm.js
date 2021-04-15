@@ -1,5 +1,6 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import 'react-phone-input-2/lib/style.css';
+import _ from 'underscore';
 
 import { useForm } from '../../../../../client/hooks/useForm';
 import { ErrandTypes } from '../../utils/ErrandTypes';
@@ -10,31 +11,32 @@ import { t } from '../../../../utils';
 require('react-datepicker/dist/react-datepicker.css');
 
 export const defaultErrandFields = Object.freeze({
-	errandType: { value: ErrandTypes.default, required: false },
+	errandType: { value: ErrandTypes.default, required: true },
 	status: { value: ErrandStatuses.OPENED, required: true },
-	ts: { value: new Date(), required: true },
-	initiatedBy: { value: {}, required: true },
-	chargedTo: { value: {}, required: true },
-	desc: { value: '', required: true },
+	ts: { value: new Date(), required: false },
+	initiatedBy: { value: {}, required: false },
+	chargedTo: { value: {}, required: false },
+	desc: { value: '', required: false },
 	expireAt: { value: new Date(), required: true },
-	commentary: { value: '', required: true },
+	commentary: { value: '', required: false },
 });
 
 export const defaultErrandByProtocolItemFields = Object.freeze({
 	...defaultErrandFields,
-	errandType: { value: ErrandTypes.byProtocolItem, required: false },
+	errandType: { value: ErrandTypes.byProtocolItem, required: true },
 	protocol: { value: {}, required: true },
 });
 
-export const defaultErrandByRequestFields = {
+export const defaultErrandByRequestFields = Object.freeze({
 	...defaultErrandFields,
-	errandType: { value: ErrandTypes.byRequestAnswer, required: false },
-	sender: { value: {}, required: true },
+	errandType: { value: ErrandTypes.byRequestAnswer, required: true },
+	commentary: { value: '', required: true },
+	sender: { value: { group: '', organization: '', phone: '', email: '' }, required: true },
 	answerType: { value: {}, required: true },
-	protocol: { value: {}, required: true },
-	mail: { value: '', required: true },
+	protocol: { value: {}, required: false },
+	mail: { value: '', required: false },
 	documents: { value: [], required: true },
-};
+});
 
 export function getDefaultErrandFields({ errand, errandType = ErrandTypes.default }) {
 	let fields = defaultErrandFields;
@@ -53,7 +55,6 @@ export function getDefaultErrandFields({ errand, errandType = ErrandTypes.defaul
 	if (!errand || typeof errand !== 'object' || errand.length) {
 		return fields;
 	}
-	console.dir({ errand, fields, errandType });
 
 	const newErrand = { ...errand };
 
@@ -90,12 +91,25 @@ export function useDefaultErrandForm({ defaultValues = null, errandType = Errand
 	const allFieldAreFilled = useMemo(() => Object.entries(values).filter((val) => {
 		const [key, _value] = val;
 		const { value, required } = _value;
+		// console.log({ _value });
 
 		if (!required) { return false; }
 		if (typeof value === 'string' && value.trim() !== '') { return false; }
-		if (typeof value === 'object' && value.length > 0) { return false; }
+		if (typeof value === 'object' && value !== undefined && value !== null) { return false; }
+		if (value && _.isArray(value) && value.length > 0) { return false; }
 		return value?.toString().trim() === '';
 	}).length === 0, [values]);
+
+	const senderFieldAreFilled = useMemo(() => (errandType === ErrandTypes.byRequestAnswer ? Object.entries(values?.sender ?? {}).filter((val) => {
+		const [key, value] = val;
+
+		console.dir({ key, value });
+
+		if (typeof value === 'string' && value.trim() !== '') { return false; }
+		if (typeof value === 'object' && value !== undefined && value !== null) { return false; }
+		if (value && _.isArray(value) && value.length > 0) { return false; }
+		return value?.toString().trim() === '';
+	}) : true), [errandType, values.sender]);
 
 	return {
 		values,
@@ -104,6 +118,7 @@ export function useDefaultErrandForm({ defaultValues = null, errandType = Errand
 		commit,
 		hasUnsavedChanges,
 		allFieldAreFilled,
+		allRequiredFieldAreFilled: senderFieldAreFilled,
 	};
 }
 
@@ -126,9 +141,9 @@ export function getErrandFieldsForSave({ errand, errandType = ErrandTypes.defaul
 		default:
 			break;
 	}
-	console.dir({ fieldsGet: fields, errand });
+	// console.dir({ fieldsGet: fields, errand });
 
-	const newErrand = { ...errand };
+	const newErrand = { ...errand, createdAt: new Date(errand.createdAt && errand.createdAt) };
 
 	const errandKeys = Object.keys(errand);
 	const fieldsKeys = Object.keys(fields);
@@ -146,6 +161,8 @@ export function getErrandFieldsForSave({ errand, errandType = ErrandTypes.defaul
 
 	newErrand.status = { ...newErrand.status, i18nLabel: t(newErrand.status.i18nLabel) };
 	newErrand.errandType = { key: newErrand.errandType.key, state: newErrand.errandType.state, title: newErrand.errandType.title, i18nLabel: t(newErrand.errandType.i18nLabel) };
+	newErrand.answerType && Object.assign(newErrand, { answerType: { ...newErrand.answerType, i18nLabel: t(newErrand.answerType.i18nLabel) } });
+	newErrand.chargedTo && Object.assign(newErrand, { chargedTo: { person: { ...newErrand.chargedTo } } });
 	errand.expireAt?.value && Object.assign(newErrand, { expireAt: new Date(errand.expireAt.value) });
 	errand.ts?.value && Object.assign(newErrand, { ts: new Date(errand.ts.value) });
 
@@ -161,6 +178,7 @@ function ErrandForm({
 	setContext,
 	items,
 	setItems,
+	errandId,
 }) {
 	const {
 		newValues,
@@ -173,9 +191,8 @@ function ErrandForm({
 	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'pre-wrap', border: onReadOnly ? '' : '1px solid #4fb0fc' }), [onReadOnly]);
 	const marginBlockEnd = useMemo(() => ({ marginBlockEnd: '1rem !important' }), []);
 
-	let view = <DefaultErrandFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values}/>;
+	let view = <DefaultErrandFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} setContext={setContext}/>;
 
-	console.dir({ errandType });
 	switch (errandType) {
 		case ErrandTypes.default:
 			break;
@@ -183,7 +200,7 @@ function ErrandForm({
 			view = <ErrandByProtocolItemFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values}/>;
 			break;
 		case ErrandTypes.byRequestAnswer:
-			view = <ErrandByRequestFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} request={request} setItems={setItems} items={items} setContext={setContext}/>;
+			view = <ErrandByRequestFields errandId={errandId} inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} request={request} setItems={setItems} items={items} setContext={setContext}/>;
 			break;
 		default:
 			break;

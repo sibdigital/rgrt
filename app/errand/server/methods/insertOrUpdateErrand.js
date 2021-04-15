@@ -14,9 +14,9 @@ Meteor.methods({
 		const person = Persons.findOne({ userId }, { fields: { surname: 1, name: 1, patronymic: 1 } });
 
 		if (errandData._id) {
-			Errands.updateErrand(errandData._id, { ...errandData, chargedTo: { userId, person } });
+			Errands.updateErrand(errandData._id, errandData);
 			return errandData._id;
 		}
-		return Errands.create({ ...errandData, chargedTo: { userId, person } });
+		return Errands.create({ ...errandData, chargedTo: { userId, ...errandData.chargedTo?.person ?? person } });
 	},
 });

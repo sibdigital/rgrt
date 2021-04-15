@@ -56,9 +56,9 @@ Meteor.methods({
 		const user = Meteor.user();
 
 		// type === users
-		if (!hasPermission(user._id, 'view-outside-room') || !hasPermission(user._id, 'view-d-room')) {
-			return;
-		}
+		// if (!hasPermission(user._id, 'view-outside-room') || !hasPermission(user._id, 'view-d-room')) {
+		// 	return;
+		// }
 
 		const options = {
 			...pagination,

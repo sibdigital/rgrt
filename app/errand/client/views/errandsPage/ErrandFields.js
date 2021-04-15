@@ -11,28 +11,35 @@ import {
 } from '@rocket.chat/fuselage';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 import ReactTooltip from 'react-tooltip';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
-import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
 import { ErrandStatuses } from '../../utils/ErrandStatuses';
 import { settings } from '../../../../settings/client';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
-import AnswerForm from '../../../../working-group-requests/client/views/AnswerForm';
-import { ProtocolField as ProtocolChoose, ProtocolItemsField } from '../../../../working-group-requests/client/views/RequestForm';
+import AnswerForm, { AnswerTypes } from '../../../../working-group-requests/client/views/AnswerForm';
+import { ProtocolField as ProtocolChoose, ProtocolItemsField, MailField, defaultRequestTypeState, ResponsibleField } from '../../../../working-group-requests/client/views/RequestForm';
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { ErrandTypes } from '../../utils/ErrandTypes';
 import { deCapitalize } from '../../../../../client/helpers/capitalize';
-import { filesValidation, fileUploadToCouncil } from '../../../../ui/client/lib/fileUpload';
+import { filesValidation } from '../../../../ui/client/lib/fileUpload';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { mime } from '../../../../utils';
 import { getErrandFieldsForSave } from './ErrandForm';
 
-function DefaultField({ title, renderInput,flexDirection = 'row', ...props }) {
+function DefaultField({ title, renderInput,flexDirection = 'row', required = false, ...props }) {
 	return <Field display='flex' flexDirection={flexDirection} mie={flexDirection === 'row' && 'x16'} {...props}>
-		<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf={flexDirection === 'row' && 'center'} mbe={flexDirection === 'column' && 'x16'} mie='x16' width='max-content'>{title}</Field.Label>
+		<Field.Label
+			style={{ flex: '0 0 0px', whiteSpace: 'pre' }}
+			alignSelf={flexDirection === 'row' && 'center'}
+			mbe={flexDirection === 'column' && 'x16'}
+			mie='x16'
+			width='max-content'
+		>
+			{title}
+			{required && <span style={{ color: 'red' }}>*</span>}
+		</Field.Label>
 		{renderInput}
 	</Field>;
 }
@@ -74,7 +81,7 @@ function ExpireAtField({ expireAt, handleExpireAt, inputStyles, ...props }) {
 			popperClassName='date-picker'/>
 	, [expireAt, handleExpireAt, inputStyles]);
 
-	return useMemo(() => <DefaultField title={t('Errand_Expired_date')} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Errand_Expired_date')} required={true} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
 }
 
 function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
@@ -106,7 +113,7 @@ function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
 		<SelectFiltered style={inputStyles} options={availableStatuses} value={statusValue} key='status' onChange={handleChange} placeholder={t('Status')}/>
 	, [availableStatuses, handleChange, inputStyles, statusValue, t]);
 
-	return useMemo(() => <DefaultField title={t('Status')} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Status')} required={true} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
 }
 
 function DescriptionField({ desc, ...props }) {
@@ -116,11 +123,11 @@ function DescriptionField({ desc, ...props }) {
 	return useMemo(() => <DefaultField title={t('Description')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
-function CommentaryField({ commentary, inputStyles, handleCommentary, ...props }) {
+function CommentaryField({ commentary, required, inputStyles, handleCommentary, ...props }) {
 	const t = useTranslation();
 	const renderInput = useMemo(() => <TextAreaInput style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, t]);
 
-	return useMemo(() => <DefaultField title={t('Commentary')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
+	return useMemo(() => <DefaultField title={t('Commentary')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
 function ProtocolField({ protocol, ...props }) {
@@ -129,31 +136,32 @@ function ProtocolField({ protocol, ...props }) {
 
 	const protocolUrl = useMemo(() => (protocol && protocol._id ? [settings.get('Site_Url'), 'protocol/', protocol._id].join('') : ''), [protocol]);
 	const protocolItemUrl = useMemo(() => (protocol && protocol.sectionId && protocol.itemId ? [settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId].join('') : protocolUrl), [protocol, protocolUrl]);
-	const protocolTitle = useMemo(() => (protocol ? [t('Protocol'), ' от ', formatDate(protocol.d), ' № ', protocol.num].join('') : ''), [formatDate, protocol, t]);
+	const protocolLabel = useMemo(() => (protocol ? [t('Protocol'), ' от ', formatDate(protocol.d), ' № ', protocol.num].join('') : ''), [formatDate, protocol, t]);
+	const protocolItemLabel = useMemo(() => (protocol && protocol.sectionId && protocol.itemId
+		? ['№', protocol.itemNum, ', ', protocol.itemName ?? ''].join('')
+		: protocolUrl)
+	, [protocol, protocolUrl, t]);
 
 	return useMemo(() => (protocol && protocol._id
 		? <Field display='flex' flexDirection='row' {...props}>
-			<Field mie='x16' display='flex' flexDirection='row'>
-				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol')}</Field.Label>
-				<Field.Row>
-					<a href={protocolUrl}>{protocolTitle}</a>
-				</Field.Row>
-			</Field>
 			<Field display='flex' flexDirection='row'>
+				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol')}</Field.Label>
+				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mie='x16' mis='x8'>
+					<a style={{ maxWidth: 'max-content' }} href={protocolUrl}>{protocolLabel}</a>
+				</Field>
+			</Field>
+			<Field display='flex' flexDirection='row' mie='x16'>
 				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol_Item')}</Field.Label>
-				<Field.Row>
-					<a href={protocolItemUrl}>{protocolTitle}</a>
-				</Field.Row>
+				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mis='x8'>
+					<a href={protocolItemUrl}>{protocolItemLabel}</a>
+				</Field>
 			</Field>
 		</Field>
 		: <></>)
-	, [props, protocol, protocolItemUrl, protocolTitle, protocolUrl, t]);
+	, [protocol, props, t, protocolUrl, protocolLabel, protocolItemUrl, protocolItemLabel]);
 }
 
-export function DefaultErrandFields({ inputStyles, marginBlockEnd, values, handlers }) {
-	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
-
+export function DefaultErrandFields({ inputStyles, values, handlers, setContext }) {
 	const {
 		status,
 		ts,
@@ -168,6 +176,7 @@ export function DefaultErrandFields({ inputStyles, marginBlockEnd, values, handl
 		handleStatus,
 		handleExpireAt,
 		handleCommentary,
+		handleChargedTo,
 	} = handlers;
 
 	const onChangeField = useCallback((val, field, handler) => {
@@ -182,12 +191,13 @@ export function DefaultErrandFields({ inputStyles, marginBlockEnd, values, handl
 				<CreatedAtField ts={ts.value} />
 			</Box>
 			<DescriptionField desc={desc.value}/>
+			<ResponsibleField flexDirection='row' handleChoose={setContext} itemResponsible={chargedTo.value.person ?? {}} handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}/>
 			<Box display='flex' flexDirection='row'>
-				<ChargedToField chargedTo={chargedTo.value}/>
+				{/*<ChargedToField chargedTo={chargedTo.value}/>*/}
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
 			</Box>
-			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
+			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} required={commentary.required} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
 
 		</Margins>
 	</Box>;
@@ -229,41 +239,79 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
 			</Box>
-			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
+			<CommentaryField inputStyles={inputStyles} commentary={commentary.value} required={commentary.required} handleCommentary={(val) => onChangeField(val, commentary, handleCommentary)}/>
 
 		</Margins>
 	</Box>;
 }
 
-export function ErrandByRequestFields({ inputStyles, values, handlers, request, setContext, items, setItems }) {
+export function ErrandByRequestFields({ inputStyles, values, handlers, request, setContext, items, setItems, errandId }) {
 	const t = useTranslation();
 
 	const [tab, setTab] = useState('errand');
 
 	const {
-		initiatedBy,
+		chargedTo,
 		desc,
 		protocol,
 		documents,
+		answerType,
+		mail,
 	} = values;
 
 	const {
 		handleDesc,
-		handleInitiatedBy,
+		handleChargedTo,
 		handleProtocol,
 		handleDocuments,
+		handleMail,
+		handleAnswerType,
 	} = handlers;
 
 	useEffect(() => {
-		console.dir({ request });
-		if (request && request._id && request.itemResponsible && request.itemResponsible._id && !initiatedBy._id) {
-			handleInitiatedBy({ ...initiatedBy, value: request.itemResponsible });
-		}
+		if (request && request._id && !errandId) {
+			if (request.itemResponsible && request.itemResponsible._id && !chargedTo?._id) {
+				handleChargedTo({ ...chargedTo, value: { person: request.itemResponsible } });
+			}
 
-		if (request && request._id && request.desc && desc.value === '') {
-			handleDesc({ ...desc, value: request.desc });
+			if (request.desc && desc.value === '') {
+				handleDesc({ ...desc, value: request.desc });
+			}
+
+			if (request.requestType && request.requestType.state === defaultRequestTypeState.REQUEST.state && request.protocol) {
+				handleProtocol({ required: protocol.required,
+					value: {
+						_id: request.protocol._id ?? '',
+						num: request.protocol.num ?? '',
+						d: request.protocol.d ? new Date(request.protocol.d) : new Date(),
+						itemNum: request.protocol.itemNum ?? '',
+						itemName: request.protocol.itemName ?? '',
+						itemId: request.protocol.itemId ?? '',
+						sectionId: request.protocol.sectionId ?? '',
+					},
+				});
+				setItems([{
+					_id: request.protocol.itemId,
+					itemNum: request.protocol.itemNum ?? '',
+					num: request.protocol.itemNum ?? '',
+					itemName: request.protocol.itemName ?? '',
+					name: request.protocol.itemName ?? '',
+					sectionId: request.protocol.sectionId ?? '',
+				}]);
+			}
+
+			if (request.requestType && request.requestType.state === defaultRequestTypeState.MAIL.state && request.mail) {
+				handleAnswerType({ required: true, value: AnswerTypes.MAIL });
+				handleMail({ required: true, value: request.mail });
+			}
 		}
-	},[request]);
+	}, [request, errandId]);
+
+	useMemo(() => {
+		if (!answerType?.value?.state) {
+			handleAnswerType({ ...answerType, value: AnswerTypes.PROTOCOL });
+		}
+	}, [answerType]);
 
 	const chooseButtonStyles = useMemo(() => ({ backgroundColor: 'transparent', borderColor: 'var(--rc-color-primary-button-color)', borderRadius: '0.7rem', borderWidth: '1.5px' }), []);
 
@@ -284,6 +332,7 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			handlers[handler]({ value, required: values[key].required ?? false });
 		}
 	}, [handlers, values]);
+	console.dir({ valuesInErrandFields: values });
 
 	return <Box display='flex' flexDirection='column' mbe='x16'>
 
@@ -295,13 +344,21 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			</Tabs>
 		</Box>
 		{ tab === 'errand'
-			&& <DefaultErrandFields inputStyles={inputStyles} handlers={handlers} values={values}/>
+			&& <DefaultErrandFields inputStyles={inputStyles} handlers={handlers} values={values} setContext={setContext}/>
 		}
 		{ tab === 'answer'
 			&& <><AnswerForm defaultValues={answerValues} defaultHandlers={handlers} onAnswerErrand={true} onErrandHandle={onChangeField}/>
 				<Margins all='x8'>
-					<ProtocolChoose flexDirection={'row'} protocol={protocol.value} handleProtocol={handleProtocol} inputStyles={inputStyles} handleChoose={setContext} chooseButtonStyles={chooseButtonStyles}/>
-					<ProtocolItemsField handleProtocolItems={setItems} protocolItems={items} protocolId={protocol?.value?._id ?? null} chooseButtonStyles={chooseButtonStyles} handleChoose={setContext}/>
+					{
+						answerType.value.key === AnswerTypes.PROTOCOL.key
+						&& <><ProtocolChoose flexDirection={'row'} protocol={protocol.value} handleProtocol={handleProtocol} inputStyles={inputStyles} handleChoose={setContext} chooseButtonStyles={chooseButtonStyles}/>
+							<ProtocolItemsField handleProtocolItems={setItems} protocolItems={items} protocolId={protocol?.value?._id ?? null} chooseButtonStyles={chooseButtonStyles} handleChoose={setContext}/></>
+					}
+					{
+						answerType.value.key === AnswerTypes.MAIL.key
+						&& <MailField inputStyles={inputStyles} requestType={answerType.value} mail={mail.value} handleMail={(val) => handleMail({ ...mail, value: val.currentTarget.value })}/>
+					}
+
 				</Margins>
 			</>
 		}
@@ -314,7 +371,6 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 function AnswerFilesTable({ files, documents, handleDocuments }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
-	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
 	const [context, setContext] = useState('');
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
@@ -435,8 +491,8 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Table.Row>;
 	};
 
+	// console.dir({ filesInErrandFields: files, documents });
 	return <Box display='flex' flexDirection='column'>
-		{/*<Margins inline='x8'>*/}
 		<Button mis='x16' mbe='x16' small primary width='max-content' onClick={fileUploadClick}>{t('Upload_file')}</Button>
 		{context === 'uploadFiles' && currentUploadedFiles?.length > 0
 		&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
@@ -460,6 +516,5 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Field>
 		}
 		<GenericTable header={header} renderRow={renderRow} results={files ?? []} total={files?.length || 0}/>
-		{/*</Margins>*/}
 	</Box>;
 }

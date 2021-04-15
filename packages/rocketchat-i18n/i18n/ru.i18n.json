@@ -3940,6 +3940,8 @@
   "Working_group_request_sender": "Вид отправителя",
   "Working_group_request_sender_description": "Контактная информация об отправителе",
   "Working_group_request_sender_organization": "Организация",
+  "Working_group_request_type": "Тип запроса",
+  "Working_group_request_answer_type": "Тип ответа",
   "Working_group_request_your_information_accepted": "Ваш ответ на запрос %s от %s %s принят",
   "Working_group_requests": "Запросы",
   "Working_group_received_answer": "Просмотр ответа",

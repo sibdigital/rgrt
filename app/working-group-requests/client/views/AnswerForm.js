@@ -1,40 +1,32 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Button, Chip, Field, Margins, Select, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
+import { Box, Field, Margins, Select, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
-import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
-import { useFormatDate } from '../../../../client/hooks/useFormatDate';
-import { getAnimation } from '../../../utils';
-import { ClearButton } from '../../../utils/client/views/ClearButton';
-import { constructPersonFullFIO } from '../../../utils/client/methods/constructPersonFIO';
-import { CouncilChoose } from './CouncilChoose';
-import { ProtocolChoose } from './ProtocolChoose';
-import { ItemsChoose } from './ItemsChoose';
-import { settings } from '../../../settings/client';
 
 require('react-datepicker/dist/react-datepicker.css');
 
-export const AnswerTypeEnum = Object.freeze({
-	PROTOCOL: 1,
-	MAIL: 2,
-});
-
-export const answerStatusState = Object.freeze({
-	RECEIVED: { state: 1, title: 'Received' },
-	ACCEPTED: { state: 2, title: 'Accepted' },
+export const AnswerTypes = Object.freeze({
+	PROTOCOL: { state: 1, title: 'Working_group_request_for_protocol_item', i18nLabel: 'Working_group_request_for_protocol_item', key: 'PROTOCOL' },
+	MAIL: { state: 2, title: 'Working_group_request_for_mail', i18nLabel: 'Working_group_request_for_mail', key: 'MAIL' },
+	getTypeByState: (state) => {
+		for (const [key, value] of Object.entries(AnswerTypes)) {
+			if (typeof value === 'object' && value.state === state) {
+				return value;
+			}
+		}
+	},
 });
 
 export const defaultAnswerFields = {
 	sender: {},
 	unread: false,
 	ts: new Date(),
-	answerType: {},
+	answerType: AnswerTypes.MAIL,
 	protocolId: '',
 	sectionItemsId: [],
 	protocol: {},
@@ -179,8 +171,8 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 
 	const values = useMemo(() => defaultValues ?? newValues, [defaultValues, newValues]);
 	const handlers = useMemo(() => defaultHandlers ?? newHandlers, [defaultHandlers, newHandlers]);
-	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
-	const statusAnswerOptions = useMemo(() => [[answerStatusState.ACCEPTED.state, t(answerStatusState.ACCEPTED.title)], [answerStatusState.RECEIVED.state, t(answerStatusState.RECEIVED.title)]], [t]);
+	const typeAnswerOptions = useMemo(() => Object.values(AnswerTypes).map((type) => [type.state, t(type.i18nLabel)]), [t]);
+	console.dir({ typeAnswerOptions });
 
 	const {
 		sender,
@@ -220,8 +212,8 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 	const marginBlockEnd = useMemo(() => ({ marginBlockEnd: '1rem !important' }));
 
 	const onChangeField = useCallback((val, handler) => {
+		console.dir({ val, handler });
 		handler(val);
-		console.dir({ handler });
 		if (onErrandHandle) {
 			onErrandHandle(handler.name, val);
 		}
@@ -237,8 +229,26 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 		['Другое', 'Другое'],
 	], []);
 
+	console.dir({ answerTypeOptionVal: answerType });
 	return <Box display='flex' flexDirection='column'>
+
 		<Margins all='x8'>
+
+			<Field display='flex' flexDirection='row' mie='x16'>
+				<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Working_group_request_answer_type')}</Field.Label>
+				<Select
+					border={inputStyles.border}
+					mie='auto'
+					mbe='x16'
+					width='max-content'
+					maxHeight='40px'
+					options={typeAnswerOptions}
+					value={answerType?.state ?? ''}
+					selected={answerType?.state ?? ''}
+					placeholder={t('Working_group_request_answer_type')}
+					onChange={(val) => onChangeField(AnswerTypes.getTypeByState(val), handleAnswerType)}
+				/>
+			</Field>
 
 			<Field display='flex' flexDirection='row' style={marginBlockEnd}>
 				{useMemo(() => <Field display='flex' flexDirection='row' mie='x16'>
@@ -290,30 +300,12 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 				</Field>, [t, inputStyles, sender, onReadOnly, onChangeField, handleSender])}
 			</Field>
 
-			{/*{useMemo(() => onAnswerErrand && <Field display='flex' flexDirection='row' style={marginBlockEnd}>*/}
-			{/*	<Box display='flex' flexDirection='row' mie='x16'>*/}
-			{/*		<Field.Label mie='x16' alignSelf='center'>{t('Type')}</Field.Label>*/}
-			{/*		<Select width='max-content' style={inputStyles} options={typeAnswerOptions} onChange={(val) => handleAnswerType(val)} value={answerType} placeholder={t('Type')}/>*/}
-			{/*	</Box>*/}
-			{/*	<Box display='flex' flexDirection='row'>*/}
-			{/*		<Field.Label mie='x16' alignSelf='center'>{t('Status')}</Field.Label>*/}
-			{/*		<Select width='max-content' style={inputStyles} options={statusAnswerOptions}/>*/}
-			{/*	</Box>*/}
-			{/*</Field>, [answerType, handleAnswerType, marginBlockEnd, onAnswerErrand, t, typeAnswerOptions])}*/}
-
 			{useMemo(() => !onAnswerErrand && <Field style={marginBlockEnd}>
 				<Field.Label>{t('Working_group_request_invite_select_protocol')}</Field.Label>
 				<Field.Row>
 					<TextAreaInput rows='2' value={protocol?.title ?? ''} onChange={(event) => onChangeField({ ...protocol, title: event.currentTarget.value }, handleProtocol)} readOnly={true} placeholder={t('Working_group_request_invite_select_protocol')} fontScale='p1'/>
 				</Field.Row>
 			</Field>, [onAnswerErrand, marginBlockEnd, t, protocol, onChangeField, handleProtocol])}
-
-			{/*{useMemo(() => !onAnswerErrand && <Field style={marginBlockEnd}>*/}
-			{/*	<Field.Label>{t('Working_group_request_invite_select_sections')}</Field.Label>*/}
-			{/*	<Field.Row>*/}
-			{/*		<TextAreaInput rows='2' value={protocol?.section?.title ?? ''} onChange={(event) => onChangeField({ ...protocol, section: { ...protocol.section, title: event.currentTarget.value } })} readOnly={true} placeholder={t('Working_group_request_invite_select_sections')} fontScale='p1'/>*/}
-			{/*	</Field.Row>*/}
-			{/*</Field>, [onAnswerErrand, marginBlockEnd, t, inputStyles, protocol, handleProtocol])}*/}
 
 			{useMemo(() => !onAnswerErrand && <Field style={marginBlockEnd}>
 				<Field.Label>{t('Working_group_request_invite_select_sections_items')}</Field.Label>

@@ -7,8 +7,7 @@ import ru from 'date-fns/locale/ru';
 import { settings } from '../../../settings/client';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useEndpointData } from '../../../../client/hooks/useEndpointData';
+import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
 import { Answers } from './Answers';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
@@ -19,6 +18,7 @@ import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from '
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import RequestForm, { useDefaultRequestForm, WorkingGroupRequestVerticalChooseBar } from './RequestForm';
+import { ErrandTypes } from '../../../errand/client/utils/ErrandTypes';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -64,6 +64,13 @@ export function DocumentPage() {
 		}), [data]),
 	);
 
+	const { data: errandsData } = useEndpointDataExperimental('errands.list',
+		useMemo(() => ({
+			query: JSON.stringify({ workingGroupRequestId: requestId }),
+		}), [requestId]),
+	);
+
+	useMemo(() => console.dir({ errandsData }), [errandsData]);
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
 
 	const {
@@ -111,18 +118,20 @@ export function DocumentPage() {
 		}
 	}, [protocolItemsData]);
 
-	const answers = useMemo(() => data?.answers ?? [], [data]);
+	// const answers = useMemo(() => data?.answers ?? [], [data]);
+	const answers = useMemo(() => errandsData?.errands ?? [], [errandsData]);
 
-	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&byRequestAnswer&${ requestId }`].join(''), [requestId]);
+	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&${ ErrandTypes.byRequestAnswer.key }&${ requestId }`].join(''), [requestId]);
 	const addressLabel = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
 	const onChange = useCallback(() => {
 		setCache(new Date());
 	}, []);
 
-	const onMailClick = useCallback((curMail) => () => {
-		FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ curMail._id }`);
-	}, [requestId]);
+	const onMailClick = useCallback((errandId) => () => {
+		// FlowRouter.go(`/working-groups-request/${ requestId }/answer/${ errandId }`);
+		FlowRouter.go(`/errand/${ errandId }`);
+	}, []);
 
 	const goBack = () => {
 		FlowRouter.go('working-groups-requests');
@@ -165,7 +174,9 @@ export function DocumentPage() {
 	const handleSaveRequest = useCallback(async () => {
 		try {
 			const { protocol } = values;
-			values.protocolItems?.length > 0 && values.protocolItems[0].num && Object.assign(protocol, { itemNum: values.protocolItems[0].num });
+			values.protocolItems?.length > 0 && values.protocolItems[0].num && console.dir({ itemInSave: values.protocolItems[0] });
+			values.protocolItems?.length > 0 && values.protocolItems[0].num
+			&& Object.assign(protocol, { sectionId: values.protocolItems[0].sectionId ?? '', itemId: values.protocolItems[0]._id, itemName: values.protocolItems[0].name, itemNum: values.protocolItems[0].num });
 
 			await saveAction({
 				number: values.number,
@@ -215,7 +226,7 @@ export function DocumentPage() {
 				<Field mbe='x16'>
 					<Field.Label>{t('Working_group_request_invite_link')}</Field.Label>
 					<Field.Row>
-						<a href={address} is='span' target='_blank'>{addressLabel}</a>
+						<a href={address} is='span'>{addressLabel}</a>
 					</Field.Row>
 				</Field>
 				<Box displa='flex' maxHeight='600px'>

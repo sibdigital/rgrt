@@ -44,7 +44,10 @@ export function EditErrandPage() {
 	}), [id, idParams]);
 
 	const { data, state, error } = useEndpointDataExperimental('errands.findOne', query);
-	const { data: personData, state: personState, error: personError } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
+	const { data: personData, state: personState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({
+		query: JSON.stringify({ userId }),
+		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
+	}), [userId]));
 	const { data: requestData, state: requestState } = useEndpointDataExperimental('working-groups-requests.findOne', useMemo(() => ({
 		query: JSON.stringify({ _id: idParams[0] === 'add' ? idParams[2] : data?.workingGroupRequestId ?? '' }),
 	}), [data, idParams]));
@@ -60,14 +63,14 @@ export function EditErrandPage() {
 		</Box>;
 	}
 
-	if (error || personError) {
+	if ([state, personState, requestState].includes(ENDPOINT_STATES.ERROR)) {
 		console.log('error');
 		return <Callout margin='x16' type='danger'>{error}</Callout>;
 	}
 	// console.dir({ idParams });
 	// console.dir(idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]] } : null);
 
-	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], chargedTo: { userId, person: personData } } : data ?? null} request={requestData ?? null}/>;
+	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, _id: userId } } : data ?? null} request={requestData ?? null}/>;
 }
 
 export function NewErrand({ errand, request }) {
@@ -85,7 +88,7 @@ export function NewErrand({ errand, request }) {
 
 	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
 
-	const { values, handlers, hasUnsavedChanges } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
+	const { values, handlers, hasUnsavedChanges, allFieldAreFilled, allRequiredFieldAreFilled } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
 
 	const saveAction = useCallback(async (errandToSave, files) => {
 		try {
@@ -111,14 +114,20 @@ export function NewErrand({ errand, request }) {
 		const files = errandType === ErrandTypes.byRequestAnswer ? values.documents?.value?.filter((doc) => doc.file) : [];
 		const errandToSave = getErrandFieldsForSave({ errand: values, errandType });
 
+		if (errand?.errandType?.key === ErrandTypes.byRequestAnswer.key) {
+			request?._id && Object.assign(errandToSave, { workingGroupRequestId: request._id });
+		}
 		// console.log({ errandType, errandToSave, files });
 		await saveAction(errandToSave, files);
-	}, [errand, values, saveAction]);
+	}, [errand, values, saveAction, request]);
 
 	const handleChoose = useCallback((val, field, handleField) => {
 		// console.log({ val, field, handleField });
 		if (handlers[handleField]) {
 			handlers[handleField]({ value: { ...values[field].value, num: val.num, d: val.d, _id: val._id }, required: values[field].required });
+		}
+		if (handleField === 'handleChargedTo') {
+			handlers.handleChargedTo({ value: { person: val }, required: values.chargedTo.required });
 		}
 		if (handleField === 'handleProtocolItems') {
 			handlers.handleProtocol({ value: { ...values.protocol.value, itemNum: val[0].num, sectionId: val[0].sectionId, itemId: val[0]._id }, required: values.protocol.required });
@@ -126,7 +135,7 @@ export function NewErrand({ errand, request }) {
 		}
 	}, [handlers, values]);
 
-	// console.dir({ valuesInEditErrand: values });
+	console.dir({ allFieldAreFilledInEditErrand: allFieldAreFilled, allRequiredFieldAreFilledInEditErrand: allRequiredFieldAreFilled });
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
@@ -136,16 +145,16 @@ export function NewErrand({ errand, request }) {
 				</Field>
 				<ButtonGroup mis='auto'>
 					{/*{ !chargedToCurrentUser && <Button primary small aria-label={_t('Save')} onClick={onEmailSendClick}>{t('Send_email')}</Button>}*/}
-					<Button disabled={!hasUnsavedChanges} primary small aria-label={t('Save')} onClick={handleSave}>
+					<Button disabled={!hasUnsavedChanges || !allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSave}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>
 			</Page.Header>
 			<Page.ScrollableContent padding='x24'>
-				<ErrandForm defaultValues={values} defaultHandlers={handlers} onReadOnly={false} errandType={ErrandTypes[errand?.errandType?.key ?? 'default']} request={request} setItems={setItems} items={items} setContext={setContext}/>
+				<ErrandForm errandId={errand?._id} defaultValues={values} defaultHandlers={handlers} onReadOnly={false} errandType={ErrandTypes[errand?.errandType?.key ?? 'default']} request={request} setItems={setItems} items={items} setContext={setContext}/>
 			</Page.ScrollableContent>
 		</Page>
-		<WorkingGroupRequestVerticalChooseBar protocolItems={items} protocolId={values.protocol?.value?._id ?? ''} handlers={{ handleProtocol: (val) => handleChoose(val, 'protocol', 'handleProtocol'), handleProtocolItems: (val) => handleChoose(val, 'protocolItems', 'handleProtocolItems') }} context={context} close={() => setContext('')}/>
+		<WorkingGroupRequestVerticalChooseBar protocolItems={items} protocolId={values.protocol?.value?._id ?? ''} handlers={{ handleItemResponsible: (val) => handleChoose(val, 'chargedTo', 'handleChargedTo'), handleProtocol: (val) => handleChoose(val, 'protocol', 'handleProtocol'), handleProtocolItems: (val) => handleChoose(val, 'protocolItems', 'handleProtocolItems') }} context={context} close={() => setContext('')}/>
 	</Page>;
 }
 

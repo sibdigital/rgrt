@@ -23,6 +23,9 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
+import { useUserId } from '/client/contexts/UserContext';
+import { hasPermission } from '/app/authorization';
+import { Meteor } from "meteor/meteor";
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -73,7 +76,7 @@ function Errands({
 		const baseUrl = item.protocol ? [ 'protocol/', item.protocol._id ].join('') : undefined;
 		const baseTitle = item.protocol ? _t('Protocol') + ' от ' + formatDate(item.protocol.d) + ' № ' + item.protocol.num : undefined;
 		const initiatedBy = constructPersonFullFIO(item.initiatedBy ?? '');
-		const chargedTo = constructPersonFullFIO(item.chargedTo ?? '');
+		const chargedTo = constructPersonFullFIO(item.chargedTo?.person ?? '');
 
 		return <Table.Row key={item._id} role='link' action>
 			{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
@@ -102,12 +105,12 @@ function Errands({
 		</Table.Row>;
 	}
 
+	console.dir({ errands: data.result });
 	return <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={data.result} total={data.total} setParams={setParams} params={params} />;
 }
 
 export function ErrandPage() {
 	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
 
 	const type = useRouteParameter('type');
 
@@ -135,9 +138,10 @@ export function ErrandPage() {
 			type,
 		}),
 		sort: JSON.stringify({ [sort[0]]: sort[1] === 'asc' ? 1 : -1 }),
+		cache,
 		...params.itemsPerPage && { count: params.itemsPerPage },
 		...params.current && { offset: params.current },
-	}), [type, sort, params]);
+	}), [type, sort, params, cache]);
 
 	const data = useEndpointData('errands', query) || { result: [], total: 0 };
 

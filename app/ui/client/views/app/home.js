@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
@@ -8,6 +9,7 @@ import { t } from '../../../../utils';
 import { AccountBox, menu } from '../../../../ui-utils';
 import { createInteractionActions } from '../../../../utils/client/views/createInteractionActions';
 import { hasAtLeastOnePermission, hasPermission } from '../../../../authorization';
+import { Users } from '../../../../models';
 
 const toolbarButtons = () => [
 	{
@@ -43,7 +45,7 @@ const toolbarButtons = () => [
 		name: t('Errands_from_me'),
 		icon: 'errands_from_me',
 		context: 'home',
-		// condition: () => hasPermission('manage-errands-from-me'),
+		condition: () => Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/initiated_by_me');
@@ -53,6 +55,7 @@ const toolbarButtons = () => [
 		name: t('Errands_for_me'),
 		icon: 'errands_to_me',
 		context: 'home',
+		condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/charged_to_me');
@@ -300,7 +303,7 @@ Template.gridOfIcons.helpers({
 		if (!context) {
 			context = 'interactions';
 		}
-		return toolbarButtons().filter((button) => (!button.condition || button.condition()) && context === button.context);
+		return toolbarButtons().filter((button) => (!button.condition || (button.condition && button.condition())) && context === button.context);
 	},
 	notHome() {
 		return Template.instance().context.get() !== 'home';

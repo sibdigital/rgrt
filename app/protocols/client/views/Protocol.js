@@ -90,7 +90,20 @@ export function ProtocolPage() {
 	const data = useEndpointData('protocols.findOne', query) || {};
 	const workingGroups = useEndpointData('working-groups.list', useMemo(() => ({ query: JSON.stringify({ type: { $ne: 'subject' } }) }), [])) || { workingGroups: [] };
 
-	const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
+	// const getItemsResponsibles = useCallback((sections) => {
+	// 	const arr = [];
+	// 	sections?.forEach((section) => section.items?.forEach((item) => item.responsible && arr.concat(item.responsible.map((responsible) => responsible._id))));
+	// 	console.dir({ arr, sections });
+	// 	return arr;
+	// }, []);
+	//
+	// const personsWithLinkToUser = useEndpointData('users.list', useMemo(() => ({
+	// 	query: JSON.stringify({ personId: { $in: getItemsResponsibles(data?.sections ?? []) } }),
+	// 	fields: JSON.stringify({ personId: 1 }),
+	// }), [data, getItemsResponsibles]));
+
+	// const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
+	const title = useMemo(() => [t('Protocol'), [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
 
 	const deleteProtocol = useMethod('deleteProtocol');
 	const deleteSection = useMethod('deleteSection');
@@ -288,30 +301,30 @@ export function ProtocolPage() {
 			{
 				// icon: 'edit',
 				name: t('Item_Delete'),
-				action: openConfirmDeleteItem(event.currentTarget.dataset.section, event.currentTarget.dataset.item)
+				action: openConfirmDeleteItem(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
 			},
 			{
 				name: t('Working_group_request'),
-				action: openWorkingGroupRequest(event.currentTarget.dataset.item)
+				action: openWorkingGroupRequest(event.currentTarget.dataset.item),
 			},
 			event.currentTarget.dataset.responsible === 'true' && {
 				name: t('Errand'),
 				action: openErrand(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
-			}
-		]
+			},
+		];
 		const config = {
 			columns: [
 				{
 					groups: [
-						{ items }
-					]
-				}
+						{ items },
+					],
+				},
 			],
 			currentTarget: event.currentTarget,
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [])
+	}, [onEditItemClick, onMoveItemClick, openConfirmDeleteItem, openErrand, t]);
 
 	const goBack = () => {
 		FlowRouter.go('/protocols');
@@ -324,6 +337,8 @@ export function ProtocolPage() {
 		}
 		return res;
 	}, [workingGroups]);
+
+	// useMemo(() => console.dir({ personsWithLinkToUser }), [personsWithLinkToUser]);
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -350,7 +365,16 @@ export function ProtocolPage() {
 			<Page.ScrollableContent>
 				<Box maxWidth='x800' w='full' alignSelf='center' pi='x32' pb='x24' fontSize='x16' borderStyle='solid' borderWidth='x2' borderColor='hint'>
 					<Box mbe='x24' display='flex' flexDirection='column'>
-						<Box is='span' fontScale='h1' alignSelf='center'>{title}</Box>
+						{!smallScreenWidth
+							? title?.map((_title, index) => (
+								<Box is='span' fontScale='h1' key={index} alignSelf='center'>
+									{_title}
+								</Box>
+							))
+							: <Box is='span' fontScale='h1' alignSelf='center'>
+								{title.toString()}
+							</Box>
+						}
 					</Box>
 					<Box mbe='x16' display='flex' flexDirection='column'>
 						<Box is='span' alignSelf='center'>{data.place}</Box>

@@ -9,9 +9,9 @@ import { Users, Persons } from '../../../models';
 
 API.v1.addRoute('councils.list', { authRequired: true }, {
 	get() {
-		if (!hasPermission(this.userId, 'view-c-room')) {
-			return API.v1.unauthorized();
-		}
+		// if (!hasPermission(this.userId, 'view-c-room')) {
+		// 	return API.v1.unauthorized();
+		// }
 
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query, fields } = this.parseJsonQuery();

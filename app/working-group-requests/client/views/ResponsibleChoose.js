@@ -37,25 +37,15 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQuery = ({ text, itemsPerPage, current }, [column, direction], personFields, prevResponsiblesId) => useMemo(() => ({
 	query: JSON.stringify({
+		// surname: { $regex: text || '', $options: 'i' },
+		// $or: [{ surname: { $regex: text || '', $options: 'i' } }],
 		$or: [{
 			surname: { $regex: text || '', $options: 'i' },
+		}, {
 			name: { $regex: text || '', $options: 'i' },
+		}, {
 			patronymic: { $regex: text || '', $options: 'i' },
-			email: { $regex: text || '', $options: 'i' },
 		}],
-		// $and: [
-		// 	{
-		// 		_id: { $ne: { $in: { prevResponsiblesId } } },
-		// 	},
-		// 	{
-		// 		$or: [{
-		// 			surname: { $regex: text || '', $options: 'i' },
-		// 			name: { $regex: text || '', $options: 'i' },
-		// 			patronymic: { $regex: text || '', $options: 'i' },
-		// 			email: { $regex: text || '', $options: 'i' },
-		// 		}],
-		// 	},
-		// ],
 	}),
 	fields: JSON.stringify(personFields),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
@@ -97,7 +87,7 @@ export function ResponsibleChoose({
 	useMemo(() => console.dir({ params }), [params]);
 
 	const handleChoose = useCallback((responsible) => {
-		onSetResponsible && onSetResponsible(responsible);
+		onSetResponsible && onSetResponsible({ _id: responsible._id, name: responsible.name, surname: responsible.surname, patronymic: responsible.patronymic });
 		close && close();
 	}, [close, onSetResponsible]);
 

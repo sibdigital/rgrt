@@ -747,9 +747,9 @@ export const fileUploadToCouncil = async (files, { _id }) => {
 				file: file.file,
 				ts: file.ts,
 			});
-			// if (uploadedFile.id) {
-			// 	ids.push(uploadedFile.id);
-			// }
+			if (uploadedFile && uploadedFile.id) {
+				ids.push(uploadedFile.id);
+			}
 			uploadNextFile();
 		};
 		upload();

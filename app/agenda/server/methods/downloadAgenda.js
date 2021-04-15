@@ -32,6 +32,7 @@ Meteor.methods({
 		}
 
 		const agenda = await Agendas.findOne({ _id });
+		const isHaveProposals = agenda?.sections?.filter((_agenda) => _agenda.initiatedBy?._id).length > 0;
 
 		if (!agenda) {
 			throw new Meteor.Error('error-the-field-is-required', `The council with _id: ${ _id } doesn't exist`, { method: 'downloadAgenda', field: 'agenda' });
@@ -57,15 +58,6 @@ Meteor.methods({
 				heading: HeadingLevel.HEADING_1,
 				alignment: AlignmentType.CENTER,
 			}),
-			// new Paragraph({
-			// 	children: [
-			// 		new TextRun({
-			// 			text: `От ${ dateString ?? moment(agenda.ts).format('DD MMMM YYYY, HH:mm') }`,
-			// 		}),
-			// 	],
-			// 	heading: HeadingLevel.HEADING_2,
-			// 	alignment: AlignmentType.CENTER,
-			// }),
 			new Paragraph({
 				children: [
 					new TextRun({
@@ -86,85 +78,78 @@ Meteor.methods({
 			}),
 		];
 
+		const getSectionsRows = () => {
+			const arr = [];
+			arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: 'Пункт', bold: true, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+				}),
+			);
+			arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: 'Рассматриваемый вопрос', bold: true, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+				}),
+			);
+			isHaveProposals && arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: 'Ответственный', bold: true, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+				}),
+			);
+			arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: 'Выступающие', bold: true, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+				}),
+			);
+			return arr;
+		};
+
 		let sectionsRows = [
 			new TableRow({
 				tableHeader: true,
-				children: [
-					new TableCell({
-						children: [new Paragraph({ text: 'Пункт', bold: true, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						width: {
-							size: 5,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: 'Рассматриваемый вопрос', bold: true, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						width: {
-							size: 45,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: 'Ответственный', bold: true, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						width: {
-							size: 20,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: 'Выступающие', bold: true, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						width: {
-							size: 30,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-				],
+				children: getSectionsRows(),
 			}),
 		];
+
+		const getSectionsCell = (value, index) => {
+			const arr = [];
+			arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: `${ value.item ?? index + 1 }`, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+					alignment: AlignmentType.CENTER,
+				}),
+			);
+			arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: `${ value.issueConsideration ?? '' }`.trim(), alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+					alignment: AlignmentType.CENTER,
+				}),
+			);
+			isHaveProposals && arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: `${ value.initiatedBy?.value ?? '' }`, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+					alignment: AlignmentType.CENTER,
+				}),
+			);
+			arr.push(
+				new TableCell({
+					children: [new Paragraph({ text: `${ value.speakers?.map((speaker) => constructPersonFIO(speaker)).join(' ') ?? '' }`, alignment: AlignmentType.CENTER })],
+					verticalAlign: VerticalAlign.CENTER,
+					alignment: AlignmentType.CENTER,
+				}),
+			);
+			return arr;
+		};
+
 		sectionsRows = sectionsRows.concat(agenda?.sections?.map((value, index) => {
 			return new TableRow({
-				children: [
-					new TableCell({
-						children: [new Paragraph({ text: `${ value.item ?? index + 1 }`, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						alignment: AlignmentType.CENTER,
-						width: {
-							size: 5,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: `${ value.issueConsideration ?? '' }`.trim(), alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						alignment: AlignmentType.CENTER,
-						width: {
-							size: 45,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: `${ value.initiatedBy?.value ?? '' }`, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						alignment: AlignmentType.CENTER,
-						width: {
-							size: 20,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-					new TableCell({
-						children: [new Paragraph({ text: `${ value.speakers?.map((speaker) => constructPersonFIO(speaker)).join(' ') ?? '' }`, alignment: AlignmentType.CENTER })],
-						verticalAlign: VerticalAlign.CENTER,
-						alignment: AlignmentType.CENTER,
-						width: {
-							size: 30,
-							type: WidthType.PERCENTAGE,
-						},
-					}),
-				],
+				children: getSectionsCell(value, index),
 			});
 		}));
 

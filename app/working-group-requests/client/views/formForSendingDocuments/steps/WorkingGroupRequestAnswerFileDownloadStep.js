@@ -157,7 +157,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const workingGroupRequestId = workingGroupRequest._id;
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
-	const chooseButtonStyles = useMemo(() => ({ marginInlineStart: '1rem !important', backgroundColor: 'transparent !important', borderColor: 'var(--rc-color-primary-button-color) !important', borderRadius: '0.7rem', borderWidth: '1.5px' }), []);
+	const chooseButtonStyles = useMemo(() => ({ borderRadius: '0.7rem', borderWidth: '1.5px' }), []);
 	const documentsHelpTooltipLabel = useMemo(() => 'Загрузите не пустые файлы', []);
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0 && attachedFile.length > 0, [newData, attachedFile]);
 	const typeAnswerOptions = useMemo(() => [['mail', t('Working_group_mail')], ['protocol', t('Working_group_request_invite_select_protocol')]], [t]);
@@ -392,6 +392,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 									&& <ClearButton onClick={() => handleClearProtocol()}/>}
 									<Button
 										onClick={() => setVerticalContext('protocolSelect')}
+										backgroundColor='transparent'
+										borderColor='var(--rc-color-primary-button-color)'
+										mis='x16'
 										style={ chooseButtonStyles }>
 										{t('Choose')}
 									</Button>
@@ -401,7 +404,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								{
 									<TextInput readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
 								}
-								{/*{!mediaQuery && <Select width='100%' options={protocolsOptions} onChange={handleChangeSelect('protocol')} value={newData.protocol.value} placeholder={t('Working_group_request_invite_select_protocol')}/>}*/}
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
@@ -413,12 +415,14 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 									}
 									{protocolSelected && <Button
 										onClick={() => setVerticalContext('protocolItemSelect')}
+										backgroundColor='transparent'
+										borderColor='var(--rc-color-primary-button-color)'
+										mis='x16'
 										style={ chooseButtonStyles }>
 										{t('Choose')}
 									</Button>}
 								</Label>
 							</Field.Row>
-							{/*<TextInput disabled={!protocolSelected} readOnly value={protocolSelectItemLabel} placeholder={t('Working_group_request_invite_select_sections_items')}/>*/}
 							<ProtocolItemsField protocolItems={protocolItemsId} handleProtocolItems={setProtocolItemsId} protocolId={protocol?._id ?? ''} onShowChooseButton={false} onShowLabelAndTooltip={false}/>
 						</Field>}
 						<Field>

@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Button, Icon, Callout, Table, Box } from '@rocket.chat/fuselage';
+import { Button, Icon, Table, Box } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
+import _ from 'underscore';
 
-import { hasPermission } from '../../../authorization';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
-import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
@@ -26,9 +26,8 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction]);
 
-export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false }) {
+export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false, onNewFileAdded }) {
 	const t = useTranslation();
-	const userId = useUserId();
 	const formatDateAndTime = useFormatDateAndTime();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const setModal = useSetModal();
@@ -54,6 +53,12 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 			setFilesArray(data.documents);
 		}
 	}, [data]);
+
+	useMemo(() => {
+		if (onNewFileAdded && _.isArray(onNewFileAdded)) {
+			setFilesArray(filesArray.concat(onNewFileAdded));
+		}
+	}, [onNewFileAdded]);
 
 	const updateCouncilFilesOrder = useMethod('updateCouncilFilesOrder');
 	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
@@ -144,7 +149,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 
 		const style = getStyle(document.index);
 
-		return <Table.Row key={_id} tabIndex={0} role='link' action style={style}>
+		return <Table.Row width='99%' key={_id} tabIndex={0} role='link' action style={style}>
 			<Table.Cell fontScale='p1' color='default'>{document.index + 1}</Table.Cell>
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			{mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>}
@@ -171,8 +176,8 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		</Table.Row>;
 	};
 
-	return <Box maxHeight='500px' overflowY='auto' overflowX='hidden'>
-		<GenericTable header={header} renderRow={renderRow} results={filesArray} total={data?.documents?.length ?? 0} setParams={setParams} params={params}/>
+	return <Box overflowX='hidden'>
+		<GenericTable header={header} renderRow={renderRow} results={filesArray} total={filesArray?.length ?? 0} setParams={setParams} params={params}/>
 	</Box>;
 }
 

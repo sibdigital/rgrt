@@ -364,7 +364,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 				)}
 			</Page.Content>
 		</Page>
-		<Page style={{ display: !context ? 'none' : '' }}>
+		<Page style={{ display: !context ? 'none' : '', maxWidth: '900px' }}>
 			{ context
 				&& <VerticalBar style={{ zIndex: '1111', overflow: 'visible' }} className='contextual-bar' width='100%' qa-context-name={`admin-user-and-room-context-${ context }`} flexShrink={0}>
 					<VerticalBar.Header>

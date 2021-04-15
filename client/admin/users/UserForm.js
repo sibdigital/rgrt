@@ -73,7 +73,6 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 	} = formHandlers;
 
 	const onLoadCustomFields = useCallback((hasCustomFields) => setHasCustomFields(hasCustomFields), []);
-	console.log(workingGroups);
 
 	const workingGroupOptions = useMemo(() => {
 		const res = [[null, t('Not_chosen')]];
@@ -84,15 +83,15 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 	}, [workingGroups]);
 
 	const personsOptions = useMemo(() => {
-		const res = [["", t('Not_chosen')]];
+		const res = [['', t('Not_chosen')]];
 		if (persons?.persons?.length > 0) {
-			return res.concat(persons?.persons.map((person) => [person._id, person.surname + ' ' + person.name + ' ' + person.patronymic]));
+			return res.concat(persons?.persons.map((person) => [person._id, [person.surname, person.name, person.patronymic].join(' ')]));
 		}
 		return res;
 	}, [persons]);
 
 	const person = persons?.persons.filter((person) => person._id === personId)[0];
-	
+
 	const autofillDataFromPerson = (person) => {
 		handleSurname(person.surname);
 		handleName(person.name);
@@ -103,24 +102,17 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 	}
 
 	const resetFilledData = (person) => {
-		handleSurname("");
-		handleName("");
-		handlePatronymic("");
-		handlePersonId("");
-		handlePosition("");
-		handleOrganization("");
-	}
+		handleSurname('');
+		handleName('');
+		handlePatronymic('');
+		handlePersonId('');
+		handlePosition('');
+		handleOrganization('');
+	};
 
 	useEffect(() => {
 		person?._id ? autofillDataFromPerson(person) : resetFilledData(person);
 	}, [person]);
-
-	// const workingGroupOptions = useMemo(() => [
-	// 	['Не выбрано', t('Not_chosen')],
-	// 	['Члены рабочей группы', 'Члены рабочей группы'],
-	// 	['Представители субъектов Российской Федерации', 'Представители субъектов Российской Федерации'],
-	// 	['Иные участники', 'Иные участники'],
-	// ], [t]);
 
 	return <VerticalBar.ScrollableContent is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} { ...props }>
 		<FieldGroup>

@@ -193,7 +193,7 @@ function Council({
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [isSecretary, setIsSecretary] = useState(false);
 	const [isUserJoin, setIsUserJoin] = useState(false);
-	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
+	const [newAddedFiles, setNewAddedFiles] = useState([]);
 	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
 	const [isCouncilFilesReload, setIsCouncilFilesReload] = useState(true);
 
@@ -334,7 +334,6 @@ function Council({
 	const handleTabClick = useMemo(() => (tab) => () => {
 		setTab(tab);
 		tab === 'persons' && setContext('participants');
-		setCurrentMovedFiles({ downIndex: -1, upIndex: - 1 });
 		tab === 'files' && currentUploadedFiles.length > 0 && setContext('uploadFiles');
 	}, [currentUploadedFiles]);
 
@@ -399,7 +398,6 @@ function Council({
 
 	const fileUpload = async () => {
 		let validationArray = [];
-		console.log(currentUploadedFiles);
 		if (currentUploadedFiles.length > 0) {
 			validationArray = await filesValidation(currentUploadedFiles);
 			if (validationArray.length > 0) {
@@ -415,12 +413,13 @@ function Council({
 				setAttachedFiles(attachedFilesBuf);
 				onChange();
 			} else {
-				await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
+				const ids = await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				setCurrentUploadedFiles([]);
-				onChange();
-				setIsCouncilFilesReload(!isCouncilFilesReload);
+				setNewAddedFiles(currentUploadedFiles);
+				// setIsCouncilFilesReload(!isCouncilFilesReload);
+				console.dir({ filesIdKek: ids });
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
 		}
@@ -445,21 +444,13 @@ function Council({
 		}
 	};
 
-	const resetData = () => {
-		window.history.back();
-		// setDate(new Date(data.d));
-		// setDescription(data.desc);
-		// setCouncilType(data.type ?? '');
-		// onChange();
-	};
-
 	const onAddParticipantClick = (_id) => () => {
 		setContext('addParticipants');
 	};
 
 	const onParticipantClick = useCallback((context) => () => {
 		setContext(context);
-	}, [context]);
+	}, []);
 
 	const onEmailSendClick = (_id) => () => {
 		FlowRouter.go(`/manual-mail-sender/council/${ _id }`);
@@ -513,7 +504,7 @@ function Council({
 								const itemNumber = 1;
 								const sectionData = createSectionData(sectionNumber, section.item);
 								sectionData.items = [];
-								const itemData = createItemData(itemNumber, section.issueConsideration);
+								const itemData = createItemData(itemNumber, section.issueConsideration, section.speakers ?? []);
 								sectionData.items.push(itemData);
 								protocolData.sections.push(sectionData);
 								sectionNumber++;
@@ -562,7 +553,7 @@ function Council({
 					</Button>}
 				</ButtonGroup>
 			</Page.Header>
-			<Page.Content>
+			<Page.ScrollableContent margin='x8'>
 				<Field mbe='x16' display={mediaQuery ? 'flex' : 'block'} flexDirection='row'>
 					<Field mis='x4' display='flex' flexDirection='row' mbe={!mediaQuery && 'x16'}>
 						<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Council_type')}</Field.Label>
@@ -637,17 +628,26 @@ function Council({
 					</ButtonGroup>
 				</Field>}
 				{tab === 'persons' && isSecretary
-					&& ((context === 'participants'
-					&& <CouncilPersons councilId={councilId} isSecretary={isSecretary}/>
-					)
+					&& <Box maxHeight='500px'>
+						{ context === 'participants'
+						&& <CouncilPersons councilId={ councilId } isSecretary={ isSecretary }/>
+						}
 
-					|| (context === 'addParticipants'
-					&& <AddPerson councilId={councilId} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>
-					)
+						{ context === 'addParticipants'
+						&& <AddPerson
+							councilId={ councilId } onChange={ onChange } close={ onClose } persons={ persons }
+							invitedPersons={ invitedPersons } setInvitedPersons={ setInvitedPersonsIds }
+							onNewParticipant={ onParticipantClick }/>
+						}
 
-					|| (context === 'newParticipants'
-					&& <CreateParticipant workingGroupOptions={workingGroupOptions} councilId={councilId} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>
-					))
+						{ context === 'newParticipants'
+						&& <CreateParticipant
+							workingGroupOptions={ workingGroupOptions } councilId={ councilId }
+							goTo={ onCreatePersonsClick } close={ onClose } onChange={ onChange }
+							invitedPersons={ invitedPersonsIds }
+							setInvitedPersons={ setInvitedPersonsIds }/>
+						}
+					</Box>
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
@@ -671,9 +671,11 @@ function Council({
 					</Field>
 				}
 				{tab === 'files'
-					&& <CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload}/>
+					&& <Box maxHeight='500px'>
+						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload} onNewFileAdded={newAddedFiles}/>
+					</Box>
 				}
-			</Page.Content>
+			</Page.ScrollableContent>
 		</Page>
 	</Page>;
 }
