@@ -44,13 +44,14 @@ export function AddErrandByProtocolItemPage() {
 	}
 	const protocolData = _protocolData.protocol[0];
 
-	const section = protocolData.sections.filter((section) => section.items.find((item) => item._id === itemId))[0];
-	const item = section.items.find(item => item._id === itemId);
-	const itemResponsible = item?.responsible[0];
+	const section = protocolData.sections.filter((section) => section.items?.find((item) => item._id === itemId))[0];
+	const item = section?.items?.find(item => item._id === itemId) ?? {};
+	const itemResponsible = item?.responsible[0] ?? {};
 	const itemName = item.name ? preProcessingProtocolItems(item.name) : '';
 
 	const errand = {
 		initiatedBy: {
+			userId,
 			_id: personData._id,
 			surname: personData.surname,
 			name: personData.name,
@@ -58,7 +59,6 @@ export function AddErrandByProtocolItemPage() {
 		},
 		status: ErrandStatuses.OPENED,
 		chargedTo: {
-			userId,
 			person: {
 				_id: itemResponsible._id,
 				surname: itemResponsible.surname,
