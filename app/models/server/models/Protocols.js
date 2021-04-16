@@ -203,6 +203,27 @@ class Protocols extends Base {
 		}
 		return 0;
 	}
+
+	updateItemStatus(itemId, status) {
+		const data = this.findOne({ 'sections.items._id': itemId });
+		// console.dir({ dataTestUpdate: data });
+		let isUpdated = false;
+		if (data.sections) {
+			data.sections = data.sections.map((section) => {
+				if (section.items) {
+					section.items = section.items.map((item) => {
+						if (item._id === itemId) {
+							isUpdated = true;
+							return { ...item, status };
+						}
+						return item;
+					});
+				}
+				return section;
+			});
+		}
+		return isUpdated ? this.update({ _id: data._id }, { $set: { ...data } }) : 0;
+	}
 }
 
 export default new Protocols();
