@@ -11,8 +11,9 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 require('react-datepicker/dist/react-datepicker.css');
 
 export const AnswerTypes = Object.freeze({
-	PROTOCOL: { state: 1, title: 'Working_group_request_for_protocol_item', i18nLabel: 'Working_group_request_for_protocol_item', key: 'PROTOCOL' },
-	MAIL: { state: 2, title: 'Working_group_request_for_mail', i18nLabel: 'Working_group_request_for_mail', key: 'MAIL' },
+	PROTOCOL: { state: 1, title: 'Working_group_request_for_protocol_item', i18nLabel: 'Запрос по пункту протокола', key: 'PROTOCOL' },
+	MAIL: { state: 2, title: 'Working_group_request_for_mail', i18nLabel: 'Запрос по письму', key: 'MAIL' },
+
 	getTypeByState: (state) => {
 		for (const [key, value] of Object.entries(AnswerTypes)) {
 			if (typeof value === 'object' && value.state === state) {

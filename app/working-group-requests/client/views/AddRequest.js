@@ -147,14 +147,14 @@ function NewAddRequest() {
 			protocolId,
 			requestType,
 		});
-		console.log({ requestData });
+		// console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
-		console.log({ validation });
+		// console.log({ validation });
 		if (validation.length === 0) {
-			await insertOrUpdateWorkingGroupRequest(requestData);
+			await insertOrUpdateWorkingGroupRequest({ ...requestData, createdBy: { userId } });
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [insertOrUpdateWorkingGroupRequest, t]);
+	}, [insertOrUpdateWorkingGroupRequest, t, userId]);
 
 	const handleSaveRequest = useCallback(async () => {
 		try {
