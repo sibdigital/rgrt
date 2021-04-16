@@ -6,10 +6,6 @@ import { Protocols } from '../../../models';
 
 Meteor.methods({
 	updateItemStatus(itemId, status) {
-		if (!hasPermission(this.userId, 'manage-protocols')) {
-			throw new Meteor.Error('not_authorized');
-		}
-
 		if (!itemId) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field itemId is required', { method: 'updateItemStatus', field: 'itemId' });
 		}
