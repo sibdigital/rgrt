@@ -100,6 +100,8 @@ function NewAddRequest() {
 
 	const [context, setContext] = useState('');
 
+	const { data: requestsMaxNumber } = useEndpointDataExperimental('working-groups-requests.getMaxRequestNumber', useMemo(() => ({}), []));
+
 	const { values, handlers, allFieldAreFilled } = useDefaultRequestForm({ defaultValues: null });
 
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
@@ -108,6 +110,12 @@ function NewAddRequest() {
 		// eslint-disable-next-line new-cap
 		GetDataFromProtocolItem({ protocolsItemId, workingGroupRequestContext, handlers });
 	}
+
+	useEffect(() => {
+		if (requestsMaxNumber) {
+			handlers.handleNumber && handlers.handleNumber(requestsMaxNumber.number ?? 1);
+		}
+	}, [requestsMaxNumber]);
 
 	const close = useCallback(() => setContext(''), []);
 
