@@ -18,6 +18,7 @@ import ru from 'date-fns/locale/ru';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
+import { isIOS } from 'react-device-detect';
 
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -180,14 +181,14 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 						zIndex='100'
 						width='100%'
 						height='100%'
-						onTouchStart={() => setResponsible([...responsible, option]) }
+						onTouchStart={() => isIOS && setResponsible([...responsible, option]) }
 					>
 						{constructPersonFIO(option)}
 					</Box>
 				}
 				filterSelectedOptions
 				freeSolo
-				onChange={(event, value) => setResponsible(value)}
+				onChange={(event, value) => !isIOS && setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
 						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}

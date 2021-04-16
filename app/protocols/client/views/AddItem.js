@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Field, Button, InputBox, ButtonGroup, TextInput, Box } from '@rocket.chat/fuselage';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import CKEditor from '@ckeditor/ckeditor5-react';
@@ -7,6 +7,8 @@ import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
 import { Autocomplete, createFilterOptions } from '@material-ui/lab';
 import ru from 'date-fns/locale/ru';
+import { isIOS } from 'react-device-detect';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
@@ -106,7 +108,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 						zIndex='100'
 						width='100%'
 						height='100%'
-						onTouchStart={() => setResponsible([...responsible, option]) }
+						onTouchStart={() => isIOS && setResponsible([...responsible, option]) }
 					>
 						{constructPersonFIO(option)}
 					</Box>
@@ -114,7 +116,7 @@ export function AddItem({ goToNew, close, onChange, ...props }) {
 				filterSelectedOptions
 				freeSolo
 				filterOptions={createFilterOptions({ limit: 10 })}
-				onChange={(event, value) => setResponsible(value)}
+				onChange={(event, value) => !isIOS && setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
 						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
