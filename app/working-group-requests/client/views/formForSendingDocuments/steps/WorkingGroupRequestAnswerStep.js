@@ -99,13 +99,15 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 	};
 
 	const packNewData = () => {
-		const dataToSend = { sender: {
-			_id: newData.senderId.value,
-			group: newData.sender.value,
-			organization: newData.senderOrganization.value,
-			phone: newData.phone.value,
-			email: newData.email.value,
-		} };
+		const dataToSend = {
+			sender: {
+				_id: newData.senderId.value,
+				group: newData.sender.value,
+				organization: newData.senderOrganization.value,
+				phone: newData.phone.value,
+				email: newData.email.value,
+			}
+		};
 		dataToSend.unread = newData.unread.value;
 		dataToSend.ts = new Date();
 		return Object.assign({}, dataToSend, fileDownloadInfo.workingGroupRequestAnswer);
@@ -121,30 +123,24 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 		try {
 			setCommitting(true);
 			const dataToSave = packNewData();
-			// const { answerId, mailId: newMailId } = await addWorkingGroupRequestAnswer(fileDownloadInfo.workingGroupRequestId, fileDownloadInfo.mailId, dataToSave);
-			// await fileUploadToWorkingGroupRequestAnswer(fileDownloadInfo.attachedFile, {
-			// 	_id: fileDownloadInfo.workingGroupRequestId,
-			// 	mailId: newMailId === '' ? fileDownloadInfo.mailId : newMailId,
-			// 	answerId,
-			// });
 
-			// console.log('HEREERERE');
-			console.dir({ data });
-			// console.dir({ kekw: { ...fileDownloadInfo, ...dataToSave } });
+			console.dir({ data, dataToSave });
 
 			const dataToErrand = { ...dataToSave, workingGroupRequestId: data._id };
 
 			dataToSave.sender._id && Object.assign(dataToErrand, { chargedTo: dataToSave.sender });
 			data.desc && Object.assign(dataToErrand, { desc: data.desc });
-			data.itemResponsible?._id && Object.assign(dataToErrand, { initiatedBy: data.itemResponsible });
+			data.createdBy?.userId && Object.assign(dataToErrand, { initiatedBy: { userId: data.createdBy.userId } });
+			dataToSave.sender?.organization && Object.assign(dataToErrand, { chargedTo: { person: { name: dataToSave.sender.organization } } });
 			dataToSave.protocol && Object.assign(dataToErrand, {
 				protocol: {
 					_id: dataToSave.protocol._id,
 					d: dataToSave.protocol.d,
 					num: dataToSave.protocol.num,
-					itemNum: dataToSave.protocol.itemNum,
-					itemId: dataToSave.protocol.itemId,
 					sectionId: dataToSave.protocol.sectionId,
+					itemId: dataToSave.protocol.itemId,
+					itemNum: dataToSave.protocol.itemNum,
+					itemName: dataToSave.protocol.itemName,
 				},
 			});
 
