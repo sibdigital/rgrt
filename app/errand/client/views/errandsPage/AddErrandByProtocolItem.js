@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
 	Box,
 	Callout,
@@ -6,6 +6,7 @@ import {
 } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../../client/contexts/RouterContext';
@@ -27,6 +28,17 @@ export function AddErrandByProtocolItemPage() {
 
 	const { data: _protocolData, state, error } = useEndpointDataExperimental('protocols.findByItemId', useMemo(() => ({ query: JSON.stringify({ _id: itemId }) }), [itemId]));
 	const { data: personData, state: personState } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({ query: JSON.stringify({ userId }) }), [userId]));
+	const { data: errandByItemId } = useEndpointDataExperimental('errands.list', useMemo(() => ({
+		query: JSON.stringify({ protocolItemId: itemId }),
+		fields: JSON.stringify({ _id: 1 }),
+	}), [itemId]));
+
+	useEffect(() => {
+		if (errandByItemId && errandByItemId.total > 0) {
+			console.dir({ errandByItemId });
+			FlowRouter.go(`/errand/${ errandByItemId.errands[0]._id }`);
+		}
+	}, [errandByItemId]);
 
 	if ([state, personState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box w='full' pb='x24'>
