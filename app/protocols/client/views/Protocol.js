@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, Label, Modal } from '@rocket.chat/fuselage';
 import { FlowRouter } from 'meteor/kadira:flow-router';
+import { useMediaQuery } from '@material-ui/core';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -21,10 +22,9 @@ import { CreateParticipant } from './participants/CreateParticipant';
 import { popover } from '../../../ui-utils/client/lib/popover';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
-import { EditProtocol } from '../../../protocols/client/views/EditProtocol';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
-import { useMediaQuery } from '@material-ui/core';
+import { EditProtocol } from './EditProtocol';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -324,7 +324,7 @@ export function ProtocolPage() {
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [onEditItemClick, onMoveItemClick, openConfirmDeleteItem, openErrand, t]);
+	}, [onEditItemClick, onMoveItemClick, t]);
 
 	const goBack = () => {
 		FlowRouter.go('/protocols');

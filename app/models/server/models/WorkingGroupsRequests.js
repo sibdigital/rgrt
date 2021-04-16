@@ -41,50 +41,12 @@ class WorkingGroupsRequests extends Base {
 	}
 
 	addAnswerToRequest(workingGroupRequestId, _mailId, answerData) {
-		const mailId = _mailId === null ? 'noAnswer' : _mailId;
-		const newMailId = mailId === 'noAnswer' ? mailId : '';
 		const _id = new ObjectID().toHexString();
 		answerData._id = _id;
 
 		const data = this.findOne({ _id: workingGroupRequestId });
 		data._updatedAt = new Date();
 
-		const newMailData = {
-			_id: mailId,
-			description: '',
-			number: null,
-			ts: new Date(),
-			inum: 1,
-			answers: [answerData],
-		};
-
-		// if (data.mails) {
-		// 	let isAdded = false;
-		// 	data.mails.forEach((mail) => {
-		// 		if (mail._id === mailId) {
-		// 			isAdded = true;
-		// 			if (mail.answers) {
-		// 				let internalNum = 0;
-		// 				mail.answers.forEach((answer) => {
-		// 					if (answer.inum > internalNum) {
-		// 						internalNum = answer.inum;
-		// 					}
-		// 				});
-		// 				internalNum++;
-		// 				answerData.inum = internalNum;
-		// 				mail.answers = [...mail.answers, answerData];
-		// 			} else {
-		// 				answerData.inum = 1;
-		// 				mail.answers = [answerData];
-		// 			}
-		// 		}
-		// 	});
-		// 	if (!isAdded) {
-		// 		data.mails = [...data.mails, newMailData];
-		// 	}
-		// } else {
-		// 	data.mails = [newMailData];
-		// }
 		if (data.answers) {
 			data.answers = [...data.answers, answerData];
 		} else {
@@ -92,7 +54,6 @@ class WorkingGroupsRequests extends Base {
 		}
 
 		this.update({ _id: workingGroupRequestId }, { $set: { ...data } });
-		// return { answerId: _id, mailId: newMailId };
 		return { answerId: _id, mailId: _id };
 	}
 

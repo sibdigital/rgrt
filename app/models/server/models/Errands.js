@@ -66,6 +66,19 @@ export class Errands extends Base {
 
 		return this.find(query);
 	}
+
+	readAnswer(_id) {
+		const data = this.findOne({ _id });
+		console.log('data here');
+		console.dir({ data, _id });
+		if (!data || data.unread === null || data.unread === undefined || !data.unread) {
+			return;
+		}
+
+		data._updatedAt = new Date();
+		data.unread = false;
+		return this.update({ _id }, { $set: { ...data } });
+	}
 }
 
 export default new Errands();
