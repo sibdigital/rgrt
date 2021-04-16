@@ -69,7 +69,7 @@ const toolbarButtons = () => [
 		openContext: 'interaction',
 	},
 	{
-		name: t('Council Commission \"Transport\"'),
+		name: t('Council Commission'),
 		icon: 'team',
 		context: 'home',
 		action: () => {

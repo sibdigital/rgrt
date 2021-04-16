@@ -58,7 +58,7 @@ const menuItems = () => [
 		},
 	},
 	{
-		name: t('Council Commission \"Transport\"'),
+		name: t('Council Commission'),
 		action: () => {
 			FlowRouter.go('/council-commission');
 		},
