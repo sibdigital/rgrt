@@ -1,8 +1,9 @@
 import { CustomErrand, Messages, Rooms } from '../../../models/server/raw';
-import { canAccessRoomAsync } from '/app/authorization/server/functions/canAccessRoom';
+import { canAccessRoomAsync } from '../../../authorization/server/functions/canAccessRoom';
 
-export async function findErrands({ query = {}, options: { offset, count, sort } }) {
+export async function findErrands({ query = {}, options: { offset, count, sort }, fields = {} }) {
 	const cursor = await CustomErrand.find(query, {
+		fields,
 		sort: sort || { ts: -1 },
 		skip: offset,
 		limit: count,

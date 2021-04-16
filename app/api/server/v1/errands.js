@@ -85,9 +85,9 @@ API.v1.addRoute('errands', { authRequired: true }, {
 API.v1.addRoute('errands.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
-		const result = Promise.await(findErrands({ query, options: { offset, count, sort } }));
+		const result = Promise.await(findErrands({ query, options: { offset, count, sort }, fields: stockFields ?? {} }));
 
 		return API.v1.success({
 			errands: result?.errands ?? [],
