@@ -105,7 +105,12 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 	const onAddClick = (_id) => () => {
 		const index = personsIdToAdd.findIndex((iUser) => iUser._id === _id);
 		if (index < 0) {
-			personsIdToAdd.push({ _id, ts: new Date() });
+			if (!councilId) {
+				const person = findPersons.find((_person) => _person._id === _id);
+				personsIdToAdd.push({ ...person, ts: new Date() });
+			} else {
+				personsIdToAdd.push({ _id, ts: new Date() });
+			}
 		} else {
 			personsIdToAdd.splice(index, 1);
 		}
