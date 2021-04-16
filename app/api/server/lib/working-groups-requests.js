@@ -74,3 +74,11 @@ export async function findWorkingGroupRequestByProtocolsItemId(protocolsItemId, 
 
 	return cursor ?? {};
 }
+
+export async function getMaxRequestNumber() {
+	const cursor = await WorkingGroupsRequests.find({}, { fields: { _id: 1 } });
+	const array = await cursor.toArray();
+	const { length } = array;
+
+	return { number: length + 1 };
+}
