@@ -138,17 +138,15 @@ export function AddPerson({ councilId, onChange, close, persons, invitedPersons,
 			: <Box display='flex' flexDirection='column'>
 				{isFetching && <ReactLoading type={'spinningBubbles'} color='#F7F8FA' style={{ margin: '1rem 1rem', alignSelf: 'center', position: 'absolute', zIndex: '40', width: '200px', height: '200px' }} />}
 				<SlideAnimation style={{ overflow: 'hidden auto' }}>
-					<PersonsTable invitedPersons={ findPersons } personsIdToAdd={ personsIdToAdd } handleAddPerson={ onAddClick } isFetching={ isFetching }/>
+					<PersonsTable params={params} setParams={setParams} invitedPersons={ findPersons } totalPersons={personsData?.total ?? 0} personsIdToAdd={ personsIdToAdd } handleAddPerson={ onAddClick } isFetching={ isFetching }/>
 				</SlideAnimation>
 			</Box>
 		}
 	</Field>;
 }
 
-function PersonsTable({ invitedPersons, personsIdToAdd, handleAddPerson, isFetching }) {
+function PersonsTable({ params, setParams, invitedPersons, totalPersons, personsIdToAdd, handleAddPerson, isFetching }) {
 	const t = useTranslation();
-
-	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 
 	const mediaQuery = useMediaQuery('(min-width: 768px)');
 
@@ -187,5 +185,5 @@ function PersonsTable({ invitedPersons, personsIdToAdd, handleAddPerson, isFetch
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={invitedPersons} total={invitedPersons.length} setParams={setParams} params={params} />;
+	return <GenericTable header={header} renderRow={renderRow} results={invitedPersons} total={totalPersons} setParams={setParams} params={params} />;
 }
