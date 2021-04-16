@@ -18,14 +18,14 @@ import { EditPerson } from './EditPerson';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-export const useQuery = ({ text, itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
+const useQuery = ({ itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	// query: JSON.stringify({ workingGroup: { $regex: text || '', $options: 'i' } }),
 	// fields: JSON.stringify({ emails: 1, surname: 1, name: 1, patronymic: 1, position: 1, organization: 1, phone: 1, workingGroup: 1 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
 	// TODO: remove cache. Is necessary for data invalidation
-}), [text, itemsPerPage, current, column, direction, cache]);
+}), [itemsPerPage, current, column, direction, cache]);
 
 export function PersonsPage() {
 	const t = useTranslation();
@@ -33,7 +33,7 @@ export function PersonsPage() {
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['weight']);
-	const [cache, setCache] = useState(new Date());
+	const [cache, setCache] = useState();
 	const [currentPerson, setCurrentPerson] = useState({});
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -41,7 +41,7 @@ export function PersonsPage() {
 
 	const query = useQuery(debouncedParams, debouncedSort, cache);
 
-	const data = useEndpointData('persons.list', query) || {};
+	const data = useEndpointData('persons.list', query) || { result: [] };
 	const { data: workingGroupData, state: workingGroupState } = useEndpointDataExperimental('working-groups.list', useMemo(() => ({
 		query: JSON.stringify({ type: { $ne: 'subject' } }),
 	}), []));
@@ -140,7 +140,7 @@ export function PersonsPage() {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.Content>
-				<Persons setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onEditClick} onEditClick={onEditClick} onDeleteClick={onDeleteClick} sort={sort}/>
+				<Persons setParams={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onEditClick} onEditClick={onEditClick} onDeleteClick={onDeleteClick} sort={sort}/>
 			</Page.Content>
 		</Page>
 		{ context

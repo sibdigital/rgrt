@@ -3,8 +3,8 @@ import { Persons } from '../../../models/server/raw';
 export async function findPersons({ query = {}, fields = {}, pagination: { offset, count, sort } }) {
 	const cursor = await Persons.find(query, {
 		sort: sort || { surname: 1 },
-		skip: offset || 0,
-		limit: count || 50,
+		skip: offset,
+		limit: count,
 		fields,
 	});
 
