@@ -38,7 +38,7 @@ export class Errands extends Base {
 	}
 
 	// UPDATE
-	updateErrand(_id, newData) {
+	updateErrandWithNewData(_id, newData) {
 		newData._updatedAt = new Date();
 		return this.update({ _id }, { $set: { ...newData } });
 	}

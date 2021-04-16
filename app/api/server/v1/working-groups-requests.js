@@ -90,7 +90,7 @@ API.v1.addRoute('working-groups-requests.findAnswerOneById', { authRequired: tru
 API.v1.addRoute('working-groups-requests.getOneByInviteLink', { authRequired: false }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findOneWorkingGroupRequestByInviteLink(query.inviteLink, { fields: { protocol: 1, requestType: 1, mail: 1, protocolItemsId: 1, desc: 1, date: 1, ts: 1, number: 1 } })));
+		return API.v1.success(Promise.await(findOneWorkingGroupRequestByInviteLink(query.inviteLink, { fields: { createdBy: 1, protocol: 1, requestType: 1, mail: 1, protocolItemsId: 1, desc: 1, date: 1, ts: 1, number: 1 } })));
 	},
 });
 

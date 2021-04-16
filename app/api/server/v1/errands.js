@@ -44,7 +44,7 @@ API.v1.addRoute('errands', { authRequired: true }, {
 
 		switch (query.type) {
 			case 'initiated_by_me':
-				formedQuery['initiatedBy._id'] = `${ userId }`;
+				formedQuery['initiatedBy.userId'] = `${ userId }`;
 				break;
 			case 'charged_to_me':
 				formedQuery['chargedTo.person._id'] = `${ person._id }`;
@@ -86,10 +86,6 @@ API.v1.addRoute('errands.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query } = this.parseJsonQuery();
-
-		if (sort && Object.keys(sort).length > 1) {
-			return API.v1.failure('This method support only one "sort" parameter');
-		}
 
 		const result = Promise.await(findErrands({ query, options: { offset, count, sort } }));
 
