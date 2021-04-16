@@ -31,7 +31,7 @@ function AdminUserInformationStep({ step, title, active }) {
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const registerAdminUser = async ({ name, username, email, password, onRegistrationEmailSent }) => {
-		await registerUser({ name, username, email, pass: password });
+		await registerUser({ name, login: username, email, pass: password });
 		callbacks.run('userRegistered');
 
 		try {
