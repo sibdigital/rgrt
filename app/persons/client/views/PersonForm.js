@@ -64,7 +64,8 @@ export function useDefaultPersonForm({ defaultValues = null, isContactPerson = f
 		hasUnsavedChanges,
 	} = useForm(fields);
 
-	const allFieldAreFilled = useMemo(() => Object.values(values).filter((val) => {
+	const allFieldAreFilled = useMemo(() => Object.values(values).filter((val,index) => {
+		if (index === 4) { return false; }
 		if (typeof val === 'string' && val.trim() !== '') { return false; }
 		if (typeof val === 'object' && val?.length > 0) { return false; }
 		return val?.toString().trim() === '';

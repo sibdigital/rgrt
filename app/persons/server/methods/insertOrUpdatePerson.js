@@ -17,10 +17,6 @@ Meteor.methods({
 			throw new Meteor.Error('error-the-field-is-required', 'The field surname is required', { method: 'insertOrUpdatePerson', field: 'surname' });
 		}
 
-		if (!s.trim(person.phone)) {
-			throw new Meteor.Error('error-the-field-is-required', 'The field phone is required', { method: 'insertOrUpdatePerson', field: 'phone' });
-		}
-
 		if (!s.trim(person.email)) {
 			throw new Meteor.Error('error-the-field-is-required', 'The field email is required', { method: 'insertOrUpdatePerson', field: 'email' });
 		}
