@@ -1,7 +1,7 @@
 <template name="menuBar">
     <nav class="menu-bar">
 		{{#each menuItems}}
-			<span class="nav-item">
+			<span class="menu-item nav-item">
 				{{#if icon}}
 					{{> icon block="sidebar__toolbar-button-icon" icon=icon}}
 				{{else}}
@@ -9,5 +9,17 @@
 				{{/if}}
 			</span>
 		{{/each}}
+		<div style="position: relative;">
+			<span class="dropdown-icon">
+				<i id="dropdown-item-icon" class="icon-angle-down"></i>
+			</span>
+			<div id="dropdown-bar" class="dropdown-bar">
+				{{#each hiddenMenuItems}}
+					<span class="menu-item dropdowns-nav-item">
+						{{name}}
+					</span>
+				{{/each}}
+			</div>
+		</div>
     </nav>
 </template>
