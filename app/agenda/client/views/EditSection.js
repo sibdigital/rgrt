@@ -213,14 +213,14 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 						zIndex='100'
 						width='100%'
 						height='100%'
-						onTouchStart={() => { console.log('on touch start in render option ', option); handleSpeakers(option, true); }}
+						onTouchStart={() => { console.log('on touch start in render option ', state); isIOS && handleSpeakers(option, true); }}
 					>
 						{[constructPersonFIO(option), `, ${ option.organization ?? '' }`].join('')}
 					</Box>
 				}
 				filterSelectedOptions
 				filterOptions={createFilterOptions({ limit: 10 })}
-				onChange={(event, value) => { console.log('onChange event ', event); handleSpeakers(value); }}
+				onChange={(event, value) => { console.log('onChange event ', event); !isIOS && handleSpeakers(value); }}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
 						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
