@@ -32,16 +32,17 @@ export function createCouncilData(date, description = '', councilType, invitedPe
 
 export function downloadCouncilParticipantsForm({ res, fileName }) {
 	try {
-		// const res = await downloadCouncilParticipantsMethod({ _id, dateString: formatDateAndTime(data.d) });
 		const url = window.URL.createObjectURL(new Blob([res]));
+		console.log('downloadCouncilParticipant after url', url);
 		const link = document.createElement('a');
+		console.log('downloadCouncilParticipant after link', link);
 		link.href = url;
-		// const fileName = [t('Council_from') + ' ' + moment(new Date()).format('DD MMMM YYYY') + '.docx'].join('');
 		link.setAttribute('download', fileName);
 		document.body.appendChild(link);
+		console.log('downloadCouncilParticipant after append child');
 		link.click();
+		console.log('downloadCouncilParticipant after append child click');
 	} catch (e) {
 		console.error('downloadCouncilParticipantsForm :', e);
-		console.log('downloadCouncilParticipantsForm :', e);
 	}
-};
+}

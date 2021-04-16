@@ -19,6 +19,7 @@ import ReactTooltip from 'react-tooltip';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import { FlowRouter } from 'meteor/kadira:flow-router';
+import { isIOS, isSafari } from 'react-device-detect';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -44,7 +45,7 @@ import {
 	createItemData,
 	createProtocolData,
 	createSectionData,
-	validateProtocolData
+	validateProtocolData,
 } from '../../../protocols/client/views/lib';
 
 registerLocale('ru', ru);
@@ -337,16 +338,21 @@ function Council({
 		tab === 'files' && currentUploadedFiles.length > 0 && setContext('uploadFiles');
 	}, [currentUploadedFiles]);
 
-	const downloadCouncilParticipants = (_id) => async (e) => {
-		e.preventDefault();
+	const downloadCouncilParticipants = (_id) => async (event) => {
+		!isIOS && event.preventDefault();
+		console.log('downloadCouncilParticipant after preventDefault');
 		try {
 			const res = await downloadCouncilParticipantsMethod({ _id, dateString: formatDateAndTime(data.d) });
+			console.log('downloadCouncilParticipant after download');
+			console.dir({ res });
 			const fileName = [data.type?.title ?? '', ' ', moment(new Date(data.d)).format('DD MMMM YYYY'), '.docx'].join('');
+			console.log('downloadCouncilParticipant after filename');
 			if (res) {
 				downloadCouncilParticipantsForm({ res, fileName });
+				console.log('downloadCouncilParticipant after form');
 			}
-		} catch (e) {
-			console.error('[council.js].downloadCouncilParticipants :', e);
+		} catch (error) {
+			console.error('[council.js].downloadCouncilParticipants :', error);
 		}
 	};
 
@@ -355,6 +361,7 @@ function Council({
 			console.log('!fileupload_enabled');
 			return null;
 		}
+		console.log('fileUploadClic');
 		setContext('uploadFiles');
 		let fileIndex = staticFileIndex;
 		const $input = $(document.createElement('input'));
@@ -386,14 +393,14 @@ function Council({
 			setCurrentUploadedFiles(currentUploadedFiles ? currentUploadedFiles.concat(filesToUpload) : filesToUpload);
 
 			$input.remove();
-			onChange();
+			!isIOS && onChange();
 		});
 		$input.click();
 
-		if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
-			$input.click();
-		}
-		onChange();
+		// if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+		// 	$input.click();
+		// }
+		!isIOS && onChange();
 	};
 
 	const fileUpload = async () => {
@@ -615,14 +622,20 @@ function Council({
 						<Button mbe={mediaQuery ? 'x0' : 'x8'} disabled={isLoading} marginInlineEnd='10px' small primary onClick={onEmailSendClick(councilId)} aria-label={t('Send_email')}>
 							{t('Send_email')}
 						</Button>
-						<Button style={{ touchAction: 'none' }} disabled={isLoading} small primary onClick={downloadCouncilParticipants(councilId)} aria-label={t('Download')}>
+						<Button
+							style={{ touchAction: 'none' }} disabled={isLoading} small primary
+							onTouchStart={() => console.log(['on touch start', isIOS, isSafari].join(' '))}
+							onTouchEnd={(e) => isIOS && downloadCouncilParticipants(councilId)(null)}
+							onClick={(event) => !isIOS && downloadCouncilParticipants(councilId)(event)}
+							aria-label={t('Download')}
+						>
 							{t('Download_Council_Participant_List')}
 						</Button>
 					</Field.Row>
 				</Field>}
 				{tab === 'files' && isSecretary && <Field mbe='x8'>
 					<ButtonGroup mis='auto' mie='x16'>
-						<Button disabled={isLoading} onClick={fileUploadClick} small primary aria-label={t('Upload_file')}>
+						<Button disabled={isLoading} onTouchStart={() => isIOS && fileUploadClick()} onClick={() => !isIOS && fileUploadClick()} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
 						</Button>
 					</ButtonGroup>
