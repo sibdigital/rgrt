@@ -67,7 +67,7 @@ export function AddErrandByProtocolItemPage() {
 			},
 		},
 		desc: $(item?.name).text(),
-		expireAt: new Date(),
+		expireAt: item.expireAt ? new Date(item.expireAt) : new Date(),
 		ts: new Date(),
 		protocol: {
 			_id: protocolData._id,
