@@ -12,3 +12,5 @@ import './methods/getMaxProtocolNum';
 import './methods/getMaxProtocolSectionNum';
 import './methods/getProtocolByCouncilId';
 import './methods/updateItemStatus';
+import './methods/downloadTestServer';
+import './docxTemplates/defaultProtocolTemplate';

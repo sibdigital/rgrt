@@ -25,6 +25,8 @@ import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { EditProtocol } from './EditProtocol';
+// import { downLoadFile } from '../../../utils/client/methods/downloadFile';
+import { downloadCouncilParticipantsForm } from '../../../councils/client/views/lib';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -102,7 +104,6 @@ export function ProtocolPage() {
 	// 	fields: JSON.stringify({ personId: 1 }),
 	// }), [data, getItemsResponsibles]));
 
-	// const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
 	const title = useMemo(() => [t('Protocol'), [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
 
 	const deleteProtocol = useMethod('deleteProtocol');
@@ -110,6 +111,8 @@ export function ProtocolPage() {
 	const deleteItem = useMethod('deleteItem');
 	const moveSection = useMethod('moveSection');
 	const moveItem = useMethod('moveItem');
+	const downloadTestServer = useMethod('downloadTestServer');
+	const defaultProtocolTemplate = useMethod('defaultProtocolTemplate');
 
 	const onEditClick = useCallback((context) => () => {
 		router.push({ id: protocolId, context });
@@ -338,7 +341,22 @@ export function ProtocolPage() {
 		return res;
 	}, [workingGroups]);
 
-	// useMemo(() => console.dir({ personsWithLinkToUser }), [personsWithLinkToUser]);
+	const downloadFile = useCallback(async (e) => {
+		try {
+			// await downloadTest();
+			// const file = await downloadTestServer(protocolId);
+			const file = await defaultProtocolTemplate({ protocolId });
+			const fileName = ['Протокол', ' от ', formatDate(new Date(data.d)), '.docx'].join('');
+
+			if (file) {
+				downloadCouncilParticipantsForm({ res: file, fileName });
+				console.log('downloadCouncilParticipant after form');
+			}
+			// await downLoadFile(file)(e);
+		} catch (error) {
+			console.error(error);
+		}
+	}, [protocolId, data]);
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -348,6 +366,9 @@ export function ProtocolPage() {
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
 				<ButtonGroup display={smallScreenWidth ? 'flex' : 'block'}>
+					{!context && <Button mbe='x8' small primary onClick={(e) => downloadFile(e)} aria-label={t('Download_Snippet')}>
+						{t('Download_Snippet')}
+					</Button>}
 					{!context && <Button mbe='x8' small primary onClick={onEditClick('edit')} aria-label={t('Protocol_Info')}>
 						{t('Protocol_Info')}
 					</Button>}
