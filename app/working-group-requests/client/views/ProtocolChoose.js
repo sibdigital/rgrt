@@ -100,34 +100,41 @@ const Filters = ({ params, setFilter, ...props }) => {
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ text, startDate, endDate, itemsPerPage, current }, [column, direction], protocolsFields) => useMemo(() => ({
+const useQuery = ({ text, itemsPerPage, current }, [column, direction], protocolsFields) => useMemo(() => ({
 	query: JSON.stringify({
 		$or: [
 			{ num: { $regex: text || '', $options: 'i' } },
-			// { d: { $gte: startDate ?? '', $lt: endDate ?? '' } },
+			// { d: { $gte: startDate ? new Date(startDate) : '', $lt: endDate ? new Date(endDate) : '' } },
 		],
 	}),
 	fields: JSON.stringify(protocolsFields),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
-}), [text, startDate, endDate, protocolsFields, column, direction, itemsPerPage, current]);
+}), [text, protocolsFields, column, direction, itemsPerPage, current]);
 
 export function ProtocolChoose({ setProtocolId, setProtocol, setCouncil, close, protocolsFields = null }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const mediaQuery = useMediaQuery('(max-width: 560px)');
 
-	const [params, setParams] = useState({ text: '', startDate: '', endDate: '', current: 0, itemsPerPage: 25 });
+	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['d']);
 	const [refProtocolsFields, setRefProtocolsFields] = useState(protocolsFields ?? { place: 1, d: 1, num: 1, council: 1 });
+	const [protocolsList, setProtocolsList] = useState([]);
 
-	const debouncedText = useDebouncedValue(params.text, 500);
+	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
 
-	const query = useQuery({ ...params, text: debouncedText }, debouncedSort, refProtocolsFields);
+	const query = useQuery(debouncedParams, debouncedSort, refProtocolsFields);
 
 	const { data: protocolData, state: protocolState } = useEndpointDataExperimental('protocols.list', query);
+
+	useEffect(() => {
+		if (protocolData && protocolData.protocols) {
+			setProtocolsList(protocolData.protocols);
+		}
+	}, [protocolData]);
 
 	const onProtocolClick = useCallback((protocol) => {
 		setProtocolId && setProtocolId(protocol._id);
@@ -161,7 +168,7 @@ export function ProtocolChoose({ setProtocolId, setProtocol, setCouncil, close, 
 
 	return <Box>
 		<Filters params={params} setFilter={setParams}/>
-		<GenericTable header={header} renderRow={renderRow} results={protocolData?.protocols ?? []} total={protocolData?.total ?? 0} setParams={setParams} params={params}/>
+		<GenericTable header={header} renderRow={renderRow} results={protocolsList} total={protocolData?.total ?? 0} setParams={setParams} params={params}/>
 	</Box>;
 }
 
