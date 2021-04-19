@@ -24,9 +24,8 @@ import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
-import { EditProtocol } from './EditProtocol';
-// import { downLoadFile } from '../../../utils/client/methods/downloadFile';
 import { downloadCouncilParticipantsForm } from '../../../councils/client/views/lib';
+import { EditProtocol } from './EditProtocol';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -111,7 +110,6 @@ export function ProtocolPage() {
 	const deleteItem = useMethod('deleteItem');
 	const moveSection = useMethod('moveSection');
 	const moveItem = useMethod('moveItem');
-	const downloadTestServer = useMethod('downloadTestServer');
 	const defaultProtocolTemplate = useMethod('defaultProtocolTemplate');
 
 	const onEditClick = useCallback((context) => () => {
@@ -343,8 +341,6 @@ export function ProtocolPage() {
 
 	const downloadFile = useCallback(async (e) => {
 		try {
-			// await downloadTest();
-			// const file = await downloadTestServer(protocolId);
 			const file = await defaultProtocolTemplate({ protocolId });
 			const fileName = ['Протокол', ' от ', formatDate(new Date(data.d)), '.docx'].join('');
 
