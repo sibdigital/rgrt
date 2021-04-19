@@ -206,7 +206,6 @@ class Protocols extends Base {
 
 	updateItemStatus(itemId, status) {
 		const data = this.findOne({ 'sections.items._id': itemId });
-		// console.dir({ dataTestUpdate: data });
 		let isUpdated = false;
 		if (data.sections) {
 			data.sections = data.sections.map((section) => {

@@ -131,7 +131,7 @@ export function NewErrand({ errand, request, protocolId = null }) {
 				}
 			}
 		} catch (err) {
-			console.error(err, kek);
+			console.error(err);
 		}
 	}, [dispatchToastMessage, errand, insertOrUpdateErrand, protocolId, t]);
 
@@ -144,12 +144,12 @@ export function NewErrand({ errand, request, protocolId = null }) {
 			request?._id && Object.assign(errandToSave, { workingGroupRequestId: request._id });
 		}
 
-		await saveAction(errandToSave, files);
-
 		if (errand && errand.protocolItemId && errandToSave.status && errandToSave.status.state) {
 			const status = getProtocolItemStatus(errandToSave.status.state, t(errandToSave.status.title));
 			await updateItemStatus(errand.protocolItemId, status);
 		}
+
+		await saveAction(errandToSave, files);
 	}, [errand, values, saveAction, request, getProtocolItemStatus, t, updateItemStatus]);
 
 	const handleChoose = useCallback((val, field, handleField) => {
