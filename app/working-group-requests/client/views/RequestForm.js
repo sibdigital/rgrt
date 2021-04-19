@@ -212,7 +212,7 @@ export function ResponsibleField({
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
-			<Field.Label alignSelf='center' mie='x16' display='flex' flexDirection='row' alignItems='center'>
+			<Field.Label alignSelf={flexDirection === 'column' ? 'auto' : 'center'} mie='x16' display='flex' flexDirection='row' alignItems='center'>
 				{t('Errand_Charged_to')} {itemResponsible && itemResponsible._id && <ClearButton onClick={() => handleItemResponsible({})}/>}
 			</Field.Label>
 			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>

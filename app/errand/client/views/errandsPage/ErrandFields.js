@@ -196,6 +196,8 @@ export function DefaultErrandFields({ inputStyles, values, handlers, setContext 
 		handleDesc,
 	} = handlers;
 
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
+
 	const onChangeField = useCallback((val, field, handler) => {
 		handler({ ...field, value: val });
 	}, []);
@@ -203,13 +205,22 @@ export function DefaultErrandFields({ inputStyles, values, handlers, setContext 
 	return <Box display='flex' flexDirection='column'>
 		<Margins inline='x8' block='x16'>
 
-			<Box display='flex' flexDirection='row' >
+			<Box display='flex' flexDirection={mediaQuery ? 'row' : 'column'} width='auto'>
 				<InitiatedByField initiatedBy={initiatedBy.value}/>
 				<CreatedAtField ts={ts.value} />
 			</Box>
 			<DescriptionField desc={desc.value} inputStyles={inputStyles} handleDesc={(val) => onChangeField(val, desc, handleDesc)} required={desc.required}/>
-			<ResponsibleField flexDirection='row' handleChoose={setContext} itemResponsible={chargedTo.value.person ?? {}} handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}/>
-			<Box display='flex' flexDirection='row' >
+			<Margins inlineEnd={mediaQuery ? 'x20' : 'x3.2'}>
+				<Box display='flex' width='auto'>
+					<ResponsibleField
+						flexDirection={mediaQuery ? 'row' : 'column'}
+						handleChoose={setContext}
+						itemResponsible={chargedTo.value.person ?? {}}
+						handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}
+					/>
+				</Box>
+			</Margins>
+			<Box display='flex' flexDirection={mediaQuery ? 'row' : 'column'} width='auto'>
 				{/*<ChargedToField chargedTo={chargedTo.value}/>*/}
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
