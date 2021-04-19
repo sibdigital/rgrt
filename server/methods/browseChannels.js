@@ -75,9 +75,13 @@ Meteor.methods({
 
 		if (type === 'channels') {
 			const sort = sortChannels(sortBy, sortDirection);
+			console.log('before permission');
+
 			if ((!user && !canViewAnonymous) || (user && !hasPermission(user._id, 'view-c-room'))) {
 				return;
 			}
+			console.log('after permission');
+			console.dir({ regex });
 
 			const result = Rooms.findByNameOrFNameAndType(regex, 'c', {
 				...pagination,
