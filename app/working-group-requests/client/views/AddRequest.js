@@ -53,15 +53,15 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 				let protocolItem = null;
 				let sectionId = '';
 				protocolData.sections.forEach((section) => {
-					const it = section.items.find((item) => item._id === protocolsItemId);
+					const it = section.items?.find((item) => item._id === protocolsItemId) ?? null;
 					if (it) {
 						protocolItem = it;
 						sectionId = section._id;
 					}
 				});
 				const itemDesc = $(protocolItem?.name ?? '').text();
-				const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0] ?? '');
-				console.log({ protocolsItemId, protocolItem, itemDesc });
+				const itemResponsiblePerson = protocolItem?.responsible[0] ?? {};
+				console.log({ protocolsItemId, protocolItem, itemResponsiblePerson });
 
 				itemDesc && handlers.handleDescription && handlers.handleDescription(itemDesc);
 				protocolData && handlers.handleProtocol && handlers.handleProtocol({
@@ -72,8 +72,8 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 					itemId: protocolItem?._id ?? '',
 					itemName: protocolItem?.name ?? '',
 					itemNum: protocolItem?.num ?? '',
-					itemResponsible: itemResponsiblePerson,
 				});
+
 				itemResponsiblePerson && handlers.handleItemResponsible && handlers.handleItemResponsible(itemResponsiblePerson);
 				handlers.handleProtocolItems && protocolData.sections.forEach((section) => section.items?.forEach((item) => item._id === protocolsItemId && handlers.handleProtocolItems([item])));
 			}
