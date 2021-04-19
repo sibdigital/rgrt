@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Scrollable } from '@rocket.chat/fuselage';
-import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { Box, Button, ButtonGroup, Icon, TextInput, Tile, Scrollable, Field } from '@rocket.chat/fuselage';
+import { useDebouncedValue, useMutableCallback } from '@rocket.chat/fuselage-hooks';
 import { css } from '@rocket.chat/css-in-js';
+
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
@@ -18,26 +19,20 @@ const clickable = css`
 		}
 	`;
 
-const SearchByText = ({ setParams, usersData, setUsersData, ...props }) => {
+const FilterByText = ({ setFilter, setIsFetching, ...props }) => {
 	const t = useTranslation();
 	const [text, setText] = useState('');
-	const handleChange = useCallback((event) => setText(event.currentTarget.value), []);
+
+	const handleChange = useMutableCallback((event) => { setText(event.currentTarget.value); setIsFetching(true); });
+	const onSubmit = useMutableCallback((e) => e.preventDefault());
 
 	useEffect(() => {
-		const regExp = new RegExp('^'.concat(text), 'i');
-		try {
-			setUsersData(usersData.filter((user) => (user.name && user.name.match(regExp))
-				|| (user.surname && user.surname.match(regExp))
-				|| (user.username && user.username.match(regExp))
-				|| text.length === 0));
-		} catch (e) {
-			setUsersData(usersData);
-			console.log(e);
-		}
-	}, [setUsersData, text]);
+		setFilter({ text, current: 0, itemsPerPage: 25 });
+	}, [setFilter, text]);
 
-	return <Box mbe='x16' is='form' onSubmit={useCallback((e) => e.preventDefault(), [])} display='flex' flexDirection='column' {...props}>
-		<TextInput flexShrink={0} placeholder={t('Search_Users')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
+	return <Box mb='x16' is='form' onSubmit={onSubmit} display='flex' flexDirection='column' {...props}>
+		<Field.Label>{t('Search')}</Field.Label>
+		<TextInput flexShrink={0} placeholder={t('Search')} addon={<Icon name='magnifier' size='x20'/>} onChange={handleChange} value={text} />
 	</Box>;
 };
 
@@ -47,13 +42,9 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction], cache) =
 	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	query: JSON.stringify({
 		$or: [
-			{ 'emails.address': { $regex: text || '', $options: 'i' } },
 			{ username: { $regex: text || '', $options: 'i' } },
 			{ name: { $regex: text || '', $options: 'i' } },
 			{ surname: { $regex: text || '', $options: 'i' } },
-		],
-		$and: [
-			{ type: { $ne: 'bot' } },
 		],
 	}),
 	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
@@ -69,12 +60,13 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['surname', 'asc']);
-	const [findUsers, setFindUsers] = useState([]);
+	const [findPersons, setFindPersons] = useState([]);
 	const [cache, setCache] = useState(new Date());
+	const [isFetching, setIsFetching] = useState(false);
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
-	const query = useQuery(debouncedParams, debouncedSort, 'cache');
+	const query = useQuery(debouncedParams, debouncedSort, cache);
 
 	const data = useEndpointData('persons.list', query);
 
@@ -82,7 +74,8 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 
 	useEffect(() => {
 		const persons = data?.persons.length > 0 ? participantsData?.users.length > 0 ? data.persons.filter(person => participantsData.users.find(p => p._id === person._id) === undefined) : data.persons : [];
-		setFindUsers(persons);
+		setFindPersons(persons);
+		setIsFetching(false);
 	}, [data, participantsData]);
 
 	const insertOrUpdateSection = useMethod('addParticipantToProtocol');
@@ -94,8 +87,8 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 	const handleSave = useCallback((userId) => async () => {
 		try {
 			await saveAction(userId);
-			setCache(new Date());
 			dispatchToastMessage({ type: 'success', message: t('Participant_Added_Successfully') });
+			setCache(new Date());
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -116,9 +109,11 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 		{/* <Box color='hint'>{user.position}, {user.organization}</Box> */}
 	</Box>;
 
+	useMemo(() => console.dir({ params }), [params]);
+
 	return <VerticalBar.ScrollableContent>
-		<SearchByText setParams={ setParams } usersData={data?.persons ?? []} setUsersData={setFindUsers}/>
-		{findUsers && !findUsers.length
+		<FilterByText setFilter={ setParams } setIsFetching={setIsFetching}/>
+		{findPersons && !findPersons.length
 			? <>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
 					{t('No_data_found')}
@@ -131,11 +126,17 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 			</>
 			: <>
 				<Scrollable>
-					<Box mb='x8' flexGrow={1}>
+					<Box mb='x8' flexGrow={1} opacity={isFetching && '20%'}>
 						{data
-							? findUsers.map((props, index) => <User key={props._id || index} { ...props}/>)
+							? findPersons.map((props, index) => <User key={props._id || index} { ...props}/>)
 							: <></>
 						}
+						{/*{*/}
+						{/*	data && data.total > params.current + params.itemsPerPage*/}
+						{/*	&& <Button w='99%' mbs='x8' mbe='x16' mie='x4' onClick={() => setParams({ ...params, current: params.current + params.itemsPerPage })}>*/}
+						{/*		{t('Load_more')}*/}
+						{/*	</Button>*/}
+						{/*}*/}
 					</Box>
 				</Scrollable>
 				<ButtonGroup stretch w='full'>
