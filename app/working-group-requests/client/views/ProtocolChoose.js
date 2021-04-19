@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Field, Icon, Table, TextInput } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery, useMutableCallback } from '@rocket.chat/fuselage-hooks';
 import DatePicker from 'react-datepicker';
+import _ from 'underscore';
 
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
@@ -103,8 +104,7 @@ const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 const useQuery = ({ text, itemsPerPage, current }, [column, direction], protocolsFields) => useMemo(() => ({
 	query: JSON.stringify({
 		$or: [
-			{ num: { $regex: text || '', $options: 'i' } },
-			// { d: { $gte: startDate ? new Date(startDate) : '', $lt: endDate ? new Date(endDate) : '' } },
+			!_.isNaN(parseInt(text)) ? { num: parseInt(text) } : {},
 		],
 	}),
 	fields: JSON.stringify(protocolsFields),

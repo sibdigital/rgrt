@@ -1,7 +1,9 @@
+import _ from 'underscore';
+
 import { API } from '../api';
 import { findProtocols, findProtocol, findProtocolByCouncilId, findProtocolByItemId } from '../lib/protocols';
-import { hasPermission } from '../../../authorization';
 import { Persons } from '../../../models';
+
 
 API.v1.addRoute('protocols.list', { authRequired: true }, {
 	get() {
@@ -12,8 +14,18 @@ API.v1.addRoute('protocols.list', { authRequired: true }, {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query, stockFields } = this.parseJsonQuery();
 
+		let isValidQuery = true;
+		let formedQuery = {};
+
+		if (query.$or && _.isArray(query.$or) && query.$or.length === 0) {
+			isValidQuery = false;
+		} else if (query.$or && _.isArray(query.$or) && query.$or.length > 0 && query.$or[0].num) {
+			isValidQuery = false;
+			formedQuery = { $where: `/^${ query.$or[0].num }.*/.test(this.num)` };
+		}
+
 		return API.v1.success(Promise.await(findProtocols({
-			query,
+			query: isValidQuery ? query : formedQuery,
 			fields: stockFields,
 			pagination: {
 				offset,
