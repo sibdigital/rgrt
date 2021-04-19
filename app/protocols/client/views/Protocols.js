@@ -13,6 +13,29 @@ import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
 
+const getDateStatus = (date) => {
+	const today = new Date();
+	const dt = new Date(date);
+	let result = 'to-be';
+	if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
+		result = 'today';
+	} else if (dt < today) {
+		result = 'held';
+	}
+	return result;
+};
+
+const colorBackgroundCouncil = (date) => {
+	const status = getDateStatus(date);
+	let color = 'var(--rc-color-councils-background-to-be)';
+	if (status === 'today') {
+		color = 'var(--rc-color-councils-background-today)';
+	} else if (status === 'held') {
+		color = 'var(--rc-color-councils-background-held)';
+	}
+	return color;
+};
+
 export function Protocols({
 	data,
 	sort,
@@ -70,17 +93,17 @@ export function Protocols({
 		mediaQuery && <Th key={'place'} color='default'>{t('Protocol_Place')}</Th>,
 		mediaQuery && <Th key={'typename'} color='default'>{t('Council')}</Th>,
 		// mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '190px' }} color='default'>{t('Created_at')}</Th>,
-		isAllowedEdit && <Th w='x40' key='edit'></Th>,
-		isAllowedEdit && <Th w='x40' key='delete'></Th>,
-		// <Th w='x40' key='download'></Th>
+		isAllowedEdit && <Th w='x40' key='edit'/>,
+		isAllowedEdit && <Th w='x40' key='delete'/>,
 	], [sort, mediaQuery]);
 
 	const formatDate = useFormatDate();
 	const formatDateAndTime = useFormatDateAndTime();
 
 	const renderRow = (protocol) => {
-		const { _id, d: date, num, place, council, ts } = protocol;
-		return <Table.Row key={_id} tabIndex={0} role='link' action>
+		const { _id, d: date, num, place, council } = protocol;
+
+		return <Table.Row key={_id} tabIndex={0} role='link' action backgroundColor={colorBackgroundCouncil(date)}>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>№ {num}</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(date)}</Box></Table.Cell>
 			{ mediaQuery && <Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{place}</Box></Table.Cell>}
