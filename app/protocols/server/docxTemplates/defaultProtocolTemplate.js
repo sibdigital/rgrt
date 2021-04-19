@@ -63,6 +63,16 @@ const preProcessingProtocolItems = (item, strItem) => {
 	return replaced;
 };
 
+function constructPersonFIO(responsible) {
+	if (!responsible || typeof responsible !== 'object') {
+		return responsible;
+	}
+	if (!responsible.surname && !responsible.name && !responsible.patronymic) {
+		return responsible;
+	}
+	return [responsible.surname ?? '', ' ', responsible.name?.substr(0, 1) ?? '', '.', responsible.patronymic?.substr(0, 1) ?? '', '.'].join('');
+}
+
 function getHeaderParagraph(protocol) {
 	return new Paragraph({
 		children: [
@@ -140,22 +150,30 @@ function getProtocolSectionParagraphs(protocol) {
 				}));
 
 				if (item.responsible && _.isArray(item.responsible) && item.responsible.length > 0) {
-					let str = '(';
+					let str = '';
 					item.responsible.forEach((responsible, index) => {
 						if (index > 0) {
 							str = str.concat(', ');
 						}
-						str = str.concat(responsible.surname ? `${ responsible.surname }` : '');
+						str = str.concat(constructPersonFIO(responsible));
 					});
-					str = str.concat(')');
 
 					result.push(new Paragraph({
 						children: [
 							new TextRun({
+								text: item.responsible.length === 1 ? 'Ответственный: ' : 'Ответственные: ',
+								bold: true,
+							}),
+							new TextRun({
 								text: str,
 							}),
 						],
-						alignment: AlignmentType.CENTER,
+						indent: {
+							firstLine: 1080,
+						},
+						spacing: {
+							after: 180,
+						},
 						style: 'defaultFontStyle',
 					}));
 				}
@@ -307,7 +325,7 @@ Meteor.methods({
 			}),
 		];
 
-		console.dir({ sectionsParagraphs });
+		// console.dir({ sectionsParagraphs });
 
 		if (_.isArray(sectionsParagraphs) && sectionsParagraphs.length > 0) {
 			sectionsParagraphs.forEach((secPar) => protocolParagraphArray.push(secPar));
@@ -324,7 +342,7 @@ Meteor.methods({
 			style: 'defaultFontStyle',
 		}));
 
-		console.dir({ protocolParagraphArray });
+		// console.dir({ protocolParagraphArray });
 
 		doc.addSection({
 			size: {
@@ -359,7 +377,7 @@ Meteor.methods({
 		if (_.isArray(participantsParagraphs) && participantsParagraphs.length > 0) {
 			participantsParagraphs.forEach((partPar) => attachmentParagraphArray.push(partPar));
 		}
-		console.dir({ attachmentParagraphArray });
+		// console.dir({ attachmentParagraphArray });
 
 		doc.addSection({
 			size: {
