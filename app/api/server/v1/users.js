@@ -247,29 +247,33 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 			position: 1,
 		};
 
-		const user = Users.findOneById(query.userId, { ...fields, emails: 1 });
-		const person = Persons.findOne(query, { fields });
+		const user = Users.findOneById(query.userId, { ...fields, emails: 1, personId: 1 });
+		const person = Persons.findOne({ _id: user?.personId ?? '' }, { fields });
+
+		if (!user || !query.userId) {
+			return API.v1.success({ });
+		}
 
 		if (person) {
-			const personKeys = Object.keys(person);
-			let isChange = false;
-			Object.keys(fields).forEach((field) => {
-				if (!personKeys.includes(field)) {
-					isChange = true;
-					person[field] = user[field];
-				}
-			});
-
-			if (isChange) {
-				try {
-					Persons.update({ _id: person._id }, { $set: { ...person } });
-				} catch (e) {
-					console.log(e);
-				}
-			}
+			// const personKeys = Object.keys(person);
+			// let isChange = false;
+			// Object.keys(fields).forEach((field) => {
+			// 	if (!personKeys.includes(field)) {
+			// 		isChange = true;
+			// 		person[field] = user[field];
+			// 	}
+			// });
+			//
+			// if (isChange) {
+			// 	try {
+			// 		Persons.update({ _id: person._id }, { $set: { ...person } });
+			// 	} catch (e) {
+			// 		console.log(e);
+			// 	}
+			// }
 		} else if (!person) {
 			const email = user?.emails[0]?.address ?? '';
-			// console.log(user);
+
 			const createPerson = {
 				surname: user.surname ?? '',
 				name: user.name ?? '',
@@ -280,9 +284,12 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 				position: user.position ?? '',
 				userId: query.userId,
 			};
-			// console.log('user end');
-			Persons.insert(createPerson);
-			return API.v1.success(Persons.findOne(query, { fields }));
+
+			const afterPersonCreateId = Persons.create(createPerson);
+			console.dir({ afterPersonCreateId });
+
+			Users.update({ _id: query.userId }, { $set: { ...user, personId: afterPersonCreateId } });
+			return API.v1.success(Persons.findOne({ userId: query.userId }, { fields }));
 		}
 
 		return API.v1.success(person);
