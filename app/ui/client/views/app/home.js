@@ -56,7 +56,7 @@ const toolbarButtons = () => [
 		name: t('Errands_for_me'),
 		icon: 'errands_to_me',
 		context: 'home',
-		condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
+		// condition: () => Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/charged_to_me');
