@@ -22,6 +22,7 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
+import { ErrandStatuses } from '../../utils/ErrandStatuses';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -37,13 +38,12 @@ const getDateStatus = (date) => {
 	return result;
 };
 
-const colorBackgroundCouncil = (date) => {
-	const status = getDateStatus(date);
-	let color = 'var(--rc-color-councils-background-to-be)';
-	if (status === 'today') {
-		color = 'var(--rc-color-councils-background-today)';
-	} else if (status === 'held') {
-		color = 'var(--rc-color-councils-background-held)';
+const colorBackgroundCouncil = (state) => {
+	let color = '#fbff85';
+	if (state === ErrandStatuses.CLOSED.state) {
+		color = '#d9ffdc';
+	} else if (state === ErrandStatuses.OPENED.state) {
+		color = '#ffbaba';
 	}
 	return color;
 };
@@ -97,7 +97,7 @@ function Errands({
 		const initiatedBy = constructPersonFullFIO(item.initiatedBy ?? '');
 		const chargedTo = constructPersonFullFIO(item.chargedTo?.person ?? '');
 
-		return <Table.Row key={item._id} role='link' action backgroundColor={colorBackgroundCouncil(item.expireAt)}>
+		return <Table.Row key={item._id} role='link' action style={{ opacity: '90%' }} backgroundColor={colorBackgroundCouncil(item.status?.state ?? '')}>
 			{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
 				{initiatedBy}
 			</Table.Cell> }
