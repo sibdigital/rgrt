@@ -111,6 +111,7 @@ export function ProtocolPage() {
 	const moveSection = useMethod('moveSection');
 	const moveItem = useMethod('moveItem');
 	const defaultProtocolTemplate = useMethod('defaultProtocolTemplate');
+	const checkErrandByProtocolItemId = useMethod('checkErrandByProtocolItemId');
 
 	const onEditClick = useCallback((context) => () => {
 		router.push({ id: protocolId, context });
@@ -236,9 +237,9 @@ export function ProtocolPage() {
 			columns: [
 				{
 					groups: [
-						{ items }
-					]
-				}
+						{ items },
+					],
+				},
 			],
 			currentTarget: event.currentTarget,
 			offsetVertical: 10,
@@ -277,9 +278,18 @@ export function ProtocolPage() {
 		FlowRouter.go(`/working-groups-request/add/new-protocols-item-request/${ protocolsItemId }`);
 	};
 
-	const openErrand = (sectionId, itemId) => () => {
-		FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
-		// FlowRouter.go(`/errand/add&byProtocolItem&${ protocolId }&${ sectionId }&${ itemId }`);
+	const openErrand = (sectionId, itemId) => async () => {
+		try {
+			const errandId = await checkErrandByProtocolItemId(itemId);
+			// console.dir({ errandId });
+			if (errandId) {
+				FlowRouter.go(`/errand/${ errandId }`);
+			} else {
+				FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
+			}
+		} catch (error) {
+			FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
+		}
 	};
 
 	const onItemMenuClick = useCallback((event) => {

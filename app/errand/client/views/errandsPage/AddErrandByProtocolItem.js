@@ -95,7 +95,7 @@ export function AddErrandByProtocolItemPage() {
 	};
 	// console.log({ errand, item, itemText: $(item.name).text(), itemName });
 
-	return <NewErrand errand={errand} request={null}/>;
+	return <NewErrand errand={errand} request={null} protocolId={protocolData._id}/>;
 }
 
 AddErrandByProtocolItemPage.displayName = 'AddErrandByProtocolItemPage';
