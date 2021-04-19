@@ -138,6 +138,27 @@ function getProtocolSectionParagraphs(protocol) {
 					},
 					style: 'defaultFontStyle',
 				}));
+
+				if (item.responsible && _.isArray(item.responsible) && item.responsible.length > 0) {
+					let str = '(';
+					item.responsible.forEach((responsible, index) => {
+						if (index > 0) {
+							str = str.concat(', ');
+						}
+						str = str.concat(responsible.surname ? `${ responsible.surname }` : '');
+					});
+					str = str.concat(')');
+
+					result.push(new Paragraph({
+						children: [
+							new TextRun({
+								text: str,
+							}),
+						],
+						alignment: AlignmentType.CENTER,
+						style: 'defaultFontStyle',
+					}));
+				}
 			});
 		}
 	});
@@ -218,123 +239,133 @@ Meteor.methods({
 			return t;
 		};
 
+		const protocolParagraphArray = [
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: 'ПРОТОКОЛ',
+						bold: true,
+					}),
+				],
+				style: 'defaultFontStyle',
+				alignment: AlignmentType.CENTER,
+			}),
+
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: 'Заседания комиссии Государственного совета Российской Федерации',
+					}),
+					new TextRun({
+						text: '',
+						break: 1,
+					}),
+					new TextRun({
+						text: 'по направлению «Транспорт»',
+					}),
+				],
+				style: 'defaultFontStyle',
+				alignment: AlignmentType.CENTER,
+			}),
+
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: protocol?.place ?? 'Место проведения',
+					}),
+				],
+				style: 'defaultFontStyle',
+				alignment: AlignmentType.CENTER,
+			}),
+
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: protocol?.d ? moment(new Date(protocol.d)).format('DD MMMM YYYY') : 'Дата проведения',
+
+					}),
+					new TextRun({
+						text: [...getMaxTabs(16), '№', protocol?.num ?? 'Номер'].join(''),
+					}),
+				],
+				tabStops: [
+					{
+						type: TabStopType.END,
+						// position: TabStopPosition.MAX,
+					},
+				],
+				style: 'defaultFontStyle',
+			}),
+
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: 'Присутствовали: список участников прилагается (Приложение 1)',
+					}),
+				],
+				style: 'defaultFontStyle',
+			}),
+		];
+
+		console.dir({ sectionsParagraphs });
+
+		if (_.isArray(sectionsParagraphs) && sectionsParagraphs.length > 0) {
+			sectionsParagraphs.forEach((secPar) => protocolParagraphArray.push(secPar));
+		}
+		protocolParagraphArray.push(new Paragraph({
+			children: [
+				new TextRun({
+					text: 'Соответствующие предложения подготовить для рассмотрения на заседании Правительственной комиссии по транспорту.',
+				}),
+			],
+			indent: {
+				firstLine: 1080,
+			},
+			style: 'defaultFontStyle',
+		}));
+
+		console.dir({ protocolParagraphArray });
+
 		doc.addSection({
 			size: {
 				orientation: PageOrientation.LANDSCAPE,
 			},
-			children: [
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: 'ПРОТОКОЛ',
-							bold: true,
-						}),
-					],
-					style: 'defaultFontStyle',
-					alignment: AlignmentType.CENTER,
-				}),
-
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: 'Заседания комиссии Государственного совета Российской Федерации',
-						}),
-						new TextRun({
-							text: '',
-							break: 1,
-						}),
-						new TextRun({
-							text: 'по направлению «Транспорт»',
-						}),
-					],
-					style: 'defaultFontStyle',
-					alignment: AlignmentType.CENTER,
-				}),
-
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: protocol?.place ?? 'Место проведения',
-						}),
-					],
-					style: 'defaultFontStyle',
-					alignment: AlignmentType.CENTER,
-				}),
-
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: protocol?.d ? moment(new Date(protocol.d)).format('DD MMMM YYYY') : 'Дата проведения',
-
-						}),
-						new TextRun({
-							text: [...getMaxTabs(16), '№', protocol?.num ?? 'Номер'].join(''),
-						}),
-					],
-					tabStops: [
-						{
-							type: TabStopType.END,
-							// position: TabStopPosition.MAX,
-						},
-					],
-					style: 'defaultFontStyle',
-				}),
-
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: 'Присутствовали: список участников прилагается (Приложение 1)',
-						}),
-					],
-					style: 'defaultFontStyle',
-				}),
-
-				sectionsParagraphs?.map((section) => section),
-
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: 'Соответствующие предложения подготовить для рассмотрения на заседании Правительственной комиссии по транспорту.',
-						}),
-					],
-					indent: {
-						firstLine: 1080,
-					},
-					style: 'defaultFontStyle',
-				}),
-			],
+			children: protocolParagraphArray,
 		});
 
-		// console.dir({ participantsParagraphs });
+		const attachmentParagraphArray = [
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: 'Приложение 1',
+						bold: true,
+					}),
+				],
+				style: 'defaultFontStyle',
+				alignment: AlignmentType.CENTER,
+			}),
+
+			new Paragraph({
+				children: [
+					new TextRun({
+						text: 'Участники протокола',
+					}),
+				],
+				style: 'defaultFontStyle',
+				alignment: AlignmentType.CENTER,
+			}),
+		];
+
+		if (_.isArray(participantsParagraphs) && participantsParagraphs.length > 0) {
+			participantsParagraphs.forEach((partPar) => attachmentParagraphArray.push(partPar));
+		}
+		console.dir({ attachmentParagraphArray });
 
 		doc.addSection({
 			size: {
 				orientation: PageOrientation.LANDSCAPE,
 			},
-			children: [
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: 'Приложение 1',
-							bold: true,
-						}),
-					],
-					style: 'defaultFontStyle',
-					alignment: AlignmentType.CENTER,
-				}),
-
-				new Paragraph({
-					children: [
-						new TextRun({
-							text: 'Участники протокола',
-						}),
-					],
-					style: 'defaultFontStyle',
-					alignment: AlignmentType.CENTER,
-				}),
-
-				participantsParagraphs?.map((paragraph) => paragraph),
-			],
+			children: attachmentParagraphArray,
 		});
 
 		const buffer = await Packer.toBuffer(doc);
