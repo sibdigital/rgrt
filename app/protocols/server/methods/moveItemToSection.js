@@ -18,14 +18,13 @@ Meteor.methods({
 		}
 
 		if (prevSectionId === newSectionId) {
-			return true;
+			return false;
 		}
 
 		if (protocol.sections) {
 			let section;
 			let prevSection;
 			let item;
-			let itemIndex;
 
 			protocol.sections.forEach((currentSection) => {
 				if (currentSection._id === newSectionId) {
@@ -36,14 +35,13 @@ Meteor.methods({
 				}
 			});
 
-			if (!section || !prevSection) {
+			if (!section || !prevSection || !prevSection.items) {
 				throw new Meteor.Error('Protocol_Error_Invalid_Section', 'Invalid section', { method: 'moveItem' });
 			}
 
-			prevSection.items?.filter((currentItem, index) => {
+			prevSection.items = prevSection.items.filter((currentItem, index) => {
 				if (currentItem._id === itemId) {
 					item = currentItem;
-					itemIndex = index;
 				}
 				return currentItem._id !== itemId;
 			});
@@ -52,45 +50,14 @@ Meteor.methods({
 				throw new Meteor.Error('Protocol_Error_Invalid_Section', 'Invalid item', { method: 'moveItemToSection' });
 			}
 
-		// 	if (section.items) {
-		// 		if (direction === 'down') {
-		// 			if (index < section.items.length - 1) {
-		// 				const newNum = section.items[index + 1].num;
-		// 				const newIndex = section.items[index + 1].inum;
-		// 				section.items[index + 1].num = item.num;
-		// 				section.items[index + 1].inum = item.inum;
-		// 				item.num = newNum;
-		// 				item.inum = newIndex;
-		// 				section.items.sort(sortItems);
-		// 				Protocols.updateProtocol(protocolId, protocol);
-		// 				return true;
-		// 			}
-		// 		} else {
-		// 			if (index > 0) {
-		// 				const newNum = section.items[index - 1].num;
-		// 				const newIndex = section.items[index - 1].inum;
-		// 				section.items[index - 1].num = item.num;
-		// 				section.items[index - 1].inum = item.inum;
-		// 				item.num = newNum;
-		// 				item.inum = newIndex;
-		// 				section.items.sort(sortItems);
-		// 				Protocols.updateProtocol(protocolId, protocol);
-		// 				return true;
-		// 			}
-		// 		}
-		// 	} else {
-		// 		protocol.sections.forEach((currentSection) => {
-		// 			if (currentSection._id === newSectionId) {
-		// 				section = currentSection;
-		// 			}
-		// 			if (currentSection._id === prevSectionId) {
-		// 				prevSection = currentSection;
-		// 			}
-		// 		});
-		// 		section.items = [];
-		// 	}
-		// } else {
-		// 	throw new Meteor.Error('Protocol_Error_Invalid_Section', 'Invalid section', { method: 'moveItem' });
+			if (section.items) {
+				section.items.push(item);
+			} else {
+				section.items = [item];
+			}
+
+			Protocols.updateProtocol(protocolId, protocol);
+			return true;
 		}
 
 		return false;

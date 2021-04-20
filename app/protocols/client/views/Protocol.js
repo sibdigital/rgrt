@@ -321,7 +321,7 @@ export function ProtocolPage() {
 				name: t('Item_Move_Down'),
 				action: onMoveItemClick('down', event.currentTarget.dataset.section, event.currentTarget.dataset.item),
 			},
-			{
+			data?.sections?.length > 1 && {
 				name: t('Item_Move_To_Section'),
 				action: onMoveItemToSection(event.currentTarget.dataset.section, event.currentTarget.dataset.item),
 			},
@@ -351,7 +351,7 @@ export function ProtocolPage() {
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [onEditItemClick, onMoveItemClick, t]);
+	}, [onEditItemClick, onMoveItemClick, t, data]);
 
 	const goBack = () => {
 		FlowRouter.go('/protocols');
@@ -437,7 +437,7 @@ export function ProtocolPage() {
 				{ context === 'participants' && t('Participants') }
 				{ context === 'add-participant' && t('Participant_Add') }
 				{ context === 'create-participant' && t('Participant_Create') }
-				{ context === 'move_item_to_section' && t('move_item_to_section') }
+				{ context === 'move_item_to_section' && t('Item_Move_To_Section') }
 				<VerticalBar.Close onClick={close}/>
 			</VerticalBar.Header>
 			{context === 'edit' && <EditProtocol _id={protocolId} close={close} onChange={onChange} cache={cache}/>}
@@ -448,7 +448,7 @@ export function ProtocolPage() {
 			{context === 'participants' && <Participants protocolId={protocolId} onAddParticipantClick={onAddParticipantClick} close={close}/>}
 			{context === 'add-participant' && <AddParticipant protocolId={protocolId} close={onParticipantsClick} onCreateParticipant={onAddParticipantClick}/>}
 			{context === 'create-participant' && <CreateParticipant goTo={onParticipantsClick} close={onParticipantsClick} workingGroupOptions={workingGroupOptions}/>}
-			{context === 'move_item_to_section' && <MoveItemToSectionField close={close} sections={data.sections}/>}
+			{context === 'move_item_to_section' && <MoveItemToSectionField protocolId={protocolId} close={close} sections={data.sections} onChange={onChange}/>}
 		</VerticalBar>}
 	</Page>;
 }
@@ -465,7 +465,7 @@ const clickable = css`
 		}
 	`;
 
-function MoveItemToSectionField({ close, sections }) {
+function MoveItemToSectionField({ protocolId, close, sections, onChange }) {
 	const t = useTranslation();
 	const sectionIdParam = useRouteParameter('sectionId');
 	const itemId = useRouteParameter('itemId');
@@ -474,27 +474,47 @@ function MoveItemToSectionField({ close, sections }) {
 
 	const moveItemToSection = useMethod('moveItemToSection');
 
-	console.dir({ sectionIdParam, itemId });
+	const unSelectedStyle = useMemo(() => ({
+		borderColor: 'var(--rcx-button-colors-primary-disabled-background-color, var(--rcx-color-primary-200, #d1ebfe))',
+		borderWidth: '4px',
+		// borderRadius: '1rem',
+	}), []);
+
+	const handleSave = useCallback(async (protocolId, prevSectionId, newSectionId, itemId) => {
+		try {
+			const isMoved = await moveItemToSection(protocolId, prevSectionId, newSectionId, itemId);
+			if (isMoved) {
+				close();
+				onChange();
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}, [close, moveItemToSection, onChange]);
 
 	const renderRow = (section) => {
 		const { num } = section;
 		return <Box
 			pb='x4'
 			color='default'
+			style={ section._id === currentSectionId ? unSelectedStyle : {} }
 			className={ clickable }
 			onClick={ () => setCurrentSectionId(section._id) }
-			backgroundColor={ section._id === currentSectionId && '#BBBBBB'}
 			pi={section._id === currentSectionId ? '1.5rem' : '1rem'}
 			fontSize='16px'
 			mbe='x8'
-			height='30px'
+			height='40px'
+			borderRadius='1rem'
 		>
-			{[t('Section'), ' №', romanize(num)].join('')}
+			<Label >{[t('Section'), ' №', romanize(num)].join('')}</Label>
 		</Box>;
 	};
 
 	return <VerticalBar.ScrollableContent>
-		<Button primary disabled={currentSectionId === sectionIdParam} onClick={() => close()}>{t('Kek')}</Button>
+		<ButtonGroup >
+			<Button w='50%' mie='x16' onClick={() => close()}>{t('Cancel')}</Button>
+			<Button w='50%' primary disabled={currentSectionId === sectionIdParam} onClick={() => handleSave(protocolId, sectionIdParam, currentSectionId, itemId)}>{t('Move')}</Button>
+		</ButtonGroup>
 		<GenericList layout={'column'} renderRow={renderRow} results={sections} total={sections?.length ?? 0}/>
 	</VerticalBar.ScrollableContent>;
 }
