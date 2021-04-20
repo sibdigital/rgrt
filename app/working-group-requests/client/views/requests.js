@@ -14,6 +14,7 @@ export function Requests({
 	sort,
 	onClick,
 	onEditClick,
+	onDeleteClick,
 	onHeaderClick,
 	setParams,
 	params,
@@ -42,6 +43,7 @@ export function Requests({
 			{t('Created_at')}
 		</Th>,
 		canAddRequest && <Th w='x40' key='edit'/>,
+		canAddRequest && <Th w='x40' key='delete'/>,
 	], [canAddRequest, t]);
 
 	const renderRow = (request) => {
@@ -63,6 +65,11 @@ export function Requests({
 			{canAddRequest && <Table.Cell alignItems={'end'}>
 				<Button small onClick={onEditClick(_id)} aria-label={t('Edit')}>
 					<Icon name='edit'/>
+				</Button>
+			</Table.Cell>}
+			{canAddRequest && <Table.Cell alignItems={'end'}>
+				<Button small onClick={onDeleteClick(_id)} aria-label={t('Delete')}>
+					<Icon name='trash'/>
 				</Button>
 			</Table.Cell>}
 		</Table.Row>;

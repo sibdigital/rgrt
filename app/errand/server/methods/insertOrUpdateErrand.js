@@ -10,13 +10,13 @@ Meteor.methods({
 			throw new Meteor.Error('error-action-not-allowed', 'You are not allowed to create a errand', { method: 'createErrand' });
 		}
 
-		const userId = Meteor.userId();
-		const person = Persons.findOne({ userId }, { fields: { surname: 1, name: 1, patronymic: 1 } });
+		// const userId = Meteor.userId();
+		// const person = Persons.findOne({ userId }, { fields: { surname: 1, name: 1, patronymic: 1 } });
 
 		if (errandData._id) {
-			Errands.updateErrand(errandData._id, errandData);
+			Errands.updateErrandWithNewData(errandData._id, errandData);
 			return errandData._id;
 		}
-		return Errands.create({ ...errandData, chargedTo: { userId, ...errandData.chargedTo?.person ?? person } });
+		return Errands.create(errandData);
 	},
 });

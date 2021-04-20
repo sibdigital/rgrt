@@ -24,12 +24,15 @@
     height: 76px !important;
 }
 
-.sidebar.hidden .sidebar__toolbar,
-.sidebar.hidden .sidebar__footer a:not(.small-logo),
-.sidebar.hidden h3:not(.rooms-list__type.type-d),
-.sidebar.hidden .rooms-list__list,
-.sidebar.hidden .rooms-list__type.type-d .rooms-list__type-text {
-    display: none;
+.sidebar.hidden .sidebar__header .sidebar__toolbar,
+.sidebar.hidden .rooms-list .rooms-list__type,
+.sidebar.hidden .rooms-list .rooms-list__list,
+.sidebar.hidden .rooms-list .rooms-list__type.type-d .rooms-list__type-text {
+	display: none;
+}
+.sidebar.hidden .rooms-list .rooms-list__type.type-d,
+.sidebar.hidden .rooms-list .rooms-list__type.type-d .icon {
+	display: block !important;
 }
 
 .sidebar:not(.hidden) .sidebar__footer .small-logo {

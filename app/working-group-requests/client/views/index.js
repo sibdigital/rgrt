@@ -11,6 +11,8 @@ import { Requests } from './requests';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import { useMethod } from '../../../../client/contexts/ServerContext';
+import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
@@ -20,18 +22,19 @@ export const useQuery = ({ itemsPerPage, current }, [column, direction], cache) 
 	fields: JSON.stringify({ answers: 0 }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
-}), [itemsPerPage, current, column, direction, cache]);
+	cache,
+}), [direction, itemsPerPage, current, cache]);
 
 export function WorkingGroupRequestsPage() {
 	const t = useTranslation();
 	const routeName = 'working-groups-requests';
 	const userId = useUserId();
 	const canAddRequest = hasPermission('manage-working-group-requests', userId);
-	console.log('working-groups-requests');
+	const dispatchToastMessage = useToastMessageDispatch();
 
 	const [params, setParams] = useState({ current: 0, itemsPerPage: 25 });
 	const [sort, setSort] = useState(['_id']);
-	const [cache, setCache] = useState();
+	const [cache, setCache] = useState(new Date());
 	const [currentRequestToEdit, setCurrentRequestToEdit] = useState({});
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -41,33 +44,35 @@ export function WorkingGroupRequestsPage() {
 
 	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
-	const data = useEndpointData('working-groups-requests.list', query) || {};
-	const docsdata = data.requests ?? [];
-	console.log(data);
-	console.log(docsdata);
+	const data = useEndpointData('working-groups-requests.list', query);
+	const docsData = useMemo(() => data?.requests ?? [], [data]);
 
 	const router = useRoute(routeName);
 
 	const context = useRouteParameter('context');
 	const id = useRouteParameter('id');
 
+	const deleteWorkingGroupRequest = useMethod('deleteWorkingGroupRequest');
+
 	const onClick = (_id) => () => {
 		FlowRouter.go(`/working-groups-request/${ _id }`);
 	};
 
-	const onPinnedFilesClick = useCallback(() => {
-		//FlowRouter.go('/composition-of-the-working-group');
-	}, []);
+	const onDeleteClick = useCallback((_id) => async () => {
+		try {
+			await deleteWorkingGroupRequest(_id);
+			dispatchToastMessage({ type: 'success', message: t('Working_group_request_deleted') });
+			setCache(new Date());
+		} catch (error) {
+			console.error(error);
+		}
+	}, [deleteWorkingGroupRequest, dispatchToastMessage, t]);
 
 	const onEditClick = useCallback((_id) => () => {
-		const request = docsdata.find((request) => request._id === _id);
-		console.log(data);
-		console.log(docsdata);
-		console.log(request);
-		console.log(_id);
+		const request = docsData.find((request) => request._id === _id);
 		setCurrentRequestToEdit(request);
 		FlowRouter.go(`/working-groups-request/${ _id }/edit`);
-	}, [router, currentRequestToEdit, docsdata]);
+	}, [docsData]);
 
 	const handleHeaderButtonClick = useCallback(() => {
 		FlowRouter.go('working-groups-request-new');
@@ -81,14 +86,6 @@ export function WorkingGroupRequestsPage() {
 		}
 		setSort([id, 'asc']);
 	};
-
-	const close = useCallback(() => {
-		router.push({});
-	}, [router]);
-
-	const onChange = useCallback(() => {
-		setCache(new Date());
-	}, []);
 
 	const goBack = () => {
 		FlowRouter.go('home');
@@ -118,7 +115,7 @@ export function WorkingGroupRequestsPage() {
 				}
 			</Page.Header>
 			<Page.Content>
-				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsdata} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
+				{<Requests setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={docsData} onDeleteClick={onDeleteClick} onEditClick={onEditClick} onClick={onClick} sort={sort}/>}
 			</Page.Content>
 		</Page>
 	</Page>;

@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Session } from 'meteor/session';
 
@@ -156,7 +157,7 @@ export const SideNav = new class {
 	isSidebar = () => {
 		return this.sidebarPos.elem.className === 'sidebar hidden';
 	}
-	
+
 	setCollapsed = () => {
 		this.sidebarPos.elem.className = 'sidebar hidden';
 		this.sidebarPos.footer.className = 'small-logo';
@@ -164,7 +165,7 @@ export const SideNav = new class {
 
 		document.getElementById('sidebar__footer_id').append(this.sidebarPos.footer);
 	}
-	
+
 	setExpanded = () => {
 		const viewMode = getUserPreference(Meteor.userId(), 'sidebarViewMode');
 		const sidebarHideAvatar = getUserPreference(Meteor.userId(), 'sidebarHideAvatar');
@@ -174,7 +175,7 @@ export const SideNav = new class {
 
 		document.getElementById('sidebar__footer_id').append(this.sidebarPos.footer);
 	}
-	
+
 	constructSidebar() {
 		this.isSidebar() ? this.setExpanded() : this.setCollapsed();
 	}

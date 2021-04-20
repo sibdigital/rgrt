@@ -18,6 +18,8 @@ import ru from 'date-fns/locale/ru';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/ru';
+import { isIOS } from 'react-device-detect';
+import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 
 import { useEndpointData } from '../../../../client/hooks/useEndpointData';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -73,23 +75,54 @@ export function EditItem({ protocolId, sectionId, _id, cache, onChange, ...props
 	return <EditItemWithData protocol={data} isSecretary={isSecretary} sectionId={sectionId} itemId={_id} onChange={onChange} currentUserPersonId={currentUserPerson?._id ?? ''} {...props}/>;
 }
 
+const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
+
+const useQuery = ({ text, itemsPerPage, current }, [column, direction], prevResponsibleIds) => useMemo(() => ({
+	query: JSON.stringify({
+		$and: [{
+			$or: [{
+				surname: { $regex: text || '', $options: 'i' },
+			}, {
+				name: { $regex: text || '', $options: 'i' },
+			}, {
+				patronymic: { $regex: text || '', $options: 'i' },
+			}],
+		}, {
+			_id: { $not: { $in: prevResponsibleIds ?? [] } },
+		}],
+	}),
+	fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
+	...itemsPerPage && { count: itemsPerPage },
+	...current && { offset: current },
+}), [text, prevResponsibleIds, column, direction, itemsPerPage, current]);
+
 function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, itemId, currentUserPersonId, ...props }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const isAllowedEdit = hasPermission('manage-protocols', useUserId());
-
-	const personsData = useEndpointData('persons.listToAutoComplete', useMemo(() => ({ }), [])) || { persons: [] };
 
 	const item = protocol.sections.find(s => s._id === sectionId).items.find(i => i._id === itemId);
 
 	const { _id, num: previousNumber, name: previousName, responsible: previousResponsible, expireAt: previousExpireAt, status: previousStatus } = item || {};
 	const previousItem = item || {};
 
+	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 10 });
+	const [sort, setSort] = useState(['surname']);
 	const [number, setNumber] = useState('');
 	const [name, setName] = useState('');
 	const [responsible, setResponsible] = useState([]);
 	const [expireAt, setExpireAt] = useState('');
 	const [status, setStatus] = useState(0);
+
+	const debouncedParams = useDebouncedValue(params, 500);
+	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const responsibleId = useMemo(() => responsible?.map((_responsible) => _responsible._id), [responsible]);
+
+	const personsQuery = useQuery(debouncedParams, debouncedSort, responsibleId);
+
+	const personsData = useEndpointData('persons.listToAutoComplete', personsQuery) || { persons: [] };
 
 	useEffect(() => {
 		// console.log(item);
@@ -171,13 +204,22 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 				id='tags-standard'
 				value={responsible}
 				forcePopupIcon={false}
-				options={personsData.persons}
+				options={personsData?.persons ?? []}
 				getOptionLabel={(option) => constructPersonFIO(option)}
-				//getOptionSelected={(option, value) => option.name === value.name && option.surname === value.surname}
 				filterOptions={createFilterOptions({ limit: 10 })}
+				renderOption={(option, state) =>
+					<Box
+						style={{ cursor: 'pointer' }}
+						zIndex='100'
+						width='100%'
+						height='100%'
+						onTouchStart={() => isIOS && setResponsible([...responsible, option]) }
+					>
+						{constructPersonFIO(option)}
+					</Box>
+				}
 				filterSelectedOptions
-				freeSolo
-				onChange={(event, value) => setResponsible(value)}
+				onChange={(event, value) => !isIOS && setResponsible(value)}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
 						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
@@ -189,9 +231,25 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 						{...params}
 						variant='outlined'
 						placeholder={t('Item_Responsible')}
-						style={!isSecretary ? { cursor: 'not-allowed !important' } : {}}
+						style={!isSecretary ? { cursor: 'not-allowed !important', touchAction: 'none' } : { touchAction: 'none' }}
+						onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }
 					/>
 				)}
+				noOptionsText={
+					<Button
+						style={{ touchAction: 'none' }}
+						// onMouseDown={() => !isIOS && onCreateNewPerson()}
+						// onTouchStart={() => isIOS && onCreateNewPerson()}
+						backgroundColor='inherit'
+						borderColor='lightgrey'
+						borderWidth='0.5px'
+						textAlign='center'
+						width='100%'
+					>
+						{ t('Participant_Create') }
+					</Button>
+				}
+				onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }
 			/>
 		</Field>
 		<Field>

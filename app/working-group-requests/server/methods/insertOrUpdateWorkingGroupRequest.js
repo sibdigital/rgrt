@@ -35,6 +35,7 @@ Meteor.methods({
 			workingGroupRequestData.protocolId && Object.assign(createWorkingGroupRequest, { protocolId: workingGroupRequestData.protocolId });
 			workingGroupRequestData.requestType && Object.assign(createWorkingGroupRequest, { requestType: workingGroupRequestData.requestType });
 			workingGroupRequestData.mail && Object.assign(createWorkingGroupRequest, { mail: workingGroupRequestData.mail });
+			workingGroupRequestData.createdBy && Object.assign(createWorkingGroupRequest, { createdBy: workingGroupRequestData.createdBy });
 
 			const _id = WorkingGroupsRequests.create(createWorkingGroupRequest);
 

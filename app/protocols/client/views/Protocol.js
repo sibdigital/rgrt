@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, ButtonGroup, Field, Icon, Label, Modal } from '@rocket.chat/fuselage';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { useMediaQuery } from '@material-ui/core';
@@ -28,6 +28,7 @@ import { useUserId } from '../../../../client/contexts/UserContext';
 import GenericList from '../../../../client/components/GenericList';
 import { romanize } from '../../../utils';
 import { EditProtocol } from './EditProtocol';
+import { downloadCouncilParticipantsForm } from '../../../councils/client/views/lib';
 
 const DeleteWarningModal = ({ title, onDelete, onCancel, ...props }) => {
 	const t = useTranslation();
@@ -105,7 +106,6 @@ export function ProtocolPage() {
 	// 	fields: JSON.stringify({ personId: 1 }),
 	// }), [data, getItemsResponsibles]));
 
-	// const title = t('Protocol').concat(' ').concat(t('Date_to')).concat(' ').concat(formatDate(data.d)).concat(' ').concat(' № ').concat(data.num);
 	const title = useMemo(() => [t('Protocol'), [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
 
 	const deleteProtocol = useMethod('deleteProtocol');
@@ -113,6 +113,8 @@ export function ProtocolPage() {
 	const deleteItem = useMethod('deleteItem');
 	const moveSection = useMethod('moveSection');
 	const moveItem = useMethod('moveItem');
+	const defaultProtocolTemplate = useMethod('defaultProtocolTemplate');
+	const checkErrandByProtocolItemId = useMethod('checkErrandByProtocolItemId');
 
 	const onEditClick = useCallback((context) => () => {
 		router.push({ id: protocolId, context });
@@ -279,9 +281,18 @@ export function ProtocolPage() {
 		FlowRouter.go(`/working-groups-request/add/new-protocols-item-request/${ protocolsItemId }`);
 	};
 
-	const openErrand = (sectionId, itemId) => () => {
-		FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
-		// FlowRouter.go(`/errand/add&byProtocolItem&${ protocolId }&${ sectionId }&${ itemId }`);
+	const openErrand = (sectionId, itemId) => async () => {
+		try {
+			const errandId = await checkErrandByProtocolItemId(itemId);
+			// console.dir({ errandId });
+			if (errandId) {
+				FlowRouter.go(`/errand/${ errandId }`);
+			} else {
+				FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
+			}
+		} catch (error) {
+			FlowRouter.go(`/protocol/${ protocolId }/item/${ sectionId }/${ itemId }/new-errand`);
+		}
 	};
 
 	const onMoveItemToSection = useCallback((currentSectionId, itemId) => () => {
@@ -340,7 +351,7 @@ export function ProtocolPage() {
 			offsetVertical: 10,
 		};
 		popover.open(config);
-	}, [onEditItemClick, onMoveItemClick, openConfirmDeleteItem, t]);
+	}, [onEditItemClick, onMoveItemClick, t]);
 
 	const goBack = () => {
 		FlowRouter.go('/protocols');
@@ -354,7 +365,20 @@ export function ProtocolPage() {
 		return res;
 	}, [workingGroups]);
 
-	// useMemo(() => console.dir({ personsWithLinkToUser }), [personsWithLinkToUser]);
+	const downloadFile = useCallback(async (e) => {
+		try {
+			const file = await defaultProtocolTemplate({ protocolId });
+			const fileName = ['Протокол', ' от ', formatDate(new Date(data.d)), '.docx'].join('');
+
+			if (file) {
+				downloadCouncilParticipantsForm({ res: file, fileName });
+				console.log('downloadCouncilParticipant after form');
+			}
+			// await downLoadFile(file)(e);
+		} catch (error) {
+			console.error(error);
+		}
+	}, [protocolId, data]);
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -364,6 +388,9 @@ export function ProtocolPage() {
 					<Label fontScale='h1'>{t('Protocol')}</Label>
 				</Field>
 				<ButtonGroup display={smallScreenWidth ? 'flex' : 'block'}>
+					{!context && <Button mbe='x8' small primary onClick={(e) => downloadFile(e)} aria-label={t('Download_Snippet')}>
+						{t('Download_Snippet')}
+					</Button>}
 					{!context && <Button mbe='x8' small primary onClick={onEditClick('edit')} aria-label={t('Protocol_Info')}>
 						{t('Protocol_Info')}
 					</Button>}

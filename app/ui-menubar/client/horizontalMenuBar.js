@@ -7,6 +7,7 @@ import { t } from '../../utils';
 import { AccountBox } from '../../ui-utils';
 import { hasAtLeastOnePermission } from '../../authorization';
 import { Users } from '../../models';
+import { SideNav } from '/app/ui-utils/client';
 
 const menuItems = () => [
 	{
@@ -45,7 +46,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Errands_for_me'),
-		condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
+		// condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
 		action: () => {
 			FlowRouter.go('/errands/charged_to_me');
 		},
@@ -58,7 +59,7 @@ const menuItems = () => [
 		},
 	},
 	{
-		name: t('Council Commission \"Transport\"'),
+		name: t('Council Commission'),
 		action: () => {
 			FlowRouter.go('/council-commission');
 		},
@@ -77,10 +78,21 @@ Template.menuBar.helpers({
 	menuItems() {
 		return menuItems().filter((button) => (!button.condition || button.condition()));
 	},
+	hiddenMenuItems() {
+		return menuItems().filter((item,index) => index > 5);
+	}
 })
 
 Template.menuBar.events({
-	'click .nav-item'(e, instance) {
+	'click .menu-item'(e, instance) {
+		if ($('.dropdown-bar').hasClass('show')) {
+			$('.dropdown-bar').toggleClass('show');
+			$('.icon-angle-down').toggleClass('rotate');
+		}
 		return this.action && this.action.apply(this, [e]);
 	},
+	'click .dropdown-icon'(e, instance) {
+		$('.dropdown-bar').toggleClass('show');
+		$('.icon-angle-down').toggleClass('rotate');
+	}
 });

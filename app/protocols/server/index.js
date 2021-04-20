@@ -11,4 +11,6 @@ import './methods/moveItem';
 import './methods/getMaxProtocolNum';
 import './methods/getMaxProtocolSectionNum';
 import './methods/getProtocolByCouncilId';
+import './methods/updateItemStatus';
+import './docxTemplates/defaultProtocolTemplate';
 import './methods/moveItemToSection';

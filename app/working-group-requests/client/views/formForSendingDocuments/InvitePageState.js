@@ -58,7 +58,7 @@ function InvitePageState() {
 			};
 		}
 		return {
-			fields: JSON.stringify({ number: 1, desc: 1, date: 1, ts: 1, mail: 1, protocol: 1 }),
+			fields: JSON.stringify({ protocol: 1, requestType: 1, mail: 1, protocolItemsId: 1, desc: 1, date: 1, ts: 1, number: 1, createdBy: 1 }),
 		};
 	}, [workingGroupRequestId]);
 

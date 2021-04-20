@@ -1,6 +1,6 @@
 export const downLoadFile = (file) => async (e) => {
 	console.log('downLoadFile');
-	e.preventDefault();
+	// e.preventDefault();
 	try {
 		const filename = `${ file.title ?? file.name }`;
 		if (window.navigator && window.navigator.msSaveOrOpenBlob) {

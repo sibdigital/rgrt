@@ -4,9 +4,9 @@ import { Users } from '../../../models/server/raw';
 import { hasPermissionAsync } from '../../../authorization/server/functions/hasPermission';
 
 export async function findUsersToAutocomplete({ uid, selector }) {
-	if (!await hasPermissionAsync(uid, 'view-outside-room')) {
-		return { items: [] };
-	}
+	// if (!await hasPermissionAsync(uid, 'view-outside-room')) {
+	// 	return { items: [] };
+	// }
 	const exceptions = selector.exceptions || [];
 	const conditions = selector.conditions || {};
 	const options = {

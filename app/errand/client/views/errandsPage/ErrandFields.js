@@ -12,6 +12,7 @@ import {
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import ReactTooltip from 'react-tooltip';
+import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
@@ -28,12 +29,20 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { mime } from '../../../../utils';
 import { getErrandFieldsForSave } from './ErrandForm';
 
-function DefaultField({ title, renderInput,flexDirection = 'row', required = false, ...props }) {
-	return <Field display='flex' flexDirection={flexDirection} mie={flexDirection === 'row' && 'x16'} {...props}>
+function DefaultField({ title, renderInput, flexDirection = 'row', required = false, ...props }) {
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
+
+	return <Field
+		display='flex'
+		flexDirection={mediaQuery ? flexDirection : 'column'}
+		mie={flexDirection === 'row' && 'x16'}
+		mbe={!mediaQuery && 'x16'}
+		{...props}
+	>
 		<Field.Label
 			style={{ flex: '0 0 0px', whiteSpace: 'pre' }}
-			alignSelf={flexDirection === 'row' && 'center'}
-			mbe={flexDirection === 'column' && 'x16'}
+			alignSelf={ mediaQuery && flexDirection === 'row' ? 'center' : 'auto' }
+			mbe={(!mediaQuery || flexDirection === 'column') && 'x8'}
 			mie='x16'
 			width='max-content'
 		>
@@ -116,23 +125,28 @@ function ErrandStatusField({ inputStyles, status, handleStatus, ...props }) {
 	return useMemo(() => <DefaultField title={t('Status')} required={true} renderInput={renderInput} {...props}/>, [props, renderInput, t]);
 }
 
-function DescriptionField({ desc, ...props }) {
+function DescriptionField({ desc, required, inputStyles, handleDesc, ...props }) {
 	const t = useTranslation();
-	const renderInput = useMemo(() => <TextAreaInput style={{ wordBreak: 'break-word', whiteSpace: 'break-spaces' }} placeholder={t('Description')} rows='5' flexGrow={1} value={desc ?? ''}/>, [desc, t]);
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
-	return useMemo(() => <DefaultField title={t('Description')} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
+	const renderInput = useMemo(() => <TextAreaInput mie={mediaQuery && 'x16'} onChange={(e) => handleDesc(e.currentTarget.value) } style={{ ...inputStyles, wordBreak: 'break-word', whiteSpace: 'break-spaces' }} placeholder={t('Description')} rows='5' flexGrow={1} value={desc ?? ''}/>, [desc, handleDesc, inputStyles, mediaQuery, t]);
+
+	return useMemo(() => <DefaultField width='auto' title={t('Description')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
 function CommentaryField({ commentary, required, inputStyles, handleCommentary, ...props }) {
 	const t = useTranslation();
-	const renderInput = useMemo(() => <TextAreaInput style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, t]);
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
-	return useMemo(() => <DefaultField title={t('Commentary')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
+	const renderInput = useMemo(() => <TextAreaInput mie={mediaQuery && 'x16'} style={inputStyles} rows='3' placeholder={t('Commentary')} flexGrow={1} value={commentary ?? ''} onChange={(e) => handleCommentary(e.currentTarget.value)}/>, [commentary, handleCommentary, inputStyles, mediaQuery, t]);
+
+	return useMemo(() => <DefaultField width='auto' title={t('Commentary')} required={required} renderInput={renderInput} flexDirection={'column'} {...props}/>, [props, renderInput, t]);
 }
 
 function ProtocolField({ protocol, ...props }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const protocolUrl = useMemo(() => (protocol && protocol._id ? [settings.get('Site_Url'), 'protocol/', protocol._id].join('') : ''), [protocol]);
 	const protocolItemUrl = useMemo(() => (protocol && protocol.sectionId && protocol.itemId ? [settings.get('Site_Url'), 'protocol/', protocol._id, '/', 'edit-item/', protocol.sectionId, '/', protocol.itemId].join('') : protocolUrl), [protocol, protocolUrl]);
@@ -142,23 +156,25 @@ function ProtocolField({ protocol, ...props }) {
 		: protocolUrl)
 	, [protocol, protocolUrl, t]);
 
+	const fieldParentStyle = useMemo(() => (mediaQuery ? {} : { marginBlockStart: '0 !important' }), [mediaQuery]);
+
 	return useMemo(() => (protocol && protocol._id
-		? <Field display='flex' flexDirection='row' {...props}>
-			<Field display='flex' flexDirection='row'>
-				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol')}</Field.Label>
-				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mie='x16' mis='x8'>
+		? <Field display='flex' flexDirection={mediaQuery ? 'row' : 'column'} style={fieldParentStyle} width='auto' {...props}>
+			<Field display='flex' flexDirection={mediaQuery ? 'row' : 'column'} mie='x16' mbe={!mediaQuery && 'x16'}>
+				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf={mediaQuery ? 'center' : 'auto'} mbe={!mediaQuery && 'x8'} mie='x16'>{t('Protocol')}</Field.Label>
+				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mis={mediaQuery && 'x8'}>
 					<a style={{ maxWidth: 'max-content' }} href={protocolUrl}>{protocolLabel}</a>
 				</Field>
 			</Field>
-			<Field display='flex' flexDirection='row' mie='x16'>
-				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' mie='x16'>{t('Protocol_Item')}</Field.Label>
-				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mis='x8'>
+			<Field display='flex' flexDirection={mediaQuery ? 'row' : 'column'} mie='x16'>
+				<Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf={mediaQuery ? 'center' : 'auto'} mbe={!mediaQuery && 'x8'} mie='x16'>{t('Protocol_Item')}</Field.Label>
+				<Field borderColor='#cbced1' borderWidth='x2' paddingBlock='x8' paddingInline='x14' minHeight='x40' mis={mediaQuery && 'x8'}>
 					<a href={protocolItemUrl}>{protocolItemLabel}</a>
 				</Field>
 			</Field>
 		</Field>
 		: <></>)
-	, [protocol, props, t, protocolUrl, protocolLabel, protocolItemUrl, protocolItemLabel]);
+	, [protocol, props, t, protocolUrl, protocolLabel, protocolItemUrl, protocolItemLabel, fieldParentStyle, mediaQuery]);
 }
 
 export function DefaultErrandFields({ inputStyles, values, handlers, setContext }) {
@@ -177,7 +193,10 @@ export function DefaultErrandFields({ inputStyles, values, handlers, setContext 
 		handleExpireAt,
 		handleCommentary,
 		handleChargedTo,
+		handleDesc,
 	} = handlers;
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const onChangeField = useCallback((val, field, handler) => {
 		handler({ ...field, value: val });
@@ -186,13 +205,22 @@ export function DefaultErrandFields({ inputStyles, values, handlers, setContext 
 	return <Box display='flex' flexDirection='column'>
 		<Margins inline='x8' block='x16'>
 
-			<Box display='flex' flexDirection='row'>
+			<Box display='flex' flexDirection={mediaQuery ? 'row' : 'column'} width='auto'>
 				<InitiatedByField initiatedBy={initiatedBy.value}/>
 				<CreatedAtField ts={ts.value} />
 			</Box>
-			<DescriptionField desc={desc.value}/>
-			<ResponsibleField flexDirection='row' handleChoose={setContext} itemResponsible={chargedTo.value.person ?? {}} handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}/>
-			<Box display='flex' flexDirection='row'>
+			<DescriptionField desc={desc.value} inputStyles={inputStyles} handleDesc={(val) => onChangeField(val, desc, handleDesc)} required={desc.required}/>
+			<Margins inlineEnd={mediaQuery ? 'x20' : 'x3.2'}>
+				<Box display='flex' width='auto'>
+					<ResponsibleField
+						flexDirection={mediaQuery ? 'row' : 'column'}
+						handleChoose={setContext}
+						itemResponsible={chargedTo.value.person ?? {}}
+						handleItemResponsible={(val) => handleChargedTo({ required: chargedTo.required, value: val })}
+					/>
+				</Box>
+			</Margins>
+			<Box display='flex' flexDirection={mediaQuery ? 'row' : 'column'} width='auto'>
 				{/*<ChargedToField chargedTo={chargedTo.value}/>*/}
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>
@@ -219,7 +247,10 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 		handleStatus,
 		handleCommentary,
 		handleExpireAt,
+		handleDesc,
 	} = handlers;
+
+	const mediaQuery = useMediaQuery('(min-width: 520px)');
 
 	const onChangeField = useCallback((val, field, handler) => {
 		handler({ ...field, value: val });
@@ -228,13 +259,13 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 	return <Box display='flex' flexDirection='column'>
 		<Margins inline='x8' block='x16'>
 
-			<Box display='flex' flexDirection='row'>
+			<Box display='flex' flexDirection={mediaQuery ? 'row' : 'column'} width='auto'>
 				<InitiatedByField initiatedBy={initiatedBy.value}/>
 				<CreatedAtField ts={ts.value} />
 			</Box>
 			<ProtocolField protocol={protocol.value}/>
-			<DescriptionField desc={desc.value}/>
-			<Box display='flex' flexDirection='row'>
+			<DescriptionField desc={desc.value} inputStyles={inputStyles} handleDesc={(val) => onChangeField(val, desc, handleDesc)} required={desc.required}/>
+			<Box display='flex' flexDirection={mediaQuery ? 'row' : 'column'} width='auto'>
 				<ChargedToField chargedTo={chargedTo.value}/>
 				<ExpireAtField expireAt={expireAt} handleExpireAt={handleExpireAt} inputStyles={inputStyles}/>
 				<ErrandStatusField inputStyles={inputStyles} handleStatus={(val) => onChangeField(val, status, handleStatus)} status={status.value}/>

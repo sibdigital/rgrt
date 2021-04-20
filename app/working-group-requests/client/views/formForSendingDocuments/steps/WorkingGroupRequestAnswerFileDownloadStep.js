@@ -24,6 +24,7 @@ import { filesValidation } from '../../../../../ui/client/lib/fileUpload';
 import { ClearButton } from '../../../../../utils/client/views/ClearButton';
 import { preProcessingProtocolItems } from '../../lib';
 import { ProtocolItemsField, defaultRequestTypeState } from '../../RequestForm';
+import { AnswerTypes } from '../../AnswerForm';
 import './reactTooltip.css';
 
 registerLocale('ru', ru);
@@ -285,11 +286,11 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 
 	const packNewData = () => {
 		const dataToSend = {};
-		dataToSend.answerType = answerTypeContext;
 
 		if (answerTypeContext === 'protocol') {
 			console.log({ newData });
 			console.log({ protocolSelected, sectionSelected, protocolItemsId });
+			dataToSend.answerType = AnswerTypes.PROTOCOL;
 			protocolSelected && Object.assign(dataToSend, { protocolId: protocolSelected._id });
 			sectionSelected && Object.assign(dataToSend, { sectionId: sectionSelected._id });
 			protocolItemsId && Object.assign(dataToSend, { sectionItemsId: protocolItemsId });
@@ -298,19 +299,21 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 				title: protocolSelected ? [t('Protocol'), '№', protocolSelected.num, t('Date_From'), formatDate(protocolSelected.d)].join(' ') : '',
 				num: protocolSelected ? protocolSelected.num : '',
 				d: protocolSelected ? protocolSelected.d : '',
-				section: {
-					_id: sectionSelected?._id ?? '',
-					title: sectionSelected ? [sectionSelected.num ?? '', ': ', sectionSelected.name ? preProcessingProtocolItems(sectionSelected.name) : ''].join('') : '',
-				},
-				itemNum: protocolItemsId.length > 0 ? protocolItemsId[0].num : '',
+				// section: {
+				// 	_id: sectionSelected?._id ?? '',
+				// 	title: sectionSelected ? [sectionSelected.num ?? '', ': ', sectionSelected.name ? preProcessingProtocolItems(sectionSelected.name) : ''].join('') : '',
+				// },
 				sectionId: protocolItemsId.length > 0 ? protocolItemsId[0].sectionId : '',
 				itemId: protocolItemsId.length > 0 ? protocolItemsId[0]._id : '',
-				sectionItem: protocolItemsId?.map((item) => ({
-					_id: item._id,
-					title: [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join(''),
-				})) || [],
+				itemNum: protocolItemsId.length > 0 ? protocolItemsId[0].num : '',
+				itemName: protocolItemsId.length > 0 ? preProcessingProtocolItems(protocolItemsId[0].name) : '',
+				// sectionItem: protocolItemsId?.map((item) => ({
+				// 	_id: item._id,
+				// 	title: [item.num ?? '', ': ', item.name ? preProcessingProtocolItems(item.name) : ''].join(''),
+				// })) || [],
 			};
 		} else if (answerTypeContext === 'mail') {
+			dataToSend.answerType = AnswerTypes.MAIL;
 			dataToSend.mailAnswer = customAnswerMailLabel;
 		}
 

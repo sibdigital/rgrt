@@ -64,5 +64,5 @@ export function Persons({
 		</Table.Row>;
 	};
 
-	return <GenericTable header={header} renderRow={renderRow} results={data?.persons ?? []} total={data?.persons?.length || 0} setParams={setParams} params={params} />;
+	return <GenericTable header={header} renderRow={renderRow} results={data.persons} total={data.total} setParams={setParams} params={params} />;
 }

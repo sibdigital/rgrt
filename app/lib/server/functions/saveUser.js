@@ -422,9 +422,9 @@ export const saveUser = function(userId, userData) {
 		const updateUser = {
 			$set: {
 				roles: userData.roles || ['user'],
-				surname: userData.surname,
-				...typeof userData.name !== 'undefined' && { name: userData.name },
-				patronymic: userData.patronymic,
+				surname: userData.surname ?? '',
+				name: userData.name ?? '',
+				patronymic: userData.patronymic ?? '',
 				settings: userData.settings || {},
 			},
 		};
@@ -477,9 +477,9 @@ export const saveUser = function(userId, userData) {
 		if (!saveUserIdentity(userId, {
 			_id: userData._id,
 			username: userData.username,
-			name: userData.name,
-			surname: userData.surname,
-			patronymic: userData.patronymic,
+			// name: userData.name ?? '',
+			// surname: userData.surname ?? '',
+			// patronymic: userData.patronymic ?? '',
 		})) {
 			throw new Meteor.Error('error-could-not-save-identity', 'Could not save user identity', { method: 'saveUser' });
 		}

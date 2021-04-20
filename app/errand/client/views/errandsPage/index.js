@@ -1,5 +1,5 @@
 import { FlowRouter } from 'meteor/kadira:flow-router';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
 	Icon,
 	Table,
@@ -7,7 +7,7 @@ import {
 	Label,
 	Field,
 } from '@rocket.chat/fuselage';
-import { useMediaQuery, useSafely } from '@rocket.chat/fuselage-hooks';
+import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
 import Page from '../../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
@@ -15,7 +15,6 @@ import { useRouteParameter } from '../../../../../client/contexts/RouterContext'
 import { GenericTable, Th } from '../../../../../client/components/GenericTable';
 import { useEndpointData } from '../../../../../client/hooks/useEndpointData';
 import { useFormatDate } from '../../../../../client/hooks/useFormatDate';
-import { useFormatDateAndTime } from '../../../../../client/hooks/useFormatDateAndTime';
 import { useSetModal } from '../../../../../client/contexts/ModalContext';
 import { useMethod } from '../../../../../client/contexts/ServerContext';
 import { SuccessModal, WarningModal } from '../../../../utils/index';
@@ -23,11 +22,31 @@ import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMes
 import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
-import { useUserId } from '/client/contexts/UserContext';
-import { hasPermission } from '/app/authorization';
-import { Meteor } from "meteor/meteor";
+import { ErrandStatuses } from '../../utils/ErrandStatuses';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
+
+const getDateStatus = (date) => {
+	const today = new Date();
+	const dt = date ? new Date(date) : new Date();
+	let result = 'to-be';
+	if (dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
+		result = 'today';
+	} else if (dt < today) {
+		result = 'held';
+	}
+	return result;
+};
+
+const colorBackgroundCouncil = (state) => {
+	let color = '#fbff85';
+	if (state === ErrandStatuses.CLOSED.state) {
+		color = '#d9ffdc';
+	} else if (state === ErrandStatuses.OPENED.state) {
+		color = '#ffbaba';
+	}
+	return color;
+};
 
 function Errands({
 	type,
@@ -78,7 +97,7 @@ function Errands({
 		const initiatedBy = constructPersonFullFIO(item.initiatedBy ?? '');
 		const chargedTo = constructPersonFullFIO(item.chargedTo?.person ?? '');
 
-		return <Table.Row key={item._id} role='link' action>
+		return <Table.Row key={item._id} role='link' action style={{ opacity: '90%' }} backgroundColor={colorBackgroundCouncil(item.status?.state ?? '')}>
 			{ type === 'initiated_by_me' || <Table.Cell fontScale='p1' onClick={onClick(item._id)} style={style} color='default'>
 				{initiatedBy}
 			</Table.Cell> }

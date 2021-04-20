@@ -4,7 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import { API } from '../api';
 import { FileUpload } from '../../../file-upload';
 import { Persons, Users } from '../../../models/server/index';
-import { findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId, findWorkingGroupRequestByProtocolsItemId } from '../lib/working-groups-requests';
+import { getMaxRequestNumber, findWorkingGroupRequestAnswerByAnswerId, findWorkingGroupsRequests, findOneWorkingGroupRequestByInviteLink, findWorkingGroupRequest, findWorkingGroupRequestMailByMailId, findWorkingGroupRequestMailAnswerByAnswerId, findWorkingGroupRequestByProtocolsItemId } from '../lib/working-groups-requests';
 
 API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 	get() {
@@ -90,7 +90,7 @@ API.v1.addRoute('working-groups-requests.findAnswerOneById', { authRequired: tru
 API.v1.addRoute('working-groups-requests.getOneByInviteLink', { authRequired: false }, {
 	get() {
 		const { query } = this.parseJsonQuery();
-		return API.v1.success(Promise.await(findOneWorkingGroupRequestByInviteLink(query.inviteLink, { fields: { protocol: 1, requestType: 1, mail: 1, protocolItemsId: 1, desc: 1, date: 1, ts: 1, number: 1 } })));
+		return API.v1.success(Promise.await(findOneWorkingGroupRequestByInviteLink(query.inviteLink, { fields: { createdBy: 1, protocol: 1, requestType: 1, mail: 1, protocolItemsId: 1, desc: 1, date: 1, ts: 1, number: 1 } })));
 	},
 });
 
@@ -167,5 +167,12 @@ API.v1.addRoute('working-groups-requests.findByProtocolsItemId', { authRequired:
 	get() {
 		const { query, stockFields } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findWorkingGroupRequestByProtocolsItemId(query.protocolsItemId, { fields: stockFields ?? { _id: 1 } })));
-	}
+	},
+});
+
+API.v1.addRoute('working-groups-requests.getMaxRequestNumber', { authRequired: true }, {
+	get() {
+		const cursor = Promise.await(getMaxRequestNumber());
+		return API.v1.success(cursor ?? {});
+	},
 });

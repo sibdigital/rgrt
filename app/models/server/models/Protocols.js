@@ -182,7 +182,7 @@ class Protocols extends Base {
 
 	getMaxProtocolSectionNum(protocolId) {
 		const data = this.findOne({ _id: protocolId });
-		if (data.sections && data.sections.length > 0) {
+		if (data && data.sections && data.sections.length > 0) {
 			return Math.max.apply(Math, data.sections.map(function(section) { return section.num; }));
 		}
 		return 0;
@@ -202,6 +202,26 @@ class Protocols extends Base {
 			});
 		}
 		return 0;
+	}
+
+	updateItemStatus(itemId, status) {
+		const data = this.findOne({ 'sections.items._id': itemId });
+		let isUpdated = false;
+		if (data.sections) {
+			data.sections = data.sections.map((section) => {
+				if (section.items) {
+					section.items = section.items.map((item) => {
+						if (item._id === itemId) {
+							isUpdated = true;
+							return { ...item, status };
+						}
+						return item;
+					});
+				}
+				return section;
+			});
+		}
+		return isUpdated ? this.update({ _id: data._id }, { $set: { ...data } }) : 0;
 	}
 }
 

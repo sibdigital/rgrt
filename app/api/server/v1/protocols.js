@@ -1,7 +1,9 @@
+import _ from 'underscore';
+
 import { API } from '../api';
 import { findProtocols, findProtocol, findProtocolByCouncilId, findProtocolByItemId } from '../lib/protocols';
-import { hasPermission } from '../../../authorization';
 import { Persons } from '../../../models';
+
 
 API.v1.addRoute('protocols.list', { authRequired: true }, {
 	get() {
@@ -12,8 +14,18 @@ API.v1.addRoute('protocols.list', { authRequired: true }, {
 		const { offset, count } = this.getPaginationItems();
 		const { sort, query, stockFields } = this.parseJsonQuery();
 
+		let isValidQuery = true;
+		let formedQuery = {};
+
+		if (query.$or && _.isArray(query.$or) && query.$or.length === 0) {
+			isValidQuery = false;
+		} else if (query.$or && _.isArray(query.$or) && query.$or.length > 0 && query.$or[0].num) {
+			isValidQuery = false;
+			formedQuery = { $where: `/^${ query.$or[0].num }.*/.test(this.num)` };
+		}
+
 		return API.v1.success(Promise.await(findProtocols({
-			query,
+			query: isValidQuery ? query : formedQuery,
 			fields: stockFields,
 			pagination: {
 				offset,
@@ -69,11 +81,11 @@ API.v1.addRoute('protocols.findByItemId', { authRequired: true }, {
 	},
 });
 
-API.v1.addRoute('protocols.findByCouncilId', {authRequired: true}, {
+API.v1.addRoute('protocols.findByCouncilId', { authRequired: true}, {
 	get() {
 		const { query } = this.parseJsonQuery();
 		return API.v1.success(Promise.await(findProtocolByCouncilId(query._id)));
-	}
+	},
 });
 
 API.v1.addRoute('protocols.participants', { authRequired: true }, {
@@ -145,11 +157,9 @@ API.v1.addRoute('protocols.getProtocolItemsByItemsId', { authRequired: true }, {
 
 API.v1.addRoute('protocols.getProtocolItemsByProtocolId', { authRequired: true }, {
 	get() {
-		// const { offset, count } = this.getPaginationItems();
 		const { query } = this.parseJsonQuery();
 
 		const cursor = Promise.await(findProtocol(query._id));
-		console.log({ cursor, query });
 		const items = [];
 
 		if (!cursor) {
@@ -162,8 +172,35 @@ API.v1.addRoute('protocols.getProtocolItemsByProtocolId', { authRequired: true }
 				&& items.push({ _id: item._id, sectionId: section._id, num: item.num, expireAt: item.expireAt, name: item.name, responsible: item.responsible })
 			));
 		}
-		// console.log({ items });
 
 		return API.v1.success({ items });
+	},
+});
+
+API.v1.addRoute('protocols.getProtocolItemMaxNumber', { authRequired: true }, {
+	get() {
+		const { query } = this.parseJsonQuery();
+
+		const cursor = Promise.await(findProtocol(query._id));
+
+		if (!cursor) {
+			return API.v1.success({ number: 1 });
+		}
+
+		const result = { number: 1 };
+
+		if (cursor.sections) {
+			try {
+				cursor.sections.forEach((section) => {
+					if (section._id === query.sectionId) {
+						result.number = section.items.length + 1;
+					}
+				});
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		return API.v1.success(result);
 	},
 });

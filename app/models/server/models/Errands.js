@@ -38,7 +38,7 @@ export class Errands extends Base {
 	}
 
 	// UPDATE
-	updateErrand(_id, newData) {
+	updateErrandWithNewData(_id, newData) {
 		newData._updatedAt = new Date();
 		return this.update({ _id }, { $set: { ...newData } });
 	}
@@ -65,6 +65,19 @@ export class Errands extends Base {
 		const query = { 'initiatedBy._id': userId };
 
 		return this.find(query);
+	}
+
+	readAnswer(_id) {
+		const data = this.findOne({ _id });
+		console.log('data here');
+		console.dir({ data, _id });
+		if (!data || data.unread === null || data.unread === undefined || !data.unread) {
+			return;
+		}
+
+		data._updatedAt = new Date();
+		data.unread = false;
+		return this.update({ _id }, { $set: { ...data } });
 	}
 }
 

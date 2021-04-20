@@ -51,24 +51,29 @@ function GetDataFromProtocolItem({ protocolsItemId = null, workingGroupRequestCo
 		if (protocolData) {
 			if (protocolData.sections && protocolData.protocol && protocolData.protocol[0]) {
 				let protocolItem = null;
+				let sectionId = '';
 				protocolData.sections.forEach((section) => {
-					const it = section.items.find((item) => item._id === protocolsItemId);
+					const it = section.items?.find((item) => item._id === protocolsItemId) ?? null;
 					if (it) {
 						protocolItem = it;
+						sectionId = section._id;
 					}
 				});
 				const itemDesc = $(protocolItem?.name ?? '').text();
-				const itemResponsiblePerson = constructPersonFIO(protocolItem?.responsible[0] ?? '');
-				console.log({ protocolsItemId, protocolItem, itemDesc });
+				const itemResponsiblePerson = protocolItem?.responsible[0] ?? {};
+				console.log({ protocolsItemId, protocolItem, itemResponsiblePerson });
 
 				itemDesc && handlers.handleDescription && handlers.handleDescription(itemDesc);
 				protocolData && handlers.handleProtocol && handlers.handleProtocol({
 					_id: protocolData.protocol[0]?._id,
 					d: protocolData.protocol[0]?.d ?? new Date(),
 					num: protocolData.protocol[0]?.num ?? '',
+					sectionId,
+					itemId: protocolItem?._id ?? '',
+					itemName: protocolItem?.name ?? '',
 					itemNum: protocolItem?.num ?? '',
-					itemResponsible: itemResponsiblePerson,
 				});
+
 				itemResponsiblePerson && handlers.handleItemResponsible && handlers.handleItemResponsible(itemResponsiblePerson);
 				handlers.handleProtocolItems && protocolData.sections.forEach((section) => section.items?.forEach((item) => item._id === protocolsItemId && handlers.handleProtocolItems([item])));
 			}
@@ -95,6 +100,8 @@ function NewAddRequest() {
 
 	const [context, setContext] = useState('');
 
+	const { data: requestsMaxNumber } = useEndpointDataExperimental('working-groups-requests.getMaxRequestNumber', useMemo(() => ({}), []));
+
 	const { values, handlers, allFieldAreFilled } = useDefaultRequestForm({ defaultValues: null });
 
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
@@ -103,6 +110,12 @@ function NewAddRequest() {
 		// eslint-disable-next-line new-cap
 		GetDataFromProtocolItem({ protocolsItemId, workingGroupRequestContext, handlers });
 	}
+
+	useEffect(() => {
+		if (requestsMaxNumber) {
+			handlers.handleNumber && handlers.handleNumber(requestsMaxNumber.number ?? 1);
+		}
+	}, [requestsMaxNumber]);
 
 	const close = useCallback(() => setContext(''), []);
 
@@ -134,14 +147,14 @@ function NewAddRequest() {
 			protocolId,
 			requestType,
 		});
-		console.log({ requestData });
+		// console.log({ requestData });
 		const validation = validateWorkingGroupRequestData(requestData);
-		console.log({ validation });
+		// console.log({ validation });
 		if (validation.length === 0) {
-			await insertOrUpdateWorkingGroupRequest(requestData);
+			await insertOrUpdateWorkingGroupRequest({ ...requestData, createdBy: { userId } });
 		}
 		validation.forEach((error) => { throw new Error({ type: 'error', message: t('error-the-field-is-required', { field: t(error) }) }); });
-	}, [insertOrUpdateWorkingGroupRequest, t]);
+	}, [insertOrUpdateWorkingGroupRequest, t, userId]);
 
 	const handleSaveRequest = useCallback(async () => {
 		try {

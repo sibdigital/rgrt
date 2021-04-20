@@ -62,10 +62,6 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 		setEditData({ ...editData, [field]: value });
 	};
 
-	const handleBackClick = () => {
-		goToFinalStep();
-	};
-
 	const saveAction = useCallback(async (item, initiatedBy, issueConsideration, date, status, previousData) => {
 		const proposalsData = createProposalsForTheAgenda(item, initiatedBy, issueConsideration, date, status, previousData);
 		const validation = validateProposalsForTheAgenda(proposalsData);
@@ -87,21 +83,24 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 		setCommitting(true);
 		try {
 			setCommitting(false);
-			console.log(editData);
-			await saveAction(
-				editData.item,
-				editData.initiatedBy,
-				editData.issueConsideration,
-				editData.date,
-				editData.status,
-				null,
-			);
+			if (editData.issueConsideration.trim() !== '') {
+				await saveAction(
+					editData.item,
+					editData.initiatedBy,
+					editData.issueConsideration,
+					editData.date,
+					editData.status,
+					null,
+				);
+			} else {
+				goToFinalStep();
+			}
 		} catch (error) {
 			setCommitting(false);
 		}
 	};
 
-	const allFieldAreFilled = useMemo(() => editData.issueConsideration !== '', [editData.issueConsideration]);
+	// const allFieldAreFilled = useMemo(() => editData.issueConsideration !== '', [editData.issueConsideration]);
 
 	return <Step active={active} working={committing} onSubmit={handleSave} style={stepStyle}>
 		<StepHeader number={step} title={title} />
@@ -121,7 +120,7 @@ function ProposalForTheAgendaStep({ stepStyle = {}, step, title, active, council
 			</Accordion>}
 		</Margins>
 
-		<Pager disabled={committing} isContinueEnabled={allFieldAreFilled && agendaId} onBackClick={handleBackClick} onBackClickText={t('Skip')} continueButtonLabel={t('Proposal_for_the_agenda_invite_register')}/>
+		<Pager disabled={committing} continueButtonLabel={t('Proposal_for_the_agenda_invite_register')}/>
 	</Step>;
 }
 

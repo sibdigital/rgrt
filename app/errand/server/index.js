@@ -7,3 +7,4 @@ import './methods/createErrand';
 import './methods/editErrand';
 import './methods/deleteErrand';
 import './methods/insertOrUpdateErrand';
+import './methods/checkErrandByProtocolItemId';

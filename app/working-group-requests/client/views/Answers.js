@@ -1,14 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Field, Icon, Label, Table, TextInput, TextAreaInput } from '@rocket.chat/fuselage';
+import { Box, Table } from '@rocket.chat/fuselage';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
 
-import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useFormatDate } from '../../../../client/hooks/useFormatDate';
-import { GoBackButton } from '../../../utils/client/views/GoBackButton';
 
 export function Answers({ editData, mail, onClick, onChange }) {
 	const data = [];
@@ -32,8 +30,7 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 			const index = answers.findIndex((answer) => answer._id === answerEnter._id);
 			if (index > -1) {
 				answers[index].unread = false;
-				// await readAnswer(requestId, mail._id, answerEnter._id);
-				await readAnswer(requestId, answerEnter._id);
+				await readAnswer(answerEnter._id);
 				onChange();
 			}
 		}
@@ -66,28 +63,4 @@ function AnswersWithData({ answers, mail, onClick, onChange }) {
 	};
 
 	return <GenericTable header={header} renderRow={renderRow} results={answers} onChange={onChange} total={answers.length} setParams={setParams} params={params} />;
-
-	// return <Page>
-	// 	<Page.Header>
-	// 		<Field width={'100%'} display={'block'} marginBlock={'15px'}>
-	// 			<GoBackButton/>
-	// 			<Label fontScale='h1'>{t('Working_group_received_mails')}</Label>
-	// 		</Field>
-	// 	</Page.Header>
-	// 	<Page.Content>
-	// 		<Field mbe='x8'>
-	// 			<Field.Label>{t('Number')}</Field.Label>
-	// 			<Field.Row>
-	// 				<TextInput readOnly placeholder={t('Number')} is='span' fontScale='p1'>{numberLabel}</TextInput>
-	// 			</Field.Row>
-	// 		</Field>
-	// 		<Field mbe='x8'>
-	// 			<Field.Label>{t('Description')}</Field.Label>
-	// 			<Field.Row>
-	// 				<TextAreaInput rows='3' value={descriptionLabel} readOnly placeholder={t('Description')} fontScale='p1'/>
-	// 			</Field.Row>
-	// 		</Field>
-	// 		<GenericTable header={header} renderRow={renderRow} results={answers} onChange={onChange} total={answers.length} setParams={setParams} params={params} />
-	// 	</Page.Content>
-	// </Page>;
 }

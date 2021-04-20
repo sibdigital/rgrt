@@ -3,8 +3,8 @@ import { t } from '../../../utils';
 export const ErrandStatuses = Object.freeze({
 	OPENED: { state: 1, key: 'OPENED', title: 'opened', i18nLabel: t('opened') },
 	IN_PROGRESS: { state: 2, key: 'IN_PROGRESS', title: 'inProgress', i18nLabel: t('inProgress') },
-	SOLVED: { state: 3, key: 'SOLVED', title: 'solved', i18nLabel: t('solved') },
-	CANCELED: { state: 4, key: 'CANCELED', title: 'canceled', i18nLabel: t('canceled') },
+	CANCELED: { state: 3, key: 'CANCELED', title: 'canceled', i18nLabel: t('canceled') },
+	SOLVED: { state: 4, key: 'SOLVED', title: 'solved', i18nLabel: t('solved') },
 	CLOSED: { state: 5, key: 'CLOSED', title: 'closed', i18nLabel: t('closed') },
 
 	getErrandStatusesByState: ({ state }) => {

@@ -22,6 +22,7 @@ import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { WorkingGroupRequestVerticalChooseBar } from '../../../../working-group-requests/client/views/RequestForm';
 import ErrandForm, { useDefaultErrandForm, getErrandFieldsForSave } from './ErrandForm';
 import { ErrandTypes } from '../../utils/ErrandTypes';
+import { ErrandStatuses } from '../../utils/ErrandStatuses';
 import { fileUploadToErrand } from '../../../../ui/client/lib/fileUpload';
 
 registerLocale('ru', ru);
@@ -70,10 +71,10 @@ export function EditErrandPage() {
 	// console.dir({ idParams });
 	// console.dir(idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]] } : null);
 
-	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, _id: userId } } : data ?? null} request={requestData ?? null}/>;
+	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, userId } } : data ?? null} request={requestData ?? null}/>;
 }
 
-export function NewErrand({ errand, request }) {
+export function NewErrand({ errand, request, protocolId = null }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -87,8 +88,29 @@ export function NewErrand({ errand, request }) {
 	}, [errand]);
 
 	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
+	const updateItemStatus = useMethod('updateItemStatus');
 
 	const { values, handlers, hasUnsavedChanges, allFieldAreFilled, allRequiredFieldAreFilled } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
+
+	const getProtocolItemStatus = useCallback((errandStatusState, title) => {
+		let result = { state: 1, title: 'Новое' };
+
+		switch (errandStatusState) {
+			case ErrandStatuses.IN_PROGRESS.state:
+				result = { state: 2, title };
+				break;
+			case ErrandStatuses.SOLVED.state:
+				result = { state: 3, title };
+				break;
+			case ErrandStatuses.CLOSED.state:
+				result = { state: 3, title };
+				break;
+			default:
+				break;
+		}
+
+		return result;
+	}, []);
 
 	const saveAction = useCallback(async (errandToSave, files) => {
 		try {
@@ -101,13 +123,17 @@ export function NewErrand({ errand, request }) {
 				window.location.reload();
 			} else {
 				dispatchToastMessage({ type: 'success', message: t('Errand_Added_Successfully') });
-				const id = errandId;
-				FlowRouter.go(`/errand/${ id }`);
+
+				if (errand && errand.protocolItemId && protocolId) {
+					FlowRouter.go(`/protocol/${ protocolId }`);
+				} else {
+					FlowRouter.go(`/errand/${ errandId }`);
+				}
 			}
 		} catch (err) {
 			console.error(err);
 		}
-	}, [dispatchToastMessage, insertOrUpdateErrand, t]);
+	}, [dispatchToastMessage, errand, insertOrUpdateErrand, protocolId, t]);
 
 	const handleSave = useCallback(async () => {
 		const errandType = ErrandTypes[errand?.errandType?.key ?? 'default'];
@@ -117,9 +143,14 @@ export function NewErrand({ errand, request }) {
 		if (errand?.errandType?.key === ErrandTypes.byRequestAnswer.key) {
 			request?._id && Object.assign(errandToSave, { workingGroupRequestId: request._id });
 		}
-		// console.log({ errandType, errandToSave, files });
+
+		if (errand && errand.protocolItemId && errandToSave.status && errandToSave.status.state) {
+			const status = getProtocolItemStatus(errandToSave.status.state, t(errandToSave.status.title));
+			await updateItemStatus(errand.protocolItemId, status);
+		}
+
 		await saveAction(errandToSave, files);
-	}, [errand, values, saveAction, request]);
+	}, [errand, values, saveAction, request, getProtocolItemStatus, t, updateItemStatus]);
 
 	const handleChoose = useCallback((val, field, handleField) => {
 		// console.log({ val, field, handleField });
@@ -135,7 +166,7 @@ export function NewErrand({ errand, request }) {
 		}
 	}, [handlers, values]);
 
-	console.dir({ allFieldAreFilledInEditErrand: allFieldAreFilled, allRequiredFieldAreFilledInEditErrand: allRequiredFieldAreFilled });
+	// console.dir({ allFieldAreFilledInEditErrand: allFieldAreFilled, allRequiredFieldAreFilledInEditErrand: allRequiredFieldAreFilled });
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
@@ -145,7 +176,7 @@ export function NewErrand({ errand, request }) {
 				</Field>
 				<ButtonGroup mis='auto'>
 					{/*{ !chargedToCurrentUser && <Button primary small aria-label={_t('Save')} onClick={onEmailSendClick}>{t('Send_email')}</Button>}*/}
-					<Button disabled={!hasUnsavedChanges || !allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSave}>
+					<Button disabled={!allFieldAreFilled} primary small aria-label={t('Save')} onClick={handleSave}>
 						{t('Save')}
 					</Button>
 				</ButtonGroup>

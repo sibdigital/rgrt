@@ -26,7 +26,7 @@ export const defaultRequestTypeState = Object.freeze({
 });
 
 export const getRequestTypeByState = ({ state = 1 }) => {
-	if (!state) { return {}; }
+	if (!state) { return defaultRequestTypeState.REQUEST; }
 
 	for (const [key, value] of Object.entries(defaultRequestTypeState)) {
 		if (value.state === state) {
@@ -34,7 +34,7 @@ export const getRequestTypeByState = ({ state = 1 }) => {
 		}
 	}
 
-	return {};
+	return defaultRequestTypeState.REQUEST;
 };
 
 export const defaultRequestFields = {
@@ -46,7 +46,7 @@ export const defaultRequestFields = {
 	itemResponsible: '',
 	mail: '',
 	description: '',
-	requestType: 1,
+	requestType: defaultRequestTypeState.REQUEST,
 };
 
 export function getRequestFormFields({ request = null, onGetAllFieldsFromPrevAnswer = false }) {
@@ -212,7 +212,7 @@ export function ResponsibleField({
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
-			<Field.Label alignSelf='center' mie='x16' display='flex' flexDirection='row' alignItems='center'>
+			<Field.Label alignSelf={flexDirection === 'column' ? 'auto' : 'center'} mie='x16' display='flex' flexDirection='row' alignItems='center'>
 				{t('Errand_Charged_to')} {itemResponsible && itemResponsible._id && <ClearButton onClick={() => handleItemResponsible({})}/>}
 			</Field.Label>
 			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
@@ -297,7 +297,7 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			maxHeight='40px'
 			options={requestTypeOption}
 			value={requestType?.state ?? requestType}
-			onChange={(val) => handleRequestType(val)}
+			onChange={(val) => handleRequestType(getRequestTypeByState({ state: val }))}
 		/>
 
 		<Margins all='x4'>

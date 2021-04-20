@@ -127,17 +127,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [tab, setTab] = useState('persons');
 
-	const invitedPersons = useMemo(() => persons.filter((person) => {
-		const iPerson = invitedPersonsIds.find((iPerson) => iPerson._id === person._id);
-		if (!iPerson) { return; }
-
-		if (!iPerson.ts) {
-			person.ts = new Date('January 1, 2021 00:00:00');
-		} else {
-			person.ts = iPerson.ts;
-		}
-		return person;
-	}), [invitedPersonsIds, persons]);
+	// useMemo(() => console.dir({ invitedPersonsIdsWithMemo: invitedPersonsIds }), [invitedPersonsIds]);
 
 	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' }), []);
 
@@ -180,10 +170,13 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 
 	const handleSaveCouncil = useCallback(async () => {
 		try {
-			await saveAction(date, description, {
-				_id: '',
-				title: councilType,
-			}, invitedPersonsIds, place);
+			await saveAction(
+				date,
+				description,
+				{ _id: '', title: councilType },
+				invitedPersonsIds.map((person) => ({ _id: person._id, ts: new Date(person.ts) })),
+				place,
+			);
 			dispatchToastMessage({ type: 'success', message: t('Council_edited') });
 		} catch (error) {
 			console.log(error);
@@ -255,7 +248,7 @@ function AddCouncilWithNewData({ persons, councilTypeOptions, onChange, workingG
 						</Button>
 					</Field.Row>
 				</Field>}
-				{context === 'participants' && <Persons councilId={null} onChange={onChange} invitedPersons={invitedPersons} setInvitedPersons={setInvitedPersonsIds}/>}
+				{context === 'participants' && <Persons councilId={null} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds}/>}
 				{context === 'addParticipants' && <AddPerson councilId={null} onChange={onChange} close={onClose} persons={persons} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} onNewParticipant={onParticipantClick}/>}
 				{context === 'newParticipants' && <CreateParticipant councilId={null} goTo={onCreatePersonsClick} close={onClose} onChange={onChange} invitedPersons={invitedPersonsIds} setInvitedPersons={setInvitedPersonsIds} workingGroupOptions={workingGroupOptions}/>}
 			</Page.Content>

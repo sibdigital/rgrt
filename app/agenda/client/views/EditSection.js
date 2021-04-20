@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
+	Box,
 	Field,
 	Button,
 	InputBox,
@@ -13,6 +14,7 @@ import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
 import { Autocomplete, createFilterOptions } from '@material-ui/lab';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import { isIOS } from 'react-device-detect';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -46,7 +48,9 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction]) => useMe
 	query: JSON.stringify({
 		$or: [{
 			surname: { $regex: text || '', $options: 'i' },
+		}, {
 			name: { $regex: text || '', $options: 'i' },
+		}, {
 			patronymic: { $regex: text || '', $options: 'i' },
 		}],
 	}),
@@ -68,7 +72,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		// date: new Date(),
 		speakers: [],
 	});
-	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 25 });
+	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 10 });
 	const [sort, setSort] = useState(['surname']);
 
 	const debouncedParams = useDebouncedValue(params, 500);
@@ -110,9 +114,14 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		setEditData({ ...editData, [field]: value });
 		onChange();
 	};
-	const handleSpeakers = (value) => {
-		setEditData({ ...editData, speakers: value });
-	};
+
+	const handleSpeakers = useCallback((value, onIos = false) => {
+		if (onIos) {
+			setEditData({ ...editData, speakers: [...editData.speakers, value] });
+		} else {
+			setEditData({ ...editData, speakers: value });
+		}
+	}, [editData]);
 
 	const cancelModal = useCallback(() => setModal(undefined), [setModal]);
 
@@ -189,15 +198,29 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 		<Field>
 			<Field.Label>{t('Agenda_speakers')}</Field.Label>
 			<Autocomplete
+				style={{ touchAction: 'none' }}
 				multiple
 				id='tags-standard'
 				options={personsData?.persons ?? []}
 				value={editData.speakers ?? []}
 				forcePopupIcon={false}
 				getOptionLabel={(userData) => [constructPersonFIO(userData), `, ${ userData.organization ?? '' }`].join('')}
+				// getOptionSelected={(option, value) => console.dir({ option, value })}
+				// onHighlightChange={(event, option, reason) => console.log('onHighlightChange')}
+				renderOption={(option, state) =>
+					<Box
+						style={{ cursor: 'pointer' }}
+						zIndex='100'
+						width='100%'
+						height='100%'
+						onTouchStart={() => { console.log('on touch start in render option ', state); isIOS && handleSpeakers(option, true); }}
+					>
+						{[constructPersonFIO(option), `, ${ option.organization ?? '' }`].join('')}
+					</Box>
+				}
 				filterSelectedOptions
 				filterOptions={createFilterOptions({ limit: 10 })}
-				onChange={(event, value) => handleSpeakers(value)}
+				onChange={(event, value) => { console.log('onChange event ', event); !isIOS && handleSpeakers(value); }}
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
 						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
@@ -207,14 +230,17 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				renderInput={(params) => (
 					<TextField
 						{...params}
+						style={{ touchAction: 'none' }}
 						variant='outlined'
 						placeholder={t('Agenda_speakers')}
-						onChange={(e) => setParams({ ...params, text: e.currentTarget.value }) }
+						onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }
 					/>
 				)}
 				noOptionsText={
 					<Button
-						onMouseDown={onCreateNewPerson}
+						style={{ touchAction: 'none' }}
+						onMouseDown={() => !isIOS && onCreateNewPerson()}
+						onTouchStart={() => isIOS && onCreateNewPerson()}
 						backgroundColor='inherit'
 						borderColor='lightgrey'
 						borderWidth='0.5px'
@@ -224,7 +250,7 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 						{ t('Participant_Create') }
 					</Button>
 				}
-				onClose={(event, reason) => setParams({ ...params, text: '' }) }
+				onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }
 			/>
 		</Field>
 		<Field>

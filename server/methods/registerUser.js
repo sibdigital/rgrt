@@ -31,11 +31,11 @@ Meteor.methods({
 			login: String,
 			pass: String,
 			name: String,
-			surname: String,
-			patronymic: String,
-			organization: String,
-			position: String,
-			phone: String,
+			// surname: String,
+			// patronymic: String,
+			// organization: String,
+			// position: String,
+			// phone: String,
 			secretURL: Match.Optional(String),
 			reason: Match.Optional(String),
 		}));
@@ -67,12 +67,12 @@ Meteor.methods({
 			password: formData.pass,
 			name: formData.name,
 			reason: formData.reason,
-			surname: formData.surname,
-			patronymic: formData.patronymic,
-			organization: formData.organization,
-			position: formData.position,
-			phone: formData.phone,
-			workingGroup: formData.workingGroup,
+			surname: formData.surname ?? '',
+			patronymic: formData.patronymic ?? '',
+			organization: formData.organization ?? '',
+			position: formData.position ?? '',
+			phone: formData.phone ?? '',
+			workingGroup: formData.workingGroup ?? '',
 		};
 
 		// Check if user has already been imported and never logged in. If so, set password and let it through
@@ -93,28 +93,28 @@ Meteor.methods({
 			Users.setReason(userId, reason);
 		}
 		const surname = s.trim(formData.surname) ?? '';
-		if (surname) {
+		if (surname !== '') {
 			Users.addSurname(userId, surname);
 		}
 		const patronymic = s.trim(formData.patronymic) ?? '';
-		if (patronymic) {
+		if (patronymic !== '') {
 			Users.addPatronymic(userId, patronymic);
 		}
 		const organization = s.trim(formData.organization) ?? '';
-		if (organization) {
+		if (organization !== '') {
 			Users.addOrganization(userId, organization);
 		}
 		const position = s.trim(formData.position) ?? '';
-		if (position) {
+		if (position !== '') {
 			Users.addPosition(userId, position);
 		}
 		const phone = s.trim(formData.phone) ?? '';
-		if (phone) {
+		if (phone !== '') {
 			Users.addPhone(userId, phone);
 		}
-		if (formData.workingGroup && formData.workingGroup !== 'undefined') {
-			Users.setWorkingGroup(userId, formData.workingGroup);
-		}
+		// if (formData.workingGroup && formData.workingGroup !== 'undefined') {
+		// 	Users.setWorkingGroup(userId, formData.workingGroup);
+		// }
 
 		saveCustomFields(userId, formData);
 
