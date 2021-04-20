@@ -131,7 +131,7 @@ function EditProtocolWithData({ close, onChange, protocol, ...props }) {
 		query: JSON.stringify({ _id: council?._id }),
 		fields: JSON.stringify({ d: 1, type: 1 }),
 	}), [council]));
-	const councilTitle = useMemo(() => (councilData ? [councilData.type.title, ' от ', formatDate(councilData.d)].join('') : ''), [councilData, formatDate]);
+	const councilTitle = useMemo(() => (councilData?.type?.title ? [councilData.type.title, ' от ', formatDate(councilData.d)].join('') : ''), [councilData, formatDate]);
 
 	const filterNumber = (value) => {
 		if (checkNumberWithDot(value, number) !== null || value === '') {
