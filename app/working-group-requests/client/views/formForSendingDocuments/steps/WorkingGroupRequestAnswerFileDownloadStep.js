@@ -22,6 +22,7 @@ import { useInvitePageContext } from '../InvitePageState';
 import { StepHeader } from '../../../../../../client/views/setupWizard/StepHeader';
 import { filesValidation } from '../../../../../ui/client/lib/fileUpload';
 import { ClearButton } from '../../../../../utils/client/views/ClearButton';
+import AutoCompleteRegions from '../../../../../tags/client/views/AutoCompleteRegions';
 import { preProcessingProtocolItems } from '../../lib';
 import { ProtocolItemsField, defaultRequestTypeState } from '../../RequestForm';
 import { AnswerTypes } from '../../AnswerForm';
@@ -153,6 +154,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [answerTypeContext, setAnswerTypeContext] = useState('mail');
 	const [customAnswerMailLabel, setCustomAnswerMailLabel] = useState('');
+	const [tags, setTags] = useState([]);
 
 	const fileSourceInputId = useUniqueId();
 	const workingGroupRequestId = workingGroupRequest._id;
@@ -348,8 +350,12 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 					setAttachedFile(attachedFilesBuf);
 					onChange();
 				} else {
-					setInfo({ workingGroupRequestId, mailId, workingGroupRequestAnswer, attachedFile });
-					console.log({ workingGroupRequestId, mailId, workingGroupRequestAnswer });
+					const filesArr = attachedFile.map((file) => {
+						file.tag = tags;
+						return file;
+					});
+					setInfo({ workingGroupRequestId, mailId, workingGroupRequestAnswer, attachedFile: filesArr, tags });
+					console.log({ workingGroupRequestId, mailId, workingGroupRequestAnswer, tags, filesArr });
 					goToNextStep();
 				}
 			}
@@ -445,6 +451,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 									{t('Working_group_request_invite_add_files')}
 								</Button>
 							</Field>
+							{attachedFile?.length > 0 && <AutoCompleteRegions onSetTags={setTags} mb='x8'/>}
 							{attachedFile?.length > 0 && <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
 								<Margins inlineEnd='x4' blockEnd='x4'>
 									{attachedFile.map((file, index) =>

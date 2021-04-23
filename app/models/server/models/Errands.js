@@ -69,8 +69,8 @@ export class Errands extends Base {
 
 	readAnswer(_id) {
 		const data = this.findOne({ _id });
-		console.log('data here');
-		console.dir({ data, _id });
+		// console.log('data here');
+		// console.dir({ data, _id });
 		if (!data || data.unread === null || data.unread === undefined || !data.unread) {
 			return;
 		}

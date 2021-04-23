@@ -31,6 +31,7 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 
 	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
 	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
+	const addTagsToErrandFiles = useMethod('addTagsToErrandFiles');
 
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [newData]);
 
@@ -150,7 +151,9 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 
 			const errandId = await insertOrUpdateErrand(errandToSave);
 			if (fileDownloadInfo.attachedFile.length > 0) {
-				await fileUploadToErrand(fileDownloadInfo.attachedFile, { _id: errandId });
+				const filesId = await fileUploadToErrand(fileDownloadInfo.attachedFile, { _id: errandId });
+				console.dir({ filesId });
+				// await addTagsToErrandFiles(errandId, filesId, fileDownloadInfo.tags ?? []);
 			}
 			setCommitting(false);
 			goToFinalStep();

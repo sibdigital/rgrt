@@ -151,12 +151,16 @@ export const uploadFileWithWorkingGroup = async (workingGroupMeetingId, { descri
 	}
 };
 
-export const uploadFileWithCouncil = async (councilId, { description, fileName, file, ts, orderIndex }) => {
+export const uploadFileWithCouncil = async (councilId, { description, fileName, file, ts, orderIndex, tag }) => {
 	const data = new FormData();
 	description	&& data.append('description', description);
 	data.append('file', file, fileName);
 	data.append('ts', ts ?? new Date());
-	orderIndex	&& data.append('orderIndex', orderIndex);
+	orderIndex && data.append('orderIndex', orderIndex);
+	if (tag) {
+		data.append('tagId', tag._id);
+		data.append('tagName', tag.name);
+	}
 
 	const uploads = Session.get('uploading') || [];
 
@@ -168,8 +172,9 @@ export const uploadFileWithCouncil = async (councilId, { description, fileName, 
 
 	uploads.push(upload);
 	Session.set('uploading', uploads);
+	console.dir({ dataInUploadWithCouncil: data });
 
-	const { xhr, promise } = APIClient.upload(`v1/councils.upload/${ councilId }`, {}, data, {
+	const { xhr, promise, _id } = APIClient.upload(`v1/councils.upload/${ councilId }`, {}, data, {
 		progress(progress) {
 			const uploads = Session.get('uploading') || [];
 
@@ -209,7 +214,7 @@ export const uploadFileWithCouncil = async (councilId, { description, fileName, 
 		await promise;
 		const uploads = Session.get('uploading') || [];
 		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
-		return { id: promise.responseJSON._id, description };
+		return { id: xhr.responseJSON._id };
 	} catch (error) {
 		const uploads = Session.get('uploading') || [];
 		uploads.filter((u) => u.id === upload.id).forEach((u) => {
@@ -354,9 +359,13 @@ export const uploadFileWithWorkingGroupRequestAnswer = async (workingGroupReques
 	}
 };
 
-export const uploadFileWithErrand = async (errandId, { fileName, file }) => {
+export const uploadFileWithErrand = async (errandId, { fileName, file, tag }) => {
 	const data = new FormData();
 	data.append('file', file, fileName);
+	if (tag) {
+		data.append('tagId', tag._id);
+		data.append('tagName', tag.name);
+	}
 
 	const uploads = Session.get('uploading') || [];
 
@@ -409,7 +418,7 @@ export const uploadFileWithErrand = async (errandId, { fileName, file }) => {
 		await promise;
 		const uploads = Session.get('uploading') || [];
 		Session.set('uploading', uploads.filter((u) => u.id !== upload.id));
-		return { id: promise.responseJSON._id };
+		return xhr.responseJSON._id;
 	} catch (error) {
 		const uploads = Session.get('uploading') || [];
 		uploads.filter((u) => u.id === upload.id).forEach((u) => {
@@ -548,6 +557,7 @@ const getFileNameWithoutExtension = (fileName) => fileName.replace(/\..+$/, '');
 
 export const fileUploadToErrand = async (files, { _id }) => {
 	files = [].concat(files);
+	const filesId = [];
 
 	const uploadNextFile = () => {
 		const file = files.pop();
@@ -579,16 +589,19 @@ export const fileUploadToErrand = async (files, { _id }) => {
 		}
 
 		const upload = async () => {
-			await uploadFileWithErrand(_id, {
+			const fileId = await uploadFileWithErrand(_id, {
 				fileName: file.name,
 				file: file.file,
+				tag: file.tag ?? '',
 			});
+			filesId.push({ _id: fileId, name: file.name });
 			uploadNextFile();
 		};
 		upload();
 	};
 
 	uploadNextFile();
+	return filesId;
 };
 
 export const fileUploadToWorkingGroupRequestAnswer = async (files, { _id, mailId, answerId }) => {
@@ -706,7 +719,7 @@ export const fileUploadToWorkingGroup = async (files, isWorkingGroupMeeting, { _
 	uploadNextFile();
 };
 
-export const fileUploadToCouncil = async (files, { _id }) => {
+export const fileUploadToCouncil = async (files, tag, { _id }) => {
 	files = [].concat(files);
 	const ids = [];
 
@@ -740,15 +753,17 @@ export const fileUploadToCouncil = async (files, { _id }) => {
 		}
 
 		const upload = async () => {
+			console.dir({ fileInUpload: file });
 			const uploadedFile = await uploadFileWithCouncil(_id, {
 				description: '',
 				orderIndex: file.orderIndex,
 				fileName: file.name,
 				file: file.file,
 				ts: file.ts,
+				tag: tag ?? {},
 			});
 			if (uploadedFile && uploadedFile.id) {
-				ids.push(uploadedFile.id);
+				ids.push({ _id: uploadedFile.id, orderIndex: file.orderIndex });
 			}
 			uploadNextFile();
 		};

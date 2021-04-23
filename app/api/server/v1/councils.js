@@ -216,6 +216,8 @@ API.v1.addRoute('councils.upload/:id', { authRequired: true }, {
 			councilId: this.urlParams.id,
 			userId: this.userId,
 		};
+		console.log('councils.upload');
+		console.log({ file, fields, tag: fields.tag ?? '1' });
 
 		const fileData = Meteor.runAsUser(this.userId, () => {
 			const fileStore = FileUpload.getStore('Uploads');
@@ -224,6 +226,10 @@ API.v1.addRoute('councils.upload/:id', { authRequired: true }, {
 			uploadedFile.description = fields.description;
 			uploadedFile.ts = fields.ts;
 			uploadedFile.orderIndex = fields.orderIndex;
+			uploadedFile.tag = {
+				_id: fields.tagId ?? '',
+				name: fields.tagName ?? '',
+			};
 
 			Meteor.call('sendFileCouncil', this.urlParams.id, uploadedFile);
 

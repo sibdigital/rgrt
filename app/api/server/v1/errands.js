@@ -157,6 +157,7 @@ API.v1.addRoute('errands.upload/:id', { authRequired: false }, {
 			type: file.mimetype,
 			errandId: this.urlParams.id,
 		};
+		console.log('upload errand', { fields });
 
 		// TODO: Requires user ID to upload file
 		const fileData = Meteor.runAsUser('rocket.cat', () => {
@@ -164,6 +165,7 @@ API.v1.addRoute('errands.upload/:id', { authRequired: false }, {
 			const uploadedFile = fileStore.insertSync(details, file.fileBuffer);
 
 			uploadedFile.description = fields.description;
+			uploadedFile.tag = { _id: fields.tagId ?? '', name: fields.tagName ?? '' };
 
 			Meteor.call('sendFileErrand', this.urlParams.id, uploadedFile);
 
