@@ -32,6 +32,7 @@ import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { hasPermission } from '../../../authorization';
+import AutoCompletePersons from '../../../persons/client/views/AutoCompletePersons';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -122,7 +123,7 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 
 	const personsQuery = useQuery(debouncedParams, debouncedSort, responsibleId);
 
-	const personsData = useEndpointData('persons.listToAutoComplete', personsQuery) || { persons: [] };
+	// const personsData = useEndpointData('persons.listToAutoComplete', personsQuery) || { persons: [] };
 
 	useEffect(() => {
 		// console.log(item);
@@ -196,62 +197,63 @@ function EditItemWithData({ close, onChange, protocol, isSecretary, sectionId, i
 				/>
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Label>{t('Item_Responsible')}</Field.Label>
-			<Autocomplete
-				disabled={!isSecretary}
-				multiple
-				id='tags-standard'
-				value={responsible}
-				forcePopupIcon={false}
-				options={personsData?.persons ?? []}
-				getOptionLabel={(option) => constructPersonFIO(option)}
-				filterOptions={createFilterOptions({ limit: 10 })}
-				renderOption={(option, state) =>
-					<Box
-						style={{ cursor: 'pointer' }}
-						zIndex='100'
-						width='100%'
-						height='100%'
-						onTouchStart={() => isIOS && setResponsible([...responsible, option]) }
-					>
-						{constructPersonFIO(option)}
-					</Box>
-				}
-				filterSelectedOptions
-				onChange={(event, value) => !isIOS && setResponsible(value)}
-				renderTags={(value, getTagProps) =>
-					value.map((option, index) => (
-						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
-							label={constructPersonFIO(option)} {...getTagProps({ index })} />
-					))
-				}
-				renderInput={(params) => (
-					<TextField
-						{...params}
-						variant='outlined'
-						placeholder={t('Item_Responsible')}
-						style={!isSecretary ? { cursor: 'not-allowed !important', touchAction: 'none' } : { touchAction: 'none' }}
-						onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }
-					/>
-				)}
-				noOptionsText={
-					<Button
-						style={{ touchAction: 'none' }}
-						// onMouseDown={() => !isIOS && onCreateNewPerson()}
-						// onTouchStart={() => isIOS && onCreateNewPerson()}
-						backgroundColor='inherit'
-						borderColor='lightgrey'
-						borderWidth='0.5px'
-						textAlign='center'
-						width='100%'
-					>
-						{ t('Participant_Create') }
-					</Button>
-				}
-				onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }
-			/>
-		</Field>
+		<AutoCompletePersons onSetPersonsArray={setResponsible} prevPersonsIdArray={responsible}/>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Item_Responsible')}</Field.Label>*/}
+		{/*	<Autocomplete*/}
+		{/*		disabled={!isSecretary}*/}
+		{/*		multiple*/}
+		{/*		id='tags-standard'*/}
+		{/*		value={responsible}*/}
+		{/*		forcePopupIcon={false}*/}
+		{/*		options={personsData?.persons ?? []}*/}
+		{/*		getOptionLabel={(option) => constructPersonFIO(option)}*/}
+		{/*		filterOptions={createFilterOptions({ limit: 10 })}*/}
+		{/*		renderOption={(option, state) =>*/}
+		{/*			<Box*/}
+		{/*				style={{ cursor: 'pointer' }}*/}
+		{/*				zIndex='100'*/}
+		{/*				width='100%'*/}
+		{/*				height='100%'*/}
+		{/*				onTouchStart={() => isIOS && setResponsible([...responsible, option]) }*/}
+		{/*			>*/}
+		{/*				{constructPersonFIO(option)}*/}
+		{/*			</Box>*/}
+		{/*		}*/}
+		{/*		filterSelectedOptions*/}
+		{/*		onChange={(event, value) => !isIOS && setResponsible(value)}*/}
+		{/*		renderTags={(value, getTagProps) =>*/}
+		{/*			value.map((option, index) => (*/}
+		{/*				<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}*/}
+		{/*					label={constructPersonFIO(option)} {...getTagProps({ index })} />*/}
+		{/*			))*/}
+		{/*		}*/}
+		{/*		renderInput={(params) => (*/}
+		{/*			<TextField*/}
+		{/*				{...params}*/}
+		{/*				variant='outlined'*/}
+		{/*				placeholder={t('Item_Responsible')}*/}
+		{/*				style={!isSecretary ? { cursor: 'not-allowed !important', touchAction: 'none' } : { touchAction: 'none' }}*/}
+		{/*				onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }*/}
+		{/*			/>*/}
+		{/*		)}*/}
+		{/*		noOptionsText={*/}
+		{/*			<Button*/}
+		{/*				style={{ touchAction: 'none' }}*/}
+		{/*				// onMouseDown={() => !isIOS && onCreateNewPerson()}*/}
+		{/*				// onTouchStart={() => isIOS && onCreateNewPerson()}*/}
+		{/*				backgroundColor='inherit'*/}
+		{/*				borderColor='lightgrey'*/}
+		{/*				borderWidth='0.5px'*/}
+		{/*				textAlign='center'*/}
+		{/*				width='100%'*/}
+		{/*			>*/}
+		{/*				{ t('Participant_Create') }*/}
+		{/*			</Button>*/}
+		{/*		}*/}
+		{/*		onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }*/}
+		{/*	/>*/}
+		{/*</Field>*/}
 		<Field>
 			<Field.Label>{t('Item_ExpireAt')}</Field.Label>
 			<Field.Row>

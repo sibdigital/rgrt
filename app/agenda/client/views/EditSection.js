@@ -25,6 +25,7 @@ import { checkNumber } from '../../../utils/client/methods/checkNumber';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import PersonForm from '../../../persons/client/views/PersonForm';
 import { validateAgendaSection, createAgendaSection } from './lib';
+import AutoCompletePersons from '../../../persons/client/views/AutoCompletePersons';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -195,64 +196,65 @@ export function EditSection({ agendaId = null, councilId, onEditDataClick, close
 				<TextAreaInput style={{ whiteSpace: 'normal', wordBreak: 'break-word' }} rows='8' value={editData.issueConsideration} onChange={handleChange('issueConsideration')} placeholder={t('Agenda_issue_consideration')}/>
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Label>{t('Agenda_speakers')}</Field.Label>
-			<Autocomplete
-				style={{ touchAction: 'none' }}
-				multiple
-				id='tags-standard'
-				options={personsData?.persons ?? []}
-				value={editData.speakers ?? []}
-				forcePopupIcon={false}
-				getOptionLabel={(userData) => [constructPersonFIO(userData), `, ${ userData.organization ?? '' }`].join('')}
-				// getOptionSelected={(option, value) => console.dir({ option, value })}
-				// onHighlightChange={(event, option, reason) => console.log('onHighlightChange')}
-				renderOption={(option, state) =>
-					<Box
-						style={{ cursor: 'pointer' }}
-						zIndex='100'
-						width='100%'
-						height='100%'
-						onTouchStart={() => { console.log('on touch start in render option ', state); isIOS && handleSpeakers(option, true); }}
-					>
-						{[constructPersonFIO(option), `, ${ option.organization ?? '' }`].join('')}
-					</Box>
-				}
-				filterSelectedOptions
-				filterOptions={createFilterOptions({ limit: 10 })}
-				onChange={(event, value) => { console.log('onChange event ', event); !isIOS && handleSpeakers(value); }}
-				renderTags={(value, getTagProps) =>
-					value.map((option, index) => (
-						<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}
-							label={constructPersonFIO(option)} {...getTagProps({ index })} />
-					))
-				}
-				renderInput={(params) => (
-					<TextField
-						{...params}
-						style={{ touchAction: 'none' }}
-						variant='outlined'
-						placeholder={t('Agenda_speakers')}
-						onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }
-					/>
-				)}
-				noOptionsText={
-					<Button
-						style={{ touchAction: 'none' }}
-						onMouseDown={() => !isIOS && onCreateNewPerson()}
-						onTouchStart={() => isIOS && onCreateNewPerson()}
-						backgroundColor='inherit'
-						borderColor='lightgrey'
-						borderWidth='0.5px'
-						textAlign='center'
-						width='100%'
-					>
-						{ t('Participant_Create') }
-					</Button>
-				}
-				onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }
-			/>
-		</Field>
+		<AutoCompletePersons onSetPersonsArray={handleSpeakers} prevPersonsIdArray={editData.speakers ?? []} onAutoCompleteLabel={t('Agenda_speakers')}/>
+		{/*/!*<Field>*!/*/}
+		{/*// 	<Field.Label>{t('Agenda_speakers')}</Field.Label>*/}
+		{/*// 	<Autocomplete*/}
+		{/*/!*		style={{ touchAction: 'none' }}*!/*/}
+		{/*// 		multiple*/}
+		{/*// 		id='tags-standard'*/}
+		{/*// 		options={personsData?.persons ?? []}*/}
+		{/*// 		value={editData.speakers ?? []}*/}
+		{/*// 		forcePopupIcon={false}*/}
+		{/*// 		getOptionLabel={(userData) => [constructPersonFIO(userData), `, ${ userData.organization ?? '' }`].join('')}*/}
+		{/*// 		// getOptionSelected={(option, value) => console.dir({ option, value })}*/}
+		{/*// 		// onHighlightChange={(event, option, reason) => console.log('onHighlightChange')}*/}
+		{/*// 		renderOption={(option, state) =>*/}
+		{/*// 			<Box*/}
+		{/*/!*				style={{ cursor: 'pointer' }}*!/*/}
+		{/*// 				zIndex='100'*/}
+		{/*// 				width='100%'*/}
+		{/*// 				height='100%'*/}
+		{/*// 				onTouchStart={() => { console.log('on touch start in render option ', state); isIOS && handleSpeakers(option, true); }}*/}
+		{/*// 			>*/}
+		{/*// 				{[constructPersonFIO(option), `, ${ option.organization ?? '' }`].join('')}*/}
+		{/*// 			</Box>*/}
+		{/*// 		}*/}
+		{/*// 		filterSelectedOptions*/}
+		{/*// 		filterOptions={createFilterOptions({ limit: 10 })}*/}
+		{/*// 		onChange={(event, value) => { console.log('onChange event ', event); !isIOS && handleSpeakers(value); }}*/}
+		{/*// 		renderTags={(value, getTagProps) =>*/}
+		{/*/!*			value.map((option, index) => (*!/*/}
+		{/*/!*				<Chip style={{ backgroundColor: '#e0e0e0', margin: '3px', borderRadius: '16px', color: '#000000DE' }}*!/*/}
+		{/*/!*					label={constructPersonFIO(option)} {...getTagProps({ index })} />*!/*/}
+		{/*/!*			))*!/*/}
+		{/*// 		}*/}
+		{/*// 		renderInput={(params) => (*/}
+		{/*// 			<TextField*/}
+		{/*/!*				{...params}*!/*/}
+		{/*// 				style={{ touchAction: 'none' }}*/}
+		{/*// 				variant='outlined'*/}
+		{/*// 				placeholder={t('Agenda_speakers')}*/}
+		{/*// 				onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }*/}
+		{/*/!*			/>*!/*/}
+		{/*// 		)}*/}
+		{/*/!*		noOptionsText={*!/*/}
+		{/*/!*			<Button*!/*/}
+		{/*/!*				style={{ touchAction: 'none' }}*!/*/}
+		{/*/!*				onMouseDown={() => !isIOS && onCreateNewPerson()}*!/*/}
+		{/*// 				onTouchStart={() => isIOS && onCreateNewPerson()}*/}
+		{/*// 				backgroundColor='inherit'*/}
+		{/*// 				borderColor='lightgrey'*/}
+		{/*/!*				borderWidth='0.5px'*!/*/}
+		{/*/!*				textAlign='center'*!/*/}
+		{/*/!*				width='100%'*!/*/}
+		{/*/!*			>*!/*/}
+		{/*/!*				{ t('Participant_Create') }*!/*/}
+		{/*/!*			</Button>*!/*/}
+		{/*/!*		}*!/*/}
+		{/*/!*		onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }*!/*/}
+		{/*/!*	/>*!/*/}
+		{/*/!*</Field>*!/*/}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

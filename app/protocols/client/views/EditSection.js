@@ -22,6 +22,7 @@ import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
 import { romanize, deromanize } from '../../../utils/lib/romanNumeralConverter';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
+import AutoCompletePersons from '../../../persons/client/views/AutoCompletePersons';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -122,12 +123,13 @@ function EditSectionWithData({ close, onChange, protocol, sectionId, ...props })
 				/>
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Label>{t('Protocol_section_speakers')}</Field.Label>
-			<Field.Row>
-				<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />
-			</Field.Row>
-		</Field>
+		<AutoCompletePersons onSetPersonsArray={setSpeakers} prevPersonsIdArray={speakers} onAutoCompleteLabel={t('Protocol_section_speakers')}/>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Protocol_section_speakers')}</Field.Label>*/}
+		{/*	<Field.Row>*/}
+		{/*		<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

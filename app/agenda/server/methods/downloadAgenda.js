@@ -118,7 +118,7 @@ Meteor.methods({
 			const arr = [];
 			arr.push(
 				new TableCell({
-					children: [new Paragraph({ text: `${ value.item ?? index + 1 }`, alignment: AlignmentType.CENTER })],
+					children: [new Paragraph({ text: `${ value.item && value.item !== '' ? value.item : index + 1 }`, alignment: AlignmentType.CENTER })],
 					verticalAlign: VerticalAlign.CENTER,
 					alignment: AlignmentType.CENTER,
 				}),

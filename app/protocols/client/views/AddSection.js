@@ -11,6 +11,7 @@ import { validateSectionData, createSectionData } from './lib';
 import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { checkRomanNumber } from '../../../utils/client/methods/checkNumber';
 import { romanize, deromanize } from '../../../utils/lib/romanNumeralConverter';
+import AutoCompletePersons from '../../../persons/client/views/AutoCompletePersons';
 
 export function AddSection({ goToNew, close, onChange, ...props }) {
 	const t = useTranslation();
@@ -88,12 +89,13 @@ export function AddSection({ goToNew, close, onChange, ...props }) {
 				/>
 			</Field.Row>
 		</Field>
-		<Field>
-			<Field.Label>{t('Protocol_section_speakers')}</Field.Label>
-			<Field.Row>
-				<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />
-			</Field.Row>
-		</Field>
+		<AutoCompletePersons onSetPersonsArray={setSpeakers} prevPersonsIdArray={speakers} onAutoCompleteLabel={t('Protocol_section_speakers')}/>
+		{/*<Field>*/}
+		{/*	<Field.Label>{t('Protocol_section_speakers')}</Field.Label>*/}
+		{/*	<Field.Row>*/}
+		{/*		<InputBox value={speakers} onChange={(e) => setSpeakers(e.currentTarget.value)} placeholder={t('Protocol_section_speakers')} />*/}
+		{/*	</Field.Row>*/}
+		{/*</Field>*/}
 		<Field>
 			<Field.Row>
 				<ButtonGroup stretch w='full'>

@@ -89,7 +89,7 @@ export function Sections({ data, onSectionMenuClick, onItemMenuClick, isAllowedE
 			<Box is='span' pie='x8'>{romanize(section.num)}.</Box>
 			<Box flexGrow={1}>
 				<Box mbe='x4' dangerouslySetInnerHTML={{ __html: section.name }} align='justify'/>
-				{ section.speakers && <Box mbe='x4'>{t('Protocol_section_speakers')}: {section.speakers}</Box>}
+				{ section.speakers.length !== 0 && <Box mbe='x4'>{t('Protocol_section_speakers')}: {constructResponsible({ responsible: section.speakers })}</Box> }
 			</Box>
 			{ isAllowedEdit && <Box pi='x4' style={{ cursor: 'pointer' }} data-section={section._id} data-first={section.first}
 				data-last={section.last} onClick={onSectionMenuClick}>
