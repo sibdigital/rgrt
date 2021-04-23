@@ -8,10 +8,11 @@ import { FileUpload } from '../../../file-upload';
 API.v1.addRoute('working-groups.list', { authRequired: false }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		return API.v1.success(Promise.await(findWorkingGroups({
 			query,
+			fields: stockFields,
 			pagination: {
 				offset,
 				count,

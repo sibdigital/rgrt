@@ -507,14 +507,20 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		<Th key={'File_name'} color='default'>
 			{ t('File_name') }
 		</Th>,
+		<Th w='x200' key={'Region'} color='default'>
+			{ t('Region') }
+		</Th>,
 		<Th w='x40' key='download'/>,
 	], [t]);
 
 	const renderRow = (document) => {
-		const { name } = document;
+		const { name, tag } = document;
 		return <Table.Row tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' color='default'>{name}</Table.Cell>
-			<Table.Cell alignItems={'end'}>
+			<Table.Cell alignItems='end'>
+				{ tag?.name ?? '' }
+			</Table.Cell>
+			<Table.Cell alignItems='end'>
 				<Button onClick={onDownloadClick(document)} small aria-label={t('download')}>
 					<Icon name='download'/>
 				</Button>

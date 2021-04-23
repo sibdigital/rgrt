@@ -11,7 +11,6 @@ export async function findProtocols({ query = {}, fields = {}, pagination: { off
 	const total = await cursor.count();
 
 	const protocols = await cursor.toArray();
-	console.dir({ total, protocols, query, pagi: { offset, count }, or: query.$or ? query.$or[0]?.num ?? '' : '' });
 
 	return {
 		protocols,

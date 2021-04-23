@@ -1,7 +1,8 @@
 import { WorkingGroups } from '../../../models/server/raw';
 
-export async function findWorkingGroups({ query = {}, pagination: { offset, count, sort } }) {
+export async function findWorkingGroups({ query = {}, fields = {}, pagination: { offset, count, sort } }) {
 	const cursor = await WorkingGroups.find(query, {
+		fields,
 		sort: sort || { time: 1 },
 		skip: offset,
 		limit: count,

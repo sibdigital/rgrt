@@ -30,7 +30,7 @@ export const defaultErrandByProtocolItemFields = Object.freeze({
 export const defaultErrandByRequestFields = Object.freeze({
 	...defaultErrandFields,
 	errandType: { value: ErrandTypes.byRequestAnswer, required: true },
-	commentary: { value: '', required: true },
+	commentary: { value: '', required: false },
 	sender: { value: { group: '', organization: '', phone: '', email: '' }, required: true },
 	answerType: { value: {}, required: true },
 	protocol: { value: {}, required: false },
