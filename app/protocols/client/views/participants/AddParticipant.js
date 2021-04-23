@@ -39,15 +39,15 @@ const FilterByText = ({ setFilter, setIsFetching, ...props }) => {
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
 const useQuery = ({ text, itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
-	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	fields: JSON.stringify({ name: 1, email: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	query: JSON.stringify({
 		$or: [
-			{ username: { $regex: text || '', $options: 'i' } },
-			{ name: { $regex: text || '', $options: 'i' } },
 			{ surname: { $regex: text || '', $options: 'i' } },
+			{ name: { $regex: text || '', $options: 'i' } },
+			{ patronymic: { $regex: text || '', $options: 'i' } },
 		],
 	}),
-	sort: JSON.stringify({ [column]: sortDir(direction), usernames: column === 'name' ? sortDir(direction) : undefined }),
+	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	cache,
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
@@ -114,16 +114,17 @@ export function AddParticipant({ protocolId, close, onCreateParticipant }) {
 	return <VerticalBar.ScrollableContent>
 		<FilterByText setFilter={ setParams } setIsFetching={setIsFetching}/>
 		{findPersons && !findPersons.length
-			? <>
+			? <Box mb='x8' flexGrow={1} opacity={isFetching && '20%'}>
 				<Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
 					{t('No_data_found')}
 				</Tile>
 				{params.text !== '' && <Button
+					w='full'
 					mbe='x8' primary onClick={onCreateParticipant('create-participant')} aria-label={t('New')}>
 					{t('Participant_Create')}
 				</Button>
 				}
-			</>
+			</Box>
 			: <>
 				<Scrollable>
 					<Box mb='x8' flexGrow={1} opacity={isFetching && '20%'}>
