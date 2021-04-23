@@ -3,6 +3,7 @@ import { Button, Icon, Table, Box } from '@rocket.chat/fuselage';
 import { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import _ from 'underscore';
+import { Tooltip } from '@material-ui/core';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -14,6 +15,7 @@ import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndT
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { downLoadFile } from '../../../utils/client/methods/downloadFile';
 import { SuccessModal, WarningModal } from '../../../utils';
+import TagButton from '../../../tags/client/views/TagButton';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -26,7 +28,7 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction]);
 
-export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false, onNewFileAdded }) {
+export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false, onNewFileAdded, onNewFileAddedIds }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -47,6 +49,9 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 	}), [councilId, cache, isReload]);
 
 	const { data, state } = useEndpointDataExperimental('councils.findOne', query) || {};
+	// const { data: tags } = useEndpointDataExperimental('tags.list', useMemo(() => ({ query: JSON.stringify({ 'type.name': 'region' }) }), []));
+	//
+	// useMemo(() => console.dir({ tags }), [tags]);
 
 	useEffect(() => {
 		if (data && data.documents) {
@@ -89,13 +94,16 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		await downLoadFile(file)(e);
 	};
 
-	const onFileDeleteConfirm = async (fileId) => {
-		console.log(fileId);
+	const onFileDeleteConfirm = async (fileId, orderIndex) => {
 		try {
+			console.dir({ fileId, orderIndex, onNewFileAddedIds });
+			if (!fileId && onNewFileAddedIds) {
+				fileId = onNewFileAddedIds.find((file) => file.orderIndex === orderIndex)._id;
+				console.dir({ fileId });
+			}
 			await deleteFileFromCouncil(councilId, fileId);
 
-			const arr = await updateCouncilFilesOrder(councilId, data.documents.filter((file) => file._id !== fileId));
-			// setAttachedFiles(arr);
+			await updateCouncilFilesOrder(councilId, data.documents.filter((file) => file._id !== fileId));
 
 			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('File_has_been_deleted')} onClose={() => { setModal(undefined); close(); onChange(); }}/>);
 		} catch (error) {
@@ -104,12 +112,12 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		}
 	};
 
-	const openFileDeleteConfirm = (fileId) => setModal(() => <WarningModal title={t('Are_you_sure')} onDelete={() => onFileDeleteConfirm(fileId) } onCancel={() => setModal(undefined)}/>);
+	const openFileDeleteConfirm = (fileId, orderIndex) => setModal(() => <WarningModal title={t('Are_you_sure')} onDelete={() => onFileDeleteConfirm(fileId, orderIndex) } onCancel={() => setModal(undefined)}/>);
 
-	const onDeleteFileConfirmDel = (fileId) => async (e) => {
+	const onDeleteFileConfirmDel = (fileId, orderIndex) => async (e) => {
 		e.preventDefault();
 		try {
-			openFileDeleteConfirm(fileId);
+			openFileDeleteConfirm(fileId, orderIndex);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -128,6 +136,9 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		mediaQuery && <Th w='x200' key={'File_uploaded_uploadedAt'} color='default'>
 			{ t('File_uploaded_uploadedAt') }
 		</Th>,
+		mediaQuery && isSecretary && <Th w='x200' key={'Region'} color='default'>
+			{ t('Region') }
+		</Th>,
 		mediaQuery && isSecretary && <Th w='x40' key='moveUp'/>,
 		mediaQuery && isSecretary && <Th w='x40' key='moveDown'/>,
 		mediaQuery && <Th w='x40' key='download'/>,
@@ -135,7 +146,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 	], [mediaQuery, isSecretary]);
 
 	const renderRow = (document) => {
-		const { _id, title, ts, orderIndex } = document;
+		const { _id, title, ts, tag } = document;
 
 		const getStyle = (index) => {
 			let style = {};
@@ -154,6 +165,9 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 			<Table.Cell fontScale='p1' color='default'>{title}</Table.Cell>
 			{mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>}
 			{mediaQuery && isSecretary && <Table.Cell alignItems={'end'}>
+				{tag?.name ?? ''}
+			</Table.Cell>}
+			{mediaQuery && isSecretary && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>
 					<Icon name='arrow-down'/>
 				</Button>
@@ -169,7 +183,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 				</Button>
 			</Table.Cell>}
 			{isSecretary && <Table.Cell alignItems={'end'}>
-				<Button small onClick={onDeleteFileConfirmDel(document._id)} aria-label={t('Delete')}>
+				<Button small onClick={onDeleteFileConfirmDel(document._id, document.orderIndex)} aria-label={t('Delete')}>
 					<Icon name='trash'/>
 				</Button>
 			</Table.Cell>}

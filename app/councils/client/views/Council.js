@@ -3,13 +3,10 @@ import {
 	ButtonGroup,
 	Button,
 	Field,
-	Icon,
 	Label,
 	TextInput,
 	TextAreaInput,
-	Modal,
 	Tabs,
-	Table,
 	Select,
 	Box, Margins, Chip, Callout,
 } from '@rocket.chat/fuselage';
@@ -20,6 +17,7 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import ru from 'date-fns/locale/ru';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { isIOS, isSafari } from 'react-device-detect';
+import _ from 'underscore';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -47,6 +45,7 @@ import {
 	createSectionData,
 	validateProtocolData,
 } from '../../../protocols/client/views/lib';
+import AutoCompleteRegions from '../../../tags/client/views/AutoCompleteRegions';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -190,11 +189,13 @@ function Council({
 	const [invitedPersonsIds, setInvitedPersonsIds] = useState([]);
 	const [attachedFiles, setAttachedFiles] = useState([]);
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
+	const [currentTag, setCurrentTag] = useState({});
 	const [tab, setTab] = useState('files');
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [isSecretary, setIsSecretary] = useState(false);
 	const [isUserJoin, setIsUserJoin] = useState(false);
 	const [newAddedFiles, setNewAddedFiles] = useState([]);
+	const [newAddedFilesId, setNewAddedFilesId] = useState([]);
 	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
 	const [isCouncilFilesReload, setIsCouncilFilesReload] = useState(true);
 
@@ -420,17 +421,51 @@ function Council({
 				setAttachedFiles(attachedFilesBuf);
 				onChange();
 			} else {
-				const ids = await fileUploadToCouncil(currentUploadedFiles, { _id: councilId });
-				setAttachedFiles(attachedFiles ? attachedFiles.concat(currentUploadedFiles) : currentUploadedFiles);
+				console.dir({ beforeUpload: currentUploadedFiles });
+				const ids = await fileUploadToCouncil(currentUploadedFiles, currentTag, { _id: councilId });
+				let files = currentUploadedFiles;
+				console.dir({ ids, length: ids.length });
+				files = files.map((file) => {
+					file.tag = currentTag;
+					console.dir({ file });
+					return file;
+				});
+				// const files = currentUploadedFiles.map((file, index) => {
+				// 	console.dir({ file, index, id: ids[index] });
+				// 	const findId = ids.find((id) => {
+				// 		console.dir({ idfind: id });
+				// 		return id.orderIndex === file.orderIndex;
+				// 	});
+				// 	console.dir({ findId });
+				// 	return { ...file, _id: findId?._id ?? '' };
+				// });
+				console.dir({ arrayIds: ids, files });
+
+				setAttachedFiles(attachedFiles ? attachedFiles.concat(files) : files);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				setCurrentUploadedFiles([]);
-				setNewAddedFiles(currentUploadedFiles);
-				// setIsCouncilFilesReload(!isCouncilFilesReload);
-				console.dir({ filesIdKek: ids });
+				setNewAddedFiles(files);
+				setNewAddedFilesId(ids);
+
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
 		}
 	};
+
+	const handleAddTags = useCallback((value) => {
+		try {
+			// const arr = currentUploadedFiles.map((file) => {
+			// 	file.tag = value;
+			// 	return file;
+			// });
+			// console.dir({ arr });
+
+			setCurrentTag(value);
+			// setCurrentUploadedFiles(arr);
+		} catch (error) {
+			console.error(error);
+		}
+	}, []);
 
 	const joinToCouncil = async () => {
 		try {
@@ -674,18 +709,19 @@ function Council({
 					</Box>
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
-					&& <Field mbe='x8'>
-						<Field.Row>
-							<Button onClick={fileUpload} mie='10px' small primary aria-label={t('Save')}>
+					&& <Box mb='x16' display='flex' flexDirection='row'>
+						<AutoCompleteRegions width='50%' mie='x8' onSetTags={handleAddTags}/>
+						<Box width='50%' display='flex' alignItems='center'>
+							<Field.Label alignSelf='center' mis='x80' mie='x8'>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
+							<Button width='110px' height='28px' onClick={fileUpload} mie='1rem' small primary aria-label={t('Save')}>
 								{t('Save')}
 							</Button>
-							<Field.Label alignSelf='center'>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
-						</Field.Row>
-					</Field>
+						</Box>
+					</Box>
 				}
 				{tab === 'files'
 					&& <Box maxHeight='500px'>
-						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload} onNewFileAdded={newAddedFiles}/>
+						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload} onNewFileAdded={newAddedFiles} onNewFileAddedIds={newAddedFilesId}/>
 					</Box>
 				}
 			</Page.ScrollableContent>
