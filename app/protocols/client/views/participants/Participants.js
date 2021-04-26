@@ -126,7 +126,7 @@ function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 		{ isAllowedEdit && <Icon onClick={openConfirmDelete(user._id)} pi='x8' name='cross'/>}
 	</Box>;
 
-	return <VerticalBar.ScrollableContent>
+	return <VerticalBar.ScrollableContent mbe='x32'>
 		<Box mbe='x8' flexGrow={1}>
 			{data && !data.users.length
 				? <Tile fontScale='p1' elevation='0' color='info' textAlign='center'>
@@ -140,7 +140,7 @@ function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 				</>
 			}
 		</Box>
-		{ isAllowedEdit && <Button primary onClick={onAddClick('add-participant')} aria-label={t('New')}>
+		{ isAllowedEdit && <Button minHeight='40px' primary onClick={onAddClick('add-participant')} aria-label={t('New')}>
 			{t('Participant_Add')}
 		</Button>}
 	</VerticalBar.ScrollableContent>;

@@ -106,7 +106,7 @@ export function ProtocolPage() {
 	// 	fields: JSON.stringify({ personId: 1 }),
 	// }), [data, getItemsResponsibles]));
 
-	const title = useMemo(() => [t('Protocol'), [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
+	const title = useMemo(() => [t('Protocol'), ' ', [t('Date_to'), ' ', formatDate(data?.d ?? '')].join(''), ' ', ['№ ', data?.num ?? ''].join('')], [data, formatDate, t]);
 
 	const deleteProtocol = useMethod('deleteProtocol');
 	const deleteSection = useMethod('deleteSection');
@@ -415,7 +415,7 @@ export function ProtocolPage() {
 								</Box>
 							))
 							: <Box is='span' fontScale='h1' alignSelf='center'>
-								{title.toString()}
+								{title.join('')}
 							</Box>
 						}
 					</Box>
