@@ -47,6 +47,9 @@ export const GenericTable = forwardRef(function GenericTable({
 	params: paramsDefault = '',
 	FilterComponent = () => null,
 	isPagination = true,
+	isDefault = true,
+	setCurrentParam = () => { },
+	setItemsPerPageParam = () => { },
 	...props
 }, ref) {
 	const t = useTranslation();
@@ -60,8 +63,28 @@ export const GenericTable = forwardRef(function GenericTable({
 	const params = useDebouncedValue(filter, 500);
 
 	useEffect(() => {
-		setParams({ ...params, current, itemsPerPage });
+		if (isDefault) {
+			setParams({ ...params, current, itemsPerPage });
+		}
 	}, [params, current, itemsPerPage, setParams]);
+
+	useEffect(() => {
+		if (!isDefault && paramsDefault && typeof paramsDefault.current === 'number') {
+			setCurrent(paramsDefault.current);
+		}
+	}, [paramsDefault]);
+
+	const handleChangeItemsPerPage = useCallback((_itemsPerPage) => {
+		console.log('_itemsPerPage');
+		setItemsPerPage(_itemsPerPage);
+		setItemsPerPageParam && setItemsPerPageParam(_itemsPerPage);
+	}, [setItemsPerPageParam]);
+
+	const handleChangeCurrent = useCallback((current) => {
+		console.log('pagination');
+		setCurrent(current);
+		setCurrentParam && setCurrentParam(current);
+	}, [setCurrentParam]);
 
 	const Loading = useCallback(() => {
 		const headerCells = flattenChildren(header);
@@ -105,8 +128,8 @@ export const GenericTable = forwardRef(function GenericTable({
 					itemsPerPageLabel={itemsPerPageLabel}
 					showingResultsLabel={showingResultsLabel}
 					count={total || 0}
-					onSetItemsPerPage={setItemsPerPage}
-					onSetCurrent={setCurrent}
+					onSetItemsPerPage={(_itemsPerPage) => handleChangeItemsPerPage(_itemsPerPage)}
+					onSetCurrent={(_current) => handleChangeCurrent(_current)}
 				/>}
 			</>
 		}
