@@ -377,6 +377,26 @@ FlowRouter.route('/working-groups-request/add/:context/:id?', {
 	}],
 });
 
+FlowRouter.route('/materials', {
+	name: 'materials',
+	action: () => {
+		renderRouteComponent(() => import('../app/materials/client/views/index'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
+FlowRouter.route('/material/:id', {
+	name: 'material',
+	action: () => {
+		renderRouteComponent(() => import('../app/materials/client/views/material'), { template: 'main', region: 'center' });
+	},
+	triggersExit: [function() {
+		$('.main-content').addClass('rc-old');
+	}],
+});
+
 FlowRouter.route('/directory/:tab?', {
 	name: 'directory',
 	action: () => {

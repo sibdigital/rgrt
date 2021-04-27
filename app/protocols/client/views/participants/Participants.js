@@ -24,10 +24,9 @@ const clickable = css`
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
-const useQuery = ({ _id, itemsPerPage, current }, [ column, direction ], cache) => useMemo(() => ({
+const useQuery = ({ _id, itemsPerPage, current }, [column, direction], cache) => useMemo(() => ({
 	query: JSON.stringify({ _id }),
-	fields: JSON.stringify({ name: 1, username: 1, emails: 1,
-		surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
+	fields: JSON.stringify({ name: 1, username: 1, emails: 1, surname: 1, patronymic: 1, organization: 1, position: 1, phone: 1 }),
 	sort: JSON.stringify({ [column]: sortDir(direction) }),
 	...itemsPerPage && { count: itemsPerPage },
 	...current && { offset: current },
@@ -90,7 +89,7 @@ export function Participants({ protocolId, onAddParticipantClick }) {
 	}, []);
 
 	return <ParticipantsWithData data={data} protocolId={protocolId} onAddClick={onAddParticipantClick} onChange={onChange}/>;
-};
+}
 
 function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 	const t = useTranslation();
@@ -120,7 +119,7 @@ function ParticipantsWithData({ data, protocolId, onAddClick, onChange }) {
 		display='flex'
 	>
 		<Box is='span' flexGrow={1}>
-			<Box fontSize={"16px"}>{user.surname} {user.name} {user.patronymic}</Box>
+			<Box fontSize={'16px'}>{user.surname} {user.name} {user.patronymic}</Box>
 			{/* <Box color='hint'>{user.position}, {user.organization}</Box> */}
 		</Box>
 		{ isAllowedEdit && <Icon onClick={openConfirmDelete(user._id)} pi='x8' name='cross'/>}

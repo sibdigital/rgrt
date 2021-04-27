@@ -147,6 +147,14 @@ const toolbarButtons = () => [
 		},
 	},
 	{
+		name: t('Materials'),
+		icon: 'team',
+		context: 'administration',
+		action: () => {
+			FlowRouter.go('materials');
+		},
+	},
+	{
 		name: [t('Create_new'), t('Channel')].join(' '),
 		icon: 'hashtag',
 		context: 'interaction',

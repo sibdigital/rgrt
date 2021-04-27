@@ -32,11 +32,13 @@ const useQuery = ({ text, itemsPerPage, current }, [column, direction], prevIds)
 	...current && { offset: current },
 }), [text, column, direction, prevIds, itemsPerPage, current]);
 
-function AutoCompleteRegions({ onSetTags, prevTags, ...props }) {
+function AutoCompleteRegions({
+	onSetTags,
+	prevTags,
+	isMultiple = false,
+	...props
+}) {
 	const t = useTranslation();
-	const formatDateAndTime = useFormatDateAndTime();
-	const dispatchToastMessage = useToastMessageDispatch();
-	const setModal = useSetModal();
 
 	const [currentTag, setCurrentTag] = useState('');
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 10 });
@@ -61,7 +63,7 @@ function AutoCompleteRegions({ onSetTags, prevTags, ...props }) {
 		<Field.Label alignSelf='center' maxWidth='max-content' mie='x8'>{t('Region')}</Field.Label>
 		<Autocomplete
 			fullWidth
-			// multiple
+			multiple={isMultiple}
 			id='tags-standard'
 			options={tagsData?.tags ?? []}
 			// value={currentTag}
