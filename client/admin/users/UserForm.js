@@ -92,6 +92,7 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 
 	const person = persons?.persons.filter((person) => person._id === personId)[0];
 
+	console.log(phone);
 	const autofillDataFromPerson = (person) => {
 		handleSurname(person.surname);
 		handleName(person.name);
@@ -100,6 +101,8 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 		handlePosition(person.position);
 		handleOrganization(person.organization);
 		handleWorkingGroup(person.group?._id);
+		handlePhone(person.phone);
+		handleEmail(person.email);
 	}
 
 	const resetFilledData = (person) => {
@@ -110,6 +113,8 @@ export default function UserForm({ formValues, formHandlers, availableRoles, per
 		handlePosition('');
 		handleOrganization('');
 		handleWorkingGroup('');
+		handlePhone('7');
+		handleEmail('');
 	};
 
 	useEffect(() => {
