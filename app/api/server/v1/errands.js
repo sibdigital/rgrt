@@ -91,7 +91,7 @@ API.v1.addRoute('errands.list', { authRequired: true }, {
 
 		return API.v1.success({
 			errands: result?.errands ?? [],
-			count: result?.length ?? 0,
+			count: result?.count ?? 0,
 			offset,
 			total: result?.total ?? 0,
 		});

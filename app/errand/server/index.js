@@ -8,3 +8,4 @@ import './methods/editErrand';
 import './methods/deleteErrand';
 import './methods/insertOrUpdateErrand';
 import './methods/checkErrandByProtocolItemId';
+import './methods/deleteFileFromErrand';

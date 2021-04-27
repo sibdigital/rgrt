@@ -79,6 +79,18 @@ export class Errands extends Base {
 		data.unread = false;
 		return this.update({ _id }, { $set: { ...data } });
 	}
+
+	removeUploadedFile(errandId, fileId) {
+		const data = this.findOne({ _id: errandId });
+		if (!data) {
+			return false;
+		}
+
+		if (data.documents) {
+			data._updatedAt = new Date();
+			return this.update({ _id: errandId }, { $pull: { documents: { _id: fileId } } });
+		}
+	}
 }
 
 export default new Errands();

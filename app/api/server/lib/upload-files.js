@@ -1,7 +1,8 @@
 import { UploadFiles } from '../../../models/server/raw';
 
-export async function findUploadFiles({ query = {}, pagination: { offset, count, sort } }) {
+export async function findUploadFiles({ query = {}, fields = {}, pagination: { offset, count, sort } }) {
 	const cursor = await UploadFiles.find(query, {
+		fields,
 		sort: sort || { time: 1 },
 		skip: offset,
 		limit: count,

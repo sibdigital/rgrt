@@ -4,10 +4,11 @@ import { findUploadFiles, findOneUploadFile, findUploadFile } from '../lib/uploa
 API.v1.addRoute('upload-files.list', { authRequired: true }, {
 	get() {
 		const { offset, count } = this.getPaginationItems();
-		const { sort, query } = this.parseJsonQuery();
+		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		return API.v1.success(Promise.await(findUploadFiles({
 			query,
+			fields: stockFields,
 			pagination: {
 				offset,
 				count,
