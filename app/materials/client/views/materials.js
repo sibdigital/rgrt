@@ -52,7 +52,7 @@ export function Materials({
 			if (!isDeleted) {
 				await deleteMaterial(material._id);
 			}
-			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('Protocol_Has_Been_Deleted')} onClose={() => { setModal(undefined); onChange(); }}/>);
+			setModal(() => <SuccessModal title={t('Deleted')} contentText={t('Files_Has_Been_Deleted')} onClose={() => { setModal(undefined); onChange(); }}/>);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
@@ -60,7 +60,7 @@ export function Materials({
 
 	const onDel = (material) => () => { onDeleteConfirm(material); };
 
-	const onDeleteClick = (material) => () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Protocol_Delete_Warning')} onDelete={onDel(material)} onCancel={() => setModal(undefined)}/>);
+	const onDeleteClick = (material) => () => setModal(() => <WarningModal title={t('Are_you_sure')} contentText={t('Files_Delete_Warning')} onDelete={onDel(material)} onCancel={() => setModal(undefined)}/>);
 
 	const header = useMemo(() => [
 		<Th key={'name'} direction={sort[1]} active={sort[0] === 'num'} onClick={onHeaderClick} sort='name' color='default'>{t('Name')}</Th>,
