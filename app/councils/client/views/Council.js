@@ -543,11 +543,11 @@ function Council({
 						if (agendaData?.sections) {
 							let sectionNumber = 1;
 							for (const section of agendaData.sections) {
-								const itemNumber = 1;
-								const sectionData = createSectionData(sectionNumber, section.item);
+								// const itemNumber = 1;
+								const sectionData = createSectionData(sectionNumber, section.issueConsideration, section.speakers ?? []);
 								sectionData.items = [];
-								const itemData = createItemData(itemNumber, section.issueConsideration, section.speakers ?? []);
-								sectionData.items.push(itemData);
+								// const itemData = createItemData(itemNumber, section.issueConsideration);
+								// sectionData.items.push(itemData);
 								protocolData.sections.push(sectionData);
 								sectionNumber++;
 							}
@@ -562,7 +562,7 @@ function Council({
 				};
 				const protocolId = await createProtocol();
 				if (protocolId) {
-					FlowRouter.go(`/protocol/${ protocolId }/edit`);
+					FlowRouter.go(`/protocol/${ protocolId }`);
 				}
 			} catch (error) {
 				dispatchToastMessage({ type: 'error', message: error });

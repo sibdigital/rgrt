@@ -1,4 +1,6 @@
 // Here previousData will define if it is an update or a new entry
+import _ from 'underscore';
+
 export function validateProtocolData(protocolData) {
 	const errors = [];
 
@@ -45,7 +47,7 @@ export function validateSectionData(sectionData) {
 	return errors;
 }
 
-export function createSectionData(number, name = '', speakers = '', previousData) {
+export function createSectionData(number, name = '', speakers = [], previousData) {
 	const sectionData = {
 	};
 
@@ -54,7 +56,11 @@ export function createSectionData(number, name = '', speakers = '', previousData
 	}
 	sectionData.num = number;
 	sectionData.name = name;
-	sectionData.speakers = speakers;
+	if (speakers && _.isArray(speakers) && speakers.length > 0) {
+		sectionData.speakers = speakers;
+	} else {
+		sectionData.speakers = [];
+	}
 
 	return sectionData;
 }
