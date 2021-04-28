@@ -4,7 +4,6 @@ import Busboy from 'busboy';
 import { API } from '../api';
 import { findErrands, findErrand } from '../lib/errands';
 import { Persons } from '../../../models/server';
-import { hasPermission } from '../../../authorization';
 import { FileUpload } from '../../../file-upload';
 
 
@@ -38,7 +37,13 @@ API.v1.addRoute('errands', { authRequired: true }, {
 
 		const userId = Meteor.userId();
 
-		const person = Persons.findOne({ userId: userId });
+		const meteorUser = Meteor.user();
+
+		const personQuery = {
+			...meteorUser?.personId ? { _id: meteorUser.personId } : { userId },
+		};
+
+		const person = Persons.findOne(personQuery);
 
 		const formedQuery = {};
 
