@@ -192,7 +192,7 @@ API.v1.addRoute('protocols.getProtocolItemMaxNumber', { authRequired: true }, {
 		if (cursor.sections) {
 			try {
 				cursor.sections.forEach((section) => {
-					if (section._id === query.sectionId) {
+					if (section._id === query.sectionId && section.items && section.items.length > 0) {
 						result.number = section.items.length + 1;
 					}
 				});

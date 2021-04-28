@@ -55,7 +55,7 @@ export function AddProtocol({ goToNew, close, onChange, ...props }) {
 			const result = await saveAction(
 				date,
 				number,
-				place
+				place,
 			);
 			dispatchToastMessage({ type: 'success', message: t('Protocol_Added_Successfully') });
 			goToNew(result)();
