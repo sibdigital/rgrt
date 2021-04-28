@@ -33,8 +33,8 @@ export function Requests({
 		<Th key={'Council'} style={{ width: '230px' }} color='default'>
 			{t('Council')}
 		</Th>,
-		<Th key={'Protocol_Item'} style={{ width: '240px' }} color='default'>
-			{t('Protocol_Item')}
+		<Th key={'Errand_Base'} style={{ width: '240px' }} color='default'>
+			{t('Errand_Base')}
 		</Th>,
 		<Th key={'Errand_Charged_to'} color='default'>
 			{t('Errand_Charged_to')}
@@ -51,6 +51,8 @@ export function Requests({
 		const councilLabel = council?.d ? [t('Council'), ' от ', formatDate(council.d)].join('') : '';
 		const protocolLabel = protocol?.d && protocol?.itemNum && protocol?.num ? [t('Protocol_Item'), ' №', protocol.itemNum, ' протокола от ', formatDate(protocol.d), ' №', protocol.num].join('') : '';
 		const responsible = typeof itemResponsible === 'object' ? constructPersonFIO(itemResponsible) : itemResponsible;
+		const mailLabel = request.mail ? [t('Working_group_mail')].join('') : '';
+		const baseLabel = request.requestType?.state === 1 ? protocolLabel : mailLabel;
 
 		return <Table.Row key={_id} tabIndex={0} role='link' action>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>{number ?? '???'}</Table.Cell>
@@ -58,7 +60,7 @@ export function Requests({
 				{councilLabel}
 			</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'>
-				{protocolLabel}
+				{baseLabel}
 			</Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{responsible}</Box></Table.Cell>
 			<Table.Cell fontScale='p1' onClick={onClick(_id)} color='default'><Box withTruncatedText>{formatDate(ts)}</Box></Table.Cell>

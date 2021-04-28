@@ -123,7 +123,7 @@ FlowRouter.route('/errands/:type?', {
 	}],
 });
 
-FlowRouter.route('/errand/:id', {
+FlowRouter.route('/errand/:id/:context?', {
 	name: 'errand',
 	action: () => {
 		renderRouteComponent(() => import('../app/errand/client/views/errandsPage/EditErrand'), { template: 'main', region: 'center' });

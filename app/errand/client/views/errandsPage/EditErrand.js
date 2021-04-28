@@ -33,6 +33,7 @@ export function EditErrandPage() {
 	const userId = useUserId();
 
 	const id = useRouteParameter('id');
+
 	const idParams = useMemo(() => id.split('&'), [id]);
 
 	const query = useMemo(() => ({
@@ -69,7 +70,6 @@ export function EditErrandPage() {
 		return <Callout margin='x16' type='danger'>{error}</Callout>;
 	}
 	// console.dir({ idParams });
-	// console.dir(idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]] } : null);
 
 	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, userId } } : data ?? null} request={requestData ?? null}/>;
 }
@@ -77,6 +77,8 @@ export function EditErrandPage() {
 export function NewErrand({ errand, request, protocolId = null }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
+	const routeContext = useRouteParameter('context');
+	console.dir({ routeContext });
 
 	const [context, setContext] = useState('');
 	const [items, setItems] = useState([]);
@@ -90,7 +92,18 @@ export function NewErrand({ errand, request, protocolId = null }) {
 	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
 	const updateItemStatus = useMethod('updateItemStatus');
 
-	const { values, handlers, hasUnsavedChanges, allFieldAreFilled, allRequiredFieldAreFilled } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
+	const titleLabel = useMemo(() => {
+		let label = t('Errand');
+		if (errand?.errandType?.key === ErrandTypes.byRequestAnswer.key) {
+			label = t('Working_group_request_answer_errand');
+		}
+		if (routeContext === 'newAnswer') {
+			label = t('Working_group_request_answer');
+		}
+		return label;
+	}, [errand?.errandType?.key, routeContext, t]);
+
+	const { values, handlers, allFieldAreFilled } = useDefaultErrandForm({ defaultValues: errand, errandType: ErrandTypes[errand?.errandType?.key ?? 'default'] });
 
 	const getProtocolItemStatus = useCallback((errandStatusState, title) => {
 		let result = { state: 1, title: 'Новое' };
@@ -172,7 +185,7 @@ export function NewErrand({ errand, request, protocolId = null }) {
 			<Page.Header title=''>
 				<Field width={'100%'} display={'block'} marginBlock={'15px'}>
 					<GoBackButton/>
-					<Label fontScale='h1'>{t('Errand')}</Label>
+					<Label fontScale='h1'>{titleLabel ?? t('Errand')}</Label>
 				</Field>
 				<ButtonGroup mis='auto'>
 					{/*{ !chargedToCurrentUser && <Button primary small aria-label={_t('Save')} onClick={onEmailSendClick}>{t('Send_email')}</Button>}*/}

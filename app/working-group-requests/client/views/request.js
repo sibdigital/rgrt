@@ -121,7 +121,7 @@ export function DocumentPage() {
 	// const answers = useMemo(() => data?.answers ?? [], [data]);
 	const answers = useMemo(() => errandsData?.errands ?? [], [errandsData]);
 
-	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&${ ErrandTypes.byRequestAnswer.key }&${ requestId }`].join(''), [requestId]);
+	const address = useMemo(() => [settings.get('Site_Url'), `errand/add&${ ErrandTypes.byRequestAnswer.key }&${ requestId }/newAnswer`].join(''), [requestId]);
 	const addressLabel = useMemo(() => [settings.get('Site_Url'), 'd/', data?.inviteLink ?? ''].join(''), [data]);
 
 	const onChange = useCallback(() => {
