@@ -134,9 +134,27 @@ function getProtocolSectionParagraphs(protocol) {
 			},
 			style: 'defaultFontStyle',
 		}));
+		let sectionSpeakers = '(';
+		_.isArray(section.speakers) && section.speakers.forEach((responsible, index) => {
+			if (index > 0) {
+				sectionSpeakers = sectionSpeakers.concat(', ');
+			}
+			sectionSpeakers = sectionSpeakers.concat(responsible.surname ? `${ responsible.surname }` : '');
+		});
+		sectionSpeakers = sectionSpeakers.concat(')');
+
+		_.isArray(section.speakers) && section.speakers?.length > 0 && result.push(new Paragraph({
+			children: [
+				new TextRun({
+					text: sectionSpeakers,
+				}),
+			],
+			alignment: AlignmentType.CENTER,
+			style: 'defaultFontStyle',
+		}));
 
 		if (section.items) {
-			section.items.forEach((item, index) => {
+			section.items.forEach((item) => {
 				result.push(new Paragraph({
 					children: [
 						new TextRun({
@@ -284,6 +302,17 @@ Meteor.methods({
 				],
 				style: 'defaultFontStyle',
 				alignment: AlignmentType.CENTER,
+				spacing: {
+					after: 120,
+				},
+				border: {
+					bottom: {
+						color: 'black',
+						space: 8,
+						value: 'single',
+						size: 4,
+					},
+				},
 			}),
 
 			new Paragraph({
