@@ -154,10 +154,6 @@ export function WorkingGroupMeetingPage() {
 			return files;
 		});
 		$input.click();
-
-		if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
-			$input.click();
-		}
 		onChange();
 	};
 

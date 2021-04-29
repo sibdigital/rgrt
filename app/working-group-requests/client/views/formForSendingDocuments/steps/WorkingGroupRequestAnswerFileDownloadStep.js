@@ -272,10 +272,6 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 			$input.remove();
 		});
 		$input.click();
-
-		if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
-			$input.click();
-		}
 	};
 
 	const handleFileUploadChipClick = (index) => () => {
