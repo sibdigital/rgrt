@@ -1670,6 +1670,7 @@
   "Files_Has_Been_Deleted": "Файл удален",
   "Files_Name_Search": "Поиск по названию файла",
   "Files_only": "Удалять только прикрепленные файлы. Сообщения останутся",
+  "Files_region_updated": "Регион у файла обновлен",
   "FileSize_KB": "__fileSize__ КБ",
   "FileSize_MB": "__fileSize__ МБ",
   "FileSize_Bytes": "__fileSize__ байт",
@@ -2904,6 +2905,7 @@
   "Regenerate_codes": "Восстановить коды",
   "Regexp_validation": "Проверка используя RegExp",
   "Region": "Регион",
+  "Region_Change": "Изменение региона",
   "Regions": "Регионы",
   "Register": "Зарегистрировать новую учетную запись",
   "Register_Server": "Регистрация сервера",
@@ -3587,7 +3589,6 @@
   "Unmute_someone_in_room": "Сделать незаглушенным кого-нибудь в комнате",
   "Unmute_user": "Сделать незаглушенным пользователя",
   "Unnamed": "Без названия",
-
   "Unpin": "Открепить",
   "Unpin_Message": "Открепить сообщение",
   "Unread": "Не прочитано",
