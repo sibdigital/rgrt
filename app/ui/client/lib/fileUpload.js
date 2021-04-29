@@ -157,7 +157,7 @@ export const uploadFileWithCouncil = async (councilId, { description, fileName, 
 	data.append('file', file, fileName);
 	data.append('ts', ts ?? new Date());
 	orderIndex && data.append('orderIndex', orderIndex);
-	if (tag) {
+	if (tag && tag._id && tag.name) {
 		data.append('tagId', tag._id);
 		data.append('tagName', tag.name);
 	}
@@ -362,7 +362,7 @@ export const uploadFileWithWorkingGroupRequestAnswer = async (workingGroupReques
 export const uploadFileWithErrand = async (errandId, { fileName, file, tag }) => {
 	const data = new FormData();
 	data.append('file', file, fileName);
-	if (tag) {
+	if (tag && tag._id && tag.name) {
 		data.append('tagId', tag._id);
 		data.append('tagName', tag.name);
 	}

@@ -28,7 +28,7 @@ const useQuery = ({ itemsPerPage, current }, [column, direction]) => useMemo(() 
 	...current && { offset: current },
 }), [itemsPerPage, current, column, direction]);
 
-export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false, onNewFileAdded, onNewFileAddedIds }) {
+export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = false, onNewFileAdded, onNewFileAddedIds, handleTagChanged }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -49,9 +49,6 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 	}), [councilId, cache, isReload]);
 
 	const { data, state } = useEndpointDataExperimental('councils.findOne', query) || {};
-	// const { data: tags } = useEndpointDataExperimental('tags.list', useMemo(() => ({ query: JSON.stringify({ 'type.name': 'region' }) }), []));
-	//
-	// useMemo(() => console.dir({ tags }), [tags]);
 
 	useEffect(() => {
 		if (data && data.documents) {
@@ -139,6 +136,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		mediaQuery && isSecretary && <Th w='x200' key={'Region'} color='default'>
 			{ t('Region') }
 		</Th>,
+		mediaQuery && isSecretary && <Th w='x40' key='edit'/>,
 		mediaQuery && isSecretary && <Th w='x40' key='moveUp'/>,
 		mediaQuery && isSecretary && <Th w='x40' key='moveDown'/>,
 		mediaQuery && <Th w='x40' key='download'/>,
@@ -166,6 +164,22 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 			{mediaQuery && <Table.Cell fontScale='p1' color='default'>{formatDateAndTime(ts ?? new Date())}</Table.Cell>}
 			{mediaQuery && isSecretary && <Table.Cell alignItems={'end'}>
 				{tag?.name ?? ''}
+			</Table.Cell>}
+			{mediaQuery && isSecretary && <Table.Cell alignItems='end'>
+				<Tooltip title={t('Region_Change')} arrow placement='top'>
+					<Button
+						onClick={() => {
+							handleTagChanged(document);
+							// tag?._id && setCurrentTag(tag);
+							// setContext('uploadFiles');
+							// setCurrentUploadedFiles([document]);
+						}}
+						small
+						aria-label={t('Region_Change')}
+					>
+						<Icon name='edit'/>
+					</Button>
+				</Tooltip>
 			</Table.Cell>}
 			{mediaQuery && isSecretary && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={t('moveUp')} onClick={() => moveFileUpOrDown('up', document.index)} style={{ transform: 'rotate(180deg)', transition: 'all 0s' }}>

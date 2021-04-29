@@ -190,6 +190,7 @@ function Council({
 	const [attachedFiles, setAttachedFiles] = useState([]);
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
 	const [currentTag, setCurrentTag] = useState({});
+	const [isTagChanged, setIsTagChanged] = useState(false);
 	const [tab, setTab] = useState('files');
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [isSecretary, setIsSecretary] = useState(false);
@@ -248,6 +249,7 @@ function Council({
 	const addCouncilToPersons = useMethod('addCouncilToPersons');
 	const deletePersonFromCouncil = useMethod('deletePersonFromCouncil');
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
+	const updateDocumentTag = useMethod('updateDocumentTag');
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -424,33 +426,39 @@ function Council({
 				console.dir({ beforeUpload: currentUploadedFiles });
 				const ids = await fileUploadToCouncil(currentUploadedFiles, currentTag, { _id: councilId });
 				let files = currentUploadedFiles;
-				console.dir({ ids, length: ids.length });
 				files = files.map((file) => {
 					file.tag = currentTag;
-					console.dir({ file });
 					return file;
 				});
-				// const files = currentUploadedFiles.map((file, index) => {
-				// 	console.dir({ file, index, id: ids[index] });
-				// 	const findId = ids.find((id) => {
-				// 		console.dir({ idfind: id });
-				// 		return id.orderIndex === file.orderIndex;
-				// 	});
-				// 	console.dir({ findId });
-				// 	return { ...file, _id: findId?._id ?? '' };
-				// });
-				console.dir({ arrayIds: ids, files });
+				console.dir({ files, currentTag });
 
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(files) : files);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				setCurrentUploadedFiles([]);
 				setNewAddedFiles(files);
 				setNewAddedFilesId(ids);
+				setCurrentTag({});
 
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
 		}
 	};
+
+	const fileUpdate = useCallback(async () => {
+		try {
+			const filesIdArrToUpdate = currentUploadedFiles.map((file) => file._id);
+			console.dir({ filesIdArrToUpdate });
+			await updateDocumentTag(councilId, filesIdArrToUpdate, currentTag);
+			setIsTagChanged(false);
+			setContext('');
+			setCurrentUploadedFiles([]);
+			setCurrentTag({});
+			setIsCouncilFilesReload(!isCouncilFilesReload);
+			dispatchToastMessage({ type: 'success', message: t('Files_region_updated') });
+		} catch (error) {
+			console.error(error);
+		}
+	}, [councilId, currentTag, isCouncilFilesReload, currentUploadedFiles, dispatchToastMessage, t, updateDocumentTag]);
 
 	const handleAddTags = useCallback((value) => {
 		try {
@@ -668,7 +676,7 @@ function Council({
 						</Button>
 					</Field.Row>
 				</Field>}
-				{tab === 'files' && isSecretary && <Field mbe='x8'>
+				{tab === 'files' && isSecretary && !isTagChanged && <Field mbe='x8'>
 					<ButtonGroup mis='auto' mie='x16'>
 						<Button disabled={isLoading} onTouchStart={() => isIOS && fileUploadClick()} onClick={() => !isIOS && fileUploadClick()} small primary aria-label={t('Upload_file')}>
 							{t('Upload_file')}
@@ -702,7 +710,7 @@ function Council({
 						<Margins inlineEnd='x4' blockEnd='x4'>
 							{currentUploadedFiles.map((file, index) =>
 								<Chip pi='x4' key={index} onClick={handleFileUploadChipClick(index)} border={file.fail ? '2px solid red' : ''} data-for='fileErrorTooltip' data-tip={ file.error ?? '' } style={{ whiteSpace: 'normal' }}>
-									{file.name ?? ''}
+									{file.name ?? file.title ?? ''}
 									<ReactTooltip id='fileErrorTooltip' effect='solid' place='top'/>
 								</Chip>)}
 						</Margins>
@@ -710,18 +718,30 @@ function Council({
 				}
 				{tab === 'files' && context === 'uploadFiles' && currentUploadedFiles?.length > 0
 					&& <Box mb='x16' display='flex' flexDirection='row'>
-						<AutoCompleteRegions width='50%' mie='x8' onSetTags={handleAddTags}/>
+						<AutoCompleteRegions width='50%' mie='x8' onSetTags={handleAddTags} prevTags={currentTag}/>
 						<Box width='50%' display='flex' alignItems='center'>
 							<Field.Label alignSelf='center' mis='x80' mie='x8'>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
-							<Button width='110px' height='28px' onClick={fileUpload} mie='1rem' small primary aria-label={t('Save')}>
-								{t('Save')}
+							{
+								isTagChanged
+								&& <Button
+									mie='x8'
+									small
+									primary
+									width='max-content'
+									onClick={() => { setIsTagChanged(false); setContext(''); setCurrentUploadedFiles([]); setCurrentTag({}); }}
+								>
+									{t('Cancel')}
+								</Button>
+							}
+							<Button width='110px' height='28px' onClick={() => isTagChanged ? fileUpdate() : fileUpload()} mie='1rem' small primary aria-label={t('Save')}>
+								{isTagChanged ? t('Save') : t('Upload')}
 							</Button>
 						</Box>
 					</Box>
 				}
 				{tab === 'files'
 					&& <Box maxHeight='500px'>
-						<CouncilFiles councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload} onNewFileAdded={newAddedFiles} onNewFileAddedIds={newAddedFilesId}/>
+						<CouncilFiles handleTagChanged={(doc) => { setIsTagChanged(true); setContext('uploadFiles'); setCurrentTag(doc.tag); setCurrentUploadedFiles([doc]); } } councilId={councilId} isSecretary={isSecretary} mediaQuery={mediaQuery} isReload={isCouncilFilesReload} onNewFileAdded={newAddedFiles} onNewFileAddedIds={newAddedFilesId}/>
 					</Box>
 				}
 			</Page.ScrollableContent>

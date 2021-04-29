@@ -5,6 +5,7 @@ import Chip from '@material-ui/core/Chip';
 import TextField from '@material-ui/core/TextField';
 import { isIOS } from 'react-device-detect';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
+import _ from 'underscore';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
@@ -40,19 +41,36 @@ function AutoCompleteRegions({
 }) {
 	const t = useTranslation();
 
-	const [currentTag, setCurrentTag] = useState('');
+	const [currentTag, setCurrentTag] = useState({});
 	const [params, setParams] = useState({ text: '', current: 0, itemsPerPage: 10 });
-	const [sort, setSort] = useState(['name']);
-	const [prevTagsId, setPrevTags] = useState([]);
+	const [sort, setSort] = useState(['region.name', 'asc']);
+	// const [prevTagsId, setPrevTagsId] = useState(_.isArray(prevTags) ? prevTags.map((tag) => tag._id) : []);
 
 	const debouncedParams = useDebouncedValue(params, 500);
 	const debouncedSort = useDebouncedValue(sort, 500);
+
+	const prevTagsId = useMemo(() => {
+		let result = [];
+		if (_.isArray(prevTags)) {
+			result = prevTags.map((tag) => tag._id);
+		} else if (prevTags && prevTags._id) {
+			result = [prevTags._id];
+		}
+		return result;
+	}, [prevTags]);
 
 	const query = useQuery(debouncedParams, debouncedSort, prevTagsId);
 
 	const { data: tagsData } = useEndpointDataExperimental('tags.list', query);
 
-	useMemo(() => console.dir({ tagsData }), [tagsData]);
+	useEffect(() => {
+		if (prevTags) {
+			setCurrentTag(prevTags);
+		}
+	}, [prevTags]);
+
+	// useMemo(() => console.dir({ tagsData }), [tagsData]);
+	useMemo(() => console.dir({ prevTagsId }), [prevTagsId]);
 
 	const handleChange = useCallback((value) => {
 		setCurrentTag(value);
@@ -66,9 +84,9 @@ function AutoCompleteRegions({
 			multiple={isMultiple}
 			id='tags-standard'
 			options={tagsData?.tags ?? []}
-			// value={currentTag}
+			value={currentTag}
 			forcePopupIcon={false}
-			getOptionLabel={(option) => option.name}
+			getOptionLabel={(option) => option?.name ?? ''}
 			// getOptionSelected={(option, value) => option._id === value._id}
 			renderOption={(option, state) =>
 				<Box
@@ -78,7 +96,7 @@ function AutoCompleteRegions({
 					height='100%'
 					onTouchStart={() => isIOS && handleChange([...currentTag, option]) }
 				>
-					{option.name}
+					{option?.name ?? ''}
 				</Box>
 			}
 			filterSelectedOptions

@@ -13,6 +13,7 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import ReactTooltip from 'react-tooltip';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import { Tooltip } from '@material-ui/core';
 
 import { useTranslation } from '../../../../../client/contexts/TranslationContext';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
@@ -28,6 +29,8 @@ import { filesValidation } from '../../../../ui/client/lib/fileUpload';
 import { useToastMessageDispatch } from '../../../../../client/contexts/ToastMessagesContext';
 import { mime } from '../../../../utils';
 import { getErrandFieldsForSave } from './ErrandForm';
+import AutoCompleteRegions from '../../../../tags/client/views/AutoCompleteRegions';
+import { useMethod } from '../../../../../client/contexts/ServerContext';
 
 function DefaultField({ title, renderInput, flexDirection = 'row', required = false, ...props }) {
 	const mediaQuery = useMediaQuery('(min-width: 520px)');
@@ -276,7 +279,7 @@ export function ErrandByProtocolItemFields({ inputStyles, values, handlers }) {
 	</Box>;
 }
 
-export function ErrandByRequestFields({ inputStyles, values, handlers, request, setContext, items, setItems, errandId }) {
+export function ErrandByRequestFields({ inputStyles, values, handlers, request, setContext, items, setItems, errandId, isSecretary = false }) {
 	const t = useTranslation();
 
 	const [tab, setTab] = useState('errand');
@@ -363,7 +366,6 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			handlers[handler]({ value, required: values[key].required ?? false });
 		}
 	}, [handlers, values]);
-	console.dir({ valuesInErrandFields: values });
 
 	return <Box display='flex' flexDirection='column' mbe='x16'>
 
@@ -394,12 +396,14 @@ export function ErrandByRequestFields({ inputStyles, values, handlers, request, 
 			</>
 		}
 		{ tab === 'files'
-			&& <AnswerFilesTable files={documents?.value ?? []} documents={documents} handleDocuments={handleDocuments}/>
+			&& <Box display='flex' flexDirection='column'>
+				<AnswerFilesTable errandId={errandId} files={documents?.value ?? []} documents={documents} handleDocuments={handleDocuments} isSecretary={isSecretary}/>
+			</Box>
 		}
 	</Box>;
 }
 
-function AnswerFilesTable({ files, documents, handleDocuments }) {
+function AnswerFilesTable({ errandId, files, documents, handleDocuments, isSecretary }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -407,6 +411,10 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 	const [currentUploadedFiles, setCurrentUploadedFiles] = useState([]);
 	const [staticFileIndex, setStaticFileIndex] = useState(0);
 	const [maxOrderFileIndex, setMaxOrderFileIndex] = useState(0);
+	const [currentTag, setCurrentTag] = useState({});
+	const [isTagChanged, setIsTagChanged] = useState(false);
+
+	const updateErrandDocumentTag = useMethod('updateErrandDocumentTag');
 
 	const handleFileUploadChipClick = (index) => () => {
 		setCurrentUploadedFiles(currentUploadedFiles.filter((file, _index) => _index !== index));
@@ -428,15 +436,35 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 				dispatchToastMessage({ type: 'error', message: t('Working_group_request_invite_file_upload_failed') });
 				setCurrentUploadedFiles(attachedFilesBuf);
 			} else {
-				// await fileUploadToErrand(currentUploadedFiles, { _id: errandId });
 				setContext('');
-				handleDocuments({ value: [...documents.value, ...currentUploadedFiles], required: documents.required });
+				const arr = currentUploadedFiles.map((file) => { if (currentTag._id) { file.tag = currentTag; } return file; });
+				handleDocuments({ value: [...documents.value, ...currentUploadedFiles.map((file) => { if (currentTag._id) { file.tag = currentTag; } return file; })], required: documents.required });
 				setCurrentUploadedFiles([]);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
 				dispatchToastMessage({ type: 'success', message: t('File_uploaded') });
 			}
 		}
-	}, [currentUploadedFiles, dispatchToastMessage, t]);
+	}, [currentUploadedFiles, dispatchToastMessage, documents, handleDocuments, maxOrderFileIndex, staticFileIndex, t, currentTag]);
+
+	const fileUpdate = useCallback(async () => {
+		try {
+			console.dir({ errandId });
+			errandId && await updateErrandDocumentTag(errandId, currentUploadedFiles.map((file) => file._id), currentTag);
+			setIsTagChanged(false);
+			setContext('');
+			setCurrentUploadedFiles([]);
+			setCurrentTag({});
+			const arr = [];
+			currentUploadedFiles.forEach((file) => {
+				arr.push({ ...file, tag: currentTag });
+			});
+			console.dir({ arrInUpdate: arr, currentTagInUpdate: currentTag });
+			handleDocuments({ value: arr, required: documents.required });
+			dispatchToastMessage({ type: 'success', message: t('Files_region_updated') });
+		} catch (error) {
+			console.error(error);
+		}
+	}, [currentTag, currentUploadedFiles, dispatchToastMessage, documents, errandId, handleDocuments, t, updateErrandDocumentTag]);
 
 	const onDownloadClick = (file) => async (e) => {
 		e.preventDefault();
@@ -497,10 +525,6 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 			$input.remove();
 		});
 		$input.click();
-
-		if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
-			$input.click();
-		}
 	};
 
 	const header = useMemo(() => [
@@ -510,8 +534,9 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		<Th w='x200' key={'Region'} color='default'>
 			{ t('Region') }
 		</Th>,
+		isSecretary && <Th w='x40' key='edit'/>,
 		<Th w='x40' key='download'/>,
-	], [t]);
+	], [t, isSecretary]);
 
 	const renderRow = (document) => {
 		const { name, tag } = document;
@@ -520,6 +545,22 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 			<Table.Cell alignItems='end'>
 				{ tag?.name ?? '' }
 			</Table.Cell>
+			{isSecretary && <Table.Cell alignItems='end'>
+				<Tooltip title={t('Region_Change')} arrow placement='top'>
+					<Button
+						onClick={() => {
+							setIsTagChanged(true);
+							tag?._id && setCurrentTag(tag);
+							setContext('uploadFiles');
+							setCurrentUploadedFiles([document]);
+						}}
+						small
+						aria-label={t('Region_Change')}
+					>
+						<Icon name='edit'/>
+					</Button>
+				</Tooltip>
+			</Table.Cell>}
 			<Table.Cell alignItems='end'>
 				<Button onClick={onDownloadClick(document)} small aria-label={t('download')}>
 					<Icon name='download'/>
@@ -528,9 +569,10 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Table.Row>;
 	};
 
-	// console.dir({ filesInErrandFields: files, documents });
+	// useMemo(() => console.dir({ currentTag }), [currentTag]);
+
 	return <Box display='flex' flexDirection='column'>
-		<Button mis='x16' mbe='x16' small primary width='max-content' onClick={fileUploadClick}>{t('Upload_file')}</Button>
+		{!isTagChanged && <Button mis='x16' mbe='x16' small primary width='max-content' onClick={fileUploadClick}>{t('Upload_file')}</Button>}
 		{context === 'uploadFiles' && currentUploadedFiles?.length > 0
 		&& <Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4'>
 			<Margins inlineEnd='x4' blockEnd='x4'>
@@ -543,12 +585,16 @@ function AnswerFilesTable({ files, documents, handleDocuments }) {
 		</Box>
 		}
 		{context === 'uploadFiles' && currentUploadedFiles?.length > 0
-		&& <Field mbe='x8'>
+		&& <Field mb='x8' display='flex' flexDirection='column'>
 			<Field.Row>
-				<Button onClick={fileUpload} mie='10px' small primary aria-label={t('Save')}>
-					{t('Save')}
-				</Button>
-				<Field.Label alignSelf='center'>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
+				<AutoCompleteRegions width='50%' mie='x8' onSetTags={setCurrentTag} prevTags={currentTag}/>
+				<Box width='50%' display='flex' alignItems='center'>
+					<Field.Label alignSelf='center' mis='x80' mie='x8'>{t('Number_of_files')} {currentUploadedFiles?.length ?? 0}</Field.Label>
+					{isTagChanged && <Button mie='x8' small primary width='max-content' onClick={() => { setIsTagChanged(false); setContext(''); setCurrentUploadedFiles([]); setCurrentTag({}); }}>{t('Cancel')}</Button>}
+					<Button onClick={() => isTagChanged ? fileUpdate() : fileUpload()} small primary aria-label={t('Save')}>
+						{isTagChanged ? t('Save') : t('Upload')}
+					</Button>
+				</Box>
 			</Field.Row>
 		</Field>
 		}

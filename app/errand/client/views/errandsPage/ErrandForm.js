@@ -170,6 +170,7 @@ export function getErrandFieldsForSave({ errand, errandType = ErrandTypes.defaul
 }
 
 function ErrandForm({
+	isSecretary = false,
 	defaultValues = null,
 	defaultHandlers = null,
 	onReadOnly = false,
@@ -200,7 +201,7 @@ function ErrandForm({
 			view = <ErrandByProtocolItemFields inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values}/>;
 			break;
 		case ErrandTypes.byRequestAnswer:
-			view = <ErrandByRequestFields errandId={errandId} inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} request={request} setItems={setItems} items={items} setContext={setContext}/>;
+			view = <ErrandByRequestFields isSecretary={isSecretary} errandId={errandId} inputStyles={inputStyles} marginBlockEnd={marginBlockEnd} handlers={handlers} values={values} request={request} setItems={setItems} items={items} setContext={setContext}/>;
 			break;
 		default:
 			break;

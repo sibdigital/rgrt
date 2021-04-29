@@ -134,6 +134,17 @@ export class Uploads extends Base {
 		return result;
 	}
 
+	updateFileTag(fileId, tag) {
+		const data = this.findOne({ _id: fileId });
+		if (!data) {
+			return false;
+		}
+
+		data._updatedAt = new Date();
+		data.tag = tag;
+		return this.update({ _id: fileId }, { $set: { ...data } });
+	}
+
 	deleteFile(fileId) {
 		if (this.model.direct && this.model.direct.remove != null) {
 			return this.model.direct.remove({ _id: fileId });

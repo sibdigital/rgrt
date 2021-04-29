@@ -170,7 +170,7 @@ API.v1.addRoute('errands.upload/:id', { authRequired: false }, {
 			const uploadedFile = fileStore.insertSync(details, file.fileBuffer);
 
 			uploadedFile.description = fields.description;
-			uploadedFile.tag = { _id: fields.tagId ?? '', name: fields.tagName ?? '' };
+			fields.tagId && fields.tagName && Object.assign(uploadedFile, { tag: { _id: fields.tagId, name: fields.tagName } });
 
 			Meteor.call('sendFileErrand', this.urlParams.id, uploadedFile);
 

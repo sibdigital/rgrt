@@ -19,7 +19,7 @@ Meteor.methods({
 			title: file.name,
 			name: file.name,
 			type: 'file',
-			tag: file.tag ?? {},
+			...file.tag && { tag: file.tag },
 			title_link: fileUrl,
 			title_link_download: true,
 		};

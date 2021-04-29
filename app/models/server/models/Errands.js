@@ -91,6 +91,23 @@ export class Errands extends Base {
 			return this.update({ _id: errandId }, { $pull: { documents: { _id: fileId } } });
 		}
 	}
+
+	updateFilesTag(errandId, filesIdArray, tag) {
+		const data = this.findOne({ _id: errandId });
+		if (!data || !data.documents) {
+			return false;
+		}
+
+		data._updatedAt = new Date();
+
+		data.documents = data.documents.map((file) => {
+			if (filesIdArray.includes(file._id)) {
+				file.tag = tag;
+			}
+			return file;
+		});
+		return this.update({ _id: errandId }, { $set: { ...data } });
+	}
 }
 
 export default new Errands();

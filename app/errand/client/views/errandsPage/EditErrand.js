@@ -54,7 +54,11 @@ export function EditErrandPage() {
 		query: JSON.stringify({ _id: idParams[0] === 'add' ? idParams[2] : data?.workingGroupRequestId ?? '' }),
 	}), [data, idParams]));
 
-	if ([state, personState, requestState].includes(ENDPOINT_STATES.LOADING)) {
+	const { data: rolesData, state: rolesState } = useEndpointDataExperimental('users.getRoles', useMemo(() => ({ query: JSON.stringify({ _id: userId }) }), [userId]));
+
+	const isSecretary = useMemo(() => rolesData?.roles?.some((role) => role === 'secretary') ?? false, [rolesData]);
+
+	if ([state, personState, requestState, rolesState].includes(ENDPOINT_STATES.LOADING)) {
 		return <Box w='full' pb='x24'>
 			<Skeleton mbe='x4'/>
 			<Skeleton mbe='x8' />
@@ -69,12 +73,11 @@ export function EditErrandPage() {
 		console.log('error');
 		return <Callout margin='x16' type='danger'>{error}</Callout>;
 	}
-	// console.dir({ idParams });
 
-	return <NewErrand errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, userId } } : data ?? null} request={requestData ?? null}/>;
+	return <NewErrand isSecretary={isSecretary} errand={idParams[0] === 'add' ? { errandType: ErrandTypes[idParams[1]], initiatedBy: { ...personData, userId } } : data ?? null} request={requestData ?? null}/>;
 }
 
-export function NewErrand({ errand, request, protocolId = null }) {
+export function NewErrand({ isSecretary, errand, request, protocolId = null }) {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const routeContext = useRouteParameter('context');
@@ -162,6 +165,7 @@ export function NewErrand({ errand, request, protocolId = null }) {
 			await updateItemStatus(errand.protocolItemId, status);
 		}
 
+		console.dir({ errandToSave, files, values, errandType });
 		await saveAction(errandToSave, files);
 	}, [errand, values, saveAction, request, getProtocolItemStatus, t, updateItemStatus]);
 
@@ -195,7 +199,7 @@ export function NewErrand({ errand, request, protocolId = null }) {
 				</ButtonGroup>
 			</Page.Header>
 			<Page.ScrollableContent padding='x24'>
-				<ErrandForm errandId={errand?._id} defaultValues={values} defaultHandlers={handlers} onReadOnly={false} errandType={ErrandTypes[errand?.errandType?.key ?? 'default']} request={request} setItems={setItems} items={items} setContext={setContext}/>
+				<ErrandForm isSecretary={isSecretary} errandId={errand?._id} defaultValues={values} defaultHandlers={handlers} onReadOnly={false} errandType={ErrandTypes[errand?.errandType?.key ?? 'default']} request={request} setItems={setItems} items={items} setContext={setContext}/>
 			</Page.ScrollableContent>
 		</Page>
 		<WorkingGroupRequestVerticalChooseBar protocolItems={items} protocolId={values.protocol?.value?._id ?? ''} handlers={{ handleItemResponsible: (val) => handleChoose(val, 'chargedTo', 'handleChargedTo'), handleProtocol: (val) => handleChoose(val, 'protocol', 'handleProtocol'), handleProtocolItems: (val) => handleChoose(val, 'protocolItems', 'handleProtocolItems') }} context={context} close={() => setContext('')}/>
