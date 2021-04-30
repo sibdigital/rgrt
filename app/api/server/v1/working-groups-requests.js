@@ -12,14 +12,16 @@ API.v1.addRoute('working-groups-requests.list', { authRequired: true }, {
 		const { sort, query, stockFields } = this.parseJsonQuery();
 
 		const userId = Meteor.userId();
-		const userRoles = Users.findOneById(userId, { fields: { roles: 1 }	});
-		const isUser = userRoles?.roles?.includes('admin') || userRoles?.roles?.includes('secretary');
+		const user = Users.findOneById(userId, { fields: { roles: 1, personId: 1 } });
+		const isUser = user?.roles?.includes('admin') || user?.roles?.includes('secretary');
 
 		if (!isUser) {
 			const person = Promise.await(Persons.findOne({ userId }, { fields: { _id: 1 } }));
+			// const newPerson = Promise.await(Persons.findOne({ _id: userRoles.personId }));
+			console.dir({ user, person });
 
 			return API.v1.success(Promise.await(findWorkingGroupsRequests({
-				query: { 'itemResponsible._id': person?._id ?? '' },
+				query: { 'itemResponsible._id': user.personId ?? person?._id ?? '' },
 				fields: stockFields,
 				pagination: {
 					offset,

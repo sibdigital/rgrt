@@ -11,7 +11,7 @@ function FinalInviteStep({ fileDownloadInfo = null }) {
 	const formatDate = useFormatDate();
 	const t = useTranslation();
 	const protocolLabel = fileDownloadInfo?.workingGroupRequestAnswer?.answerType.state === AnswerTypes.PROTOCOL.state ? ['По протоколу ', '№', fileDownloadInfo.workingGroupRequestAnswer.protocol?.num, t('Date_From'), formatDate(fileDownloadInfo.workingGroupRequestAnswer.protocol?.d)].join(' ') : '';
-	const mailLabel = fileDownloadInfo?.workingGroupRequestAnswer?.answerType.state === AnswerTypes.MAIL.state && ['По письму ', fileDownloadInfo.workingGroupRequestAnswer.mailAnswer ?? ''].join('');
+	const mailLabel = fileDownloadInfo?.workingGroupRequestAnswer?.answerType.state === AnswerTypes.MAIL.state && ['По письму ', fileDownloadInfo.workingGroupRequestAnswer.mail ?? ''].join('');
 
 	return <Box is='section' width='full' maxWidth='x480' margin='auto'>
 		<Tile is='main' padding='x40'>

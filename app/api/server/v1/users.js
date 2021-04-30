@@ -234,7 +234,7 @@ API.v1.addRoute('users.getRoles', { authRequired: true }, {
 
 API.v1.addRoute('users.getPerson', { authRequired: true }, {
 	get() {
-		const { query } = this.parseJsonQuery();
+		const { query, stockFields } = this.parseJsonQuery();
 		const fields = {
 			_id: 1,
 			userId: 1,
@@ -248,7 +248,7 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 		};
 
 		const user = Users.findOneById(query.userId, { ...fields, emails: 1, personId: 1 });
-		const person = Persons.findOne({ _id: user?.personId ?? '' }, { fields });
+		const person = Persons.findOne({ _id: user?.personId ?? '' }, { fields: stockFields });
 
 		if (!user || !query.userId) {
 			return API.v1.success({ });
@@ -282,14 +282,14 @@ API.v1.addRoute('users.getPerson', { authRequired: true }, {
 				email,
 				organization: user.organization ?? '',
 				position: user.position ?? '',
-				userId: query.userId,
+				// userId: query.userId,
 			};
 
-			const afterPersonCreateId = Persons.create(createPerson);
+			const personIdAfterCreate = Persons.create(createPerson);
 			console.dir({ afterPersonCreateId });
 
-			Users.update({ _id: query.userId }, { $set: { ...user, personId: afterPersonCreateId } });
-			return API.v1.success(Persons.findOne({ userId: query.userId }, { fields }));
+			Users.update({ _id: query.userId }, { $set: { ...user, personId: personIdAfterCreate } });
+			return API.v1.success(Persons.findOne({ _id: personIdAfterCreate }, { fields: stockFields }));
 		}
 
 		return API.v1.success(person);

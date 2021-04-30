@@ -13,6 +13,7 @@ import { fileUploadToErrand } from '../../../../../ui/client/lib/fileUpload';
 import { useMethod } from '../../../../../../client/contexts/ServerContext';
 import { getErrandFieldsForSave, getDefaultErrandFields } from '../../../../../errand/client/views/errandsPage/ErrandForm';
 import { ErrandTypes } from '../../../../../errand/client/utils/ErrandTypes';
+import { useEndpointAction } from '../../../../../../client/hooks/useEndpointAction';
 
 function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInfo, fileDownloadInfo }) {
 	const { goToPreviousStep, goToFinalStep, workingGroupRequestState } = useInvitePageContext();
@@ -32,6 +33,11 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 	const addWorkingGroupRequestAnswer = useMethod('addWorkingGroupRequestAnswer');
 	const insertOrUpdateErrand = useMethod('insertOrUpdateErrand');
 	const addTagsToErrandFiles = useMethod('addTagsToErrandFiles');
+
+	const getPersonEndpoint = useEndpointAction('GET', 'users.getPerson', useMemo(() => ({
+		query: JSON.stringify({ userId: data.createdBy.userId }),
+		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
+	}), []), null);
 
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [newData]);
 
@@ -131,7 +137,11 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 
 			dataToSave.sender._id && Object.assign(dataToErrand, { chargedTo: dataToSave.sender });
 			data.desc && Object.assign(dataToErrand, { desc: data.desc });
-			data.createdBy?.userId && Object.assign(dataToErrand, { initiatedBy: { userId: data.createdBy.userId } });
+			if (data.createdBy?.userId) {
+				const response = await getPersonEndpoint();
+				console.dir({ response });
+				Object.assign(dataToErrand, { initiatedBy: { ...response._id && { ...response }, userId: data.createdBy.userId } });
+			}
 			dataToSave.sender?.organization && Object.assign(dataToErrand, { chargedTo: { person: { name: dataToSave.sender.organization } } });
 			dataToSave.protocol && Object.assign(dataToErrand, {
 				protocol: {

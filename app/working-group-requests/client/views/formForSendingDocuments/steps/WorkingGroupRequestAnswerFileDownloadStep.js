@@ -312,7 +312,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 			};
 		} else if (answerTypeContext === 'mail') {
 			dataToSend.answerType = AnswerTypes.MAIL;
-			dataToSend.mailAnswer = customAnswerMailLabel;
+			dataToSend.mail = customAnswerMailLabel;
 		}
 
 		dataToSend.commentary = newData.commentary.value.trim();
