@@ -7,6 +7,7 @@ import {
 	Paragraph,
 	TextRun,
 	TabStopType,
+	UnderlineType,
 } from 'docx';
 import moment from 'moment';
 import _ from 'underscore';
@@ -328,11 +329,25 @@ Meteor.methods({
 			new Paragraph({
 				children: [
 					new TextRun({
-						text: protocol?.d ? moment(new Date(protocol.d)).format('DD MMMM YYYY') : 'Дата проведения',
-
+						text: protocol?.d ? moment(new Date(protocol.d)).format('[«]DD[»] MMMM YYYY [г.]') : 'Дата проведения',
+						underline: {
+							type: UnderlineType.SINGLE,
+						},
 					}),
 					new TextRun({
-						text: [...getMaxTabs(16), '№', protocol?.num ?? 'Номер'].join(''),
+						text: [...getMaxTabs(15), '№'].join(''),
+					}),
+					new TextRun({
+						text: [' ', protocol?.num ?? 'Номер'].join(''),
+						underline: {
+							type: UnderlineType.SINGLE,
+						},
+					}),
+					new TextRun({
+						text: [...getMaxTabs(2)].join(''),
+						underline: {
+							type: UnderlineType.SINGLE,
+						},
 					}),
 				],
 				tabStops: [
