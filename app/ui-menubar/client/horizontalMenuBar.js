@@ -46,7 +46,7 @@ const menuItems = () => [
 	},
 	{
 		name: t('Errands_for_me'),
-		// condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
+		condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary'),
 		action: () => {
 			FlowRouter.go('/errands/charged_to_me');
 		},
@@ -62,6 +62,12 @@ const menuItems = () => [
 		name: t('Council Commission'),
 		action: () => {
 			FlowRouter.go('/council-commission');
+		},
+	},
+	{
+		name: t('Materials'),
+		action: () => {
+			FlowRouter.go('materials');
 		},
 	},
 	{

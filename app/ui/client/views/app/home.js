@@ -56,7 +56,7 @@ const toolbarButtons = () => [
 		name: t('Errands_for_me'),
 		icon: 'errands_to_me',
 		context: 'home',
-		// condition: () => Users.isUserInRole(Meteor.userId(), 'secretary') || Users.isUserInRole(Meteor.userId(), 'admin'),
+		condition: () => !Users.isUserInRole(Meteor.userId(), 'secretary'),
 		action: () => {
 			menu.close();
 			FlowRouter.go('/errands/charged_to_me');
@@ -78,6 +78,14 @@ const toolbarButtons = () => [
 		},
 		//openContext: 'handbooks',
 		// condition: () => hasPermission('handbooks-home-page'),
+	},
+	{
+		name: t('Materials'),
+		icon: 'hashtag',
+		context: 'home',
+		action: () => {
+			FlowRouter.go('materials');
+		},
 	},
 	// {
 	// 	name: t('Counsel'),
@@ -144,14 +152,6 @@ const toolbarButtons = () => [
 		// condition: () => hasPermission('manage-persons'),
 		action: () => {
 			FlowRouter.go('persons');
-		},
-	},
-	{
-		name: t('Materials'),
-		icon: 'team',
-		context: 'administration',
-		action: () => {
-			FlowRouter.go('materials');
 		},
 	},
 	{
