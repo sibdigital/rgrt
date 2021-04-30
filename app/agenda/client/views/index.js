@@ -51,14 +51,14 @@ export function AgendaPage() {
 		return <Callout m='x16'>{ t('Loading') }</Callout>;
 	}
 
-	return <Agenda agendaData={agendaData} personsData={personsData} userData={userData} isAllowEdit={isAllow}/>;
+	return <Agenda agendaData={agendaData} councilId={id} personsData={personsData} userData={userData} isAllowEdit={isAllow}/>;
 }
 
 AgendaPage.displayName = 'AgendaPage';
 
 export default AgendaPage;
 
-function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
+function Agenda({ agendaData, councilId, personsData, userData, isAllowEdit }) {
 	const t = useTranslation();
 	const id = useRouteParameter('id');
 
@@ -164,6 +164,7 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const updateAgendaSectionOrder = useMethod('updateAgendaSectionOrder');
 	const updateProposalStatus = useMethod('updateProposalStatus');
 	const downloadAgenda = useMethod('downloadAgenda');
+	const defaultAgendaTemplate = useMethod('defaultAgendaTemplate');
 
 	const handleTabClick = useMemo(() => (tab) => () => { setTab(tab); setContext(''); }, []);
 
@@ -298,7 +299,8 @@ function Agenda({ agendaData, personsData, userData, isAllowEdit }) {
 	const onAgendaDownloadClick = useCallback(async (e) => {
 		e.preventDefault();
 		try {
-			const res = await downloadAgenda({ _id: agendaId, agendaData, dateString: moment(new Date(agendaData.ts)).format('DD MMMM YYYY') });
+			// const res = await downloadAgenda({ _id: agendaId, agendaData, dateString: moment(new Date(agendaData.ts)).format('DD MMMM YYYY') });
+			const res = await defaultAgendaTemplate({ agendaId, councilId });
 			const fileName = [t('Agenda'), ' ', moment(new Date(agendaData.ts)).format('DD MMMM YYYY'), '.docx'].join('');
 			console.log({ docx: res });
 			if (res) {
