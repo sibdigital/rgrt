@@ -23,6 +23,8 @@ import { GoBackButton } from '../../../../utils/client/views/GoBackButton';
 import { settings } from '../../../../settings';
 import { constructPersonFullFIO } from '../../../../utils/client/methods/constructPersonFIO';
 import { ErrandStatuses } from '../../utils/ErrandStatuses';
+import { hasPermission } from '../../../../authorization';
+import { useUserId } from '../../../../../client/contexts/UserContext';
 
 const style = { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' };
 
@@ -57,6 +59,7 @@ function Errands({
 	onChange,
 	setParams,
 	params,
+	isCanDeleteErrands = false,
 }) {
 	const _t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
@@ -88,8 +91,8 @@ function Errands({
 		mediaQuery && <Th key={'ts'} direction={sort[1]} active={sort[0] === 'ts'} onClick={onHeaderClick} sort='ts' style={{ width: '150px' }} color='default'>{_t('Errand_Created_At')}</Th>,
 		mediaQuery && <Th key={'expireAt'} direction={sort[1]} active={sort[0] === 'expireAt'} onClick={onHeaderClick} sort='expireAt' style={{ width: '150px' }} color='default'>{_t('Errand_Expired_date')}</Th>,
 		<Th key={'t'} direction={sort[1]} active={sort[0] === 't'} onClick={onHeaderClick} sort='t' style={{ width: '100px' }} color='default'>{_t('Status')}</Th>,
-		mediaQuery && <Th w='x40' key='delete'/>,
-	].filter(Boolean), [type, sort, mediaQuery]);
+		isCanDeleteErrands && mediaQuery && <Th w='x40' key='delete'/>,
+	].filter(Boolean), [type, _t, mediaQuery, sort, onHeaderClick, isCanDeleteErrands]);
 
 	const renderRow = (item) => {
 		const baseUrl = item.protocol ? [ 'protocol/', item.protocol._id ].join('') : undefined;
@@ -116,13 +119,13 @@ function Errands({
 			<Table.Cell fontScale='p1' style={style} onClick={onClick(item._id)} color='default'>
 				{item.status?.i18nLabel ?? _t(item.t ?? '')}
 			</Table.Cell>
-			{ mediaQuery && <Table.Cell alignItems={'end'}>
+			{ isCanDeleteErrands && mediaQuery && <Table.Cell alignItems={'end'}>
 				<Button small aria-label={_t('Delete')} onClick={onDeleteClick(item._id)}>
 					<Icon name='trash'/>
 				</Button>
 			</Table.Cell>}
 		</Table.Row>;
-	}
+	};
 
 	console.dir({ errands: data.result });
 	return <GenericTable key='ErrandsTable' header={header} renderRow={renderRow} results={data.result} total={data.total} setParams={setParams} params={params} />;
@@ -130,6 +133,9 @@ function Errands({
 
 export function ErrandPage() {
 	const t = useTranslation();
+	const userId = useUserId();
+
+	const isCanDeleteErrands = hasPermission('manage-delete-errands', userId);
 
 	const type = useRouteParameter('type');
 
@@ -198,7 +204,7 @@ export function ErrandPage() {
 				</Button>}
 			</Page.Header>
 			<Page.Content>
-				<Errands type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} onChange={onChange} sort={sort}/>
+				<Errands isCanDeleteErrands={isCanDeleteErrands} type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} onChange={onChange} sort={sort}/>
 			</Page.Content>
 		</Page>
 	</Page>;
