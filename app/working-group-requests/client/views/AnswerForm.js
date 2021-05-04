@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Box, Field, Margins, Select, TextAreaInput, TextInput } from '@rocket.chat/fuselage';
 import DatePicker from 'react-datepicker';
 import PhoneInput from 'react-phone-input-2';
@@ -7,6 +7,10 @@ import 'react-phone-input-2/lib/style.css';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useForm } from '../../../../client/hooks/useForm';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
+import { useUserId } from '../../../../client/contexts/UserContext';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { constructPersonFullFIO } from '../../../utils/client/methods/constructPersonFIO';
+// import EmailTextInput from '../../../utils/client/views/EmailTextInput';
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -83,7 +87,6 @@ export function getAnswerErrandFields({ answer }) {
 
 	return errandAnswer;
 }
-
 
 export function getAnswerFormFields({ answer = null, onGetAllFieldsFromPrevAnswer = false }) {
 	if (!answer || typeof answer !== 'object' || answer.length) {
@@ -173,44 +176,34 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 	const values = useMemo(() => defaultValues ?? newValues, [defaultValues, newValues]);
 	const handlers = useMemo(() => defaultHandlers ?? newHandlers, [defaultHandlers, newHandlers]);
 	const typeAnswerOptions = useMemo(() => Object.values(AnswerTypes).map((type) => [type.state, t(type.i18nLabel)]), [t]);
-	console.dir({ typeAnswerOptions });
+
+	const userId = useUserId();
+
+	const { data: personData } = useEndpointDataExperimental('users.getPerson', useMemo(() => ({
+		query: JSON.stringify({ userId }),
+		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1, email: 1, phone: 1 }),
+	}), [userId]));
 
 	const {
 		sender,
-		unread,
 		ts,
 		answerType,
-		protocolId,
-		sectionItemsId,
 		protocol,
-		mail,
 		commentary,
-		documents,
 		expireAt,
-		errandType,
-		chargedTo,
-		status,
 	} = values;
 
 	const {
 		handleSender,
-		handleUnread,
 		handleExpireAt,
-		handleErrandType,
-		handleChargedTo,
-		handleStatus,
 		handleTs,
 		handleAnswerType,
-		handleProtocolId,
-		handleSectionItemsId,
 		handleProtocol,
-		handleMail,
 		handleCommentary,
-		handleDocuments,
 	} = handlers;
 
 	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: onReadOnly ? '' : '1px solid #4fb0fc' }), [onReadOnly]);
-	const marginBlockEnd = useMemo(() => ({ marginBlockEnd: '1rem !important' }));
+	const marginBlockEnd = useMemo(() => ({ marginBlockEnd: '1rem !important' }), []);
 
 	const onChangeField = useCallback((val, handler) => {
 		console.dir({ val, handler });
@@ -219,6 +212,18 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 			onErrandHandle(handler.name, val);
 		}
 	}, [onErrandHandle]);
+
+	useEffect(() => {
+		if (personData) {
+			console.dir({ personData, sender });
+			onChangeField({
+				group: 'Пользователь',
+				organization: constructPersonFullFIO(personData),
+				phone: personData.phone ?? '',
+				email: personData.email ?? '',
+			}, handleSender);
+		}
+	}, [personData]);
 
 	const senderOptions = useMemo(() => [
 		['Пользователь', 'Пользователь'],
@@ -230,7 +235,6 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 		['Другое', 'Другое'],
 	], []);
 
-	console.dir({ answerTypeOptionVal: answerType });
 	return <Box display='flex' flexDirection='column'>
 
 		<Margins all='x8'>
@@ -254,7 +258,15 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 			<Field display='flex' flexDirection='row' style={marginBlockEnd}>
 				{useMemo(() => <Field display='flex' flexDirection='row' mie='x16'>
 					<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Working_group_request_sender')}</Field.Label>
-					<Select width='auto' style={inputStyles} options={senderOptions} value={sender?.group ?? ''} onChange={(event) => onChangeField({ ...sender, group: event }, handleSender)} placeholder={t('Working_group_request_sender')}/>
+					<Select
+						width='auto'
+						style={inputStyles}
+						options={senderOptions}
+						value={sender?.group ?? ''}
+						selected={sender?.group ?? ''}
+						onChange={(event) => onChangeField({ ...sender, group: event }, handleSender)}
+						placeholder={t('Working_group_request_sender')}
+					/>
 				</Field>, [t, inputStyles, senderOptions, sender, onChangeField, handleSender])}
 
 				{useMemo(() => !onAnswerErrand && <Field display='flex' flexDirection='row'>
@@ -294,6 +306,20 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 						: <TextInput style={inputStyles} value={sender?.phone ?? ''} onChange={(event) => onChangeField({ ...sender, phone: event.currentTarget.value }, handleSender)} placeholder={t('Phone_number')} fontScale='p1'/>
 					}
 				</Field>, [t, onReadOnly, inputStyles, sender, handleSender, onChangeField])}
+
+				{/*<EmailTextInput*/}
+				{/*	inputProps={{*/}
+				{/*		style: inputStyles,*/}
+				{/*	}}*/}
+				{/*	textInputProps={{*/}
+				{/*		// style: inputStyles,*/}
+				{/*		readOnly: onReadOnly,*/}
+				{/*		placeholder: t('Email'),*/}
+				{/*		fontScale: 'p1',*/}
+				{/*	}}*/}
+				{/*	email={sender?.email ?? ''}*/}
+				{/*	handleEmail={(event) => onChangeField({ ...sender, email: event?.currentTarget?.value ?? event }, handleSender)}*/}
+				{/*/>*/}
 
 				{useMemo(() => <Field display='flex' flexDirection='row' flexWrap='wrap'>
 					<Field.Label alignSelf='center' maxWidth='max-content' mie='x16'>{t('Email')}</Field.Label>

@@ -103,7 +103,7 @@ export function useDefaultErrandForm({ defaultValues = null, errandType = Errand
 	const senderFieldAreFilled = useMemo(() => (errandType === ErrandTypes.byRequestAnswer ? Object.entries(values?.sender ?? {}).filter((val) => {
 		const [key, value] = val;
 
-		console.dir({ key, value });
+		// console.dir({ key, value });
 
 		if (typeof value === 'string' && value.trim() !== '') { return false; }
 		if (typeof value === 'object' && value !== undefined && value !== null) { return false; }

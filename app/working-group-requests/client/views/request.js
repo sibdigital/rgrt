@@ -27,7 +27,9 @@ export function DocumentPage() {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const formatDateAndTime = useFormatDateAndTime();
-	const canSaveRequest = hasPermission('manage-working-group-requests', useUserId());
+	const userId = useUserId();
+
+	const canSaveRequest = hasPermission('manage-working-group-requests', userId);
 
 	const [cache, setCache] = useState(new Date());
 	const [context, setContext] = useState('');
@@ -70,7 +72,6 @@ export function DocumentPage() {
 		}), [requestId]),
 	);
 
-	useMemo(() => console.dir({ errandsData }), [errandsData]);
 	const insertOrUpdateWorkingGroupRequest = useMethod('insertOrUpdateWorkingGroupRequest');
 
 	const {
@@ -227,7 +228,7 @@ export function DocumentPage() {
 			<Page.ScrollableContent padding='x24'>
 				{/* eslint-disable-next-line react-hooks/rules-of-hooks */}
 				{useMemo(() =>
-					<RequestForm defaultValues={values} defaultHandlers={handlers} setContext={setContext}/>
+					<RequestForm defaultValues={values} defaultHandlers={handlers} setContext={setContext} isCanSaveRequest={canSaveRequest}/>
 				, [setContext, handlers, values])}
 				<Field mbe='x16'>
 					<Field.Label>{t('Working_group_request_invite_link')}</Field.Label>

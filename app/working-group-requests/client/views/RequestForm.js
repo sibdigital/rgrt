@@ -204,6 +204,7 @@ export function ResponsibleField({
 	handleItemResponsible,
 	flexDirection = 'column',
 	itemResponsible,
+	isCanChangeResponsible = false,
 	...props
 }) {
 	const t = useTranslation();
@@ -213,13 +214,13 @@ export function ResponsibleField({
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
 			<Field.Label alignSelf={flexDirection === 'column' ? 'auto' : 'center'} mie='x16' display='flex' flexDirection='row' alignItems='center'>
-				{t('Errand_Charged_to')} {itemResponsible && itemResponsible._id && <ClearButton onClick={() => handleItemResponsible({})}/>}
+				{t('Errand_Charged_to')} {itemResponsible && itemResponsible._id && isCanChangeResponsible && <ClearButton onClick={() => handleItemResponsible({})}/>}
 			</Field.Label>
 			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
 				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Errand_Charged_to')}/>
-				<Button mis='auto' mie='x8' alignSelf='center' style={_chooseButtonStyles} small onClick={() => handleChoose('responsibleChoose')} fontScale='p1'>
+				{isCanChangeResponsible && <Button mis='auto' mie='x8' alignSelf='center' style={_chooseButtonStyles} small onClick={() => handleChoose('responsibleChoose')} fontScale='p1'>
 					{t('Choose')}
-				</Button>
+				</Button>}
 			</Box>
 		</Field>
 	, [_chooseButtonStyles, flexDirection, handleChoose, handleItemResponsible, itemResponsible, label, t]);
@@ -227,7 +228,7 @@ export function ResponsibleField({
 
 const SlideAnimation = getAnimation({ type: 'slideInDown' });
 
-function RequestForm({ defaultValues = null, defaultHandlers = null, setContext = null }) {
+function RequestForm({ defaultValues = null, defaultHandlers = null, setContext = null, isCanSaveRequest = false }) {
 	const t = useTranslation();
 
 	const {
@@ -355,11 +356,11 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 					<Field.Row width='inherit'>
 						<TextInput style={ inputStyles } placeholder={t('Working_group_request_select_mail')} value={mail} onChange={(event) => onChangeField(event, handleMail)} fontScale='p1'/>
 					</Field.Row>
-				</Field>, [handleMail, inputStyles, mail, onChangeField, protocolItems, requestType, t])
+				</Field>, [handleMail, inputStyles, mail, onChangeField, requestType, t])
 			}
 
 			<Field mbe='x16'>
-				<ResponsibleField flexDirection={'row'} handleItemResponsible={handleItemResponsible} itemResponsible={itemResponsible} chooseButtonStyles={chooseButtonStyles} handleChoose={handleChoose}/>
+				<ResponsibleField isCanChangeResponsible={isCanSaveRequest} flexDirection={'row'} handleItemResponsible={handleItemResponsible} itemResponsible={itemResponsible} chooseButtonStyles={chooseButtonStyles} handleChoose={handleChoose}/>
 			</Field>
 
 			<Field mbe='x16'>
