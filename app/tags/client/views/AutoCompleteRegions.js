@@ -9,7 +9,7 @@ import _ from 'underscore';
 
 import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessagesContext';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
+import { ENDPOINT_STATES, useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 
@@ -61,7 +61,7 @@ function AutoCompleteRegions({
 
 	const query = useQuery(debouncedParams, debouncedSort, prevTagsId);
 
-	const { data: tagsData } = useEndpointDataExperimental('tags.list', query);
+	const { data: tagsData, state: tagsState } = useEndpointDataExperimental('tags.list', query);
 
 	useEffect(() => {
 		if (prevTags) {
@@ -80,6 +80,8 @@ function AutoCompleteRegions({
 	return <Box display='flex' flexDirection='row' {...props}>
 		<Field.Label alignSelf='center' maxWidth='max-content' mie='x8'>{t('Region')}</Field.Label>
 		<Autocomplete
+			loading={tagsState === ENDPOINT_STATES.LOADING}
+			loadingText={t('Loading')}
 			fullWidth
 			multiple={isMultiple}
 			id='tags-standard'
@@ -118,7 +120,7 @@ function AutoCompleteRegions({
 					onChange={(e) => setParams({ current: 0, itemsPerPage: 10, text: e.currentTarget.value }) }
 				/>
 			)}
-			noOptionsText={t('No_data_found')}
+			noOptionsText={tagsState === ENDPOINT_STATES.LOADING ? t('Loading') : t('No_data_found')}
 			onClose={(event, reason) => setParams({ current: 0, itemsPerPage: 10, text: '' }) }
 		/>
 	</Box>;

@@ -9,13 +9,11 @@ import { useToastMessageDispatch } from '../../../../client/contexts/ToastMessag
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useMethod } from '../../../../client/contexts/ServerContext';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
-import { useUserId } from '../../../../client/contexts/UserContext';
 import { GenericTable, Th } from '../../../../client/components/GenericTable';
 import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { useSetModal } from '../../../../client/contexts/ModalContext';
 import { downLoadFile } from '../../../utils/client/methods/downloadFile';
 import { SuccessModal, WarningModal } from '../../../utils';
-import TagButton from '../../../tags/client/views/TagButton';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -39,6 +37,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 	// const [sort, setSort] = useState(['title', 'asc']);
 	const [currentMovedFiles, setCurrentMovedFiles] = useState({ upIndex: -1, downIndex: -1 });
 	const [filesArray, setFilesArray] = useState([]);
+	const [filesIdTagChangedArray, setFilesIdTagChangedArray] = useState([]);
 
 	const query = useMemo(() => ({
 		query: JSON.stringify({ _id: councilId }),
@@ -153,7 +152,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 			} else if (index === currentMovedFiles.downIndex) {
 				style = { animation: 'slideUp 0.3s linear' };
 			}
-			return style;
+			return { ...style, ...filesIdTagChangedArray.includes(_id) && { border: '1px solid #4fb0fc' } };
 		};
 
 		const style = getStyle(document.index);
@@ -170,6 +169,7 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 					<Button
 						onClick={() => {
 							handleTagChanged(document);
+							setFilesIdTagChangedArray([_id]);
 							// tag?._id && setCurrentTag(tag);
 							// setContext('uploadFiles');
 							// setCurrentUploadedFiles([document]);
