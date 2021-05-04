@@ -270,11 +270,14 @@ Meteor.methods({
 
 		const getMaxTabs = (nums) => {
 			const t = [];
+			const tabSpaceCount = 12;
 			for (let i = 0; i < nums; i++) {
 				t.push('\t');
 			}
 			return t;
 		};
+
+		const tabBeforeNumberDeltaCount = protocol?.num ? protocol.num.toString().length - 1 : 0;
 
 		const protocolParagraphArray = [
 			new Paragraph({
@@ -335,26 +338,20 @@ Meteor.methods({
 						},
 					}),
 					new TextRun({
-						text: [...getMaxTabs(15), '№'].join(''),
+						text: [...getMaxTabs(14), '№'].join(''),
 					}),
 					new TextRun({
-						text: [' ', protocol?.num ?? 'Номер'].join(''),
+						text: [' ', protocol?.num ?? ''].join(''),
 						underline: {
 							type: UnderlineType.SINGLE,
 						},
 					}),
 					new TextRun({
-						text: [...getMaxTabs(2)].join(''),
+						text: [...getMaxTabs(1)].join(''),
 						underline: {
 							type: UnderlineType.SINGLE,
 						},
 					}),
-				],
-				tabStops: [
-					{
-						type: TabStopType.END,
-						// position: TabStopPosition.MAX,
-					},
 				],
 				style: 'defaultFontStyle',
 			}),
