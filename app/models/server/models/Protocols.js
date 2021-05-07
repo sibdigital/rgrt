@@ -177,6 +177,12 @@ class Protocols extends Base {
 		if (data) {
 			return data.num;
 		}
+		// const cursor = this.find({}, { fields: { _id: 1 } }).fetch();
+		// const { length } = cursor;
+		//
+		// if (length) {
+		// 	return length;
+		// }
 		return 0;
 	}
 

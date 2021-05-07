@@ -235,6 +235,18 @@ function AnswerForm({ defaultValues = null, defaultHandlers = null, onReadOnly =
 		['Другое', 'Другое'],
 	], []);
 
+	useMemo(() => {
+		if (sender.group === 'Пользователь' && personData) {
+			// console.dir({ personData, sender });
+			onChangeField({
+				group: 'Пользователь',
+				organization: constructPersonFullFIO(personData),
+				phone: personData.phone ?? '',
+				email: personData.email ?? '',
+			}, handleSender);
+		}
+	}, [sender?.group]);
+
 	return <Box display='flex' flexDirection='column'>
 
 		<Margins all='x8'>

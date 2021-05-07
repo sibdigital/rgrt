@@ -61,6 +61,8 @@ export function CouncilFiles({ councilId, isSecretary, mediaQuery, isReload = fa
 		}
 	}, [onNewFileAdded]);
 
+	useMemo(() => setFilesIdTagChangedArray([]), [isReload]);
+
 	const updateCouncilFilesOrder = useMethod('updateCouncilFilesOrder');
 	const deleteFileFromCouncil = useMethod('deleteFileFromCouncil');
 

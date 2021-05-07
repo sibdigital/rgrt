@@ -728,7 +728,13 @@ function Council({
 									small
 									primary
 									width='max-content'
-									onClick={() => { setIsTagChanged(false); setContext(''); setCurrentUploadedFiles([]); setCurrentTag({}); }}
+									onClick={() => {
+										setIsTagChanged(false);
+										setContext('');
+										setCurrentUploadedFiles([]);
+										setCurrentTag({});
+										isTagChanged && setIsCouncilFilesReload(!isCouncilFilesReload);
+									}}
 								>
 									{t('Cancel')}
 								</Button>
