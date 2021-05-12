@@ -250,6 +250,7 @@ function Council({
 	const deletePersonFromCouncil = useMethod('deletePersonFromCouncil');
 	const insertOrUpdateProtocol = useMethod('insertOrUpdateProtocol');
 	const updateDocumentTag = useMethod('updateDocumentTag');
+	const getCouncilFileByOrderIndex = useMethod('getCouncilFileByOrderIndex');
 
 	const dispatchToastMessage = useToastMessageDispatch();
 
@@ -428,9 +429,14 @@ function Council({
 				let files = currentUploadedFiles;
 				files = files.map((file) => {
 					file.tag = currentTag;
+					// console.dir({ filesIdsInMap: ids, type: ids.length ?? 'length', typs: _.isArray(ids), tipo: _.values(ids) });
+					// ids.forEach((id) => console.dir({ idInForEach: id }));
+					// const currentId = ids.find((id) => id.orderIndex === file.orderIndex);
+					// console.dir({ currentId, file });
+					// file._id = currentId._id;
 					return file;
 				});
-				console.dir({ files, currentTag });
+				console.dir({ files, currentTag, filesIDS: ids });
 
 				setAttachedFiles(attachedFiles ? attachedFiles.concat(files) : files);
 				setMaxOrderFileIndex(maxOrderFileIndex + staticFileIndex);
@@ -446,9 +452,10 @@ function Council({
 
 	const fileUpdate = useCallback(async () => {
 		try {
-			const filesIdArrToUpdate = currentUploadedFiles.map((file) => file._id);
-			console.dir({ filesIdArrToUpdate });
-			await updateDocumentTag(councilId, filesIdArrToUpdate, currentTag);
+			const filesIdArrToUpdate = currentUploadedFiles.filter((file) => file._id);
+			const newFilesIdArrToUpdate = await getCouncilFileByOrderIndex(councilId, currentUploadedFiles);
+			console.dir({ filesIdArrToUpdate, newFilesIdArrToUpdate });
+			await updateDocumentTag(councilId, [...filesIdArrToUpdate.map((it) => it._id), ...newFilesIdArrToUpdate.map((it) => it._id)], currentTag);
 			setIsTagChanged(false);
 			setContext('');
 			setCurrentUploadedFiles([]);
@@ -458,7 +465,7 @@ function Council({
 		} catch (error) {
 			console.error(error);
 		}
-	}, [councilId, currentTag, isCouncilFilesReload, currentUploadedFiles, dispatchToastMessage, t, updateDocumentTag]);
+	}, [currentUploadedFiles, getCouncilFileByOrderIndex, councilId, updateDocumentTag, currentTag, isCouncilFilesReload, dispatchToastMessage, t]);
 
 	const handleAddTags = useCallback((value) => {
 		try {

@@ -12,3 +12,4 @@ import './methods/deleteFileFromCouncil';
 import './methods/deleteCouncilFromPersons';
 import './methods/updateCouncilFilesOrder';
 import './methods/updateDocumentTag';
+import './helpers/getCouncilFileByOrderIndex';

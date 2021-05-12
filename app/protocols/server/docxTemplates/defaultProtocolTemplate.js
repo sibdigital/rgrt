@@ -338,10 +338,10 @@ Meteor.methods({
 						},
 					}),
 					new TextRun({
-						text: [...getMaxTabs(14), '№'].join(''),
+						text: [...getMaxTabs(12), '№'].join(''),
 					}),
 					new TextRun({
-						text: [' ', protocol?.num ?? ''].join(''),
+						text: [' ', protocol?.num ? protocol.num.toString().trim() : ''].join(''),
 						underline: {
 							type: UnderlineType.SINGLE,
 						},
