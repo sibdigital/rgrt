@@ -35,9 +35,9 @@ function WorkingGroupRequestAnswerStep({ stepStyle, step, title, active, userInf
 	const addTagsToErrandFiles = useMethod('addTagsToErrandFiles');
 
 	const getPersonEndpoint = useEndpointAction('GET', 'users.getPerson', useMemo(() => ({
-		query: JSON.stringify({ userId: data.createdBy.userId }),
+		query: JSON.stringify({ userId: data?.createdBy?.userId ?? '' }),
 		fields: JSON.stringify({ surname: 1, name: 1, patronymic: 1 }),
-	}), []), null);
+	}), [data]), null);
 
 	const allFieldAreFilled = useMemo(() => Object.values(newData).filter((current) => current.value === '' && current.required === true).length === 0, [newData]);
 

@@ -98,45 +98,47 @@ export function useDefaultRequestForm({ defaultValues = null }) {
 	};
 }
 
-function CouncilField({ council, handleCouncil, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
+function CouncilField({ council, handleCouncil, chooseButtonStyles, handleChoose, flexDirection = 'column', inputStyles, isCanSaveRequest = true, ...props }) {
 	const t = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const label = useMemo(() => (!council.d ? '' : [t('Council'), t('Date_to'), formatDateAndTime(council.d)].join(' ')), [council, formatDateAndTime, t]);
 	const address = useMemo(() => [settings.get('Site_Url'), 'council/', council?._id ?? ''].join(''), [council]);
+	const defaultBorderStyle = useMemo(() => ({ border: '0.125rem solid #cbced1' }), []);
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
 			<Field.Label alignSelf='center' mie='x16' display='flex' flexDirection='row' alignItems='center'>
-				{t('Council')} {council && council._id && <ClearButton onClick={() => handleCouncil({})}/>}
+				{t('Council')} {council && council._id && isCanSaveRequest && <ClearButton onClick={() => handleCouncil({})}/>}
 			</Field.Label>
-			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
+			<Box style={ isCanSaveRequest ? inputStyles : defaultBorderStyle } display='flex' flexDirection='row' width='inherit'>
 				{label === ''
 					? <TextInput value={label} borderWidth='0' readOnly placeholder={t('Council')}/>
 					: <Box display='flex' alignItems='center' borderWidth='0' padding='x8'><a href={address} target='_blank'>{label}</a></Box>
 				}
-				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('councilChoose')} fontScale='p1'>{t('Choose')}</Button>
+				{isCanSaveRequest && <Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('councilChoose')} fontScale='p1'>{t('Choose')}</Button>}
 			</Box>
 		</Field>
-	, [chooseButtonStyles, flexDirection, handleChoose, handleCouncil, label, t]);
+	, [flexDirection, t, council, isCanSaveRequest, inputStyles, defaultBorderStyle, label, address, chooseButtonStyles, handleCouncil, handleChoose]);
 }
 
-export function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', ...props }) {
+export function ProtocolField({ protocol, handleProtocol, handleProtocolItems, chooseButtonStyles, handleChoose, flexDirection = 'column', inputStyles, isCanSaveRequest = true, ...props }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
 	const label = useMemo(() => (!protocol.d && !protocol.num ? '' : [t('Protocol'), ' ', t('Date_to'), ' ', formatDate(protocol.d), ' №', protocol.num].join('')), [protocol, formatDate, t]);
 	const address = useMemo(() => [settings.get('Site_Url'), 'protocol/', protocol?._id ?? ''].join(''), [protocol]);
+	const defaultBorderStyle = useMemo(() => ({ border: '0.125rem solid #cbced1' }), []);
 
 	return useMemo(() =>
 		<Field mis='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
 			<Field.Label alignSelf='center' mie='x16' display='flex' flexDirection='row' alignItems='center'>
-				{t('Protocol')} {protocol && protocol._id && <ClearButton onClick={() => { handleProtocolItems([]); handleProtocol({ }); }}/>}
+				{t('Protocol')} {protocol && protocol._id && isCanSaveRequest && <ClearButton onClick={() => { handleProtocolItems([]); handleProtocol({ }); }}/>}
 			</Field.Label>
-			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
+			<Box style={isCanSaveRequest ? inputStyles : defaultBorderStyle} display='flex' flexDirection='row' width='inherit'>
 				{label === ''
 					? <TextInput value={label} borderWidth='0' readOnly placeholder={t('Protocol')}/>
 					: <Box display='flex' alignItems='center' borderWidth='0' padding='x8'><a href={address} target='_blank'>{label}</a></Box>
 				}
-				<Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{t('Choose')}</Button>
+				{isCanSaveRequest && <Button mis='auto' mie='x8' alignSelf='center' style={chooseButtonStyles} small onClick={() => handleChoose('protocolChoose')} fontScale='p1'>{t('Choose')}</Button>}
 			</Box>
 		</Field>
 	, [flexDirection, t, protocol, label, chooseButtonStyles, handleProtocolItems, handleProtocol, handleChoose]);
@@ -150,6 +152,8 @@ export function ProtocolItemsField({
 	onShowLabelAndTooltip = true,
 	onShowChooseButton = true,
 	handleChoose = () => {},
+	isCanSaveRequest = true,
+	isChipEnabled = true,
 }) {
 	const t = useTranslation();
 	const formatDate = useFormatDate();
@@ -159,25 +163,31 @@ export function ProtocolItemsField({
 		handleProtocolItems(arr);
 	}, [handleProtocolItems, protocolItems]);
 
+	const defaultBorderStyle = useMemo(() => ({ border: '0.125rem solid #cbced1' }), []);
+
 	return useMemo(() =>
 		<Box display='flex' flexDirection='row' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
 			{onShowLabelAndTooltip
 			&& <Field.Label style={{ flex: '0 0 0px', whiteSpace: 'pre' }} alignSelf='center' display='flex' flexDirection='row' alignItems='center'>
-				{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && <ClearButton onClick={() => handleProtocolItems([])}/>}
+				{t('Protocol_Item')} {protocolItems && protocolItems.length > 0 && isCanSaveRequest && <ClearButton onClick={() => handleProtocolItems([])}/>}
 			</Field.Label>
 			}
 			<Margins all='x4'>
 				<Box display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start' mbs='x4' borderColor='var(--rc-color-primary-button-color)'>
 					{ protocolItems.map((item, index) =>
-						<Chip mie='x8' mbe='x8' pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }}
-							onClick={() => handleProtocolItemChipClick(index)} border='1px solid' color='var(--rc-color-button-primary-light)'>
+						<Chip
+							mie='x8' mbe='x8' pi='x4' key={index} style={{ whiteSpace: 'normal', borderRadius: '0.6rem' }}
+							onClick={isChipEnabled ? () => handleProtocolItemChipClick(index) : null}
+							border='1px solid'
+							color='var(--rc-color-button-primary-light)'
+						>
 							{(!item.num ? '' : [t('Protocol_Item'), ' №', item.num].join(''))}
 						</Chip>)}
 				</Box>
 				{onShowChooseButton && <Field
 					maxHeight='30px' maxWidth='250px' display='flex' flexDirection='row' flexWrap='wrap' justifyContent='flex-start'
 					border='0px hidden transparent' borderRadius='0.6rem' alignItems='center'>
-					<Button disabled={!protocolId} style={chooseButtonStyles} small onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{t('Choose')}</Button>
+					{isCanSaveRequest && <Button disabled={!protocolId} style={chooseButtonStyles} small onClick={() => handleChoose('protocolItemChoose')} fontScale='p1'>{t('Choose')}</Button>}
 				</Field>}
 			</Margins>
 		</Box>
@@ -200,6 +210,7 @@ export function MailField({ requestType, mail, inputStyles, handleMail }) {
 
 export function ResponsibleField({
 	chooseButtonStyles,
+	inputStyles,
 	handleChoose,
 	handleItemResponsible,
 	flexDirection = 'column',
@@ -210,13 +221,14 @@ export function ResponsibleField({
 	const t = useTranslation();
 	const label = useMemo(() => constructPersonFullFIO(itemResponsible ?? ''), [itemResponsible]);
 	const _chooseButtonStyles = useMemo(() => chooseButtonStyles ?? { backgroundColor: 'transparent', borderColor: 'var(--rc-color-primary-button-color)', borderRadius: '0.7rem', borderWidth: '1.5px' }, [chooseButtonStyles]);
+	const defaultInputStyle = useMemo(() => ({ border: '0.125rem solid #cbced1' }), []);
 
 	return useMemo(() =>
 		<Field mie='x4' mbs='x4' mbe='x16' display='flex' flexDirection={flexDirection}>
 			<Field.Label alignSelf={flexDirection === 'column' ? 'auto' : 'center'} mie='x16' display='flex' flexDirection='row' alignItems='center'>
 				{t('Errand_Charged_to')} {itemResponsible && itemResponsible._id && isCanChangeResponsible && <ClearButton onClick={() => handleItemResponsible({})}/>}
 			</Field.Label>
-			<Box border='1px solid #4fb0fc' display='flex' flexDirection='row' width='inherit'>
+			<Box style={isCanChangeResponsible ? inputStyles : defaultInputStyle} display='flex' flexDirection='row' width='inherit'>
 				<TextInput value={label} borderWidth='0' readOnly placeholder={t('Errand_Charged_to')}/>
 				{isCanChangeResponsible && <Button mis='auto' mie='x8' alignSelf='center' style={_chooseButtonStyles} small onClick={() => handleChoose('responsibleChoose')} fontScale='p1'>
 					{t('Choose')}
@@ -228,7 +240,7 @@ export function ResponsibleField({
 
 const SlideAnimation = getAnimation({ type: 'slideInDown' });
 
-function RequestForm({ defaultValues = null, defaultHandlers = null, setContext = null, isCanSaveRequest = false }) {
+function RequestForm({ defaultValues = null, defaultHandlers = null, setContext = null, isCanSaveRequest = true }) {
 	const t = useTranslation();
 
 	const {
@@ -260,7 +272,7 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 		handleRequestType,
 	} = defaultHandlers ?? handlers;
 
-	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', border: '1px solid #4fb0fc' }), []);
+	const inputStyles = useMemo(() => ({ wordBreak: 'break-word', whiteSpace: 'normal', ...isCanSaveRequest && { border: '1px solid #4fb0fc' } }), [isCanSaveRequest]);
 	const chooseButtonStyles = useMemo(() => ({ backgroundColor: 'transparent', borderColor: 'var(--rc-color-primary-button-color)', borderRadius: '0.7rem', borderWidth: '1.5px' }), []);
 
 	const requestTypeOption = useMemo(() => {
@@ -285,12 +297,13 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			handleNumber(value);
 		}
 	};
-	// console.dir({ defaultValues });
 
+	useMemo(() => console.dir({ inputStyles }), [inputStyles]);
 	return <Box display='flex' flexDirection='column'>
 
 		<Select
 			border={inputStyles.border}
+			disabled={!isCanSaveRequest}
 			// style={{ marginInlineStart: 'auto !important', marginBlockEnd: '1rem !important' }}
 			mie='auto'
 			mbe='x16'
@@ -306,11 +319,12 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 			<Field mbs='x4' mbe='x16' display='flex' flexDirection='row'>
 				<Field display='flex' flexDirection='row'>
 					<Field.Label maxWidth='100px' alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Number')}</Field.Label>
-					<TextInput mie='x12' value={number} style={ inputStyles } placeholder={t('Number')} onChange={(e) => filterNumber(e.currentTarget.value)} fontScale='p1'/>
+					<TextInput readOnly={!isCanSaveRequest} mie='x12' value={number} style={ inputStyles } placeholder={t('Number')} onChange={(e) => filterNumber(e.currentTarget.value)} fontScale='p1'/>
 				</Field>
 				<Field mis='x4' display='flex' flexDirection='row'>
 					<Field.Label alignSelf='center' mie='x16' style={{ flex: '0 0 0' }}>{t('Date')}</Field.Label>
 					<DatePicker
+						readOnly={!isCanSaveRequest}
 						mie='x16'
 						dateFormat='dd.MM.yyyy'
 						selected={date}
@@ -319,18 +333,18 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 						// timeFormat='HH:mm'
 						// timeIntervals={5}
 						// timeCaption='Время'
-						customInput={<TextInput style={ inputStyles } />}
+						customInput={<TextInput style={ inputStyles } readOnly={!isCanSaveRequest}/>}
 						locale='ru'
 						popperClassName='date-picker'/>
 				</Field>
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
 				{useMemo(() => requestType.state === defaultRequestTypeState.REQUEST.state
-					&& <CouncilField flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} council={council} handleCouncil={handleCouncil} handleChoose={handleChoose}/>
-				, [chooseButtonStyles, council, handleChoose, handleCouncil, requestType])}
+					&& <CouncilField inputStyles={inputStyles} isCanSaveRequest={isCanSaveRequest} flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} council={council} handleCouncil={handleCouncil} handleChoose={handleChoose}/>
+				, [chooseButtonStyles, council, handleChoose, handleCouncil, requestType, isCanSaveRequest, inputStyles])}
 				{useMemo(() => requestType.state === defaultRequestTypeState.REQUEST.state
-					&& <ProtocolField flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleProtocol={handleProtocol} handleProtocolItems={handleProtocolItems} handleChoose={handleChoose}/>
-				, [requestType, chooseButtonStyles, protocol, handleProtocol, handleProtocolItems, handleChoose])}
+					&& <ProtocolField inputStyles={inputStyles} isCanSaveRequest={isCanSaveRequest} flexDirection={'row'} chooseButtonStyles={chooseButtonStyles} protocol={protocol} handleProtocol={handleProtocol} handleProtocolItems={handleProtocolItems} handleChoose={handleChoose}/>
+				, [requestType, chooseButtonStyles, protocol, handleProtocol, handleProtocolItems, handleChoose, isCanSaveRequest, inputStyles])}
 			</Field>
 			<Field mbe='x16' display='flex' flexDirection='row'>
 				{
@@ -338,6 +352,8 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 						requestType.state === defaultRequestTypeState.REQUEST.state && protocol._id && protocol._id !== ''
 						&& <SlideAnimation>
 							<ProtocolItemsField
+								isChipEnabled={isCanSaveRequest}
+								isCanSaveRequest={isCanSaveRequest}
 								protocolId={protocol?._id ?? null}
 								handleChoose={handleChoose}
 								chooseButtonStyles={chooseButtonStyles}
@@ -354,19 +370,19 @@ function RequestForm({ defaultValues = null, defaultHandlers = null, setContext 
 				&& <Field mbe='x16' display='flex' flexDirection='row'>
 					<Field.Label alignSelf='center' mie='x16' style={{ whiteSpace: 'pre' }}>{t('Working_group_request_select_mail')}</Field.Label>
 					<Field.Row width='inherit'>
-						<TextInput style={ inputStyles } placeholder={t('Working_group_request_select_mail')} value={mail} onChange={(event) => onChangeField(event, handleMail)} fontScale='p1'/>
+						<TextInput readOnly={!isCanSaveRequest} style={ inputStyles } placeholder={t('Working_group_request_select_mail')} value={mail} onChange={(event) => onChangeField(event, handleMail)} fontScale='p1'/>
 					</Field.Row>
 				</Field>, [handleMail, inputStyles, mail, onChangeField, requestType, t])
 			}
 
 			<Field mbe='x16'>
-				<ResponsibleField isCanChangeResponsible={isCanSaveRequest} flexDirection={'row'} handleItemResponsible={handleItemResponsible} itemResponsible={itemResponsible} chooseButtonStyles={chooseButtonStyles} handleChoose={handleChoose}/>
+				<ResponsibleField inputStyles={inputStyles} isCanChangeResponsible={isCanSaveRequest} flexDirection={'row'} handleItemResponsible={handleItemResponsible} itemResponsible={itemResponsible} chooseButtonStyles={chooseButtonStyles} handleChoose={handleChoose}/>
 			</Field>
 
 			<Field mbe='x16'>
 				<Field.Label>{t('Description')}</Field.Label>
 				<Field.Row>
-					<TextAreaInput style={ inputStyles } rows='5' value={description} onChange={(event) => onChangeField(event, handleDescription)} placeholder={t('Description')} fontScale='p1'/>
+					<TextAreaInput readOnly={!isCanSaveRequest} style={ inputStyles } rows='5' value={description} onChange={(event) => onChangeField(event, handleDescription)} placeholder={t('Description')} fontScale='p1'/>
 				</Field.Row>
 			</Field>
 

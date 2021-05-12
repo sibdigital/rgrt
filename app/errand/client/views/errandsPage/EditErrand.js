@@ -144,6 +144,7 @@ export function NewErrand({ isSecretary, errand, request, protocolId = null }) {
 					FlowRouter.go(`/protocol/${ protocolId }`);
 				} else {
 					FlowRouter.go(`/errand/${ errandId }`);
+					window.location.reload();
 				}
 			}
 		} catch (err) {

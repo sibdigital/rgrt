@@ -188,9 +188,9 @@ export function ErrandPage() {
 		FlowRouter.go(`/errand/${ _id }`);
 	};
 
-	const onSendRequestAnswer = () => {
-		window.open([settings.get('Site_Url'), 'd/all'].join(''), '_blank');
-	};
+	// const onSendRequestAnswer = () => {
+	// 	window.open([settings.get('Site_Url'), 'd/all'].join(''), '_blank');
+	// };
 
 	return <Page flexDirection='row'>
 		<Page>
@@ -199,9 +199,9 @@ export function ErrandPage() {
 					<GoBackButton/>
 					<Label fontScale={mediaQuery ? 'h1' : 'h2'}>{t(title)}</Label>
 				</Field>
-				{ title === 'Tasks_for_me' && <Button width='x160' primary small onClick={onSendRequestAnswer} aria-label={t('Send_request_answer')}>
-					{ t('Send_request_answer') }
-				</Button>}
+				{/*{ title === 'Tasks_for_me' && <Button width='x160' primary small onClick={onSendRequestAnswer} aria-label={t('Send_request_answer')}>*/}
+				{/*	{ t('Send_request_answer') }*/}
+				{/*</Button>}*/}
 			</Page.Header>
 			<Page.Content>
 				<Errands isCanDeleteErrands={isCanDeleteErrands} type={type} setParam={setParams} params={params} onHeaderClick={onHeaderClick} data={data} onClick={onClick} onChange={onChange} sort={sort}/>

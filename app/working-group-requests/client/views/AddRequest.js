@@ -211,7 +211,7 @@ function NewAddRequest() {
 			<Page.ScrollableContent padding='x24'>
 				{
 					useMemo(() =>
-						<RequestForm defaultHandlers={handlers} defaultValues={values} setContext={setContext}/>
+						<RequestForm defaultHandlers={handlers} defaultValues={values} setContext={setContext} isCanSaveRequest={true}/>
 					, [handlers, values])
 				}
 			</Page.ScrollableContent>

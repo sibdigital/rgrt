@@ -27,6 +27,7 @@ import { preProcessingProtocolItems } from '../../lib';
 import { ProtocolItemsField, defaultRequestTypeState } from '../../RequestForm';
 import { AnswerTypes } from '../../AnswerForm';
 import './reactTooltip.css';
+import { useUser } from '/client/contexts/UserContext';
 
 registerLocale('ru', ru);
 require('react-datepicker/dist/react-datepicker.css');
@@ -135,6 +136,9 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 	const formatDate = useFormatDate();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const { goToPreviousStep, goToNextStep } = useInvitePageContext();
+	const user = useUser();
+	const isAuthorizedUser = useMemo(() => !!user?._id, [user]);
+	useMemo(() => console.dir({ user, isAuthorizedUser }), [user, isAuthorizedUser]);
 
 	const [committing, setCommitting] = useState(false);
 	const [cache, setCache] = useState(new Date());
@@ -376,7 +380,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								<Label>{t('Type')}</Label>
 							</Field.Row>
 							<Field.Row>
-								<Select options={typeAnswerOptions} onChange={(val) => setAnswerTypeContext(val)} value={answerTypeContext} placeholder={t('Type')}/>
+								<Select disabled={!isAuthorizedUser} options={typeAnswerOptions} onChange={(val) => setAnswerTypeContext(val)} value={answerTypeContext} placeholder={t('Type')}/>
 							</Field.Row>
 						</Field>
 						{answerTypeContext === 'mail' && <Field>
@@ -386,28 +390,28 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 								</Label>
 							</Field.Row>
 							<Field.Row>
-								<TextInput placeholder={t('Working_group_request_select_mail')} onChange={(event) => setCustomAnswerMailLabel(event.currentTarget.value)} value={customAnswerMailLabel}/>
+								<TextInput disabled={!isAuthorizedUser} placeholder={t('Working_group_request_select_mail')} onChange={(event) => setCustomAnswerMailLabel(event.currentTarget.value)} value={customAnswerMailLabel}/>
 							</Field.Row>
 						</Field>}
 						{answerTypeContext === 'protocol' && <Field>
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_protocol')}
-									{protocolSelected && protocolSelected._id
+									{protocolSelected && protocolSelected._id && isAuthorizedUser
 									&& <ClearButton onClick={() => handleClearProtocol()}/>}
-									<Button
+									{isAuthorizedUser && <Button
 										onClick={() => setVerticalContext('protocolSelect')}
 										backgroundColor='transparent'
 										borderColor='var(--rc-color-primary-button-color)'
 										mis='x16'
 										style={ chooseButtonStyles }>
 										{t('Choose')}
-									</Button>
+									</Button>}
 								</Label>
 							</Field.Row>
 							<Field.Row>
 								{
-									<TextInput readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
+									<TextInput disabled={!isAuthorizedUser} readOnly value={protocolSelectLabel} placeholder={t('Working_group_request_invite_select_protocol')}/>
 								}
 							</Field.Row>
 						</Field>}
@@ -415,10 +419,11 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 							<Field.Row height='40px'>
 								<Label>
 									{t('Working_group_request_invite_select_sections_items')}
-									{protocolItemsId && protocolItemsId.length > 0
-									&& <ClearButton onClick={() => handleClearSelectItemsOptions()}/>
+									{protocolItemsId && protocolItemsId.length > 0 && isAuthorizedUser
+										&& <ClearButton onClick={() => handleClearSelectItemsOptions()}/>
 									}
-									{protocolSelected && <Button
+									{protocolSelected && isAuthorizedUser && <Button
+										hidden={!isAuthorizedUser}
 										onClick={() => setVerticalContext('protocolItemSelect')}
 										backgroundColor='transparent'
 										borderColor='var(--rc-color-primary-button-color)'
@@ -428,7 +433,7 @@ function WorkingGroupRequestAnswerFileDownloadStep({
 									</Button>}
 								</Label>
 							</Field.Row>
-							<ProtocolItemsField protocolItems={protocolItemsId} handleProtocolItems={setProtocolItemsId} protocolId={protocol?._id ?? ''} onShowChooseButton={false} onShowLabelAndTooltip={false}/>
+							<ProtocolItemsField isChipEnabled={isAuthorizedUser} protocolItems={protocolItemsId} handleProtocolItems={setProtocolItemsId} protocolId={protocol?._id ?? ''} onShowChooseButton={false} onShowLabelAndTooltip={false}/>
 						</Field>}
 						<Field>
 							<Field.Label>{t('Commentary')}</Field.Label>

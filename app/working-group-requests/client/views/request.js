@@ -8,10 +8,9 @@ import { settings } from '../../../settings/client';
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
 import { useRouteParameter } from '../../../../client/contexts/RouterContext';
-import { useEndpointDataExperimental, ENDPOINT_STATES } from '../../../../client/hooks/useEndpointDataExperimental';
+import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { Answers } from './Answers';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
-import { useFormatDateAndTime } from '../../../../client/hooks/useFormatDateAndTime';
 import { hasPermission } from '../../../authorization';
 import { useUserId } from '../../../../client/contexts/UserContext';
 import { createWorkingGroupRequestData, validateWorkingGroupRequestData } from './lib';
@@ -26,7 +25,6 @@ require('react-datepicker/dist/react-datepicker.css');
 export function DocumentPage() {
 	const t = useTranslation();
 	const dispatchToastMessage = useToastMessageDispatch();
-	const formatDateAndTime = useFormatDateAndTime();
 	const userId = useUserId();
 
 	const canSaveRequest = hasPermission('manage-working-group-requests', userId);
@@ -212,6 +210,7 @@ export function DocumentPage() {
 		}
 	}, [saveAction, values, protocolsItemId, t, dispatchToastMessage]);
 
+	useMemo(() => console.dir({ canSaveRequest }), [canSaveRequest]);
 	return <Page flexDirection='row'>
 		<Page>
 			<Page.Header title=''>
