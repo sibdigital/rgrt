@@ -1,16 +1,11 @@
-import React, { ReactDOM, useMemo, useState, useEffect, useCallback } from 'react';
-import { ButtonGroup, Button, Field, Box, Label, Icon } from '@rocket.chat/fuselage';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { Field, Box, Label } from '@rocket.chat/fuselage';
 import { useDebouncedValue, useMediaQuery } from '@rocket.chat/fuselage-hooks';
-import ScrollListener from 'react-scroll-listener';
 
 import Page from '../../../../client/components/basic/Page';
 import { useTranslation } from '../../../../client/contexts/TranslationContext';
-import { useRoute, useRouteParameter } from '../../../../client/contexts/RouterContext';
-import VerticalBar from '../../../../client/components/basic/VerticalBar';
 import { useEndpointDataExperimental } from '../../../../client/hooks/useEndpointDataExperimental';
 import { GoBackButton } from '../../../utils/client/views/GoBackButton';
-import { useEndpointData } from '/client/hooks/useEndpointData';
-import { isBrowser } from 'react-device-detect';
 
 const sortDir = (sortDir) => (sortDir === 'asc' ? 1 : -1);
 
